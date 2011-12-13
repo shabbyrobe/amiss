@@ -23,6 +23,4 @@ See the ``doc/`` folder for more info.
 License
 -------
 
-Amiss is licensed under the MIT License:
-
-.. literalinclude:: ../LICENSE
+Amiss is licensed under the MIT License. See ``LICENSE`` for more info.
