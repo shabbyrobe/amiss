@@ -17,7 +17,7 @@ It is unapologetic about being `stupid, simple and fast`, and is completely awar
 Documentation
 -------------
 
-See the ``doc/`` folder for more info.
+See the ``doc/`` folder for more info, or the ``example/`` folder for some quickstarts.
 
 
 License
