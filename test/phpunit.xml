@@ -1,0 +1,11 @@
+<phpunit forceCoversAnnotation="true"
+	bootstrap="config.php">
+<testsuites>
+  <testsuite name="Unit">
+    <directory>unit</directory>
+  </testsuite>
+  <testsuite name="Acceptance">
+    <directory>acceptance</directory>
+  </testsuite>
+</testsuites>
+</phpunit>
