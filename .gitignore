@@ -1,3 +1,7 @@
 doc/_build/
 *.DS_Store
+.buildpath
+.settings
+.project
+.pydevproject
 

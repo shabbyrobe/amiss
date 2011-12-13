@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+if (!isset($argv[1])) {
+	echo "Amiss v".trim(file_get_contents(__DIR__.'/../VERSION'))." CLI\n";
+	echo "Usage: amiss command [args]\n\n";
+	
+	echo "Available commands:\n";
+	foreach (glob(__DIR__.'/commands/*.php') as $command) {
+		echo "  ".basename($command, '.php').PHP_EOL;
+	}
+	exit;
+}
+
+$command = preg_replace('@[^A-z0-9\-]@', '', $argv[1]);
+
+// remove the command from argv
+array_splice($argv, 1, 1);
+
+require(__DIR__.'/commands/'.$command.'.php');

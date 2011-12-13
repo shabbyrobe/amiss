@@ -1,10 +1,10 @@
 <?php
 
-require_once(__DIR__.'/../src/Loader.php');
-require_once(__DIR__.'/lib/functions.php');
+require_once(__DIR__.'/../../src/Loader.php');
+require_once(__DIR__.'/../lib/functions.php');
 spl_autoload_register(array(new Amiss\Loader, 'load'));
 
-$usage = "php {$argv[1]} [OPTIONS] INPUT
+$usage = "amiss ar-create-sql [OPTIONS] INPUT
 
 Emits SQL for creating active record tables
 
