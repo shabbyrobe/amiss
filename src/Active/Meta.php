@@ -77,7 +77,7 @@ class Meta
 	
 	public function getFields()
 	{
-		if (!$this->fields) {
+		if ($this->fields===null) {
 			$class = $this->class;
 			$fields = $class::$fields;
 			
@@ -86,8 +86,10 @@ class Meta
 				$fields = array_merge($current->parent->getFields(), $fields);
 				$current = $current->parent;
 			}
-			$this->fields = $fields;
+			
+			$this->fields = $fields ?: array();
 		}
+		
 		return $this->fields;
 	}
 	
