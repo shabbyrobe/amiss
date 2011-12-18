@@ -2,8 +2,6 @@
 
 namespace Amiss;
 
-use Amiss\Test\Unit\CreateSelectCriteriaTest;
-
 const INDEX_DUPE_CONTINUE = 0;
 const INDEX_DUPE_FAIL = 1;
 
