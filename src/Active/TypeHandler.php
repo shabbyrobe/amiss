@@ -4,9 +4,9 @@ namespace Amiss\Active;
 
 interface TypeHandler
 {
-	function prepareValueForDb($value);
+	function prepareValueForDb($value, $object, $fieldName);
 	
-	function handleValueFromDb($value);
+	function handleValueFromDb($value, $object, $fieldName);
 	
 	/**
 	 * It's ok to return nothing from this - the default column type

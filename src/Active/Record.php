@@ -246,7 +246,7 @@ abstract class Record implements RowExporter
 						
 						$handler = $meta->fieldHandlers[$field];
 						if ($handler) {
-							$value = $handler->prepareValueForDb($value);
+							$value = $handler->prepareValueForDb($value, $this, $field);
 						}
 					}
 					
@@ -292,7 +292,7 @@ abstract class Record implements RowExporter
 					
 					$handler = $meta->fieldHandlers[$field];
 					if ($handler) {
-						$this->$field = $handler->handleValueFromDb($this->$field);
+						$this->$field = $handler->handleValueFromDb($this->$field, $this, $field);
 					}
 				}
 			}

@@ -103,12 +103,12 @@ class TestTypeHandler implements \Amiss\Active\TypeHandler
 		$this->garbage = $garbage;
 	}
 	
-	public function prepareValueForDb($value)
+	public function prepareValueForDb($value, $object, $fieldName)
 	{
 		return $this->garbage.'2001-01-01 15:15:15'.$this->garbage;
 	}
 	
-	public function handleValueFromDb($value)
+	public function handleValueFromDb($value, $object, $fieldName)
 	{
 		return $this->garbage.$value.$this->garbage;
 	}
@@ -129,12 +129,12 @@ class TestCustomFieldTypeRecord extends \Amiss\Active\Record
 
 class TestCustomFieldTypeHandler implements \Amiss\Active\TypeHandler
 {
-	function prepareValueForDb($value)
+	function prepareValueForDb($value, $object, $fieldName)
 	{
 		return "db-$value";
 	}
 	
-	function handleValueFromDb($value)
+	function handleValueFromDb($value, $object, $fieldName)
 	{
 		return "value-$value"; 
 	}

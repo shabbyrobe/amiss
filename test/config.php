@@ -145,12 +145,12 @@ class TestTypeHandler implements \Amiss\Active\TypeHandler
 		foreach ($data as $k=>$v) $this->$k = $v;
 	}
 	
-	function prepareValueForDb($value)
+	function prepareValueForDb($value, $object, $fieldName)
 	{
 		return $this->valueForDb;
 	}
 	
-	function handleValueFromDb($value)
+	function handleValueFromDb($value, $object, $fieldName)
 	{
 		return $this->valueFromDb;
 	}

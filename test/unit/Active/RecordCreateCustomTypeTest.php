@@ -67,12 +67,12 @@ class TestCreateActiveRecordWithCustomType extends \Amiss\Active\Record
 
 class TestCreateActiveRecordWithCustomTypeTypeHandler implements \Amiss\Active\TypeHandler
 {
-	function prepareValueForDb($value)
+	function prepareValueForDb($value, $object, $fieldName)
 	{
 		return $value;
 	}
 	
-	function handleValueFromDb($value)
+	function handleValueFromDb($value, $object, $fieldName)
 	{
 		return $value;
 	}

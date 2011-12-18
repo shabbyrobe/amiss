@@ -4,7 +4,7 @@ use Amiss\Demo\Active\EventRecord;
 
 class Handler implements \Amiss\Active\TypeHandler
 {
-	function prepareValueForDb($value)
+	function prepareValueForDb($value, $object, $fieldName)
 	{
 		if ($value instanceof \DateTime)
 			$value = $value->format('Y-m-d H:i:s');
@@ -12,7 +12,7 @@ class Handler implements \Amiss\Active\TypeHandler
 		return $value;
 	}
 	
-	function handleValueFromDb($value)
+	function handleValueFromDb($value, $object, $fieldName)
 	{
 		$len = strlen($value);
 		if ($value) {
