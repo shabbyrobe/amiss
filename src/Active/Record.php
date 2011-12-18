@@ -173,7 +173,7 @@ abstract class Record implements RowExporter
 	protected static function createMeta($class)
 	{
 		$parent = get_parent_class($class);
-		$meta = new Meta($class, $parent ? self::getMeta($parent) : null);
+		$meta = new Meta($class, $parent ? static::getMeta($parent) : null);
 		return $meta;
 	}
 	
