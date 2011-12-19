@@ -224,36 +224,44 @@ abstract class Record implements RowExporter
 		$meta = static::getMeta();
 		$fields = $meta->getFields();
 		
+		// if the active record's fields are defined, export the row here
+		// otherwise we defer to the data mapper's default handling
+		
 		if ($fields) {
 			$values = array();
 			foreach ($fields as $k=>$v) {
 				$field = null;
 				$type = null;
 				
+				// if the key is a string, the value is the type.
+				// if the key is numeric, the value is the field name and the type
+				// is the default.
+				// FIXME: this does not defer to the default properly.
+				
 				// quick method-less stringy test (strings always == zero). accurate enough.
 				if ($k == 0 && $k !== 0) {
 					$field = $k;
 					$type = $v;
-					
-					$value = $this->{$field};
-					
-					if ($type) {
-						if (!isset($meta->fieldHandlers[$field])) {
-							// set it to false if a type handler wasn't found so that 'isset' returns 
-							// true (it wouldn't for 'null')
-							$meta->fieldHandlers[$field] = $meta->getTypeHandler($type) ?: false;
-						}
-						
-						$handler = $meta->fieldHandlers[$field];
-						if ($handler) {
-							$value = $handler->prepareValueForDb($value, $this, $field);
-						}
-					}
-					
 				}
 				else {
 					$field = $v;
 					$value = $this->{$field};
+					$type = $meta->getDefaultFieldType();
+				}
+				
+				$value = $this->{$field};
+				
+				if ($type) {
+					if (!isset($meta->fieldHandlers[$field])) {
+						// set it to false if a type handler wasn't found so that 'isset' returns 
+						// true (it wouldn't for 'null')
+						$meta->fieldHandlers[$field] = $meta->getTypeHandler($type) ?: false;
+					}
+					
+					$handler = $meta->fieldHandlers[$field];
+					if ($handler) {
+						$value = $handler->prepareValueForDb($value, $this, $field);
+					}
 				}
 				
 				$values[$field] = $value;
@@ -263,6 +271,7 @@ abstract class Record implements RowExporter
 			if ($primary && $this->$primary) {
 				$values[$primary] = $this->$primary;
 			}
+			
 			return $values;
 		}
 		else {
