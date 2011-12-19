@@ -1,8 +1,8 @@
 <?php
 
-namespace Amiss\Test\Unit;
+namespace Amiss\Test\Unit\Active;
 
-class ActiveRecordTest extends \CustomTestCase
+class RecordTest extends \CustomTestCase
 {
 	public function setUp()
 	{
@@ -49,8 +49,8 @@ class ActiveRecordTest extends \CustomTestCase
 		$this->assertTrue($c1 === $c2);
 		$this->assertEquals(
 			array(
-				'Amiss\Test\Unit\TestActiveRecord1'=>'table_1',
-				'Amiss\Test\Unit\TestActiveRecord2'=>'table_2'
+				__NAMESPACE__.'\TestActiveRecord1'=>'table_1',
+				__NAMESPACE__.'\TestActiveRecord2'=>'table_2'
 			), 
 			$this->manager->tableMap
 		);
@@ -79,7 +79,7 @@ class ActiveRecordTest extends \CustomTestCase
 		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db));
 		$manager->objectNamespace = __NAMESPACE__;
 		$manager->expects($this->once())->method('get')->with(
-			$this->equalTo('Amiss\Test\Unit\TestActiveRecord1'), 
+			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
 			$this->equalTo('pants=?'), 
 			$this->equalTo(1)
 		);
@@ -98,7 +98,7 @@ class ActiveRecordTest extends \CustomTestCase
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('get')->with(
-			$this->equalTo('Amiss\Test\Unit\TestActiveRecord1'), 
+			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
 			$this->equalTo('fooBar=?'), 
 			$this->equalTo(1)
 		);
@@ -116,7 +116,7 @@ class ActiveRecordTest extends \CustomTestCase
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('get')->with(
-			$this->equalTo('Amiss\Test\Unit\TestActiveRecord2'), 
+			$this->equalTo(__NAMESPACE__.'\TestActiveRecord2'), 
 			$this->equalTo('testActiveRecord2Id=?'), 
 			$this->equalTo(1)
 		);

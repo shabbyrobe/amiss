@@ -138,8 +138,8 @@ class Meta
 	
 	public function getTypeHandler($type)
 	{
-		if ($this->typeHandlers === false) {
-			$this->typeHandlers = forward_static_call(array($this->class, 'getTypeHandlers'));
+		if ($this->typeHandlers === null) {
+			$this->typeHandlers = forward_static_call(array($this->class, 'getTypeHandlers')) ?: array();
 		}
 		
 		// this splits off any extra crap that you may have defined

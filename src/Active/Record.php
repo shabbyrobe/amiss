@@ -26,13 +26,17 @@ abstract class Record implements RowExporter
 	
 	private $fetched = false;
 	
-	protected function beforeInsert() {}
+	protected function beforeInsert()
+	{}
 	
-	protected function beforeSave() {}
+	protected function beforeSave()
+	{}
 	
-	protected function beforeUpdate() {}
+	protected function beforeUpdate()
+	{}
 	
-	protected function beforeDelete() {}
+	protected function beforeDelete()
+	{}
 	
 	public function save()
 	{
@@ -332,5 +336,10 @@ abstract class Record implements RowExporter
 	public static function getRelations()
 	{
 		return static::$relations;
-	}	
+	}
+	
+	public static function getTypeHandlers()
+	{
+		return array();
+	}
 }

@@ -11,6 +11,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->manager = new Manager(array());
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetFirstLevelScalarChildrenWithStringPath()
 	{
 		$objects = array(
@@ -21,6 +24,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetFirstLevelScalarChildrenWithArrayPath()
 	{
 		$objects = array(
@@ -31,6 +37,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetSecondLevelScalarChildrenWithStringPath()
 	{
 		$objects = array(
@@ -41,6 +50,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetSecondLevelScalarChildrenWithArrayPath()
 	{
 		$objects = array(
@@ -51,6 +63,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetFirstLevelArrayChildren()
 	{
 		$objects = array(
@@ -61,6 +76,9 @@ class ManagerGetChildrenTest extends \CustomTestCase
 		$this->assertEquals(array($objects[0]->foo[0], $objects[0]->foo[1], $objects[1]->foo[0], $objects[1]->foo[1]), $children);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::getChildren
+	 */
 	public function testGetMultiLevelArrayChildren()
 	{
 		$result = array(

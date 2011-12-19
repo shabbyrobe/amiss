@@ -1,10 +1,10 @@
 <?php
 
-namespace Amiss\Test\Unit;
+namespace Amiss\Test\Unit\Active;
 
 use Amiss\Active\TableBuilder;
 
-class ActiveRecordCreateTest extends \CustomTestCase
+class TableBuilderCreateTest extends \CustomTestCase
 {
 	public function setUp()
 	{
@@ -12,6 +12,9 @@ class ActiveRecordCreateTest extends \CustomTestCase
 		$this->manager = new \Amiss\Manager(new \Amiss\Connector('sqlite::memory:'));
 	}
 	
+	/**
+	 * @covers Amiss\Active\TableBuilder::createTable
+	 */
 	public function testCreateDefaultTableSql()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
