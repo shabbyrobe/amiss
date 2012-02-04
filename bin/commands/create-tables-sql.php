@@ -4,7 +4,7 @@ require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
 spl_autoload_register(array(new Amiss\Loader, 'load'));
 
-$usage = "amiss ar-create-sql [OPTIONS] INPUT
+$usage = "amiss create-tables-sql [OPTIONS] INPUT
 
 Emits SQL for creating active record tables
 
