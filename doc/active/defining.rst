@@ -45,6 +45,9 @@ By default, a field with the same name as the object name (namespace excluded) w
     }
 
 
+.. warning:: Amiss Active Records do not support multi-column primary keys.
+
+
 If you wish to change the field it uses for the primary key, simply add a static field called ``primary``:
 
 .. code-block:: php
