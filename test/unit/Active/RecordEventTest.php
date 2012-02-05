@@ -57,7 +57,7 @@ class RecordEventTest extends \CustomTestCase
 	 */
 	public function testBeforeSaveCalledOnInsert()
 	{
-		$ret = $this->getMock(__NAMESPACE__.'\RecordEventTestRecord', array('beforeSave'));
+		$ret = $this->getMock(__NAMESPACE__.'\RecordEventTestRecord', array('beforeSave'), array(), 'PHPUnitGotcha_BeforeSaveCalledOnInsert');
 		$ret->expects($this->once())->method('beforeSave');
 		$this->manager->expects($this->once())->method('insert');
 		$ret->insert();
@@ -66,9 +66,9 @@ class RecordEventTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::beforeSave
 	 */
-	public function testBeforeUpdateCalledOnUpdate()
+	public function testBeforeSaveCalledOnUpdate()
 	{
-		$ret = $this->getMock(__NAMESPACE__.'\RecordEventTestRecord', array('beforeSave'));
+		$ret = $this->getMock(__NAMESPACE__.'\RecordEventTestRecord', array('beforeSave'), array(), 'PHPUnitGotcha_BeforeSaveCalledOnUpdate');
 		$ret->expects($this->once())->method('beforeSave');
 		$this->manager->expects($this->once())->method('update');
 		$ret->update();
