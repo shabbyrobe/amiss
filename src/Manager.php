@@ -47,6 +47,8 @@ class Manager
 	
 	public $queries = 0;
 	
+	private $afterFetch = array();
+	
 	public function __construct($connector)
 	{
 		if (is_array($connector)) 
@@ -385,7 +387,11 @@ class Manager
 			}
 		}
 		
-		if (method_exists($class, 'afterFetch')) {
+		if (!isset($this->afterFetch[$name])) {
+			$this->afterFetch[$name] = method_exists($class, 'afterFetch');
+		}
+		
+		if ($this->afterFetch[$name]) {
 			$class->afterFetch($this);
 		}
 		
