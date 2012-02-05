@@ -18,7 +18,7 @@ class DeleteFromTableTest extends \SqliteDataTestCase
 	 */
 	public function testDeleteTableWithArraySetAndPositionalWhere()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', 'artistTypeId=?', 1);
 		
@@ -35,7 +35,7 @@ class DeleteFromTableTest extends \SqliteDataTestCase
 	 */
 	public function testDeleteTableWithArraySetAndNamedWhere()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', 'artistTypeId=:id', array(':id'=>1));
 		
@@ -52,7 +52,7 @@ class DeleteFromTableTest extends \SqliteDataTestCase
 	 */
 	public function testDeleteTableWithArrayCriteria()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
 		
@@ -69,7 +69,7 @@ class DeleteFromTableTest extends \SqliteDataTestCase
 	 */
 	public function testDeleteTableWithObjectCriteria()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$criteria = new Query(array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
 		$this->manager->delete('Artist', $criteria);

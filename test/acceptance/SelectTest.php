@@ -111,7 +111,7 @@ class SelectTest extends \SqliteDataTestCase
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>'name'));
 		$this->assertTrue(is_array($artists));
-		$this->assertEquals('bigg-nife', current($artists)->slug);
+		$this->assertEquals('bad-news', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
 	}
@@ -122,7 +122,7 @@ class SelectTest extends \SqliteDataTestCase
 		$this->assertTrue(is_array($artists));
 		$this->assertEquals('the-sonic-manipulator', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
-		$this->assertEquals('bigg-nife', $a->slug);
+		$this->assertEquals('bad-news', $a->slug);
 	}
 	
 	public function testOrderByManualMulti()
@@ -150,7 +150,7 @@ class SelectTest extends \SqliteDataTestCase
 	public function testOrderBySingleLongForm()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>array('name')));
-		$this->assertEquals('bigg-nife', current($artists)->slug);
+		$this->assertEquals('bad-news', current($artists)->slug);
 		$this->assertTrue(is_array($artists));
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
@@ -163,7 +163,7 @@ class SelectTest extends \SqliteDataTestCase
 		
 		$this->assertEquals('the-sonic-manipulator', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
-		$this->assertEquals('bigg-nife', $a->slug);
+		$this->assertEquals('bad-news', $a->slug);
 	}
 	
 	public function testSelectSingleObjectFromMultipleResultWhenLimitIsOne()

@@ -11,6 +11,10 @@ INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(4, 2, 'George Carl
 INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(5, 2, 'David Cross', 'david-cross');
 INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(6, 3, 'The Sonic Manipulator', 'the-sonic-manipulator');
 INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(7, 1, 'Sloshy', 'sloshy');
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(8, 1, 'Lords of the Underworld', 'lords-of-the-underworld');
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(9, 1, 'Bad News', 'bad-news');
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(10, 1, 'Stillwater', 'stillwater');
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(11, 1, 'Spinal Täp', 'spinal-tap');
 
 
 

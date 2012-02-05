@@ -28,7 +28,7 @@ class UpdateTableTest extends \SqliteDataTestCase
 	}
 	
 	 */
-	
+
 	public function testUpdateTableAllowsNonKeyedArraySet()
 	{
 		$stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -77,12 +77,13 @@ class UpdateTableTest extends \SqliteDataTestCase
 	 */
 	public function testUpdateTableWithArraySetAndPositionalWhere()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=?', 2);
 		
-		$this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
+	
 	
 	/**
 	 * Ensures the following signature works as expected:
@@ -91,11 +92,11 @@ class UpdateTableTest extends \SqliteDataTestCase
 	 */
 	public function testUpdateTableWithArraySetAndNamedWhere()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
 		
-		$this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 	
 	/**
@@ -105,11 +106,11 @@ class UpdateTableTest extends \SqliteDataTestCase
 	 */
 	public function testUpdateTableWithArrayCriteria()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
 		
-		$this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 	
 	/**
@@ -119,11 +120,11 @@ class UpdateTableTest extends \SqliteDataTestCase
 	 */
 	public function testUpdateTableWithObjectCriteria()
 	{
-		$this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$criteria = new Update(array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
 		$this->manager->update('Artist', $criteria);
 		
-		$this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 }
