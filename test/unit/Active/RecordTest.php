@@ -294,6 +294,18 @@ class RecordTest extends \CustomTestCase
 		$this->assertEquals($handler, \Amiss\Active\Record::getMeta()->getTypeHandler('foo'));
 		$this->assertEquals($handler, \Amiss\Active\Record::getMeta()->getTypeHandler('bar'));
 	}
+	
+	public function testUpdateTable()
+	{
+		$manager = $this->getMock('Amiss\Manager', array('update'), array($this->db), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
+		$manager->expects($this->once())->method('update')->with(
+			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
+			$this->equalTo(array('pants'=>1)),
+			$this->equalTo(1)
+		);
+		TestActiveRecord1::setManager($manager);
+		TestActiveRecord1::updateTable(array('pants'=>1), '1');
+	}
 }
 
 class TestActiveRecord1 extends \Amiss\Active\Record

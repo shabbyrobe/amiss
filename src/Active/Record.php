@@ -196,6 +196,16 @@ abstract class Record implements RowExporter
 		}
 	}
 	
+	public static function updateTable()
+	{
+		$meta = static::getMeta();
+		$manager = $meta->getManager();
+		$args = func_get_args();
+		array_unshift($args, $meta->class);
+		
+		return call_user_func_array(array($manager, 'update'), $args);
+	}
+	
 	public static function getByPk($key)
 	{
 		$primary = static::getMeta()->getPrimary();
