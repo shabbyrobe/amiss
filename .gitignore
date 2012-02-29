@@ -4,4 +4,4 @@ doc/_build/
 .settings
 .project
 .pydevproject
-
+*.pyc
