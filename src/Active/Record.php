@@ -118,6 +118,7 @@ abstract class Record implements RowExporter
 	public function fetchRelated($name, $into=null)
 	{
 		$meta = static::getMeta();
+		
 		$relations = $meta->getRelations();
 		
 		if (!isset($relations[$name])) {
@@ -141,6 +142,11 @@ abstract class Record implements RowExporter
 		
 		$manager = $meta->getManager();
 		$type = $manager->resolveObjectName($type);
+		
+		// HACK: related metadata was not getting registered. this needs to
+		// be cleaned up so that table registration with the manager is not so
+		// hacked up
+		static::getMeta($type)->getManager();
 		
 		$details = array($for, $type, $relation['on']);
 		$related = call_user_func_array(array($manager, $method), $details);

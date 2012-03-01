@@ -51,6 +51,9 @@ class Meta
 		
 		// Only register the table if the class has a parent.
 		// This basically just excludes the base ActiveRecord type.
+		// TODO: this doesn't work with relations. The table never
+		// gets registered because we never retrieve the metadata
+		// of the related table
 		if (!$this->registered && $this->parent) {
 			if (!$this->table) 
 				$this->table = $this->manager->getTableName($this->class);
