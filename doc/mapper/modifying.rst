@@ -3,6 +3,8 @@ Modifying
 
 Amiss supports very simple create, update and delete operations on objects, as well as update and delete operations on tables.
 
+..note:: Please familiarise yourself with the section on :doc:`mapping` before reading this.
+
 
 Inserting
 ---------
@@ -134,119 +136,14 @@ In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based re
     $amiss->update('EventArtist', $criteria);
 
 
-Saving
-------
-
-"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects with an autoincrement column.
-
-.. code-block:: php
-    
-    <?php
-    $obj = new Artist;
-    $obj->name = 'foo baz';
-    $amiss->save($obj, 'artistId');
-    // INSERT INTO artist (name) VALUES ('foo baz')
-    
-    $obj = $amiss->get('Artist', 'artistId=?', 1);
-    $obj->name = 'foo baz';
-    $amiss->save($obj, 'artistId');
-    // UPDATE artist SET name='foo baz' WHERE artistId=1
-
-
-How Objects Are Mapped
-----------------------
-
-Amiss does not require that you specify any property/field mappings. It does not introspect your database's schema and it does not check your class for annotations. In order to determine what to use when inserting or updating, it has to guess.
-
-By default, inserting and updating by object will enumerate all publicly accessible properties of the object that **aren't an array, an object or null** and `assume they are a column to be saved`:
-
-.. code-block:: php
-
-    <?php
-    class FooBar
-    {
-        // explicit scalar value will be assumed to be a column
-        public $yep1='yep';
-
-        // same as above
-        public $yep2=2;
-
-        // false !== null, so this is considered a column value
-        public $yep3=false;
-
-        // public properties are null by default, so this is skipped
-        public $nope1;
-
-        // let's put an array in here later. it won't be considered.
-        public $nope2;
-
-        // let's put an object in here later. it won't be considered.
-        public $nope3;
-
-        // explicitly null public property, not considered a column
-        public $nope4=null;
-
-        // protected properties are not accessible to a foreach loop over an object, 
-        // so it is not considered a column value
-        protected $nope3='nope';
-
-        // see protected property
-        private $nope4='nope';
-    }
-
-    $fb = new FooBar;
-    $fb->nope2 = array('a', 'b');
-    $fb->nope3 = new stdClass;
-    $amiss->insert($fb);
-
-    // will generate the following statement:
-    // INSERT INTO foo_bar(yep1, yep2, yep3) VALUES(:yep1, :yep2, :yep3)
-
-
-The rationale for this is as follows:
-
-* Objects are skipped because they are assumed to belong to relations, and should be saved separately
-* Arrays have no 1 to 1 representation in MySQL that isn't platform agnostic, and are also likely to represent 1-to-n relations (as in Event->eventArtists)
-* An object with a property representing a relation will possibly have a null value. See :ref:`null-handling` for more info.
-
-
-Custom Mapping
-~~~~~~~~~~~~~~
-
-This default behaviour will work in quite a lot more situations than you might be comfortable admitting while you're privately admonishing me for this crazy design decision, but trust me on this - it will. In the event that it doesn't, that's ok: if your object implements the ``RowExporter`` interface, you can build the row up however you please:
-
-.. code-block:: php
-
-    <?php
-    class FooBar implements Amiss\RowExporter
-    {
-        public $name;
-        public $anObject;
-        public $setNull;
-        
-        public function exportRow()
-        {
-            $values = (array)$this;
-            $values['anObject'] = serialize($values['anObject']);
-            return $values;
-        }
-    }
-    $fb = new FooBar();
-    $fb->anObject = new stdClass;
-    $manager->insert($fb);
-
-
-In the above example, ``exportRow()`` will be called by ``Amiss\Manager`` in order to get the values to use in the ``INSERT`` query, completely bypassing the default row export.
-
-I can hear you screaming: "Get your damn hands off my model". I agree. But it could be worse for a domain-model purist: it could be one of those pesky :doc:`/active/index`, rather than an unobtrusive interface.
-
-
 .. _null-handling:
 
 Null Handling Update Gotcha
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The way Amiss handles nulls is a potentially serious gotcha when performing updates.
+
+.. note:: ``Amiss\Active\Record``, when used in conjunction with the field definitions outlined in the "Table Creation" section of the "Active Records" documentation, does not have this issue.
 
 Consider the following quick-n-dirty object:
 
@@ -310,4 +207,21 @@ You can avoid being stung by this a few ways:
 * Don't use the object mode of ``Amiss\Manager->update``, use the table mode and specify the 'set' fields yourself
 
 
-**Very Important**: ``Amiss\Active\Record``, when used in conjunction with the field definitions outlined in the "Table Creation" section of the "Active Records" documentation, does not have this issue: it knows exactly which fields to use because you told it which fields to use!
+Saving
+------
+
+"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects with an autoincrement column.
+
+.. code-block:: php
+    
+    <?php
+    $obj = new Artist;
+    $obj->name = 'foo baz';
+    $amiss->save($obj, 'artistId');
+    // INSERT INTO artist (name) VALUES ('foo baz')
+    
+    $obj = $amiss->get('Artist', 'artistId=?', 1);
+    $obj->name = 'foo baz';
+    $amiss->save($obj, 'artistId');
+    // UPDATE artist SET name='foo baz' WHERE artistId=1
+

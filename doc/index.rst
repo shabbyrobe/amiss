@@ -18,13 +18,14 @@ Documentation
 -------------
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     
     intro
     configuring
     mapper/index
     active/index
     development
+    glossary
 
 
 License
