@@ -141,7 +141,7 @@ In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based re
 Null Handling Update Gotcha
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The way Amiss handles nulls is a potentially serious gotcha when performing updates.
+The way Amiss handles nulls is a potentially serious gotcha when performing updates. A solution is actively being investigated, but can't compromise the simplicity of the library.
 
 .. note:: ``Amiss\Active\Record``, when used in conjunction with the field definitions outlined in the "Table Creation" section of the "Active Records" documentation, does not have this issue.
 

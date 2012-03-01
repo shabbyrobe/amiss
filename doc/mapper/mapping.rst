@@ -17,9 +17,9 @@ Table Mapping
 
 Words in the object's name are ``PascalCased``. Words in the table's name will be ``underscore_separated``. Amiss will handle this translation.
 
-This default can be disabled using the following property::
+This default can be disabled using the following property:
 
-.. py:attribute:: Amiss\Manager->convertTableNames
+.. py:attribute:: Amiss\\Manager->convertTableNames
     
     Defaults to ``true``. Set to ``false`` if your table's names will be exactly the same as your objects.
 
@@ -45,7 +45,7 @@ When relying on the default mapping, the object's fields have the same name as t
 
 The following property can help tweak this behaviour:
 
-.. py:attribute:: Amiss\Manager->convertFieldUnderscores
+.. py:attribute:: Amiss\\Manager->convertFieldUnderscores
 
     Defaults to ``false``. Set to ``true`` if your table's field names are ``underscore_separated``, but your object's properties are ``camelCased``
 
@@ -111,21 +111,20 @@ Custom Mapping
 
 In spite of the :ref:`null-handling`, the default behaviour will work well in quite a lot of situations. 
 
-In the event that it doesn't, there are options.
+In the event that it doesn't, there are options:
 
 
 Name Mappers
 ~~~~~~~~~~~~
 
-If your object/table or property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name mapper to do the job for you.
+If your object/table or property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name mapper to do the job for you using the following properties:
 
-
-.. py:attribute:: Amiss\Manager->objectToTableMapper
+.. py:attribute:: Amiss\\Manager->objectToTableMapper
     
     Converts an object name to a table name. This property accepts either a PHP :term:`callback` type or an instance of ``Amiss\Name\Mapper``, although in the latter case, only the ``to()`` method will ever be used.
 
 
-.. py:attribute:: Amiss\Manager->propertyColumnMapper
+.. py:attribute:: Amiss\\Manager->propertyColumnMapper
     
     Converts a property name to a database column name and vice-versa. This property *only* accepts an instance of ``Amiss\Name\Mapper``. It uses the ``to()`` method to convert a property name to a column name, and the ``from()`` method to convert a column name back to a property name.
 
@@ -145,13 +144,13 @@ Amiss allows you to manually specify table names for objects. The object name **
 
 Amiss provides two interfaces for custom property/field mapping:
 
-.. py:class:: interface Amiss\RowExporter
+.. py:class:: interface Amiss\\RowExporter
 
     .. py:method:: exportRow()
 
     Handles converting an object's properties into an array that represents the row. Array keys should *exactly* match the field names.
 
-.. py:class:: interface Amiss\RowBuilder
+.. py:class:: interface Amiss\\RowBuilder
 
     .. py:method:: buildObject(array $row)
 

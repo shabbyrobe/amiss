@@ -22,6 +22,10 @@ It will benefit you tremendously to understand how the :doc:`/mapper/index` work
     :maxdepth: 1
 
     quickstart
+
+.. toctree::
+    :maxdepth: 2
+
     defining
     connecting
     selecting

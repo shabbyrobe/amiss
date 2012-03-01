@@ -8,7 +8,7 @@ Amiss contains a very simple approximation of a Data Mapper. It will allow you t
 
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     quickstart
     connecting

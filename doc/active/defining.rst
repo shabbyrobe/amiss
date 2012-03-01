@@ -17,7 +17,7 @@ At an absolute minimum, all you need to do to create an active record is define 
 Table Mapping
 -------------
 
-By default, the table name will be derived from the object. See the "Configuring" section for more information on this process. If you want the object to explicitly declare the table to which it refers, specify a static field called ``table``:
+By default, the table name will be derived from the object. See the Data Mapper's :doc:`/mapper/mapping` section for more information on this process. If you want the object to explicitly declare the table to which it refers, specify a static field called ``table``:
 
 .. code-block:: php
     
@@ -88,6 +88,11 @@ Fields can also be defined using the ``Amiss\Active\Record::$fields`` array inst
     echo $f->bar;
 
 
+.. warning::
+
+    ``Amiss\Active\Record`` derivatives which have their fields declared in this way **are vulnerable** to the :ref:`null-handling` outlined in the Data Mapper's :doc:`/mapper/modifying` documentation. Read on for ways to mitigate this problem.
+
+
 If you don't specify the types, Amiss will make a guess at what you want them to be. If you're using SQLite, you'll get ``STRING NULL`` columns. If you're using MySQL, you'll get ``VARCHAR(255) NULL`` columns. If this is not what you want, fret not! You can change the default, or you can specify the types on a per-column basis.
 
 Changing the default is done statically at the ``Amiss\Active\Record`` level. You can set it for all ``ActiveRecords``:
@@ -145,7 +150,7 @@ In the above examples, all of the fields except the primary key (which is not de
 
 .. note::
 
-    ** Very Important**: ``Amiss\Active\Record`` derivatives which have their fields declared in this way are not vulnerable to the *Null Handling Update Gotcha* outlined in the *Modifying* documentation.
+    ``Amiss\Active\Record`` derivatives which have their fields declared in this way are **not** vulnerable to the :ref:`null-handling` outlined in the Data Mapper's :doc:`/mapper/mapping` documentation.
 
 
 By default, the primary key will be created as an autoincrement integer and if ``$primary`` is not set, the name will be inferred from the name of the class. You can override the type of the primary key's column.
