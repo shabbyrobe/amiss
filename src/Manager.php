@@ -33,7 +33,7 @@ class Manager
 	 */
 	public $propertyColumnMapper=null;
 	
-	public $convertUnderscores=true;
+	public $convertUnderscores=false;
 	
 	public $objectNamespace=null;
 	
@@ -413,6 +413,9 @@ class Manager
 		return $values;
 	}
 	
+	/**
+	 * Active records need this to be public
+	 */
 	public function getDefaultRowValues($obj)
 	{
 		$values = array();
@@ -426,10 +429,16 @@ class Manager
 			if ($names && isset($names[$k])) {
 				$k = $names[$k];
 			}
+			elseif ($this->convertUnderscores) {
+				$k = trim(preg_replace_callback('/[A-Z]/', function($match) {
+						return '_'.strtolower($match[0]);
+				}, $k), '_');
+			}
 			if (!is_array($v) && !is_object($v) && !is_resource($v) && ($this->dontSkipNulls || $v !== null)) {
 				$values[$k] = $v;
 			}
 		}
+		
 		return $values;
 	}
 	

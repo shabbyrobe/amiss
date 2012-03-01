@@ -49,6 +49,68 @@ class ManagerNameMappingTest extends \CustomTestCase
 		); 
 	}
 	
+	public function testDefaultObjectToRowConvertsUnderscoresWhenSet()
+	{
+		$this->manager->convertUnderscores = true;
+		$class = (object)array(
+			'fooBar'=>'yep',
+			'fooBaz'=>'yeppo'
+		);
+		$values = $this->callProtected($this->manager, 'exportRow', $class);
+		$this->assertEquals(array('foo_bar'=>'yep', 'foo_baz'=>'yeppo'), $values);
+	}
+	
+	public function testDefaultObjectToRowDoesntConvertsUnderscoresWhenDisabled()
+	{
+		$this->manager->convertUnderscores = false;
+		$class = (object)array(
+			'fooBar'=>'yep',
+			'fooBaz'=>'yeppo'
+		);
+		$values = $this->callProtected($this->manager, 'exportRow', $class);
+		$this->assertEquals(array('fooBar'=>'yep', 'fooBaz'=>'yeppo'), $values);
+	}
+
+	public function testDefaultRowToObjectConvertsUnderscoresWhenSet()
+	{
+		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
+		$manager->convertUnderscores = true;
+		$manager->expects($this->any())->method('resolveObjectName')->will($this->returnValue('\stdClass'));
+		$row = array(
+			'foo_bar'=>'yep',
+			'foo_baz'=>'yeppo'
+		);
+		$stmt = $this->getMock('stdClass', array('fetch'));
+		$stmt->expects($this->any())->method('fetch')->will($this->returnValue($row));
+		$object = $manager->fetchObject($stmt, '');
+		
+		$expected = (object)array(
+			'fooBar'=>'yep',
+			'fooBaz'=>'yeppo',
+		);
+		$this->assertEquals($expected, $object);
+	}
+
+	public function testDefaultRowToObjectDoesntConvertsUnderscoresWhenDisabled()
+	{
+		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
+		$manager->convertUnderscores = false;
+		$manager->expects($this->any())->method('resolveObjectName')->will($this->returnValue('\stdClass'));
+		$row = array(
+			'foo_bar'=>'yep',
+			'foo_baz'=>'yeppo'
+		);
+		$stmt = $this->getMock('stdClass', array('fetch'));
+		$stmt->expects($this->any())->method('fetch')->will($this->returnValue($row));
+		$object = $manager->fetchObject($stmt, '');
+		
+		$expected = (object)array(
+			'foo_bar'=>'yep',
+			'foo_baz'=>'yeppo',
+		);
+		$this->assertEquals($expected, $object);
+	}
+	
 	public function testCustomDefaultColumnToProperty()
 	{
 		$this->manager->propertyColumnMapper = new TestPropertyMapper;
