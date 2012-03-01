@@ -9,7 +9,7 @@ Amiss does not try to be a fully-fledged ORM that cooks you breakfast, walks the
 
 It was written primarily to quickly replace a hacky ORM layer that never lived up to its promise with something a bit more efficient in a very short space of time, and proved to be quite handy for quick-n-dirty data mapping. I decided to clean the code up and use it as an exercise in turning a useful collection of code scraps into a well documented, well tested package.
 
-I don't recommend using it for anything, ever. Having said that, its brutal simplicity may make it a better candidate for your next throwaway project or prototype than the overburdened heaviness of `Doctrine <http://doctrine-project.org>`_, the dated interface of Propel, or the tight coupling of your favourite framework's own model layer.
+I don't recommend using it for anything, ever. Having said that, its brutal simplicity may make it a better candidate for your next throwaway project or prototype than PHP's premier ORM behemoth `Doctrine <http://doctrine-project.org>`_, the dated interface of Propel, or the tight coupling of your favourite framework's own model layer.
 
 It is unapologetic about being `stupid, simple and fast`, and is completely aware that something is **Amiss**.
 
