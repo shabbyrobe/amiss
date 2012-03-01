@@ -33,6 +33,8 @@ class Manager
 	 */
 	public $propertyColumnMapper=null;
 	
+	public $convertTableNames=true;
+	
 	public $convertFieldUnderscores=false;
 	
 	public $objectNamespace=null;
@@ -633,11 +635,15 @@ class Manager
 				}
 			}
 			else {
-				if ($pos = strrpos($class, '\\')) $class = substr($class, $pos+1);
+				$table = $class;
 				
-				$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
-					return "_".strtolower($match[0]);
-				}, $class), '_');
+				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
+				
+				if ($this->convertTableNames) {
+					$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
+						return "_".strtolower($match[0]);
+					}, $table), '_');
+				}
 			}
 		}
 		

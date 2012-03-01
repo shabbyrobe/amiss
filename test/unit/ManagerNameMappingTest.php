@@ -130,9 +130,11 @@ class ManagerNameMappingTest extends \CustomTestCase
 	
 	/**
 	 * @dataProvider dataForDefaultObjectToTableMapping
+	 * @covers Amiss\Manager::getTableName
 	 */
-	public function testDefaultObjectToTableMapping($name, $result)
+	public function testDefaultObjectToTableMappingWhenConvertEnabled($name, $result)
 	{
+		$this->manager->convertTableNames = true;
 		$table = $this->manager->getTableName($name);
 		$this->assertEquals($result, $table);
 	}
@@ -147,7 +149,18 @@ class ManagerNameMappingTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @covers Amiss\Manager::getTableName
+	 */
+	public function testDefaultObjectToTableMappingWhenConvertDisabled()
+	{
+		$this->manager->convertTableNames = false;
+		$table = $this->manager->getTableName('FooBar');
+		$this->assertEquals('`FooBar`', $table);
+	}
+	
+	/**
 	 * @dataProvider dataForCustomDefaultObjectToTableMappingWithCallable
+	 * @covers Amiss\Manager::getTableName
 	 */
 	public function testCustomDefaultObjectToTableMappingWithCallable($name, $result)
 	{
