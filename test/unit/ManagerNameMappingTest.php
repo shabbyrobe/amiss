@@ -49,6 +49,10 @@ class ManagerNameMappingTest extends \CustomTestCase
 		); 
 	}
 	
+	/**
+	 * @covers Amiss\Manager::fetchObject
+	 * @covers Amiss\Manager::exportRow
+	 */
 	public function testDefaultObjectToRowConvertsUnderscoresWhenSet()
 	{
 		$this->manager->convertFieldUnderscores = true;
@@ -60,6 +64,10 @@ class ManagerNameMappingTest extends \CustomTestCase
 		$this->assertEquals(array('foo_bar'=>'yep', 'foo_baz'=>'yeppo'), $values);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::fetchObject
+	 * @covers Amiss\Manager::exportRow
+	 */
 	public function testDefaultObjectToRowDoesntConvertsUnderscoresWhenDisabled()
 	{
 		$this->manager->convertFieldUnderscores = false;
@@ -70,7 +78,10 @@ class ManagerNameMappingTest extends \CustomTestCase
 		$values = $this->callProtected($this->manager, 'exportRow', $class);
 		$this->assertEquals(array('fooBar'=>'yep', 'fooBaz'=>'yeppo'), $values);
 	}
-
+	
+	/**
+	 * @covers Amiss\Manager::fetchObject
+	 */
 	public function testDefaultRowToObjectConvertsUnderscoresWhenSet()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
@@ -90,7 +101,10 @@ class ManagerNameMappingTest extends \CustomTestCase
 		);
 		$this->assertEquals($expected, $object);
 	}
-
+	
+	/**
+	 * @covers Amiss\Manager::fetchObject
+	 */
 	public function testDefaultRowToObjectDoesntConvertsUnderscoresWhenDisabled()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
@@ -111,6 +125,9 @@ class ManagerNameMappingTest extends \CustomTestCase
 		$this->assertEquals($expected, $object);
 	}
 	
+	/**
+	 * @covers Amiss\Manager::fetchObject
+	 */
 	public function testCustomDefaultColumnToProperty()
 	{
 		$this->manager->propertyColumnMapper = new TestPropertyMapper;
@@ -179,6 +196,9 @@ class ManagerNameMappingTest extends \CustomTestCase
 		);
 	}
 	
+	/*
+	 * @covers Amiss\Manager::getTableName
+	 */
 	public function testCustomDefaultObjectToTableMappingWithNameMapper()
 	{
 		$this->manager->objectToTableMapper = new TestPropertyMapper;
