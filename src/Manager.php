@@ -17,9 +17,9 @@ class Manager
 	/**
 	 * Translator for object names to table names.
 	 * 
-	 * If an ``Amiss\NameMapper`` is used, only the ``to()`` method will be used.
+	 * If an ``Amiss\Name\Mapper`` is used, only the ``to()`` method will be used.
 	 * 
-	 * @var mixed callable or Amiss\NameMapper
+	 * @var mixed callable or Amiss\Name\Mapper
 	 */
 	public $objectToTableMapper=null;
 	
@@ -29,11 +29,11 @@ class Manager
 	 * Should implement ``to()`` to turn a property name into a column name,
 	 * and ``from()`` to turn a column name into a property name 
 	 * 
-	 * @var Amiss\NameMapper
+	 * @var Amiss\Name\Mapper
 	 */
 	public $propertyColumnMapper=null;
 	
-	public $convertUnderscores=false;
+	public $convertFieldUnderscores=false;
 	
 	public $objectNamespace=null;
 	
@@ -374,7 +374,7 @@ class Manager
 					$prop = $names[$k];
 				}
 				else {
-					if ($this->convertUnderscores) {
+					if ($this->convertFieldUnderscores) {
 						$prop = trim(preg_replace_callback('/_(.)/', function($match) {
 							return strtoupper($match[1]);
 						}, $k), '_');
@@ -429,7 +429,7 @@ class Manager
 			if ($names && isset($names[$k])) {
 				$k = $names[$k];
 			}
-			elseif ($this->convertUnderscores) {
+			elseif ($this->convertFieldUnderscores) {
 				$k = trim(preg_replace_callback('/[A-Z]/', function($match) {
 						return '_'.strtolower($match[0]);
 				}, $k), '_');
@@ -634,6 +634,7 @@ class Manager
 			}
 			else {
 				if ($pos = strrpos($class, '\\')) $class = substr($class, $pos+1);
+				
 				$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
 					return "_".strtolower($match[0]);
 				}, $class), '_');

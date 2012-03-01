@@ -51,7 +51,7 @@ class ManagerNameMappingTest extends \CustomTestCase
 	
 	public function testDefaultObjectToRowConvertsUnderscoresWhenSet()
 	{
-		$this->manager->convertUnderscores = true;
+		$this->manager->convertFieldUnderscores = true;
 		$class = (object)array(
 			'fooBar'=>'yep',
 			'fooBaz'=>'yeppo'
@@ -62,7 +62,7 @@ class ManagerNameMappingTest extends \CustomTestCase
 	
 	public function testDefaultObjectToRowDoesntConvertsUnderscoresWhenDisabled()
 	{
-		$this->manager->convertUnderscores = false;
+		$this->manager->convertFieldUnderscores = false;
 		$class = (object)array(
 			'fooBar'=>'yep',
 			'fooBaz'=>'yeppo'
@@ -74,7 +74,7 @@ class ManagerNameMappingTest extends \CustomTestCase
 	public function testDefaultRowToObjectConvertsUnderscoresWhenSet()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
-		$manager->convertUnderscores = true;
+		$manager->convertFieldUnderscores = true;
 		$manager->expects($this->any())->method('resolveObjectName')->will($this->returnValue('\stdClass'));
 		$row = array(
 			'foo_bar'=>'yep',
@@ -94,7 +94,7 @@ class ManagerNameMappingTest extends \CustomTestCase
 	public function testDefaultRowToObjectDoesntConvertsUnderscoresWhenDisabled()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('resolveObjectName'), array(array()));
-		$manager->convertUnderscores = false;
+		$manager->convertFieldUnderscores = false;
 		$manager->expects($this->any())->method('resolveObjectName')->will($this->returnValue('\stdClass'));
 		$row = array(
 			'foo_bar'=>'yep',
