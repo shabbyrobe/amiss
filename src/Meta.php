@@ -2,9 +2,11 @@
 
 namespace Amiss;
 
-abstract class Meta
+class Meta
 {
 	public $class;
+	public $table;
+
 	private $manager;
 	protected $fields;
 	protected $allFields;
@@ -20,14 +22,13 @@ abstract class Meta
 	protected $defaultFieldType;
 	protected $relations;
 	
+
 	public function __construct($class, Meta $parent=null)
 	{
 		$this->class = $class;
 		$this->parent = $parent;
 	}
-	
-	abstract function getTable();
-	
+
 	function getManager()
 	{
 		if (!$this->manager && $this->parent) {
