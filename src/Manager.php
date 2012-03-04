@@ -12,44 +12,16 @@ class Manager
 	 */
 	public $connector;
 	
-	public $tableMap=array();
-	
-	/**
-	 * Translator for object names to table names.
-	 * 
-	 * If an ``Amiss\Name\Mapper`` is used, only the ``to()`` method will be used.
-	 * 
-	 * @var mixed callable or Amiss\Name\Mapper
-	 */
-	public $objectToTableMapper=null;
-	
-	/**
-	 * Translator for property names to column names.
-	 * 
-	 * Should implement ``to()`` to turn a property name into a column name,
-	 * and ``from()`` to turn a column name into a property name 
-	 * 
-	 * @var Amiss\Name\Mapper
-	 */
-	public $propertyColumnMapper=null;
-	
-	public $convertTableNames=true;
-	
-	public $convertFieldUnderscores=false;
-	
-	public $objectNamespace=null;
-	
-	/**
-	 * Whether or not Amiss should skip properties with a null value
-	 * when converting an object to a row.
-	 * 
-	 * @var bool
-	 */
-	public $dontSkipNulls=false;
-	
 	public $queries = 0;
 	
 	private $afterFetch = array();
+	
+	/**
+	 * @var Amiss\Meta[]
+	 */
+	protected $meta = array();
+	
+	public $metaMapper;
 	
 	public function __construct($connector)
 	{
@@ -67,17 +39,50 @@ class Manager
 		return $this->connector;
 	}
 	
+	public function getMeta($object)
+	{
+		$object = $this->resolveObjectName($object);
+		
+		if (isset($this->meta[$object]))
+			return $this->meta[$object];
+		
+		$meta = null;
+		if ($this->metaMapper)
+			$meta = $this->metaMapper->createMeta($object);
+		if (!$meta)
+			$meta = $this->createDefaultMeta($object);
+		
+		$meta->setManager($this);
+		
+		$this->meta[$object] = $meta;
+		
+		return $meta;
+	}
+	
+	protected function createDefaultMeta($object)
+	{
+		$parent = get_parent_class($object);
+		
+		$meta = new Meta\Fallback($object, $parent ? $this->getMeta($parent) : null);
+		return $meta;
+	}
+	
 	public function get($object)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($object);
 		
 		list ($limit, $offset) = $criteria->getLimitOffset();
 		
 		if ($limit && $limit != 1)
 			throw new Exception("Limit must be one or zero");
 		
+		$table = $meta->getTable();
 		list ($query, $params) = $criteria->buildQuery($table);
+		var_dump($meta);
+		var_dump($table);
+		exit;
+		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
@@ -349,11 +354,6 @@ class Manager
 		return $id;
 	}
 	
-	public function resolveObjectName($name)
-	{
-		return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
-	}
-	
 	public function fetchObject($stmt, $name, $args=null)
 	{
 		$fqcn = $this->resolveObjectName($name);
@@ -410,35 +410,6 @@ class Manager
 		}
 		else {
 			$values = $this->getDefaultRowValues($obj);
-		}
-		
-		return $values;
-	}
-	
-	/**
-	 * Active records need this to be public
-	 */
-	public function getDefaultRowValues($obj)
-	{
-		$values = array();
-		
-		$data = (array)$obj;
-		$names = null;
-		if ($this->propertyColumnMapper)
-			$names = $this->propertyColumnMapper->to(array_keys($data));
-		
-		foreach ($obj as $k=>$v) {
-			if ($names && isset($names[$k])) {
-				$k = $names[$k];
-			}
-			elseif ($this->convertFieldUnderscores) {
-				$k = trim(preg_replace_callback('/[A-Z]/', function($match) {
-						return '_'.strtolower($match[0]);
-				}, $k), '_');
-			}
-			if (!is_array($v) && !is_object($v) && !is_resource($v) && ($this->dontSkipNulls || $v !== null)) {
-				$values[$k] = $v;
-			}
 		}
 		
 		return $values;
@@ -612,43 +583,6 @@ class Manager
 		++$this->queries;
 		$stmt->execute();
 		return $stmt;
-	}
-	
-	/**
-	 * Returns a quoted table name for a class name
-	 */
-	public function getTableName($class)
-	{
-		$class = ltrim($class, '\\');
-		
-		if (isset($this->tableMap[$class])) {
-			$table = $this->tableMap[$class];
-		}
-		else {
-			if (isset($this->objectToTableMapper)) {
-				if ($this->objectToTableMapper instanceof Name\Mapper) {
-					$result = $this->objectToTableMapper->to(array($class));
-					$table = current($result);
-				}
-				else {
-					$table = call_user_func($this->objectToTableMapper, $class);
-				}
-			}
-			else {
-				$table = $class;
-				
-				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-				
-				if ($this->convertTableNames) {
-					$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
-						return "_".strtolower($match[0]);
-					}, $table), '_');
-				}
-			}
-		}
-		
-		$table = '`'.str_replace('`', '', $table).'`';
-		return $table;
 	}
 	
 	protected function createSelectCriteria($args)
