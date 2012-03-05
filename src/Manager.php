@@ -17,18 +17,19 @@ class Manager
 	private $afterFetch = array();
 	
 	/**
-	 * @var Amiss\Meta[]
+	 * @var Amiss\Meta
 	 */
 	protected $meta = array();
 	
-	public $metaMapper;
+	public $mapper;
 	
-	public function __construct($connector)
+	public function __construct($connector, Mapper $mapper=null)
 	{
 		if (is_array($connector)) 
 			$connector = Connector::create($connector);
 		
 		$this->connector = $connector;
+		$this->mapper = $mapper ?: new Mapper\Quick;
 	}
 	
 	/**
@@ -41,29 +42,16 @@ class Manager
 	
 	public function getMeta($object)
 	{
-		$object = $this->resolveObjectName($object);
-		
 		if (isset($this->meta[$object]))
 			return $this->meta[$object];
 		
-		$meta = null;
-		if ($this->metaMapper)
-			$meta = $this->metaMapper->createMeta($object);
-		if (!$meta)
-			$meta = $this->createDefaultMeta($object);
+		$parent = get_parent_class($object) ?: null;
+		if ($parent) $parent = $this->getMeta($parent);
 		
-		$meta->setManager($this);
+		$meta = $this->mapper->getMeta($object, $parent);
 		
 		$this->meta[$object] = $meta;
 		
-		return $meta;
-	}
-	
-	protected function createDefaultMeta($object)
-	{
-		$parent = get_parent_class($object);
-		
-		$meta = new Meta\Fallback($object, $parent ? $this->getMeta($parent) : null);
 		return $meta;
 	}
 	
@@ -77,12 +65,9 @@ class Manager
 		if ($limit && $limit != 1)
 			throw new Exception("Limit must be one or zero");
 		
-		$table = $meta->getTable();
+		$table = $meta->table;
 		list ($query, $params) = $criteria->buildQuery($table);
-		var_dump($meta);
-		var_dump($table);
-		exit;
-		
+
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
@@ -98,7 +83,8 @@ class Manager
 	public function getList($object)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($object);
+		$table = $meta->table;
 		
 		list ($query, $params) = $criteria->buildQuery($table);
 		
@@ -115,7 +101,8 @@ class Manager
 	public function count($object, $criteria=null)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($object);
+		$table = $meta->table;
 		
 		list ($where, $params) = $criteria->buildClause();
 		
@@ -264,13 +251,14 @@ class Manager
 	{
 		$args = func_get_args();
 		$count = count($args);
-		
+		$meta = null;
+
 		if ($count == 1) {
-			$table = $this->getTableName(get_class($args[0]));
-			$values = $this->exportRow($args[0]);
+			$meta = $this->getMeta(get_class($args[0]));
+			$values = $this->mapper->exportRow($args[0]);
 		}
 		elseif ($count == 2) {
-			$table = $this->getTableName($args[0]);
+			$meta = $this->getMeta($args[0]);
 			$values = $args[1];
 		}
 		
@@ -282,7 +270,7 @@ class Manager
 			}
 			$columns[] = '`'.str_replace('`', '', $k).'`';
 		}
-		$sql = "INSERT INTO $table(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
+		$sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
 		
 		$stmt = $this->getConnector()->prepare($sql);
 		++$this->queries;
@@ -356,38 +344,10 @@ class Manager
 	
 	public function fetchObject($stmt, $name, $args=null)
 	{
-		$fqcn = $this->resolveObjectName($name);
-		
 		$assoc = $stmt->fetch(\PDO::FETCH_ASSOC);
 		if (!$assoc) return false;
 		
-		$class = new $fqcn;
-		
-		if ($class instanceof RowBuilder) {
-			$class->buildObject($assoc);
-		}
-		else {
-			$names = null;
-			if (isset($this->propertyColumnMapper)) {
-				$names = $this->propertyColumnMapper->from(array_keys($assoc));
-			}
-			foreach ($assoc as $k=>$v) {
-				if ($names && isset($names[$k])) {
-					$prop = $names[$k];
-				}
-				else {
-					if ($this->convertFieldUnderscores) {
-						$prop = trim(preg_replace_callback('/_(.)/', function($match) {
-							return strtoupper($match[1]);
-						}, $k), '_');
-					}
-					else {
-						$prop = $k;
-					}
-				}
-				$class->$prop = $v;
-			}
-		}
+		$class = $this->mapper->createObject($assoc, $name, $args);
 		
 		if (!isset($this->afterFetch[$name])) {
 			$this->afterFetch[$name] = method_exists($class, 'afterFetch');
@@ -399,22 +359,7 @@ class Manager
 		
 		return $class;
 	}
-	
-	protected function exportRow($obj)
-	{
-		if ($obj instanceof RowExporter) {
-			$values = $obj->exportRow();
-			if (!is_array($values)) {
-				throw new Exception("Row exporter must return an array!");
-			}
-		}
-		else {
-			$values = $this->getDefaultRowValues($obj);
-		}
-		
-		return $values;
-	}
-	
+
 	protected function createTableUpdateCriteria($table, $args)
 	{
 		$criteria = null;
@@ -443,7 +388,7 @@ class Manager
 	protected function createObjectUpdateCriteria($object, $args)
 	{	
 		$uc = new Criteria\Update();	
-		$uc->set = $this->exportRow($object);
+		$uc->set = $this->mapper->exportRow($object);
 		
 		if (count($args) < 1)
 			throw new \InvalidArgumentException();
@@ -466,7 +411,8 @@ class Manager
 	
 	protected function executeUpdate($objectName, Criteria\Update $update)
 	{
-		$table = $this->getTableName($objectName);
+		$meta = $this->getMeta($objectName);
+		$table = $meta->table;
 		
 		list ($setClause,   $setParams)   = $update->buildSet();
 		list ($whereClause, $whereParams) = $update->buildClause();
@@ -489,7 +435,8 @@ class Manager
 	
 	protected function executeDelete($objectName, Criteria\Query $criteria)
 	{
-		$table = $this->getTableName($objectName);
+		$meta = $this->getMeta($objectName);
+		$table = $meta->table;
 		
 		list ($whereClause, $whereParams) = $criteria->buildClause();
 		
@@ -625,5 +572,25 @@ class Manager
 		else {
 			throw new \InvalidArgumentException('Couldn\'t parse arguments');
 		}
+	}
+
+	public function __get($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+
+	public function __set($name, $value)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+
+	public function __isset($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+
+	public function __unset($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
 	}
 }

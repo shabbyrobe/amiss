@@ -7,7 +7,7 @@ class Meta
 	public $class;
 	public $table;
 
-	private $manager;
+//	private $manager;
 	protected $fields;
 	protected $allFields;
 	protected $parent;
@@ -21,14 +21,15 @@ class Meta
 	protected $primary;
 	protected $defaultFieldType;
 	protected $relations;
-	
 
-	public function __construct($class, Meta $parent=null)
+	public function __construct($class, $table, Meta $parent=null)
 	{
 		$this->class = $class;
 		$this->parent = $parent;
+		$this->table = $table;
 	}
 
+	/*
 	function getManager()
 	{
 		if (!$this->manager && $this->parent) {
@@ -44,6 +45,7 @@ class Meta
 	{
 		$this->manager = $manager;
 	}
+	*/
 
 	public function getFields()
 	{

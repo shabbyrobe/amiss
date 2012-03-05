@@ -64,7 +64,7 @@ abstract class SqliteDataTestCase extends CustomTestCase
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite'));
 		
 		$this->manager = new \Amiss\Manager($this->db);
-		$this->manager->objectNamespace = 'Amiss\Demo';
+		$this->manager->mapper->objectNamespace = 'Amiss\Demo';
 	}
 	
 	public function createRecordMemoryDb($class)
