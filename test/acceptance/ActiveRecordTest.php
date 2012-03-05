@@ -14,6 +14,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetByPk()
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
@@ -21,6 +24,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals(1, $obj->artistId);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetByPositionalWhere()
 	{
 		$obj = Active\ArtistRecord::get('artistId=?', 1);
@@ -28,6 +34,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals(1, $obj->artistId);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetByPositionalWhereMulti()
 	{
 		$obj = Active\ArtistRecord::get('artistId=? AND artistTypeId=?', 1, 1);
@@ -35,6 +44,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals(1, $obj->artistId);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetByNamedWhere()
 	{
 		$obj = Active\ArtistRecord::get('artistId=:id', array(':id'=>1));
@@ -42,6 +54,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals(1, $obj->artistId);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetPopulatesUndeclaredProperties()
 	{
 		$obj = Active\VenueRecord::get('venueId=:id', array(':id'=>1));
@@ -51,6 +66,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals('124.4444', $obj->longitude);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testGetRelatedSingle()
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
@@ -60,6 +78,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals(1, $related->artistTypeId);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testDeleteByPrimary()
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
@@ -70,6 +91,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertGreaterThan(0, $this->manager->count('Artist'));
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testUpdateByPrimary()
 	{
 		$n = uniqid('', true);
@@ -81,6 +105,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals($n, $obj->name);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testInsert()
 	{
 		$n = uniqid('', true);
@@ -97,6 +124,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals($obj->name, $n);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testSaveUpdate()
 	{
 		$n = uniqid('', true);
@@ -108,6 +138,9 @@ class ActiveRecordTest extends \SqliteDataTestCase
 		$this->assertEquals($n, $obj->name);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testSaveInsert()
 	{
 		$n = uniqid('', true);

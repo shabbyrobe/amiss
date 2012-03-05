@@ -12,6 +12,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 {
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetTypeHandlerWhenTypeContainsLotsOfExtraDbSpecificStuff()
 	{
@@ -26,6 +27,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetTypeHandlerWhenTypeContainsBrackets()
 	{
@@ -40,6 +42,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetTypeHandlerFromActiveRecordMethod()
 	{
@@ -50,6 +53,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetUnknownTypeHandler()
 	{
@@ -60,6 +64,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetTypeHandlerFromParent()
 	{
@@ -71,6 +76,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetTypeHandlerFromParentCaches()
 	{
@@ -92,6 +98,7 @@ class MetaTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getTypeHandler
+	 * @group active
 	 */
 	public function testGetUnknownTypeHandlerFromParentCaches()
 	{

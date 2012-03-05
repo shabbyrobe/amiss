@@ -14,6 +14,7 @@ class RecordExportRowTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::exportRow
+	 * @group active
 	 */
 	public function testExportRowUsesDefaultTypeHandlerWhenFieldTypeNotSpecified()
 	{

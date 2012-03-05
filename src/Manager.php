@@ -581,7 +581,10 @@ class Manager
 
 	public function __set($name, $value)
 	{
-		throw new \BadMethodCallException("$name does not exist");
+		if ('objectNamespace' == $name)
+			$this->mapper->objectNamespace = $value;
+		else
+			throw new \BadMethodCallException("$name does not exist");
 	}
 
 	public function __isset($name)

@@ -3,7 +3,8 @@
 namespace Amiss\Mapper;
 
 use Amiss\RowBuilder,
-	Amiss\RowExporter
+	Amiss\RowExporter,
+	Amiss\Exception
 ;
 
 class Quick extends \Amiss\Mapper

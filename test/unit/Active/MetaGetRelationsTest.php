@@ -10,6 +10,7 @@ class MetaGetRelationsTest extends \CustomTestCase
 {
 	/**
 	 * @covers Amiss\Active\Meta::getRelations
+	 * @group active
 	 */
 	function testGetRelations()
 	{
@@ -24,6 +25,7 @@ class MetaGetRelationsTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getRelations
+	 * @group active
 	 */
 	function testGetChildWithRelationsOverridesParent()
 	{
@@ -39,6 +41,7 @@ class MetaGetRelationsTest extends \CustomTestCase
 
 	/**
 	 * @covers Amiss\Active\Meta::getRelations
+	 * @group active
 	 */
 	function testGetChildWithoutRelationsReturnsParent()
 	{

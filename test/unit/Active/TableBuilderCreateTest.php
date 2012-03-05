@@ -13,6 +13,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group active
 	 * @covers Amiss\Active\TableBuilder::createTable
 	 */
 	public function testCreateDefaultTableSql()
@@ -37,6 +38,9 @@ class TableBuilderCreateTest extends \CustomTestCase
 		$tableBuilder->createTable();
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testBuildCreateFieldsDefault()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
@@ -57,6 +61,9 @@ class TableBuilderCreateTest extends \CustomTestCase
 		$tableBuilder->createTable();
 	}
 
+	/**
+	 * @group active
+	 */
 	public function testCreateTableWithSingleOnRelation()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
@@ -78,6 +85,9 @@ class TableBuilderCreateTest extends \CustomTestCase
 		$tableBuilder->createTable();
 	}
 
+	/**
+	 * @group active
+	 */
 	public function testCreateTableWithSingleOnRelationSkipsIndexesForSqlite()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
@@ -97,7 +107,10 @@ class TableBuilderCreateTest extends \CustomTestCase
 		
 		$tableBuilder->createTable();
 	}
-	
+
+	/**
+	 * @group active
+	 */
 	public function testCreateTableWithMultiOnRelation()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
@@ -121,6 +134,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	}
 
 	/**
+	 * @group active
 	 * @expectedException Amiss\Exception
 	 */
 	public function testCreateTableFailsWhenFieldsNotDefined()
@@ -131,6 +145,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group active
 	 * @expectedException Amiss\Exception
 	 */
 	public function testCreateTableFailsWhenConnectorIsNotAmissConnector()

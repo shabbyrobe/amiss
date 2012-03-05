@@ -14,6 +14,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::createMeta
+	 * @group active
 	 */
 	public function testCreateMeta()
 	{
@@ -27,6 +28,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::getMeta
+	 * @group active
 	 */
 	public function testGetMeta()
 	{
@@ -40,6 +42,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Meta::getManager
+	 * @group active
 	 */
 	public function testRegisterTables()
 	{
@@ -56,6 +59,9 @@ class RecordTest extends \CustomTestCase
 		);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testMultiConnection()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
@@ -73,6 +79,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
+	 * @group active
 	 */
 	public function testGetForwarded()
 	{
@@ -90,6 +97,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
+	 * @group active
 	 */
 	public function testGetByExplicitPk()
 	{
@@ -108,6 +116,7 @@ class RecordTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
 	 * @covers Amiss\Active\Record::getByPk
+	 * @group active
 	 */
 	public function testGetByImplicitPk()
 	{
@@ -126,6 +135,7 @@ class RecordTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
 	 * @covers Amiss\Active\Record::getByPk
+	 * @group active
 	 */
 	public function testManyImplicitPksWorkAsExpected()
 	{
@@ -142,6 +152,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::fetchRelated
+	 * @group active
 	 */
 	public function testFetchRelatedSingle()
 	{
@@ -165,6 +176,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::fetchRelated
+	 * @group active
 	 */
 	public function testFetchRelatedList()
 	{
@@ -187,6 +199,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::exportRow
+	 * @group active
 	 */
 	public function testExportRowRevertsToDefaultWhenFieldsNotDefined()
 	{
@@ -206,6 +219,7 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::exportRow
+	 * @group active
 	 */
 	public function testExportRowUsesFieldsArrayWhenDefined()
 	{
@@ -228,6 +242,7 @@ class RecordTest extends \CustomTestCase
 	 * define fields, undefined properties should return null. 
 	 * 
 	 * @covers Amiss\Active\Record::__get
+	 * @group active
 	 */
 	public function testGetUnknownPropertyWhenFieldsUndefinedOnNewObjectReturnsNull()
 	{
@@ -239,6 +254,7 @@ class RecordTest extends \CustomTestCase
 	 * If the class defines its fields, undefined properties should always throw. 
 	 * 
 	 * @covers Amiss\Active\Record::__get
+	 * @group active
 	 * @expectedException BadMethodCallException
 	 */
 	public function testGetUnknownPropertyWhenFieldsDefinedThrowsException()
@@ -252,6 +268,7 @@ class RecordTest extends \CustomTestCase
 	 * if the record has been loaded from the database as we can expect it is fully
 	 * populated.
 	 * 
+	 * @group active
 	 * @expectedException BadMethodCallException
 	 */
 	public function testGetUnknownPropertyWhenFieldsUndefinedAfterRetrievingFromDatabaseThrowsException()
@@ -265,6 +282,7 @@ class RecordTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group active
 	 * @covers Amiss\Active\Record::addTypeHandler
 	 */
 	public function testAddTypeHandler()
@@ -280,6 +298,7 @@ class RecordTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group active
 	 * @covers Amiss\Active\Record::addTypeHandler
 	 */
 	public function testAddTypeHandlerToManyTypes()
@@ -295,6 +314,9 @@ class RecordTest extends \CustomTestCase
 		$this->assertEquals($handler, \Amiss\Active\Record::getMeta()->getTypeHandler('bar'));
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testUpdateTable()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('update'), array($this->db), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);

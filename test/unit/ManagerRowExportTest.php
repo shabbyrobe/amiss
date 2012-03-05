@@ -4,6 +4,10 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Manager;
 
+/**
+ * FIXME: this test case will still work to test Amiss\Mapper\Quick, but
+ * needs to be rewritten to account for that refactoring.
+ */
 class ManagerRowExportTest extends \CustomTestCase
 {
 	public function setUp()
@@ -18,7 +22,7 @@ class ManagerRowExportTest extends \CustomTestCase
 	public function testCustomExportRow()
 	{
 		$obj = new CustomBorkedRowExporter();
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 	}
 	
 	/**
@@ -27,7 +31,7 @@ class ManagerRowExportTest extends \CustomTestCase
 	public function testCustomExportRowFailsWhenArrayNotReturned()
 	{
 		$obj = new CustomRowExporter();
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(array('custom'=>'row'), $values);
 	}
 	
@@ -39,7 +43,7 @@ class ManagerRowExportTest extends \CustomTestCase
 		$obj = (object)array(
 			'null'=>null,
 		);
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(array(), $values);
 	}
 
@@ -51,7 +55,7 @@ class ManagerRowExportTest extends \CustomTestCase
 		$obj = (object)array(
 			'false'=>false,
 		);
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(array('false'=>false), $values);
 	}
 
@@ -64,7 +68,7 @@ class ManagerRowExportTest extends \CustomTestCase
 		$obj = (object)array(
 			'object'=>$child,
 		);
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(array(), $values);
 	}
 
@@ -77,7 +81,7 @@ class ManagerRowExportTest extends \CustomTestCase
 		$obj = (object)array(
 			'array'=>array('a'),
 		);
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(array(), $values);
 	}
 
@@ -93,7 +97,7 @@ class ManagerRowExportTest extends \CustomTestCase
 			'float'=>1.1,
 			'bool'=>true,
 		);
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(
 			array(
 				'int'=>1,
@@ -112,7 +116,7 @@ class ManagerRowExportTest extends \CustomTestCase
 		$obj->name = 'foo';
 		$obj->anObject = (object)array('yep'=>'yeppo');
 		
-		$values = $this->callProtected($this->manager, 'exportRow', $obj);
+		$values = $this->manager->mapper->exportRow($obj);
 		$this->assertEquals(
 			array(
 				'id'=>1,

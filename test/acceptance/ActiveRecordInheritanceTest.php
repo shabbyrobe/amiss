@@ -6,6 +6,9 @@ use Amiss\Demo\Active;
 
 class ActiveRecordInheritanceTest extends \SqliteDataTestCase
 {
+	/**
+	 * @group active
+	 */
 	public function setUp()
 	{
 		parent::setUp();
@@ -14,6 +17,9 @@ class ActiveRecordInheritanceTest extends \SqliteDataTestCase
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testSelect()
 	{
 		$event = Active\PlannedEvent::getByPk(1);
@@ -21,6 +27,9 @@ class ActiveRecordInheritanceTest extends \SqliteDataTestCase
 		$this->assertEquals(20, $event->completeness);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testFieldInheritance()
 	{
 		$meta = Active\PlannedEvent::getMeta();

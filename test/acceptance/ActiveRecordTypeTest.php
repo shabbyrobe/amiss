@@ -3,7 +3,9 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
-
+/**
+ * @group active
+ */
 class ActiveRecordTypeTest extends \SqliteDataTestCase
 {
 	public function setUp()
@@ -14,6 +16,9 @@ class ActiveRecordTypeTest extends \SqliteDataTestCase
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testClassSpecificTypeConverterOnRetrieve()
 	{
 		\Amiss\Demo\Active\EventRecord::addTypeHandler(new TestTypeHandler(), 'datetime');
@@ -22,6 +27,9 @@ class ActiveRecordTypeTest extends \SqliteDataTestCase
 		$this->assertEquals('z1936-01-02z', $event->dateEnd);
 	}
 	
+	/**
+	 * @group active
+	 */
 	public function testClassSpecificTypeConverterOnSave()
 	{
 		\Amiss\Demo\Active\EventRecord::addTypeHandler(new TestTypeHandler(), 'datetime');

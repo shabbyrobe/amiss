@@ -8,6 +8,9 @@ use Amiss\Active\TableBuilder,
 
 class ActiveRecordTableBuilderTest extends \SqliteDataTestCase
 {
+	/**
+	 * @group active
+	 */
 	public function testCreateTable()
 	{
 		$db = new \Amiss\Connector('sqlite::memory:');

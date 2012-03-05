@@ -9,6 +9,7 @@ use Amiss\Active\TypeHandler;
 class MetaConstructTest extends \CustomTestCase
 {
 	/**
+	 * @group active
 	 * @covers Amiss\Active\Meta::__construct
 	 */
 	public function testConstructWithGetTableNameMethod()
@@ -18,6 +19,7 @@ class MetaConstructTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group active
 	 * @covers Amiss\Active\Meta::__construct
 	 */
 	public function testConstructWithGetTableNameField()

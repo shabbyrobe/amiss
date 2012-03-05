@@ -23,6 +23,7 @@ class MetaGetFieldsTest extends \CustomTestCase
 {
 	/**
 	 * @covers Amiss\Active\Meta::getFields
+	 * @group active
 	 */
 	public function testGetFields()
 	{
