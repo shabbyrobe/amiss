@@ -90,12 +90,8 @@ class Quick extends \Amiss\Mapper
 		return $values;
 	}
 	
-	public function createObject($row, $className, $args=null)
+	function populateObject($class, $row)
 	{
-		$fqcn = $this->resolveObjectName($className);
-		
-		$class = new $fqcn;
-
 		if ($class instanceof RowBuilder) {
 			$class->buildObject($row);
 		}
@@ -121,7 +117,6 @@ class Quick extends \Amiss\Mapper
 				$class->$prop = $v;
 			}
 		}
-		return $class;
 	}
 	
 	protected function getTable($class)

@@ -4,11 +4,31 @@ namespace Amiss;
 
 abstract class Mapper
 {
-	abstract function resolveObjectName($name);
+	function resolveObjectName($name)
+	{
+		return $name;
+	}
 	
 	abstract function exportRow($obj);
 
-	abstract function createObject($row, $className, $args=null);
+	function createObject($row, $className, $args=null)
+	{
+		$fqcn = $this->resolveObjectName($className);
+		
+		if ($args) {
+			$class = new \ReflectionClass($fqcn);
+			$obj = $class->newInstanceArgs($args);
+		}
+		else {
+			$obj = new $fqcn;
+		}
+
+		$this->populateObject($obj, $row);
+
+		return $obj;
+	}
+	
+	abstract protected function populateObject($obj, $row);
 	
 	abstract protected function getTable($obj);
 

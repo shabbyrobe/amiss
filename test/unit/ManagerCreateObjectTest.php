@@ -9,7 +9,7 @@ class ManagerCreateObjectTest extends \CustomTestCase
 	public function setUp()
 	{
 		$this->manager = new Manager(array());
-		$this->manager->objectNamespace = 'Amiss\Test\Unit';
+		$this->manager->mapper->objectNamespace = 'Amiss\Test\Unit';
 	}
 	
 	/**

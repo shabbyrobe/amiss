@@ -581,9 +581,9 @@ class Manager
 
 	public function __set($name, $value)
 	{
-		if ('objectNamespace' == $name)
-			$this->mapper->objectNamespace = $value;
-		else
+	//	if ('objectNamespace' == $name)
+	//		$this->mapper->objectNamespace = $value;
+	//	else
 			throw new \BadMethodCallException("$name does not exist");
 	}
 
