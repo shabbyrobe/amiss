@@ -6,47 +6,25 @@ class Meta
 {
 	public $class;
 	public $table;
-
-//	private $manager;
+	
 	protected $fields;
 	protected $allFields;
 	protected $parent;
-
-	/**
-	 * A reference between the field name and its type handler
-	 */
-	public $fieldHandlers=array();
-	public $typeHandlers;
-	
 	protected $primary;
 	protected $defaultFieldType;
 	protected $relations;
 
-	public function __construct($class, $table, Meta $parent=null)
+	public function __construct($class, $table, array $info, Meta $parent=null)
 	{
 		$this->class = $class;
 		$this->parent = $parent;
 		$this->table = $table;
+		$this->primary = isset($info['primary']) ? $info['primary'] : null;
+		$this->fields = isset($info['fields']) ? $info['fields'] : null;
+		$this->relations = isset($info['relations']) ? $info['relations'] : null;
+		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
 	}
-
-	/*
-	function getManager()
-	{
-		if (!$this->manager && $this->parent) {
-			$this->manager = $this->parent->getManager();
-		}
-		if (!$this->manager)
-			throw new \UnexpectedValueException("Manager not set");
-		
-		return $this->manager;
-	}
-
-	function setManager($manager)
-	{
-		$this->manager = $manager;
-	}
-	*/
-
+	
 	public function getFields()
 	{
 		if ($this->allFields===null) {
@@ -73,23 +51,12 @@ class Meta
 			return $this->allFields[$field];
 		}
 	}
-
-	function setFields($fields)
-	{
-		$this->fields = $fields;
-		$this->allFields = null;
-	}
-
+	
 	function getRelations()
 	{
-		return $relations;
+		return $this->relations;
 	}
-
-	function setRelations($relations)
-	{
-		$this->relations = $relations;
-	}
-
+	
 	function getDefaultFieldType()
 	{
 		if ($this->defaultFieldType===null && $this->parent) {
@@ -97,7 +64,7 @@ class Meta
 		}
 		return $this->defaultFieldType;
 	}
-
+	
 	function getPrimary()
 	{
 		if (!$this->primary) {
