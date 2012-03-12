@@ -246,13 +246,17 @@ class Manager
 		$args = func_get_args();
 		$count = count($args);
 		$meta = null;
+		$object = null;
+		$class = null;
 		
 		if ($count == 1) {
-			$meta = $this->getMeta(get_class($args[0]));
-			$values = $this->mapper->exportRow($args[0]);
+			$object = $args[0];
+			$meta = $this->getMeta(get_class($object));
+			$values = $this->mapper->exportRow($meta, $object);
 		}
 		elseif ($count == 2) {
-			$meta = $this->getMeta($args[0]);
+			$class = $args[0];
+			$meta = $this->getMeta($class);
 			$values = $args[1];
 		}
 		
@@ -269,7 +273,10 @@ class Manager
 		$stmt = $this->getConnector()->prepare($sql);
 		++$this->queries;
 		$stmt->execute(array_values($values));
-		return $this->getConnector()->lastInsertId();
+		
+		if ($object && $meta->getPrimary()) {
+			$this->mapper->setPrimary($meta, $object, $this->getConnector()->lastInsertId());
+		}
 	}
 	
 	public function update()
@@ -341,17 +348,7 @@ class Manager
 		$assoc = $stmt->fetch(\PDO::FETCH_ASSOC);
 		if (!$assoc) return false;
 		
-		$object = null;
-		if ($args) {
-			$rc = new \ReflectionClass($meta->class);
-			$object = $rc->newInstanceArgs($args);
-		}
-		else {
-			$cname = $meta->class;
-			$object = new $cname;
-		}
-		
-		$this->mapper->populateObject($meta, $object, $assoc);
+		$object = $this->mapper->createObject();
 		
 		return $object;
 	}

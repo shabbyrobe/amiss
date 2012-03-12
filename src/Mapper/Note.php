@@ -4,7 +4,7 @@ namespace Amiss\Mapper;
 
 use Amiss\Exception;
 
-class Note implements \Amiss\Mapper
+class Note extends \Amiss\Mapper
 {
 	private $cache;
 	
@@ -51,18 +51,36 @@ class Note implements \Amiss\Mapper
 			}
 			
 			$info = array(
+				'primary'=>null,
 				'fields'=>array(),
 				'relations'=>array(),
 				'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
 			);
 			
+			$priFound = false;
 			foreach ($notes->properties as $prop=>$propNotes) {
-				$field = isset($propNotes['field']) && $propNotes['field'] !== true ? $propNotes['field'] : $prop;
-				$type = isset($propNotes['fieldType']) 
-					? $propNotes['fieldType'] 
-					: null   // (isset($propNotes['var']) ? $propNotes['var'] : null)
-				;
-				$info['fields'][$prop] = array($field, $type);
+				$field = null;
+				
+				if (isset($propNotes['field']))
+					$field = $propNotes['field'] !== true ? $propNotes['field'] : false;
+				
+				if (isset($propNotes['primary'])) {
+					if ($priFound)
+						throw new \UnexpectedValueException("Found two primaries for $class");
+					
+					$info['primary'] = $prop;
+					$priFound = true;
+					if (!$field) $field = $prop;
+				}
+				
+				if ($field !== null) {
+					$type = isset($propNotes['fieldType']) 
+						? $propNotes['fieldType'] 
+						: null   // (isset($propNotes['var']) ? $propNotes['var'] : null)
+					;
+					
+					$info['fields'][$prop] = array($field, $type);
+				}
 			}
 			
 			$meta = new \Amiss\Meta($class, $table, $info, $parent);
