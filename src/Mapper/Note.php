@@ -60,9 +60,9 @@ class Note implements \Amiss\Mapper
 				$field = isset($propNotes['field']) && $propNotes['field'] !== true ? $propNotes['field'] : $prop;
 				$type = isset($propNotes['fieldType']) 
 					? $propNotes['fieldType'] 
-					: (isset($propNotes['var']) ? $propNotes['var'] : null)
+					: null   // (isset($propNotes['var']) ? $propNotes['var'] : null)
 				;
-				$info['fields'][$field] = $type;
+				$info['fields'][$prop] = array($field, $type);
 			}
 			
 			$meta = new \Amiss\Meta($class, $table, $info, $parent);

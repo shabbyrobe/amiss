@@ -20,25 +20,30 @@ class Select extends Query
 		}
 	}
 	
-	public function buildFields()
+	public function buildFields($meta)
 	{
 		$fields = null;
+		
 		if (!$this->fields) {
-			$fields = '*';
+			$metaFields = $meta->getFields();
+			$fields = $metaFields ? array_keys($metaFields->fields) : '*';
 		}
 		else {
 			$fields = is_array($this->fields) ? implode(', ', $this->fields) : $this->fields;
 		}
+		
 		return $fields;
 	}
 	
-	public function buildQuery($table)
+	public function buildQuery($meta)
 	{
+		$table = $meta->table;
+		
 		list ($where, $params) = $this->buildClause();
 		$order = $this->buildOrder();
 		list ($limit, $offset) = $this->getLimitOffset();
 		
-		$query = "SELECT ".$this->buildFields()." FROM $table "
+		$query = "SELECT ".$this->buildFields($meta)." FROM $table "
 			.($where  ? "WHERE $where "            : '').' '
 			.($order  ? "ORDER BY $order "         : '').' '
 			.($limit  ? "LIMIT  ".(int)$limit." "  : '').' '

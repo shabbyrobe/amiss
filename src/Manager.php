@@ -14,8 +14,6 @@ class Manager
 	
 	public $queries = 0;
 	
-	private $afterFetch = array();
-	
 	/**
 	 * @var Amiss\Meta
 	 */
@@ -45,10 +43,7 @@ class Manager
 		if (isset($this->meta[$object]))
 			return $this->meta[$object];
 		
-		$parent = get_parent_class($object) ?: null;
-		if ($parent) $parent = $this->getMeta($parent);
-		
-		$meta = $this->mapper->getMeta($object, $parent);
+		$meta = $this->mapper->getMeta($object);
 		
 		$this->meta[$object] = $meta;
 		
@@ -65,14 +60,13 @@ class Manager
 		if ($limit && $limit != 1)
 			throw new Exception("Limit must be one or zero");
 		
-		$table = $meta->table;
-		list ($query, $params) = $criteria->buildQuery($table);
+		list ($query, $params) = $criteria->buildQuery($meta);
 
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
 		$obj = null;
-		while ($row = $this->fetchObject($stmt, $object, $criteria->args)) {
+		while ($row = $this->fetchObject($stmt, $meta, $criteria->args)) {
 			if ($obj)
 				throw new Exception("Query returned more than one row");
 			$obj = $row;
@@ -252,7 +246,7 @@ class Manager
 		$args = func_get_args();
 		$count = count($args);
 		$meta = null;
-
+		
 		if ($count == 1) {
 			$meta = $this->getMeta(get_class($args[0]));
 			$values = $this->mapper->exportRow($args[0]);
@@ -342,22 +336,24 @@ class Manager
 		return $id;
 	}
 	
-	public function fetchObject($stmt, $name, $args=null)
+	public function fetchObject($stmt, $meta, $args=null)
 	{
 		$assoc = $stmt->fetch(\PDO::FETCH_ASSOC);
 		if (!$assoc) return false;
 		
-		$class = $this->mapper->createObject($assoc, $name, $args);
-		
-		if (!isset($this->afterFetch[$name])) {
-			$this->afterFetch[$name] = method_exists($class, 'afterFetch');
+		$object = null;
+		if ($args) {
+			$rc = new \ReflectionClass($meta->class);
+			$object = $rc->newInstanceArgs($args);
+		}
+		else {
+			$cname = $meta->class;
+			$object = new $cname;
 		}
 		
-		if ($this->afterFetch[$name]) {
-			$class->afterFetch($this);
-		}
+		$this->mapper->populateObject($meta, $object, $assoc);
 		
-		return $class;
+		return $object;
 	}
 
 	protected function createTableUpdateCriteria($table, $args)

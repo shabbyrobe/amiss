@@ -13,7 +13,7 @@ namespace Amiss;
  * mode to throw exceptions by default.
  * 
  * It also offers some enhancements - it will tell you when there is an active
- * transaction
+ * transaction (unless you grab the internal PDO and start one directly)
  * 
  * @author Blake Williams
  */

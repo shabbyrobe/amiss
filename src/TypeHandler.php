@@ -1,6 +1,6 @@
 <?php
 
-namespace Amiss\Active;
+namespace Amiss;
 
 interface TypeHandler
 {
