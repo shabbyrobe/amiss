@@ -101,7 +101,7 @@ foreach ($toCreate as $class) {
 			$class::setManager($defaultManager);
 		}
 		if ($class::$fields) {
-			$builder = new Amiss\Active\TableBuilder($class);
+			$builder = new Amiss\Active\TableBuilder($manager, $class);
 			$builder->createTable();
 		}
 		else {

@@ -89,7 +89,7 @@ abstract class Mapper
 		}
 	}
 	
-	protected function determineTypeHandler($type)
+	public function determineTypeHandler($type)
 	{
 		// this splits off any extra crap that you may have defined
 		// in the field's definition, i.e. "varchar(80) not null etc etc"

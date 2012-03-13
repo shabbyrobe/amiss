@@ -66,7 +66,7 @@ foreach ($toCreate as $class) {
 		$manager = $class::getMeta()->getManager();
 		
 		if ($class::$fields) {
-			$builder = new Amiss\Active\TableBuilder($class);
+			$builder = new Amiss\TableBuilder($manager, $class);
 			$create = $builder->buildCreateTableSql();
 			if (!preg_match("/;\s*$/", $create))
 				$create .= ';';

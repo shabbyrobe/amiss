@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Unit\Active;
 
-use Amiss\Active\TableBuilder;
+use Amiss\TableBuilder;
 
 class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 {
@@ -10,13 +10,13 @@ class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
-		$this->manager = new \Amiss\Manager($this->connector);
+		$this->manager = new \Amiss\Manager($this->connector, new \Amiss\Mapper\Note);
 		\Amiss\Active\Record::setManager($this->manager);
-		$this->tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
+		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
 	}
 	
 	/**
-	 * @covers Amiss\Active\TableBuilder::buildFields
+	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()

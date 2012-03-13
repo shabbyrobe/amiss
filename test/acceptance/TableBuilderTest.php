@@ -2,20 +2,20 @@
 
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Active\TableBuilder,
-	Amiss\Demo\Active
+use Amiss\TableBuilder,
+	Amiss\Demo
 ;
 
-class ActiveRecordTableBuilderTest extends \ActiveRecordDataTestCase
+class TableBuilderTest extends \ActiveRecordDataTestCase
 {
 	/**
-	 * @group active
+	 * @group mapper
 	 * @group acceptance
 	 */
 	public function testCreateTable()
 	{
 		$db = new \Amiss\Connector('sqlite::memory:');
-		$manager = new \Amiss\Manager($db);
+		$manager = new \Amiss\Manager($db, new \Amiss\Mapper\Note);
 		
 		\Amiss\Active\Record::_reset();
 		\Amiss\Active\Record::setManager($manager);

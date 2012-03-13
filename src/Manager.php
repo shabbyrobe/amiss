@@ -21,13 +21,13 @@ class Manager
 	
 	public $mapper;
 	
-	public function __construct($connector, Mapper $mapper=null)
+	public function __construct($connector, Mapper $mapper)
 	{
 		if (is_array($connector)) 
 			$connector = Connector::create($connector);
 		
 		$this->connector = $connector;
-		$this->mapper = $mapper ?: new Mapper\Note;
+		$this->mapper = $mapper;
 	}
 	
 	/**

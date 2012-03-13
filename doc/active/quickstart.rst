@@ -57,7 +57,7 @@ See :doc:`schema` for more info.
 
     <?php
 
-    $tableBuilder = new Amiss\Active\TableBuilder('Venue');
+    $tableBuilder = new Amiss\TableBuilder('Venue');
     $tableBuilder->createTable();
 
 

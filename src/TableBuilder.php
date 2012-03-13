@@ -1,6 +1,6 @@
 <?php
 
-namespace Amiss\Active;
+namespace Amiss;
 
 use Amiss\Exception,
 	Amiss\Connector
@@ -9,13 +9,22 @@ use Amiss\Exception,
 class TableBuilder
 {
 	/**
-	 * @var Amiss\Active\Meta
+	 * @var Amiss\Meta
 	 */
 	private $meta;
 	
-	public function __construct($class)
+	/**
+	 * @var Amiss\Manager
+	 */
+	private $manager;
+	
+	private $class;
+	
+	public function __construct($manager, $class)
 	{
-		$this->meta = $class::getMeta();
+		$this->manager = $manager;
+		$this->class = $class;
+		$this->meta = $manager->getMeta($class);
 	}
 	
 	public function getClass()
@@ -25,8 +34,7 @@ class TableBuilder
 	
 	public function createTable()
 	{
-		$class = $this->meta->class;
-		$connector = $class::getManager()->getConnector();
+		$connector = $this->manager->getConnector();
 		
 		if (!($connector instanceof Connector))
 			throw new Exception("Can't create tables if not using Amiss\Connector");
@@ -38,9 +46,7 @@ class TableBuilder
 	
 	protected function buildFields()
 	{
-		$manager = $this->meta->getManager();
-		
-		$engine = $manager->getConnector()->engine;
+		$engine = $this->manager->getConnector()->engine;
 		$primary = $this->meta->primary;
 		
 		if ($primary)
@@ -54,35 +60,41 @@ class TableBuilder
 		$f = array();
 		$found = array();
 		
-		foreach ($this->meta->getFields() as $k=>$v) {
-			if (is_numeric($k)) {
-				if ($v != $primary)
-					$f[] = "`$v` $default";
-				else
-					$f[] = "`$v` $primaryType";
-				$found[] = $v;
+		foreach ($this->meta->getFields() as $id=>$info) {
+			$current = "`{$info['name']}` ";
+			
+			$type = null;
+			if ($info['type']) {
+				$type = $info['type'];
 			}
 			else {
-				$handler = $this->meta->getTypeHandler($v);
-				if ($handler) {
-					$new = $handler->createColumnType($engine);
-					if ($new) $v = $new;
-				}
-				
-				$f[] = "`$k` $v";
-				$found[] = $k;
+				if ($id != $primary)
+					$type = $default;
+				else
+					$type = $primaryType;
 			}
+			
+			$handler = $this->manager->mapper->determineTypeHandler($type);
+			if ($handler) {
+				$new = $handler->createColumnType($engine);
+				if ($new) $type = $new;
+			}
+			
+			$current .= $type;
+			$f[] = $current;
+			$found[] = $id;
 		}
+		
 		if ($primary && !in_array($primary, $found)) {
 			array_unshift($f, "`$primary` $primaryType");
 		}
+		
 		return $f;
 	}
 	
 	protected function buildTableConstraints()
 	{
-		$manager = $this->meta->getManager();
-		$engine = $manager->getConnector()->engine;
+		$engine = $this->manager->getConnector()->engine;
 		
 		$idx = array();
 		if ($engine == 'mysql') {
@@ -112,8 +124,7 @@ class TableBuilder
 			throw new Exception("Can't create an object that doesn't declare fields");
 		
 		$table = '`'.str_replace('`', '', $this->meta->table).'`';
-		$manager = $this->meta->getManager();
-		$connector = $manager->getConnector();
+		$connector = $this->manager->getConnector();
 		$engine = $connector->engine;
 		
 		$primary = $this->meta->primary;

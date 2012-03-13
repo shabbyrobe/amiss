@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Unit\Active;
 
-use Amiss\Active\TableBuilder;
+use Amiss\TableBuilder;
 
 class RecordCreateCustomTypeTest extends \CustomTestCase
 {
@@ -10,13 +10,14 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
-		$this->manager = new \Amiss\Manager($this->connector);
+		$activeMapper = new \Amiss\Active\Mapper();
+		$this->manager = new \Amiss\Manager($this->connector, $activeMapper);
 		\Amiss\Active\Record::setManager($this->manager);
-		$this->tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveRecordWithCustomType');
+		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithCustomType');
 	}
 	
 	/**
-	 * @covers Amiss\Active\TableBuilder::buildFields
+	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
 	 */
 	public function testCreateTableWithCustomTypeUsesRubbishValueWhenTypeHandlerNotRegistered()
@@ -34,7 +35,7 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	}
 	
 	/**
-	 * @covers Amiss\Active\TableBuilder::buildFields
+	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()

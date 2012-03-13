@@ -2,25 +2,28 @@
 
 namespace Amiss\Test\Unit\Active;
 
-use Amiss\Active\TableBuilder;
+use Amiss\TableBuilder;
 
 class TableBuilderCreateTest extends \CustomTestCase
 {
 	public function setUp()
 	{
 		\Amiss\Active\Record::_reset();
-		$this->manager = new \Amiss\Manager(new \Amiss\Connector('sqlite::memory:'));
+		$this->manager = new \Amiss\Manager(
+			new \Amiss\Connector('sqlite::memory:'),
+			new \Amiss\Active\Mapper
+		);
 	}
 	
 	/**
 	 * @group active
-	 * @covers Amiss\Active\TableBuilder::createTable
+	 * @covers Amiss\TableBuilder::createTable
 	 */
 	public function testCreateDefaultTableSql()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveRecord');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecord');
 		 
 		$pattern = "
 			CREATE TABLE `test_create_active_record` (
@@ -45,7 +48,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveDefaultFieldRecord');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveDefaultFieldRecord');
 		
 		$pattern = "
 			CREATE TABLE `test_create_active_default_field_record` (
@@ -68,7 +71,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveRecordWithIndexedSingleOnRelation');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithIndexedSingleOnRelation');
 		
 		$pattern = "
 			CREATE TABLE `bar` (
@@ -92,7 +95,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveRecordWithIndexedSingleOnRelation');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithIndexedSingleOnRelation');
 		
 		$pattern = "
 			CREATE TABLE `bar` (
@@ -115,7 +118,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestCreateActiveRecordWithIndexedMultiOnRelation');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithIndexedMultiOnRelation');
 		
 		$pattern = "
 			CREATE TABLE `bar` (
@@ -140,7 +143,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	public function testCreateTableFailsWhenFieldsNotDefined()
 	{
 		\Amiss\Active\Record::setManager($this->manager);
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestNoFieldsCreateActiveRecord');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestNoFieldsCreateActiveRecord');
 		$tableBuilder->createTable();
 	}
 	
@@ -152,7 +155,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::setManager($this->manager);
 		$this->manager->connector = new \PDO('sqlite::memory:');
-		$tableBuilder = new TableBuilder(__NAMESPACE__.'\TestNoFieldsCreateActiveRecord');
+		$tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestNoFieldsCreateActiveRecord');
 		$tableBuilder->createTable();
 	}
 }

@@ -8,7 +8,7 @@ class RecordEventTest extends \CustomTestCase
 {
 	public function setUp()
 	{
-		$this->connector = $this->getMock('Amiss\Connector');
+		$this->connector = $this->getMock('Amiss\Connector', array(), array(), '', !'callOriginalConstructor');
 		
 		$this->manager = $this->getMock(
 			'Amiss\Manager',

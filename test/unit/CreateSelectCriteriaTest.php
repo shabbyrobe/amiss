@@ -8,7 +8,10 @@ class CreateSelectCriteriaTest extends \CustomTestCase
 {	
 	public function setUp()
 	{
-		$this->manager = new Manager(array('dsn'=>'sqlite::memory:'));
+		$this->manager = new Manager(
+			array('dsn'=>'sqlite::memory:'),
+			new \Amiss\Mapper\Note
+		);
 	}
 	
 	/**

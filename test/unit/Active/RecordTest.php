@@ -8,7 +8,8 @@ class RecordTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
-		$this->manager = new \Amiss\Manager($this->db);
+		$this->mapper = new \Amiss\Active\Mapper;
+		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
 	}
 	
 	/**
@@ -82,7 +83,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetForwarded()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
 		$manager->expects($this->once())->method('get')->with(
 			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
 			$this->equalTo('pants=?'), 
@@ -99,7 +100,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetByExplicitPk()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('get')->with(
@@ -117,7 +118,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetByImplicitPk()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('get')->with(
@@ -135,7 +136,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testManyImplicitPksWorkAsExpected()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		TestActiveRecord2::getByPk(1);
@@ -151,7 +152,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testFetchRelatedSingle()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('getRelated')->with(
@@ -174,7 +175,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testFetchRelatedList()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db));
+		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('getRelatedList')->with(
