@@ -60,33 +60,47 @@ class Note extends \Amiss\Mapper
 			);
 			
 			$unnamed = array();
+			$setters = array();
 			$priFound = false;
-			foreach ($notes->properties as $prop=>$propNotes) {
-				$field = null;
-				
-				if (isset($propNotes['field']))
-					$field = $propNotes['field'] !== true ? $propNotes['field'] : false;
-				
-				if (isset($propNotes['primary'])) {
-					if ($priFound)
-						throw new \UnexpectedValueException("Found two primaries for $class");
+			
+			foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
+				foreach ($noteBag as $name=>$itemNotes) {
+					$field = null;
 					
-					$info['primary'] = $prop;
-					$priFound = true;
-					if (!$field) $field = $prop;
-				}
-				
-				if ($field !== null) {
-					if ($field === false) {
-						$unnamed[$prop] = $prop;
+					if (isset($itemNotes['field']))
+						$field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
+					
+					if (isset($itemNotes['primary'])) {
+						if ($priFound)
+							throw new \UnexpectedValueException("Found two primaries for $class");
+						
+						$info['primary'] = $name;
+						$priFound = true;
+						if (!$field) $field = $name;
 					}
 					
-					$type = isset($propNotes['fieldType']) 
-						? $propNotes['fieldType'] 
-						: null   // (isset($propNotes['var']) ? $propNotes['var'] : null)
-					;
-					
-					$info['fields'][$prop] = array($field, $type);
+					if ($field !== null) {
+						$getSet = null;
+						$methodWithoutPrefix = null;
+						
+						if ($type == 'method') {
+							$getSet = array($name);
+							$methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
+							$name = lcfirst($methodWithoutPrefix);
+							$getSet[] = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter']; 
+						}
+						
+						if ($field === false) {
+							$unnamed[$name] = $name;
+						}
+						
+						$type = isset($itemNotes['fieldType']) 
+							? $itemNotes['fieldType'] 
+							: null
+						;
+						
+						$info['fields'][$name] = array($field, $type, $getSet);
+					}
 				}
 			}
 			

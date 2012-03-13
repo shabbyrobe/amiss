@@ -38,7 +38,10 @@ abstract class Mapper
 				}
 			}
 			
-			$object->{$prop} = $value;
+			if (!isset($field[2]))
+				$object->{$prop} = $value;
+			else
+				call_user_func(array($object, $field[2][1]), $value);
 		}
 		
 		return $object;
@@ -51,8 +54,10 @@ abstract class Mapper
 		$defaultType = $meta->getDefaultFieldType();
 		
 		foreach ($meta->getFields() as $prop=>$field) {
-			// TODO: getter and setter support
-			$value = $object->$prop;
+			if (!isset($field[2]))
+				$value = $object->$prop;
+			else
+				$value = call_user_func(array($object, $field[2][0]));
 			
 			$type = $field[1] ?: $defaultType;
 			
