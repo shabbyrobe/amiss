@@ -124,17 +124,4 @@ class Note extends \Amiss\Mapper
 		}
 		return $meta;
 	}
-	
-	protected function getDefaultTable($class)
-	{
-		$table = $class;
-		
-		if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-		
-		$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
-			return "_".strtolower($match[0]);
-		}, $table), '_');
-
-		return $table;
-	}
 }

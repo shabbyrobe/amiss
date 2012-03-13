@@ -6,7 +6,7 @@ use Amiss\Demo\Active;
 /**
  * @group active
  */
-class ActiveRecordTypeTest extends \SqliteDataTestCase
+class ActiveRecordTypeTest extends \ActiveRecordDataTestCase
 {
 	public function setUp()
 	{
@@ -102,7 +102,7 @@ class ActiveRecordTypeTest extends \SqliteDataTestCase
 	}
 }
 
-class TestTypeHandler implements \Amiss\Active\TypeHandler
+class TestTypeHandler implements \Amiss\Type\Handler
 {
 	public $garbage;
 	
@@ -135,7 +135,7 @@ class TestCustomFieldTypeRecord extends \Amiss\Active\Record
 	public $yep1;
 }
 
-class TestCustomFieldTypeHandler implements \Amiss\Active\TypeHandler
+class TestCustomFieldTypeHandler implements \Amiss\Type\Handler
 {
 	function prepareValueForDb($value, $object, $fieldName)
 	{

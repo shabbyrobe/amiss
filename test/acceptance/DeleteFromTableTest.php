@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Criteria\Query;
 
-class DeleteFromTableTest extends \SqliteDataTestCase
+class DeleteFromTableTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{

@@ -27,7 +27,7 @@ class Manager
 			$connector = Connector::create($connector);
 		
 		$this->connector = $connector;
-		$this->mapper = $mapper ?: new Mapper\Quick;
+		$this->mapper = $mapper ?: new Mapper\Note;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ class Manager
 			throw new Exception("Limit must be one or zero");
 		
 		list ($query, $params) = $criteria->buildQuery($meta);
-
+		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
@@ -71,7 +71,7 @@ class Manager
 			if ($obj)
 				throw new Exception("Query returned more than one row");
 			
-			$object = $this->mapper->createObject($meta, $row, $criteria->args);
+			$obj = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
 		return $obj;
 	}
@@ -567,10 +567,7 @@ class Manager
 
 	public function __set($name, $value)
 	{
-	//	if ('objectNamespace' == $name)
-	//		$this->mapper->objectNamespace = $value;
-	//	else
-			throw new \BadMethodCallException("$name does not exist");
+		throw new \BadMethodCallException("$name does not exist");
 	}
 
 	public function __isset($name)

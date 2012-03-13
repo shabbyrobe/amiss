@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class InsertObjectTest extends \SqliteDataTestCase
+class InsertObjectTest extends \NoteMapperDataTestCase
 {
 	/**
 	 * Ensures the signature for object insertion works

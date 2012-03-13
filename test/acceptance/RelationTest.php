@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class RelationTest extends \SqliteDataTestCase
+class RelationTest extends \NoteMapperDataTestCase
 {
 	public function testRetrieveSingleRelated()
 	{

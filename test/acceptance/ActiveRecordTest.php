@@ -4,18 +4,18 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
 
-class ActiveRecordTest extends \SqliteDataTestCase
+class ActiveRecordTest extends \ActiveRecordDataTestCase
 {
 	public function setUp()
 	{
 		parent::setUp();
-		$this->manager->objectNamespace = 'Amiss\Demo\Active';
 		\Amiss\Active\Record::_reset();
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetByPk()
 	{
@@ -26,6 +26,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetByPositionalWhere()
 	{
@@ -36,6 +37,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetByPositionalWhereMulti()
 	{
@@ -46,6 +48,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetByNamedWhere()
 	{
@@ -56,6 +59,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetPopulatesUndeclaredProperties()
 	{
@@ -68,10 +72,13 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testGetRelatedSingle()
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
+		$this->assertTrue($obj==true, "Couldn't retrieve object");
+		
 		$related = $obj->fetchRelated('type');
 		
 		$this->assertTrue($related instanceof Active\ArtistType);
@@ -80,10 +87,13 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testDeleteByPrimary()
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
+		$this->assertTrue($obj==true, "Couldn't retrieve object");
+		
 		$obj->delete();
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistId=1'));
 		
@@ -93,6 +103,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testUpdateByPrimary()
 	{
@@ -107,6 +118,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testInsert()
 	{
@@ -126,6 +138,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testSaveUpdate()
 	{
@@ -140,6 +153,7 @@ class ActiveRecordTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testSaveInsert()
 	{

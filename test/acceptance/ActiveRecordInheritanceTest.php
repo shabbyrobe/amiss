@@ -4,21 +4,22 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
 
-class ActiveRecordInheritanceTest extends \SqliteDataTestCase
+class ActiveRecordInheritanceTest extends \ActiveRecordDataTestCase
 {
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function setUp()
 	{
 		parent::setUp();
-		$this->manager->objectNamespace = 'Amiss\Demo\Active';
 		\Amiss\Active\Record::_reset();
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testSelect()
 	{
@@ -29,6 +30,7 @@ class ActiveRecordInheritanceTest extends \SqliteDataTestCase
 	
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testFieldInheritance()
 	{

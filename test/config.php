@@ -55,6 +55,8 @@ abstract class SqliteDataTestCase extends CustomTestCase
 	 */
 	public $manager;
 	
+	public abstract function getMapper();
+	
 	public function setUp()
 	{
 		\Amiss\Active\Record::_reset();
@@ -63,8 +65,8 @@ abstract class SqliteDataTestCase extends CustomTestCase
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite'));
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite'));
 		
-		$this->manager = new \Amiss\Manager($this->db);
-		$this->manager->mapper->objectNamespace = 'Amiss\Demo';
+		$this->manager = new \Amiss\Manager($this->db, $this->getMapper());
+		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
 	public function createRecordMemoryDb($class)
@@ -73,6 +75,23 @@ abstract class SqliteDataTestCase extends CustomTestCase
 		$manager = new \Amiss\Manager(new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION)));
 		forward_static_call(array($class, 'setManager'), $manager);
 		$tb->createTable();
+	}
+}
+
+abstract class ActiveRecordDataTestCase extends SqliteDataTestCase
+{
+	public function getMapper()
+	{
+		return new \Amiss\Active\Mapper();
+	}
+}
+
+abstract class NoteMapperDataTestCase extends SqliteDataTestCase
+{
+	public function getMapper()
+	{
+		$mapper = new \Amiss\Mapper\Note();
+		return $mapper;
 	}
 }
 
@@ -134,7 +153,7 @@ class TestConnector extends \Amiss\Connector
 	}
 }
 
-class TestTypeHandler implements \Amiss\Active\TypeHandler
+class TestTypeHandler implements \Amiss\Type\Handler
 {
 	public $valueForDb;
 	public $valueFromDb;

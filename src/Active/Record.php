@@ -3,10 +3,9 @@
 namespace Amiss\Active;
 
 use	Amiss\Connector,
-	Amiss\RowExporter,
 	Amiss\Exception;
 
-abstract class Record implements RowExporter
+abstract class Record
 {
 	public static $relations=array();
 	public static $fields=array();
@@ -14,17 +13,15 @@ abstract class Record implements RowExporter
 	public static $table;
 	public static $defaultFieldType=null;
 	
-	protected static $meta=array();
+	private $fetched = false;
 	
-	/**
-	 * Used only for testing
-	 */
+	private static $managers=array();
+	
+	// for testing only
 	public static function _reset()
 	{
-		self::$meta = array();
+		self::$managers = array();
 	}
-	
-	private $fetched = false;
 	
 	protected function beforeInsert()
 	{}
@@ -38,9 +35,17 @@ abstract class Record implements RowExporter
 	protected function beforeDelete()
 	{}
 	
+	public function setFetched()
+	{
+		$this->fetched = true;
+	}
+	
 	public function save()
 	{
-		$primary = static::getMeta()->getPrimary();
+		$manager = static::getManager();
+		$meta = $manager->getMeta(get_called_class());
+		
+		$primary = $meta->primary;
 		if (!$primary)
 			throw new Exception("Active record requires an autoincrement primary if you want to call 'save'");
 		
@@ -52,15 +57,17 @@ abstract class Record implements RowExporter
 	
 	public function insert()
 	{
-		$meta = static::getMeta();
-		$primary = $meta->getPrimary();
+		$manager = static::getManager();
+		$meta = $manager->getMeta(get_called_class());
+		
+		$primary = $meta->primary;
 		
 		if ($primary && $this->{$primary})
 			throw new Exception("This record was already inserted");
 		
 		$this->beforeInsert();
 		$this->beforeSave();
-		$return = $meta->getManager()->insert($this);
+		$return = $manager->insert($this);
 		
 		if ($primary) $this->{$primary} = $return;
 	}
@@ -69,12 +76,12 @@ abstract class Record implements RowExporter
 	{
 		$args = func_get_args();
 		$count = func_num_args();
-		$meta = static::getMeta();
-		$manager = $meta->getManager();
+		$manager = static::getManager();
+		$meta = $manager->getMeta(get_called_class());
 		
 		$primary = null;
 		if ($count == 0) {
-			$primary = $meta->getPrimary();
+			$primary = $meta->primary;
 			if (!$primary)
 				throw new Exception("Active record requires an autoincrement primary if you want to call 'update' without a where clause");
 		}
@@ -95,12 +102,12 @@ abstract class Record implements RowExporter
 		$args = func_get_args();
 		$count = func_num_args();
 		
-		$meta = static::getMeta();
-		$manager = $meta->getManager();
+		$manager = static::getManager();
+		$meta = $manager->getMeta(get_called_class());
 		
 		$primary = null;
 		if ($count == 0) {
-			$primary = $meta->getPrimary();
+			$primary = $meta->primary;
 			if (!$primary)
 				throw new Exception("Active record requires an autoincrement primary if you want to call 'update' without a where clause");
 		}
@@ -117,6 +124,7 @@ abstract class Record implements RowExporter
 	
 	public function fetchRelated($name, $into=null)
 	{
+		$manager = static::getManager();
 		$meta = static::getMeta();
 		
 		$relations = $meta->getRelations();
@@ -140,14 +148,6 @@ abstract class Record implements RowExporter
 		else
 			throw new \UnexpectedValueException("Expected 'one' or 'list' for relation, found $type");
 		
-		$manager = $meta->getManager();
-		$type = $manager->resolveObjectName($type);
-		
-		// HACK: related metadata was not getting registered. this needs to
-		// be cleaned up so that table registration with the manager is not so
-		// hacked up
-		static::getMeta($type)->getManager();
-		
 		$details = array($for, $type, $relation['on']);
 		$related = call_user_func_array(array($manager, $method), $details);
 		
@@ -155,57 +155,36 @@ abstract class Record implements RowExporter
 	}
 	
 	/**
-	 * Use ``static::getMeta()->getManager()`` instead.
-	 * 
 	 * @return Amiss\Manager
-	 * @deprecated
 	 */
-	public static function getManager()
-	{
-		return static::getMeta()->getManager();
-	}
-	
-	/**
-	 * @return Amiss\Active\Meta
-	 */
-	public static function getMeta($class=null)
+	public static function getManager($class=null)
 	{
 		if (!$class)
 			$class = get_called_class();
 		
-		if (!isset(self::$meta[$class])) {
-			self::$meta[$class] = static::createMeta($class);
+		if (!isset(self::$managers[$class])) {
+			$parent = get_parent_class($class);
+			if ($parent)
+				self::$managers[$class] = static::getManager($parent);
 		}
 		
-		return self::$meta[$class];
-	}
-	
-	protected static function createMeta($class)
-	{
-		$parent = get_parent_class($class);
-		$meta = new Meta($class, $parent ? static::getMeta($parent) : null);
-		return $meta;
+		if (!isset(self::$managers[$class]))
+			throw new Exception("No manager defined against $class or any parent thereof");
+		
+		return self::$managers[$class];
 	}
 	
 	public static function setManager($manager)
 	{
-		static::getMeta()->setManager($manager);
-	}
-	
-	public static function addTypeHandler($handler, $types)
-	{
-		if (!is_array($types)) $types = array($types);
-		
-		foreach ($types as $type) {
-			$type = strtolower($type);
-			static::getMeta()->typeHandlers[$type] = $handler;
-		}
+		$class = get_called_class();
+		self::$managers[$class] = $manager;
 	}
 	
 	public static function updateTable()
 	{
-		$meta = static::getMeta();
-		$manager = $meta->getManager();
+		$manager = static::getManager();
+		$meta = $manager->getMeta(get_called_class());
+		
 		$args = func_get_args();
 		array_unshift($args, $meta->class);
 		
@@ -214,13 +193,14 @@ abstract class Record implements RowExporter
 	
 	public static function getByPk($key)
 	{
-		$primary = static::getMeta()->getPrimary();
+		$meta = static::getMeta();
+		$primary = $meta->primary;
 		return static::get($primary.'=?', $key);
 	}
 	
 	public static function __callStatic($name, $args)
 	{
-		$manager = static::getMeta()->getManager();
+		$manager = static::getManager();
 		
 		$called = get_called_class();
 		
@@ -238,99 +218,16 @@ abstract class Record implements RowExporter
 		else
 			throw new \BadMethodCallException("Unknown method $name");
 	}
-
-	public function exportRow()
-	{
-		$meta = static::getMeta();
-		$fields = $meta->getFields();
-		
-		// if the active record's fields are defined, export the row here
-		// otherwise we defer to the data mapper's default handling
-		
-		if ($fields) {
-			$values = array();
-			foreach ($fields as $k=>$v) {
-				$field = null;
-				$type = null;
-				
-				// if the key is a string, the value is the type.
-				// if the key is numeric, the value is the field name and the type
-				// is the default.
-				// FIXME: this does not defer to the default properly.
-				
-				// quick method-less stringy test (strings always == zero). accurate enough.
-				if ($k == 0 && $k !== 0) {
-					$field = $k;
-					$type = $v;
-				}
-				else {
-					$field = $v;
-					$value = $this->{$field};
-					$type = $meta->getDefaultFieldType();
-				}
-				
-				$value = $this->{$field};
-				
-				if ($type) {
-					if (!isset($meta->fieldHandlers[$field])) {
-						// set it to false if a type handler wasn't found so that 'isset' returns 
-						// true (it wouldn't for 'null')
-						$meta->fieldHandlers[$field] = $meta->getTypeHandler($type) ?: false;
-					}
-					
-					$handler = $meta->fieldHandlers[$field];
-					if ($handler) {
-						$value = $handler->prepareValueForDb($value, $this, $field);
-					}
-				}
-				
-				$values[$field] = $value;
-			}
-			
-			$primary = $meta->getPrimary();
-			if ($primary && $this->$primary) {
-				$values[$primary] = $this->$primary;
-			}
-			
-			return $values;
-		}
-		else {
-			return $meta->getManager()->getDefaultRowValues($this);
-		}
-	}
 	
-	public function afterFetch()
+	public static function getMeta()
 	{
-		$this->fetched = true;
-		
-		$meta = static::getMeta();
-		$fields = $meta->getFields();
-		
-		// handle type mappers 
-		foreach ($fields as $k=>$v) {
-			// quick method-less stringy test (strings always == zero). accurate enough.
-			if ($k == 0 && $k !== 0) {
-				if ($v) {
-					$field = $k; $type = $v;
-					
-					if (!isset($meta->fieldHandlers[$field])) {
-						// set it to false if a type handler wasn't found so that 'isset' returns 
-						// true (it wouldn't for 'null')
-						$meta->fieldHandlers[$field] = $meta->getTypeHandler($type) ?: false;
-					}
-					
-					$handler = $meta->fieldHandlers[$field];
-					if ($handler) {
-						$this->$field = $handler->handleValueFromDb($this->$field, $this, $field);
-					}
-				}
-			}
-		}
+		return static::getManager()->getMeta(get_called_class());
 	}
 	
 	public function __get($name)
 	{
-		$meta = static::getMeta();
+		$meta = static::getManager()->getMeta(get_class($this));
+		
 		$fields = $meta->getFields();
 		if ($this->fetched || ($fields && !isset($fields[$name]))) {
 			throw new \BadMethodCallException("Unknown property $name");
@@ -338,24 +235,5 @@ abstract class Record implements RowExporter
 		else {
 			return null;
 		}
-	}
-	
-	public static function getTableName()
-	{
-		/* 
-		 * Don't update this method to return the static::$tableName value.
-		 * Active\Meta has to do some gymnastics to register the table name
-		 * with the manager. It'll have to be cleaned up at a later date.
-		 */
-	}
-	
-	public static function getRelations()
-	{
-		return static::$relations;
-	}
-	
-	public static function getTypeHandlers()
-	{
-		return array();
 	}
 }

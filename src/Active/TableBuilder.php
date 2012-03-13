@@ -25,7 +25,8 @@ class TableBuilder
 	
 	public function createTable()
 	{
-		$connector = $this->meta->getManager()->getConnector();
+		$class = $this->meta->class;
+		$connector = $class::getManager()->getConnector();
 		
 		if (!($connector instanceof Connector))
 			throw new Exception("Can't create tables if not using Amiss\Connector");
@@ -40,7 +41,7 @@ class TableBuilder
 		$manager = $this->meta->getManager();
 		
 		$engine = $manager->getConnector()->engine;
-		$primary = $this->meta->getPrimary();
+		$primary = $this->meta->primary;
 		
 		if ($primary)
 			$autoinc = $engine == 'sqlite' ? 'AUTOINCREMENT' : 'AUTO_INCREMENT';

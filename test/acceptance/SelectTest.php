@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class SelectTest extends \SqliteDataTestCase
+class SelectTest extends \NoteMapperDataTestCase
 {
 	public function testSingleObjectPositionalParametersShorthand()
 	{
@@ -41,16 +41,6 @@ class SelectTest extends \SqliteDataTestCase
 		
 		$this->assertTrue($a instanceof \Amiss\Demo\Artist);
 		$this->assertEquals('Limozeen', $a->name);
-	}
-	
-	public function testSingleObjectUsingRowBuilder()
-	{
-		$a = $this->manager->get('Venue', 'venueId=?', 1);
-		
-		$this->assertTrue($a instanceof \Amiss\Demo\Venue);
-		$this->assertEquals('Strong Badia', $a->venueName);
-		$this->assertSame(1, $a->venueId);
-		$this->assertEquals('strong-badia', $a->venueSlug);
 	}
 	
 	public function testList()

@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class UpdateObjectMultiKeyTest extends \SqliteDataTestCase
+class UpdateObjectMultiKeyTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{

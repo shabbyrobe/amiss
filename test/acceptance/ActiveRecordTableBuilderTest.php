@@ -6,10 +6,11 @@ use Amiss\Active\TableBuilder,
 	Amiss\Demo\Active
 ;
 
-class ActiveRecordTableBuilderTest extends \SqliteDataTestCase
+class ActiveRecordTableBuilderTest extends \ActiveRecordDataTestCase
 {
 	/**
 	 * @group active
+	 * @group acceptance
 	 */
 	public function testCreateTable()
 	{

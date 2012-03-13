@@ -99,7 +99,7 @@ class EventArtist extends Artist
 	public $artist;
 }
 
-class Venue extends Object implements \Amiss\RowBuilder, \Amiss\RowExporter
+class Venue extends Object
 {
 	public $venueId;
 	public $venueName;
@@ -108,28 +108,4 @@ class Venue extends Object implements \Amiss\RowBuilder, \Amiss\RowExporter
 	public $venueShortAddress;
 	public $venueLatitude;
 	public $venueLongitude;
-	
-	public function buildObject(array $row)
-	{
-		$this->venueId = (int)$row['venueId'];
-		$this->venueName = $row['name'];
-		$this->venueSlug = $row['slug'];
-		$this->venueAddress = $row['address'];
-		$this->venueShortAddress = $row['shortAddress'];
-		$this->venueLatitude = $row['latitude'];
-		$this->venueLongitude = $row['longitude'];
-	}
-	
-	public function exportRow()
-	{
-		return array(
-			'venueId'=>$this->venueId,
-			'name'=>$this->venueName,
-			'slug'=>$this->venueSlug,
-			'address'=>$this->venueAddress,
-			'shortAddress'=>$this->venueShortAddress,
-			'latitude'=>$this->venueLatitude,
-			'longitude'=>$this->venueLongitude,
-		);
-	}
 }

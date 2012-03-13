@@ -44,7 +44,7 @@ class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Active\Record
 	);
 }
 
-class RecordCreateCustomTypeWithEmptyColumnTypeHandler implements \Amiss\Active\TypeHandler
+class RecordCreateCustomTypeWithEmptyColumnTypeHandler implements \Amiss\Type\Handler
 {
 	function prepareValueForDb($value, $object, $fieldName)
 	{
