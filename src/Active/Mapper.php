@@ -56,6 +56,8 @@ class Mapper extends \Amiss\Mapper
 			$parent = $this->getMeta($parentClass);
 		}
 		
+		$info['fields'] = $this->resolveUnnamedFields($info['fields']);
+		
 		$meta = new \Amiss\Meta($class, $table, $info, $parent);
 		
 		return $meta; 

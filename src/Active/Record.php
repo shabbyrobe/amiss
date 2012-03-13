@@ -60,16 +60,9 @@ abstract class Record
 		$manager = static::getManager();
 		$meta = $manager->getMeta(get_called_class());
 		
-		$primary = $meta->primary;
-		
-		if ($primary && $this->{$primary})
-			throw new Exception("This record was already inserted");
-		
 		$this->beforeInsert();
 		$this->beforeSave();
 		$return = $manager->insert($this);
-		
-		if ($primary) $this->{$primary} = $return;
 	}
 	
 	public function update()

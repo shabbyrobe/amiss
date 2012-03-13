@@ -130,6 +130,8 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$obj->name = $n;
 		$obj->slug = $n;
 		$obj->insert();
+		var_dump($obj);
+		exit;
 		
 		$this->assertGreaterThan(0, $obj->artistId);
 		$obj = Active\ArtistRecord::getByPk($obj->artistId);

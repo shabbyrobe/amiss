@@ -278,7 +278,8 @@ class Manager
 		$stmt->execute(array_values($values));
 		
 		if ($object && $meta->primary) {
-			$this->mapper->setPrimary($meta, $object, $this->getConnector()->lastInsertId());
+			$lastInsertId = $this->getConnector()->lastInsertId();
+			if ($lastInsertId) $this->mapper->setPrimary($meta, $object, $lastInsertId);
 		}
 	}
 	
@@ -372,9 +373,11 @@ class Manager
 	}
 	
 	protected function createObjectUpdateCriteria($object, $args)
-	{	
-		$uc = new Criteria\Update();	
-		$uc->set = $this->mapper->exportRow($object);
+	{
+		$meta = $this->getMeta(get_class($object));
+		
+		$uc = new Criteria\Update();
+		$uc->set = $this->mapper->exportRow($meta, $object);
 		
 		if (count($args) < 1)
 			throw new \InvalidArgumentException();
