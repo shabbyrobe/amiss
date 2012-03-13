@@ -274,7 +274,7 @@ class Manager
 		++$this->queries;
 		$stmt->execute(array_values($values));
 		
-		if ($object && $meta->getPrimary()) {
+		if ($object && $meta->primary) {
 			$this->mapper->setPrimary($meta, $object, $this->getConnector()->lastInsertId());
 		}
 	}

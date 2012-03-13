@@ -6,11 +6,11 @@ class Meta
 {
 	public $class;
 	public $table;
+	public $primary;
 	
 	protected $fields;
 	protected $allFields;
 	protected $parent;
-	protected $primary;
 	protected $defaultFieldType;
 	protected $relations;
 
@@ -74,32 +74,5 @@ class Meta
 			$this->defaultFieldType = $this->parent->getDefaultFieldType();
 		}
 		return $this->defaultFieldType;
-	}
-	
-	function getPrimary()
-	{
-		if (!$this->primary) {
-			$pos = strrpos($class, '\\');
-			$name = $pos ? substr($class, $pos+1) : $class;
-			$this->primary = lcfirst($name.'Id');
-		}
-		
-		return $this->primary;
-	}
-	
-	function getTypeHandler($type)
-	{
-		// this splits off any extra crap that you may have defined
-		// in the field's definition
-		$x = preg_split('@[ \(]@', $type, 2);
-		$id = strtolower($x[0]);
-		
-		if (!isset($this->typeHandlers[$id]) && $this->parent) {
-			// set it to false if a type handler wasn't found so that 'isset' returns 
-			// true (it wouldn't for 'null')
-			$this->typeHandlers[$id] = $this->parent->getTypeHandler($id) ?: false;
-		}
-		
-		return isset($this->typeHandlers[$id]) ? $this->typeHandlers[$id] : null;
 	}
 }
