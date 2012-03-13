@@ -80,26 +80,29 @@ class Note extends \Amiss\Mapper
 					}
 					
 					if ($field !== null) {
+						$fieldInfo = array();
+						
 						$getSet = null;
 						$methodWithoutPrefix = null;
 						
 						if ($type == 'method') {
-							$getSet = array($name);
+							$fieldInfo['getter'] = $name;
 							$methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
 							$name = lcfirst($methodWithoutPrefix);
-							$getSet[] = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter']; 
+							$fieldInfo['setter'] = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter']; 
 						}
 						
 						if ($field === false) {
 							$unnamed[$name] = $name;
 						}
 						
-						$type = isset($itemNotes['fieldType']) 
+						$fieldInfo['name'] = $field;
+						$fieldInfo['type'] = isset($itemNotes['fieldType']) 
 							? $itemNotes['fieldType'] 
 							: null
 						;
 						
-						$info['fields'][$name] = array($field, $type, $getSet);
+						$info['fields'][$name] = $fieldInfo;
 					}
 				}
 			}
@@ -108,8 +111,8 @@ class Note extends \Amiss\Mapper
 				if ($this->propertyColumnTranslator)
 					$unnamed = $this->propertyColumnTranslator->to($unnamed);
 				
-				foreach ($unnamed as $prop=>$field) {
-					$info['fields'][$prop][0] = $field;
+				foreach ($unnamed as $name=>$field) {
+					$info['fields'][$name]['name'] = $field;
 				}
 			}
 			

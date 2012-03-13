@@ -25,23 +25,23 @@ abstract class Mapper
 		
 		foreach ($meta->getFields() as $prop=>$field) {
 			// TODO: getter and setter support
-			$value = $row[$field[0]];
+			$value = $row[$field['name']];
 			
-			$type = $field[1] ?: $defaultType;
+			$type = $field['type'] ?: $defaultType;
 			
 			if ($type) {
 				if (!isset($this->typeHandlerMap[$type])) {
 					$this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
 				}
 				if ($this->typeHandlerMap[$type]) {
-					$value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field[0]);
+					$value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field['name']);
 				}
 			}
 			
-			if (!isset($field[2]))
+			if (!isset($field['setter']))
 				$object->{$prop} = $value;
 			else
-				call_user_func(array($object, $field[2][1]), $value);
+				call_user_func(array($object, $field['setter']), $value);
 		}
 		
 		return $object;
@@ -54,23 +54,23 @@ abstract class Mapper
 		$defaultType = $meta->getDefaultFieldType();
 		
 		foreach ($meta->getFields() as $prop=>$field) {
-			if (!isset($field[2]))
+			if (!isset($field['getter']))
 				$value = $object->$prop;
 			else
-				$value = call_user_func(array($object, $field[2][0]));
+				$value = call_user_func(array($object, $field['getter']));
 			
-			$type = $field[1] ?: $defaultType;
+			$type = $field['type'] ?: $defaultType;
 			
 			if ($type) {
 				if (!isset($this->typeHandlerMap[$type])) {
 					$this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
 				}
 				if ($this->typeHandlerMap[$type]) {
-					$value = $this->typeHandlerMap[$type]->prepareValueForDb($value, $object, $field[0]);
+					$value = $this->typeHandlerMap[$type]->prepareValueForDb($value, $object, $field['name']);
 				}
 			}
 			
-			$row[$field[0]] = $value;
+			$row[$field['name']] = $value;
 		}
 		
 		return $row;

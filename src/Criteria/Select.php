@@ -29,7 +29,7 @@ class Select extends Query
 			if ($metaFields) {
 				$fields = array();
 				foreach ($metaFields as $field) {
-					$fields[] = $field[0];
+					$fields[] = $field['name'];
 				}
 				$fields = implode(', ', $fields);
 			}
