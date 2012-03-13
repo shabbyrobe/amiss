@@ -14,12 +14,12 @@ class InsertObjectTest extends \NoteMapperDataTestCase
 	public function testInsertObject()
 	{
 		$this->assertEquals(0, $this->manager->count('Artist', 'slug="insert-test"'));
-		
+			
 		$artist = new Demo\Artist();
 		$artist->artistTypeId = 1;
 		$artist->name = 'Insert Test';
 		$artist->slug = 'insert-test';
-		$artist->artistId = $this->manager->insert($artist);
+		$this->manager->insert($artist);
 		
 		$this->assertGreaterThan(0, $artist->artistId);
 		
@@ -31,7 +31,7 @@ class InsertObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->insert( object $object )
 	 * 
 	 */
-	public function testInsertObjectUsingRowExporter()
+	public function testInsertObjectWithManualNoteFields()
 	{
 		$this->assertEquals(0, $this->manager->count('Venue', 'slug="insert-test"'));
 		
@@ -40,7 +40,7 @@ class InsertObjectTest extends \NoteMapperDataTestCase
 		$venue->venueSlug = 'insert-test';
 		$venue->venueAddress = 'yep';
 		$venue->venueShortAddress = 'yep';
-		$venue->venueId = $this->manager->insert($venue);
+		$this->manager->insert($venue);
 		
 		$this->assertGreaterThan(0, $venue->venueId);
 		

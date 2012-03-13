@@ -117,7 +117,7 @@ abstract class Mapper
 	{
 		$unnamed = array();
 		foreach ($fields as $prop=>$f) {
-			if (!$f['name']) $unnamed[] = $prop;
+			if (!$f['name']) $unnamed[$prop] = $prop;
 		}
 		
 		if ($unnamed) {

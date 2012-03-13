@@ -8,6 +8,8 @@ class Note extends \Amiss\Mapper
 {
 	private $cache;
 	
+	public $objectNamespace;
+	
 	public function __construct($cache=null)
 	{
 		$this->parser = new \Amiss\Note\Parser;
@@ -34,6 +36,10 @@ class Note extends \Amiss\Mapper
 	public function getMeta($class)
 	{
 		$meta = null;
+		
+		if ($this->objectNamespace && strpos($class, $this->objectNamespace)!==0)
+			$class = $this->objectNamespace.'\\'.$class;
+		
 		if ($this->cache) {
 			$meta = $this->cache[0]($class);
 		}
@@ -90,8 +96,8 @@ class Note extends \Amiss\Mapper
 						}
 						
 						$fieldInfo['name'] = $field;
-						$fieldInfo['type'] = isset($itemNotes['fieldType']) 
-							? $itemNotes['fieldType'] 
+						$fieldInfo['type'] = isset($itemNotes['type']) 
+							? $itemNotes['type'] 
 							: null
 						;
 						

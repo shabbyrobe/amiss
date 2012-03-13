@@ -91,6 +91,7 @@ abstract class NoteMapperDataTestCase extends SqliteDataTestCase
 	public function getMapper()
 	{
 		$mapper = new \Amiss\Mapper\Note();
+		$mapper->objectNamespace = 'Amiss\Demo';
 		return $mapper;
 	}
 }

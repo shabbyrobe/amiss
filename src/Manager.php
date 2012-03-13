@@ -99,14 +99,16 @@ class Manager
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
 		$meta = $this->getMeta($object);
+		
 		$table = $meta->table;
 		
 		list ($where, $params) = $criteria->buildClause();
 		
-		$fields = $criteria->buildFields();
-		$query = "SELECT COUNT($fields) FROM $table "
+		$field = $meta->primary ?: '*';
+		$query = "SELECT COUNT($field) FROM $table "
 			.($where  ? "WHERE $where" : '')
 		;
+		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		return (int)$stmt->fetchColumn();
@@ -251,16 +253,23 @@ class Manager
 		$meta = null;
 		$object = null;
 		$class = null;
+		$asTable = false;
 		
 		if ($count == 1) {
 			$object = $args[0];
-			$meta = $this->getMeta(get_class($object));
+			$class = get_class($object);
+			$meta = $this->getMeta($class);
 			$values = $this->mapper->exportRow($meta, $object);
 		}
 		elseif ($count == 2) {
 			$class = $args[0];
 			$meta = $this->getMeta($class);
 			$values = $args[1];
+			$asTable = true;
+		}
+		
+		if (!$values) {
+			throw new Exception("No values found for class $class. Are your fields defined?");
 		}
 		
 		$columns = array();
@@ -277,10 +286,15 @@ class Manager
 		++$this->queries;
 		$stmt->execute(array_values($values));
 		
-		if ($object && $meta->primary) {
+		$lastInsertId = null;
+		
+		if (($object && $meta->primary) || $asTable)
 			$lastInsertId = $this->getConnector()->lastInsertId();
-			if ($lastInsertId) $this->mapper->setPrimary($meta, $object, $lastInsertId);
-		}
+		
+		if ($object && $meta->primary && $lastInsertId)
+			$this->mapper->setPrimary($meta, $object, $lastInsertId);
+		
+		return $lastInsertId;
 	}
 	
 	public function update()

@@ -191,46 +191,6 @@ class RecordTest extends \CustomTestCase
 	}
 	
 	/**
-	 * @covers Amiss\Active\Record::exportRow
-	 * @group active
-	 */
-	public function testExportRowRevertsToDefaultWhenFieldsNotDefined()
-	{
-		\Amiss\Active\Record::setManager($this->manager);
-		$trc = new TestDefaultExportRowRecord();
-		$values = $trc->exportRow();
-		$this->assertEquals(
-			array(
-				'id'=>1,
-				'int'=>1,
-				'float'=>1.1,
-				'string'=>'hello',
-			),
-			$values
-		);
-	}
-	
-	/**
-	 * @covers Amiss\Active\Record::exportRow
-	 * @group active
-	 */
-	public function testExportRowUsesFieldsArrayWhenDefined()
-	{
-		\Amiss\Active\Record::setManager($this->manager);
-		$r = new TestFieldExportRowRecord();
-		$values = $r->exportRow();
-		$this->assertEquals(
-			array(
-				'yep1'=>'a1',
-				'yep2'=>'a2',
-				'yep3'=>'a3',
-				'yep4'=>'a4',
-			),
-			$values
-		);
-	}
-	
-	/**
 	 * If a record has not been loaded from the database and the class doesn't
 	 * define fields, undefined properties should return null. 
 	 * 
@@ -252,7 +212,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetUnknownPropertyWhenFieldsDefinedThrowsException()
 	{
-		$ar = new TestFieldExportRowRecord();
+		$ar = new TestActiveRecord1();
 		$value = $ar->thisPropertyShouldNeverExist;
 	}
 	
@@ -359,48 +319,4 @@ class TestRelatedChild extends \Amiss\Active\Record
 	public static $relations = array(
 		'parent'=>array('one'=>'TestRelatedParent', 'on'=>'parentId')
 	);
-}
-
-class TestDefaultExportRowRecord extends \Amiss\Active\Record
-{
-	public $id;
-	public $int;
-	public $float;
-	public $string;
-	public $array;
-	public $null;
-	public $resource;
-	public $object;
-	
-	public function __construct()
-	{
-		$this->id = 1;
-		$this->int = 1;
-		$this->float = 1.1;
-		$this->string = 'hello';
-		$this->null = null;
-		$this->resource = fopen('php://input', 'r');
-		$this->object = new \stdClass;
-	}
-}
-
-class TestFieldExportRowRecord extends \Amiss\Active\Record
-{
-	public static $fields = array(
-		'yep1'=>true,
-		// ensures that the 'value only' method works 
-		'yep2',
-	
-		// ensures exporting isn't affected by future enhancements 
-		'yep3'=>array(),
-		'yep4'=>'a',
-	);
-	
-	public $testFieldExportRowRecordId;
-	public $yep1 = 'a1';
-	public $yep2 = 'a2';
-	public $yep3 = 'a3';
-	public $yep4 = 'a4';
-	public $nup1 = 'n1';
-	public $nup2 = 'n2';
 }

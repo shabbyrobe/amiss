@@ -36,10 +36,31 @@ abstract class Object
 
 class Artist extends Object
 {
+	/**
+	 * @field
+	 * @primary
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $name;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
+	
+	/**
+	 * @field
+	 * @type LONGTEXT
+	 */
 	public $bio;
 	
 	/**
@@ -101,11 +122,39 @@ class EventArtist extends Artist
 
 class Venue extends Object
 {
+	/**
+	 * @primary
+	 * @field
+	 */
 	public $venueId;
+	
+	/**
+	 * @field name
+	 */
 	public $venueName;
+	
+	/**
+	 * @field slug
+	 */
 	public $venueSlug;
+	
+	/**
+	 * @field address
+	 */
 	public $venueAddress;
+	
+	/**
+	 * @field shortAddress
+	 */
 	public $venueShortAddress;
+	
+	/**
+	 * @field latitude
+	 */
 	public $venueLatitude;
+	
+	/**
+	 * @field longitude
+	 */
 	public $venueLongitude;
 }
