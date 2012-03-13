@@ -4,6 +4,8 @@ namespace Amiss;
 
 abstract class Mapper
 {
+	public $unnamedPropertyMapper;
+	
 	public $typeHandlers = array();
 	
 	private $typeHandlerMap = array();
@@ -103,5 +105,24 @@ abstract class Mapper
 		}, $table), '_');
 
 		return $table;
+	}
+	
+	protected function resolveUnnamedFields($fields)
+	{
+		$unnamed = array();
+		foreach ($fields as $prop=>$f) {
+			if (!$f['name']) $unnamed[] = $prop;
+		}
+		
+		if ($unnamed) {
+			if ($this->unnamedPropertyMapper)
+				$unnamed = $this->unnamedPropertyMapper->to($unnamed);
+			
+			foreach ($unnamed as $name=>$field) {
+				$fields[$name]['name'] = $field;
+			}
+		}
+		
+		return $fields;
 	}
 }
