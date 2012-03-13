@@ -6,6 +6,8 @@ use Amiss\Exception;
 
 class Note extends \Amiss\Mapper
 {
+	public $propertyColumnTranslator;
+	
 	private $cache;
 	
 	public function __construct($cache=null)
@@ -57,6 +59,7 @@ class Note extends \Amiss\Mapper
 				'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
 			);
 			
+			$unnamed = array();
 			$priFound = false;
 			foreach ($notes->properties as $prop=>$propNotes) {
 				$field = null;
@@ -74,12 +77,25 @@ class Note extends \Amiss\Mapper
 				}
 				
 				if ($field !== null) {
+					if ($field === false) {
+						$unnamed[$prop] = $prop;
+					}
+					
 					$type = isset($propNotes['fieldType']) 
 						? $propNotes['fieldType'] 
 						: null   // (isset($propNotes['var']) ? $propNotes['var'] : null)
 					;
 					
 					$info['fields'][$prop] = array($field, $type);
+				}
+			}
+			
+			if ($unnamed) {
+				if ($this->propertyColumnTranslator)
+					$unnamed = $this->propertyColumnTranslator->to($unnamed);
+				
+				foreach ($unnamed as $prop=>$field) {
+					$info['fields'][$prop][0] = $field;
 				}
 			}
 			

@@ -1,8 +1,8 @@
 <?php
 
-namespace Amiss;
+namespace Amiss\Type;
 
-interface TypeHandler
+interface Handler
 {
 	function prepareValueForDb($value, $object, $fieldName);
 	

@@ -66,10 +66,12 @@ class Manager
 		$this->execute($stmt, $params);
 		
 		$obj = null;
-		while ($row = $this->fetchObject($stmt, $meta, $criteria->args)) {
+		
+		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 			if ($obj)
 				throw new Exception("Query returned more than one row");
-			$obj = $row;
+			
+			$object = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
 		return $obj;
 	}
@@ -78,17 +80,18 @@ class Manager
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
 		$meta = $this->getMeta($object);
-		$table = $meta->table;
 		
-		list ($query, $params) = $criteria->buildQuery($table);
+		list ($query, $params) = $criteria->buildQuery($meta);
 		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
 		$objects = array();
-		while ($row = $this->fetchObject($stmt, $object, $criteria->args)) {
-			$objects[] = $row;
+	
+		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+			$objects[] = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
+		
 		return $objects;
 	}
 
@@ -341,16 +344,6 @@ class Manager
 			$id = $object->$autoIncrementId;
 		}
 		return $id;
-	}
-	
-	public function fetchObject($stmt, $meta, $args=null)
-	{
-		$assoc = $stmt->fetch(\PDO::FETCH_ASSOC);
-		if (!$assoc) return false;
-		
-		$object = $this->mapper->createObject();
-		
-		return $object;
 	}
 
 	protected function createTableUpdateCriteria($table, $args)

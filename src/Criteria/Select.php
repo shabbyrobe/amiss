@@ -22,11 +22,17 @@ class Select extends Query
 	
 	public function buildFields($meta)
 	{
-		$fields = null;
+		$fields = '*';
 		
 		if (!$this->fields) {
 			$metaFields = $meta->getFields();
-			$fields = $metaFields ? array_keys($metaFields->fields) : '*';
+			if ($metaFields) {
+				$fields = array();
+				foreach ($metaFields as $field) {
+					$fields[] = $field[0];
+				}
+				$fields = implode(', ', $fields);
+			}
 		}
 		else {
 			$fields = is_array($this->fields) ? implode(', ', $this->fields) : $this->fields;

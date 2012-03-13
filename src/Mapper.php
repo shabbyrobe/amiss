@@ -5,7 +5,6 @@ namespace Amiss;
 abstract class Mapper
 {
 	public $typeHandlers = array();
-	public $propertyColumnTranslator;
 	
 	private $typeHandlerMap = array();
 	
@@ -24,16 +23,18 @@ abstract class Mapper
 		
 		$defaultType = $meta->getDefaultFieldType();
 		
-		foreach ($meta->getFields() as $prop->$field) {
+		foreach ($meta->getFields() as $prop=>$field) {
 			// TODO: getter and setter support
 			$value = $row[$field[0]];
+			
+			$type = $field[1] ?: $defaultType;
 			
 			if ($type) {
 				if (!isset($this->typeHandlerMap[$type])) {
 					$this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
 				}
 				if ($this->typeHandlerMap[$type]) {
-					$value = $this->typeHandlerMap[$type]->prepareValueForDb($value, $object, $field[0]);
+					$value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field[0]);
 				}
 			}
 			
@@ -49,24 +50,7 @@ abstract class Mapper
 		
 		$defaultType = $meta->getDefaultFieldType();
 		
-		$fields = $meta->getFields();
-		$names = array();
-		$unnamed = array();
-		
-		foreach ($fields as $prop=>$field) {
-			if ($field[0])
-				$names[$prop] = $field[0];
-			elseif ($this->propertyColumnTranslator)
-				$unnamed[] = $prop;
-			else
-				$names[$prop] = $prop;
-		}
-		
-		if ($unnamed) {
-			$names = $this->propertyColumnTranslator->to($unnamed) + $names;
-		}
-		
-		foreach ($fields as $prop=>$field) {
+		foreach ($meta->getFields() as $prop=>$field) {
 			// TODO: getter and setter support
 			$value = $object->$prop;
 			
@@ -81,14 +65,7 @@ abstract class Mapper
 				}
 			}
 			
-			$fieldName = $field[0];
-			if (!$fieldName) {
-				if (isset($this->propertyColumnTranslator)) {
-					$fieldName = $this->propertyColumnTranslator->to($prop);
-				}
-			}
-			
-			$row[$fieldName] = $value;
+			$row[$field[0]] = $value;
 		}
 		
 		return $row;
