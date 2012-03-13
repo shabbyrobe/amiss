@@ -115,7 +115,7 @@ class TableBuilder
 		$connector = $manager->getConnector();
 		$engine = $connector->engine;
 		
-		$primary = $this->meta->getPrimary();
+		$primary = $this->meta->primary;
 		$fields = static::buildFields();
 		if (is_array($fields))
 			$fields = implode(",\n  ", $fields);
