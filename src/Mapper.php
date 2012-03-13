@@ -80,7 +80,13 @@ abstract class Mapper
 	
 	function setPrimary($meta, $object, $id)
 	{
-		$object->{$meta->primary} = $id;
+		$field = $meta->getField($meta->primary);
+		if (!isset($field['setter'])) {
+			$object->{$meta->primary} = $id;
+		}
+		else {
+			call_user_func(array($object, $field['setter']), $id);
+		}
 	}
 	
 	protected function determineTypeHandler($type)
