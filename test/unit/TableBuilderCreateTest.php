@@ -185,6 +185,7 @@ class TestCreateActiveRecord extends \Amiss\Active\Record
 class TestCreateActiveDefaultFieldRecord extends \Amiss\Active\Record
 {
 	public static $fields = array(
+		'testCreateActiveDefaultFieldRecordId',
 		'foo',
 		'bar',
 	);

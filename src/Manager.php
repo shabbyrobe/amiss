@@ -102,7 +102,7 @@ class Manager
 		if (!$primary)
 			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
 		
-		return $this->get($primary.'=?', $id);
+		return $this->get($meta->class, $primary.'=?', $id);
 	}
 	
 	public function count($object, $criteria=null)

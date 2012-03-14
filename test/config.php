@@ -121,10 +121,16 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      * @param mixed $other Value or object to evaluate.
      * @return bool
      */
-    public function evaluate($other)
+    public function evaluate($other, $description = '', $returnResult = FALSE)
     {
     	$pattern = '/'.preg_replace('/\s+/', '\s*', preg_quote($this->string, '/')).'/ix';
-        return preg_match($pattern, $other) > 0;
+    	$result = preg_match($pattern, $other) > 0;
+    	
+    	if (!$returnResult) {
+    		if (!$result) $this->fail($other, $description);
+    	}
+    	else
+    		return $result;
     }
 
     /**

@@ -62,7 +62,16 @@ class TableBuilder
 		$f = array();
 		$found = array();
 		
-		foreach ($this->meta->getFields() as $id=>$info) {
+		$fields = $this->meta->getFields();
+		
+		// make sure the primary key ends up first
+		if ($this->meta->primary) {
+			$primaryField = $fields[$this->meta->primary];
+			unset($fields[$this->meta->primary]);
+			$fields = array_merge(array($this->meta->primary=>$primaryField), $fields);
+		}
+		
+		foreach ($fields as $id=>$info) {
 			$current = "`{$info['name']}` ";
 			
 			$type = null;
