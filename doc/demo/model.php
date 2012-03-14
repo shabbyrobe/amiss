@@ -71,8 +71,19 @@ class Artist extends Object
 
 class ArtistType extends Object
 {
+	/**
+	 * @field
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $type;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
 	
 	/**
@@ -83,11 +94,34 @@ class ArtistType extends Object
 
 class Event extends Object
 {
+	/**
+	 * @field
+	 */
 	public $eventId;
+	
+	/**
+	 * @field
+	 */
 	public $name;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
+	
+	/**
+	 * @field
+	 */
 	public $dateStart;
+	
+	/**
+	 * @field
+	 */
 	public $dateEnd;
+	
+	/**
+	 * @field
+	 */
 	public $venueId;
 	
 	/**
@@ -101,12 +135,31 @@ class Event extends Object
 	public $venue;
 }
 
-class EventArtist extends Artist
+class EventArtist
 {
+	/**
+	 * @primary
+	 */
 	public $eventId;
+	
+	/**
+	 * @field
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $priority;
+	
+	/**
+	 * @field
+	 */
 	public $sequence;
+	
+	/**
+	 * @field
+	 */
 	public $eventArtistName;
 	
 	/**

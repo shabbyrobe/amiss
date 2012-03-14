@@ -8,9 +8,31 @@ abstract class Mapper
 	
 	public $typeHandlers = array();
 	
+	public $objectNamespace;
+	
 	private $typeHandlerMap = array();
 	
 	abstract function getMeta($class);
+	
+	public function addTypeHandler($handler, $types)
+	{
+		if (!is_array($types)) $types = array($types);
+		
+		foreach ($types as $type) {
+			$type = strtolower($type);
+			$this->typeHandlers[$type] = $handler;
+		}
+	}
+	
+	/**
+	 * Assumes that any name that contains a backslash is already resolved.
+	 * This allows you to use fully qualified class names that are outside
+	 * the mapped namespace.
+	 */
+	public function resolveObjectName($name)
+	{
+		return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
+	}
 	
 	function createObject($meta, $row, $args)
 	{
@@ -108,7 +130,7 @@ abstract class Mapper
 		
 		$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
 			return "_".strtolower($match[0]);
-		}, $table), '_');
+		}, str_replace('_', '', $table)), '_');
 
 		return $table;
 	}

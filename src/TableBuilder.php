@@ -49,10 +49,12 @@ class TableBuilder
 		$engine = $this->manager->getConnector()->engine;
 		$primary = $this->meta->primary;
 		
+		$autoinc = null;
 		if ($primary)
 			$autoinc = $engine == 'sqlite' ? 'AUTOINCREMENT' : 'AUTO_INCREMENT';
 		
 		$primaryType = "INTEGER NOT NULL PRIMARY KEY $autoinc";
+		
 		$default = $this->meta->getDefaultFieldType();
 		if (!$default) {
 			$default = $engine == 'sqlite' ? 'STRING NULL' : 'VARCHAR(255) NULL';

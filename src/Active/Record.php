@@ -16,11 +16,13 @@ abstract class Record
 	private $fetched = false;
 	
 	private static $managers=array();
+	private static $meta=array();
 	
 	// for testing only
 	public static function _reset()
 	{
 		self::$managers = array();
+		self::$meta = array();
 	}
 	
 	protected function beforeInsert()
@@ -73,6 +75,7 @@ abstract class Record
 		$meta = $manager->getMeta(get_called_class());
 		
 		$primary = null;
+		
 		if ($count == 0) {
 			$primary = $meta->primary;
 			if (!$primary)
@@ -141,7 +144,9 @@ abstract class Record
 		else
 			throw new \UnexpectedValueException("Expected 'one' or 'list' for relation, found $type");
 		
+		$type = $manager->mapper->resolveObjectName($type);
 		$details = array($for, $type, $relation['on']);
+		
 		$related = call_user_func_array(array($manager, $method), $details);
 		
 		return $related;
@@ -188,6 +193,9 @@ abstract class Record
 	{
 		$meta = static::getMeta();
 		$primary = $meta->primary;
+		if (!$primary)
+			throw new \Amiss\Exception("Can't retrieve {$meta->class} by primary - none defined.");
+		
 		return static::get($primary.'=?', $key);
 	}
 	
@@ -214,19 +222,24 @@ abstract class Record
 	
 	public static function getMeta()
 	{
-		return static::getManager()->getMeta(get_called_class());
+		$called = get_called_class();
+		if (!isset(self::$meta[$called]))
+			self::$meta[$called] = static::getManager()->getMeta($called);
+		
+		return self::$meta[$called];
 	}
 	
 	public function __get($name)
 	{
-		$meta = static::getManager()->getMeta(get_class($this));
+		$meta = static::getManager()->getMeta(get_called_class());
 		
 		$fields = $meta->getFields();
-		if ($this->fetched || ($fields && !isset($fields[$name]))) {
+		if (!isset($fields[$name])) {
 			throw new \BadMethodCallException("Unknown property $name");
 		}
 		else {
-			return null;
+			// add the property to stop this from being called again
+			$this->$name = null;
 		}
 	}
 }

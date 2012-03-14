@@ -8,8 +8,6 @@ class Note extends \Amiss\Mapper
 {
 	private $cache;
 	
-	public $objectNamespace;
-	
 	public function __construct($cache=null)
 	{
 		$this->parser = new \Amiss\Note\Parser;
@@ -37,8 +35,7 @@ class Note extends \Amiss\Mapper
 	{
 		$meta = null;
 		
-		if ($this->objectNamespace && strpos($class, $this->objectNamespace)!==0)
-			$class = $this->objectNamespace.'\\'.$class;
+		$class = $this->resolveObjectName($class);
 		
 		if ($this->cache) {
 			$meta = $this->cache[0]($class);

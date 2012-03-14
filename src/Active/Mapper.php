@@ -8,6 +8,8 @@ class Mapper extends \Amiss\Mapper
 	{
 		$info = array();
 		
+		$class = $this->resolveObjectName($class);
+		
 		$rc = new \ReflectionClass($class);
 		
 		$statics = $rc->getStaticProperties();
@@ -43,10 +45,17 @@ class Mapper extends \Amiss\Mapper
 			}
 		}
 		
+		if (!isset($info['primary'])) {
+			$pos = strrpos($class, '\\');
+			$name = lcfirst($pos ? substr($class, $pos+1) : $class).'Id';
+			if (isset($info['fields'][$name]))
+				$info['primary'] = $name;
+		}
+		
 		if (isset($info['primary']) && !isset($info['fields'][$info['primary']])) {
 			$info['fields'][$info['primary']] = array(
 				'name'=>$info['primary'], 
-				'type'=>'INT PRIMARY KEY AUTO_INCREMENT'
+				'type'=>null,
 			);
 		}
 		

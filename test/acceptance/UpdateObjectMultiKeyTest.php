@@ -9,7 +9,7 @@ class UpdateObjectMultiKeyTest extends \NoteMapperDataTestCase
 		parent::setUp();
 		
 		$this->eventArtist = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
-		
+				
 		// make sure we have the right object
 		$this->assertEquals(1, $this->eventArtist->artistId);
 		$this->assertEquals(1, $this->eventArtist->eventId);

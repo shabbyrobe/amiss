@@ -10,10 +10,12 @@ class RecordEventTest extends \CustomTestCase
 	{
 		$this->connector = $this->getMock('Amiss\Connector', array(), array(), '', !'callOriginalConstructor');
 		
+		$this->mapper = new \Amiss\Active\Mapper;
+		
 		$this->manager = $this->getMock(
 			'Amiss\Manager',
 			array('insert', 'update', 'delete', 'save'),
-			array($this->connector)
+			array($this->connector, $this->mapper)
 		);
 		
 		RecordEventTestRecord::setManager($this->manager);
@@ -82,5 +84,5 @@ class RecordEventTest extends \CustomTestCase
 
 class RecordEventTestRecord extends Record
 {
-	
+	static $primary = 'id';
 }

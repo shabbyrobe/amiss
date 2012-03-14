@@ -10,7 +10,8 @@ class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
-		$this->manager = new \Amiss\Manager($this->connector, new \Amiss\Mapper\Note);
+		$this->mapper = new \Amiss\Active\Mapper;
+		$this->manager = new \Amiss\Manager($this->connector, $this->mapper);
 		\Amiss\Active\Record::setManager($this->manager);
 		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
 	}
@@ -21,7 +22,7 @@ class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
 	{
-		\Amiss\Active\Record::addTypeHandler(new RecordCreateCustomTypeWithEmptyColumnTypeHandler, 'int');
+		$this->mapper->addTypeHandler(new RecordCreateCustomTypeWithEmptyColumnTypeHandler, 'int');
 		
 		$pattern = "
 			CREATE TABLE `bar` (

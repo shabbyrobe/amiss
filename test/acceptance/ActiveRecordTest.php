@@ -95,10 +95,10 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj==true, "Couldn't retrieve object");
 		
 		$obj->delete();
-		$this->assertEquals(0, $this->manager->count('Artist', 'artistId=1'));
+		$this->assertEquals(0, $this->manager->count('ArtistRecord', 'artistId=1'));
 		
 		// sanity check: make sure we didn't delete everything!
-		$this->assertGreaterThan(0, $this->manager->count('Artist'));
+		$this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
 	}
 	
 	/**

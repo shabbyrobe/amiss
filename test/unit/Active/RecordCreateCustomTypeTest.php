@@ -10,8 +10,8 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
-		$activeMapper = new \Amiss\Active\Mapper();
-		$this->manager = new \Amiss\Manager($this->connector, $activeMapper);
+		$this->mapper = new \Amiss\Active\Mapper();
+		$this->manager = new \Amiss\Manager($this->connector, $this->mapper);
 		\Amiss\Active\Record::setManager($this->manager);
 		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithCustomType');
 	}
@@ -40,7 +40,7 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
 	{
-		\Amiss\Active\Record::addTypeHandler(new TestCreateActiveRecordWithCustomTypeTypeHandler, 'slappywag');
+		$this->mapper->addTypeHandler(new TestCreateActiveRecordWithCustomTypeTypeHandler, 'slappywag');
 		
 		$pattern = "
 			CREATE TABLE `bar` (

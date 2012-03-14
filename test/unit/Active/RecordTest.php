@@ -9,21 +9,8 @@ class RecordTest extends \CustomTestCase
 		\Amiss\Active\Record::_reset();
 		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
 		$this->mapper = new \Amiss\Active\Mapper;
+		$this->mapper->objectNamespace = 'Amiss\Demo\Active';
 		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
-	}
-	
-	/**
-	 * @covers Amiss\Active\Record::createMeta
-	 * @group active
-	 */
-	public function testCreateMeta()
-	{
-		$class = __NAMESPACE__.'\TestActiveRecord1';
-		$meta = $this->callProtected('Amiss\Active\Record', 'createMeta', $class);
-		$this->assertInstanceOf('Amiss\Active\Meta', $meta);
-		$this->assertInstanceOf('Amiss\Active\Meta', $meta->parent);
-		$this->assertNull($meta->parent->parent);
-		$this->assertEquals($meta->class, $class);
 	}
 	
 	/**
@@ -32,33 +19,15 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetMeta()
 	{
+		\Amiss\Active\Record::setManager($this->manager);
 		$meta = TestActiveRecord1::getMeta();
-		$this->assertInstanceOf('Amiss\Active\Meta', $meta);
+		$this->assertInstanceOf('Amiss\Meta', $meta);
 		$this->assertEquals(__NAMESPACE__.'\TestActiveRecord1', $meta->class);
 		
 		// ensure the instsance is cached
 		$this->assertTrue($meta === TestActiveRecord1::getMeta());
 	}
-	
-	/**
-	 * @covers Amiss\Active\Meta::getManager
-	 * @group active
-	 */
-	public function testRegisterTables()
-	{
-		\Amiss\Active\Record::setManager($this->manager);
-		$c1 = TestActiveRecord1::getConnector();
-		$c2 = TestActiveRecord2::getConnector();
-		$this->assertTrue($c1 === $c2);
-		$this->assertEquals(
-			array(
-				__NAMESPACE__.'\TestActiveRecord1'=>'table_1',
-				__NAMESPACE__.'\TestActiveRecord2'=>'table_2'
-			), 
-			$this->manager->tableMap
-		);
-	}
-	
+		
 	/**
 	 * @group active
 	 */
@@ -134,7 +103,7 @@ class RecordTest extends \CustomTestCase
 	 * @covers Amiss\Active\Record::getByPk
 	 * @group active
 	 */
-	public function testManyImplicitPksWorkAsExpected()
+	public function testManyImplicitPks()
 	{
 		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
@@ -152,6 +121,8 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testFetchRelatedSingle()
 	{
+		$this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
+		
 		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
@@ -160,6 +131,7 @@ class RecordTest extends \CustomTestCase
 			$this->equalTo(__NAMESPACE__.'\TestRelatedParent'), 
 			$this->equalTo('parentId')
 		)->will($this->returnValue(999));
+		
 		$manager->expects($this->never())->method('getRelatedList');
 		
 		$child = new TestRelatedChild;
@@ -175,6 +147,8 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testFetchRelatedList()
 	{
+		$this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
+		
 		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
@@ -193,15 +167,17 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * If a record has not been loaded from the database and the class doesn't
-	 * define fields, undefined properties should return null. 
+	 * define fields, undefined properties should throw
 	 * 
 	 * @covers Amiss\Active\Record::__get
 	 * @group active
+	 * @expectedException BadMethodCallException
 	 */
 	public function testGetUnknownPropertyWhenFieldsUndefinedOnNewObjectReturnsNull()
 	{
+		TestActiveRecord1::setManager($this->manager);
 		$ar = new TestActiveRecord1();
-		$this->assertNull($ar->thisPropertyShouldNeverExist);
+		$a = $ar->thisPropertyShouldNeverExist;
 	}
 	
 	/**
@@ -213,6 +189,7 @@ class RecordTest extends \CustomTestCase
 	 */
 	public function testGetUnknownPropertyWhenFieldsDefinedThrowsException()
 	{
+		TestActiveRecord1::setManager($this->manager);
 		$ar = new TestActiveRecord1();
 		$value = $ar->thisPropertyShouldNeverExist;
 	}
@@ -237,43 +214,10 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @group active
-	 * @covers Amiss\Active\Record::addTypeHandler
-	 */
-	public function testAddTypeHandler()
-	{
-		$handler = new \TestTypeHandler();
-		
-		$this->assertNull(\Amiss\Active\Record::getMeta()->getTypeHandler('foo'));
-		
-		\Amiss\Active\Record::addTypeHandler(new \TestTypeHandler(), 'foo');
-		$handler2 = \Amiss\Active\Record::getMeta()->getTypeHandler('foo');
-		
-		$this->assertEquals($handler, $handler2);
-	}
-	
-	/**
-	 * @group active
-	 * @covers Amiss\Active\Record::addTypeHandler
-	 */
-	public function testAddTypeHandlerToManyTypes()
-	{
-		$handler = new \TestTypeHandler();
-		
-		$this->assertNull(\Amiss\Active\Record::getMeta()->getTypeHandler('foo'));
-		$this->assertNull(\Amiss\Active\Record::getMeta()->getTypeHandler('bar'));
-		
-		\Amiss\Active\Record::addTypeHandler(new \TestTypeHandler(), array('foo', 'bar'));
-		
-		$this->assertEquals($handler, \Amiss\Active\Record::getMeta()->getTypeHandler('foo'));
-		$this->assertEquals($handler, \Amiss\Active\Record::getMeta()->getTypeHandler('bar'));
-	}
-	
-	/**
-	 * @group active
 	 */
 	public function testUpdateTable()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('update'), array($this->db), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
+		$manager = $this->getMock('Amiss\Manager', array('update'), array($this->db, $this->mapper), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
 		$manager->expects($this->once())->method('update')->with(
 			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
 			$this->equalTo(array('pants'=>1)),
@@ -295,9 +239,14 @@ class TestActiveRecord1 extends \Amiss\Active\Record
 class TestActiveRecord2 extends \Amiss\Active\Record
 {
 	public static $table = 'table_2';
+	
+	public static $fields = array('testActiveRecord2Id');
 }
 
-class TestActiveRecord3 extends \Amiss\Active\Record {}
+class TestActiveRecord3 extends \Amiss\Active\Record
+{
+	public static $fields = array('testActiveRecord3Id');
+}
 
 abstract class OtherConnBase extends \Amiss\Active\Record {}
 

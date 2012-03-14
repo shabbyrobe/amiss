@@ -1,6 +1,7 @@
 <?php
 
-use Amiss\Active\TableBuilder;
+use Amiss\TableBuilder;
+
 require_once(__DIR__.'/../src/Loader.php');
 
 date_default_timezone_set('Australia/Melbourne');
@@ -61,19 +62,19 @@ abstract class SqliteDataTestCase extends CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		
-		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+		$this->db = new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite'));
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite'));
 		
-		$this->manager = new \Amiss\Manager($this->db, $this->getMapper());
+		$this->mapper = $this->getMapper();
+		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
 		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
 	public function createRecordMemoryDb($class)
 	{
-		$tb = new TableBuilder($class);
-		$manager = new \Amiss\Manager(new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION)));
-		forward_static_call(array($class, 'setManager'), $manager);
+		$tb = new TableBuilder($this->manager, $class);
+		forward_static_call(array($class, 'setManager'), $this->manager);
 		$tb->createTable();
 	}
 }
@@ -82,7 +83,9 @@ abstract class ActiveRecordDataTestCase extends SqliteDataTestCase
 {
 	public function getMapper()
 	{
-		return new \Amiss\Active\Mapper();
+		$mapper = new \Amiss\Active\Mapper();
+		$mapper->objectNamespace = 'Amiss\Demo\Active';
+		return $mapper;
 	}
 }
 
