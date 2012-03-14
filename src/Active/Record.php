@@ -32,7 +32,7 @@ abstract class Record
 	public function save()
 	{
 		$manager = static::getManager();
-		$meta = $manager->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$primary = $meta->primary;
 		if (!$primary)
@@ -47,7 +47,7 @@ abstract class Record
 	public function insert()
 	{
 		$manager = static::getManager();
-		$meta = $manager->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$this->beforeInsert();
 		$this->beforeSave();
@@ -59,7 +59,7 @@ abstract class Record
 		$args = func_get_args();
 		$count = func_num_args();
 		$manager = static::getManager();
-		$meta = $manager->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$primary = null;
 		
@@ -86,7 +86,7 @@ abstract class Record
 		$count = func_num_args();
 		
 		$manager = static::getManager();
-		$meta = $manager->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$primary = null;
 		if ($count == 0) {
@@ -168,7 +168,7 @@ abstract class Record
 	public static function updateTable()
 	{
 		$manager = static::getManager();
-		$meta = $manager->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$args = func_get_args();
 		array_unshift($args, $meta->class);
