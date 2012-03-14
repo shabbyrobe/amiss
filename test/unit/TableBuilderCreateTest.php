@@ -17,6 +17,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 * @covers Amiss\TableBuilder::createTable
 	 */
 	public function testCreateDefaultTableSql()
@@ -43,6 +44,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 */
 	public function testBuildCreateFieldsDefault()
 	{
@@ -66,6 +68,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 */
 	public function testCreateTableWithSingleOnRelation()
 	{
@@ -90,6 +93,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 */
 	public function testCreateTableWithSingleOnRelationSkipsIndexesForSqlite()
 	{
@@ -113,6 +117,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 */
 	public function testCreateTableWithMultiOnRelation()
 	{
@@ -138,6 +143,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 
 	/**
 	 * @group active
+	 * @group tablebuilder
 	 * @expectedException Amiss\Exception
 	 */
 	public function testCreateTableFailsWhenFieldsNotDefined()
@@ -148,6 +154,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group tablebuilder
 	 * @group active
 	 * @expectedException Amiss\Exception
 	 */

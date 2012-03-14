@@ -63,6 +63,7 @@ class BuildClauseTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Criteria\Query::buildClause
+	 * @group failing
 	 * @dataProvider dataForInClauseDoesNotRuinString
 	 */
 	public function testInClauseDoesNotRuinString($where, $result)

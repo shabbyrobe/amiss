@@ -50,10 +50,10 @@ class Manager
 		return $meta;
 	}
 	
-	public function get($object)
+	public function get($class)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$meta = $this->getMeta($object);
+		$meta = $this->getMeta($class);
 		
 		list ($limit, $offset) = $criteria->getLimitOffset();
 		
@@ -76,10 +76,10 @@ class Manager
 		return $obj;
 	}
 
-	public function getList($object)
+	public function getList($class)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$meta = $this->getMeta($object);
+		$meta = $this->getMeta($class);
 		
 		list ($query, $params) = $criteria->buildQuery($meta);
 		
@@ -94,7 +94,17 @@ class Manager
 		
 		return $objects;
 	}
-
+	
+	public function getByPk($class, $id)
+	{
+		$meta = $this->getMeta($class);
+		$primary = $meta->primary;
+		if (!$primary)
+			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
+		
+		return $this->get($primary.'=?', $id);
+	}
+	
 	public function count($object, $criteria=null)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));

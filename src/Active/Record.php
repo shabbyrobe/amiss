@@ -189,16 +189,6 @@ abstract class Record
 		return call_user_func_array(array($manager, 'update'), $args);
 	}
 	
-	public static function getByPk($key)
-	{
-		$meta = static::getMeta();
-		$primary = $meta->primary;
-		if (!$primary)
-			throw new \Amiss\Exception("Can't retrieve {$meta->class} by primary - none defined.");
-		
-		return static::get($primary.'=?', $key);
-	}
-	
 	public static function __callStatic($name, $args)
 	{
 		$manager = static::getManager();
@@ -206,7 +196,7 @@ abstract class Record
 		$called = get_called_class();
 		
 		$exists = null;
-		if ($name == 'get' || $name == 'getList' || $name == 'getRelated' || $name == 'getRelatedList' || $name == 'count') {
+		if ($name == 'get' || $name == 'getByPk' || $name == 'getList' || $name == 'getRelated' || $name == 'getRelatedList' || $name == 'count') {
 			$exists = true; 
 			array_unshift($args, $called);
 		}

@@ -10,6 +10,7 @@ class TableBuilderTest extends \ActiveRecordDataTestCase
 {
 	/**
 	 * @group mapper
+	 * @group tablebuilder
 	 * @group acceptance
 	 */
 	public function testCreateTableSqlite()
