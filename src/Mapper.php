@@ -100,14 +100,25 @@ abstract class Mapper
 		return $row;
 	}
 	
-	function setPrimary($meta, $object, $id)
+	function getProperty($meta, $object, $property)
 	{
-		$field = $meta->getField($meta->primary);
+		$field = $meta->getField($property);
 		if (!isset($field['setter'])) {
-			$object->{$meta->primary} = $id;
+			return $object->{$property};
 		}
 		else {
-			call_user_func(array($object, $field['setter']), $id);
+			return call_user_func(array($object, $field['getter']));
+		}
+	}
+	
+	function setProperty($meta, $object, $property, $value)
+	{
+		$field = $meta->getField($property);
+		if (!isset($field['setter'])) {
+			$object->{$property} = $value;
+		}
+		else {
+			call_user_func(array($object, $field['setter']), $value);
 		}
 	}
 	

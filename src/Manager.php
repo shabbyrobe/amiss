@@ -302,7 +302,7 @@ class Manager
 			$lastInsertId = $this->getConnector()->lastInsertId();
 		
 		if ($object && $meta->primary && $lastInsertId)
-			$this->mapper->setPrimary($meta, $object, $lastInsertId);
+			$this->mapper->setProperty($meta, $object, $meta->primary, $lastInsertId);
 		
 		return $lastInsertId;
 	}
@@ -358,17 +358,15 @@ class Manager
 		return $this->executeDelete($objectName, $criteria);
 	}
 	
-	public function save($object, $autoIncrementId)
+	public function save($object)
 	{
-		if (!$object->$autoIncrementId) {
-			$id = $this->insert($object);
-			$object->$autoIncrementId = $id;
-		}
-		else {
-			$this->update($object, $autoIncrementId);
-			$id = $object->$autoIncrementId;
-		}
-		return $id;
+		$meta = $this->getMeta(get_class($object));
+		$id = $this->mapper->getProperty($meta, $object, $meta->primary);
+		
+		if ($id)
+			$this->insert($object);
+		else
+			$this->update($object);
 	}
 
 	protected function createTableUpdateCriteria($table, $args)
@@ -583,25 +581,25 @@ class Manager
 			}
 		} 
 		else {
-			throw new \InvalidArgumentException('Couldn\'t parse arguments');
+			throw new \InvalidArgumentException("Couldn't parse arguments");
 		}
 	}
-
+	
 	public function __get($name)
 	{
 		throw new \BadMethodCallException("$name does not exist");
 	}
-
+	
 	public function __set($name, $value)
 	{
 		throw new \BadMethodCallException("$name does not exist");
 	}
-
+	
 	public function __isset($name)
 	{
 		throw new \BadMethodCallException("$name does not exist");
 	}
-
+	
 	public function __unset($name)
 	{
 		throw new \BadMethodCallException("$name does not exist");
