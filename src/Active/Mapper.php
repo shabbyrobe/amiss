@@ -37,7 +37,7 @@ class Mapper extends \Amiss\Mapper
 		}
 		else {
 			foreach ($rc->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
-				if ($prop->class == $class) {
+				if ($prop->class == $class && !isset($statics[$prop->name])) {
 					if (!isset($info['relations'][$prop->name])) {
 						$info['fields'][$prop->name] = array('name'=>$prop->name, 'type'=>null);
 					}
@@ -75,7 +75,6 @@ class Mapper extends \Amiss\Mapper
 	function createObject($meta, $row, $args)
 	{
 		$object = parent::createObject($meta, $row, $args);
-		$object->setFetched();
 		return $object;
 	}
 }

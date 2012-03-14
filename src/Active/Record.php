@@ -7,14 +7,6 @@ use	Amiss\Connector,
 
 abstract class Record
 {
-	public static $relations=array();
-	public static $fields=array();
-	public static $primary;
-	public static $table;
-	public static $defaultFieldType=null;
-	
-	private $fetched = false;
-	
 	private static $managers=array();
 	private static $meta=array();
 	
@@ -36,11 +28,6 @@ abstract class Record
 	
 	protected function beforeDelete()
 	{}
-	
-	public function setFetched()
-	{
-		$this->fetched = true;
-	}
 	
 	public function save()
 	{
