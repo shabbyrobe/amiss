@@ -65,6 +65,7 @@ class Artist extends Object
 	
 	/**
 	 * @var Amiss\Demo\ArtistType
+	 * @has one ArtistType artistTypeId
 	 */
 	public $artistType;
 }
