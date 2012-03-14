@@ -2,7 +2,7 @@
 
 use Amiss\Demo\Active\EventRecord;
 
-class Handler implements \Amiss\Active\TypeHandler
+class Handler implements \Amiss\Type\Handler
 {
 	function prepareValueForDb($value, $object, $fieldName)
 	{
@@ -26,6 +26,6 @@ class Handler implements \Amiss\Active\TypeHandler
 	{}
 }
 
-\Amiss\Active\Record::addTypeHandler(new Handler, 'datetime'); 
+\Amiss\Active\Record::getManager()->mapper->addTypeHandler(new Handler, 'datetime'); 
 $events = EventRecord::getList();
 return $events;
