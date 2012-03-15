@@ -103,7 +103,7 @@ abstract class Mapper
 	function getProperty($meta, $object, $property)
 	{
 		$field = $meta->getField($property);
-		if (!isset($field['setter'])) {
+		if (!isset($field['getter'])) {
 			return $object->{$property};
 		}
 		else {
