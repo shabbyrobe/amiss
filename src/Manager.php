@@ -154,7 +154,7 @@ class Manager
 		$sourceIsArray = is_array($source) || $source instanceof \Traversable;
 		if (!$sourceIsArray) $source = array($source);
 		
-		$class = get_class($source[0]);
+		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
 		$meta = $this->getMeta($class);
 		if (!isset($meta->relations[$relationName])) {
 			throw new Exception("Unknown relation $relationName on $class");
@@ -172,12 +172,16 @@ class Manager
 		
 		$relatedMeta = $this->getMeta($relation[$type]);
 		
-		// if the relationship doesn't specify a field to join on, assume the primary
-		$on = null;
-		if (isset($relation['on']))
+		// prepare the relation's "on" field
+		if ('one'==$type) {
+			if (!isset($relation['on']))
+				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
 			$on = $relation['on'];
-		else
-			$on = array($meta->primary, $relatedMeta->primary);
+		}
+		else { // many
+			$on = $meta->primary;
+		}
+		if (!is_array($on)) $on = array($on=>$on);
 		
 		// populate the 'on' with necessary data
 		$relatedFields = $relatedMeta->getFields();
@@ -195,8 +199,9 @@ class Manager
 				$lValue = !isset($relation['getter']) ? $obj->$l : call_user_func(array($obj, $relation['getter']));
 				$key[] = $lValue;
 				
-				if (!isset($ids[$l]))
+				if (!isset($ids[$l])) {
 					$ids[$l] = array('values'=>array(), 'rField'=>$r, 'param'=>$this->sanitiseParam($r['name']));
+				}
 				
 				$ids[$l]['values'][$lValue] = true;
 			}
@@ -237,7 +242,6 @@ class Manager
 					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($obj, $r['getter']));
 					$key[] = $rValue;
 				}
-				
 				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
 				
 				foreach ($resultIndex[$key] as $idx=>$lObj) {
@@ -310,15 +314,16 @@ class Manager
 		$args = func_get_args();
 		$count = count($args);
 		
-		if ($count < 2)
-			throw new \InvalidArgumentException();
-		
 		$first = array_shift($args);
 		if (is_object($first)) {
 			$criteria = $this->createObjectUpdateCriteria($first, $args);
 			$objectName = get_class($first);
 		}
 		elseif (is_string($first)) {
+			// FIXME: improve text
+			if ($count < 2)
+				throw new \InvalidArgumentException();
+			
 			$criteria = $this->createTableUpdateCriteria($first, $args);
 			$objectName = $first;
 		}
@@ -334,8 +339,15 @@ class Manager
 		$args = func_get_args();
 		$count = count($args);
 		
-		if ($count < 2)
+		if ($count < 1)
 			throw new \InvalidArgumentException();
+		elseif ($count == 1) {
+			if (!$meta->primary)
+				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
+			// FIXME: this shit needs a good cleanup
+			$args[1] = $meta->primary;
+			++$count;
+		}
 		
 		$first = array_shift($args);
 		if ($args[0] instanceof Criteria\Query) {
@@ -356,12 +368,25 @@ class Manager
 		return $this->executeDelete($objectName, $criteria);
 	}
 	
-	public function save($object)
+	/**
+	 * Hack to allow active record to intercept saving and fire events
+	 */
+	public function shouldInsert($object)
 	{
 		$meta = $this->getMeta(get_class($object));
+		if (!$meta->primary)
+			throw new Exception("Manager requires a primary if you want to call 'save'.");
+		
 		$id = $this->mapper->getProperty($meta, $object, $meta->primary);
 		
-		if ($id)
+		return $id == false;
+	}
+	
+	public function save($object)
+	{
+		$shouldInsert = $this->shouldInsert($object);
+		
+		if ($shouldInsert)
 			$this->insert($object);
 		else
 			$this->update($object);
@@ -399,8 +424,11 @@ class Manager
 		$uc = new Criteria\Update();
 		$uc->set = $this->mapper->exportRow($meta, $object);
 		
-		if (count($args) < 1)
-			throw new \InvalidArgumentException();
+		if (count($args) < 1) {
+			if (!$meta->primary)
+				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
+			$args[0] = array($meta->primary=>$this->mapper->getProperty($meta, $object, $meta->primary));
+		}
 		
 		if (is_string($args[0])) {
 			if (isset($uc->set[$args[0]])) {
@@ -436,7 +464,6 @@ class Manager
 			throw new \InvalidArgumentException("No where clause specified for table update. Explicitly specify 1=1 as the clause if you meant to do this.");
 		
 		$sql = "UPDATE $table SET $setClause WHERE $whereClause";
-		
 		$stmt = $this->getConnector()->prepare($sql);
 		++$this->queries;
 		$stmt->execute($params);
@@ -514,12 +541,6 @@ class Manager
 			else $array[] = $item;
 		}
 		return $array;
-	}
-	
-	public function bindValues($stmt, $params)
-	{
-		foreach ($params as $k=>$v)
-			$stmt->bindValue($k, $v);
 	}
 	
 	public function execute($stmt, $params=null)

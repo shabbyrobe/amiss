@@ -79,7 +79,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$obj = Active\ArtistRecord::getByPk(1);
 		$this->assertTrue($obj==true, "Couldn't retrieve object");
 		
-		$related = $obj->fetchRelated('type');
+		$related = $obj->getRelated('type');
 		
 		$this->assertTrue($related instanceof Active\ArtistType);
 		$this->assertEquals(1, $related->artistTypeId);

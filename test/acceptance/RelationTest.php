@@ -53,7 +53,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	public function testRetrieveRelatedList()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
-		$eventArtists = $this->manager->getRelatedList($event, 'eventArtists');
+		$eventArtists = $this->manager->getRelated($event, 'eventArtists');
 		
 		$this->assertTrue(is_array($eventArtists));
 		$this->assertTrue(count($eventArtists) > 0);
@@ -64,7 +64,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	public function testAssignRelatedList()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
-		$this->manager->assignRelatedList($event, 'eventArtists');
+		$this->manager->assignRelated($event, 'eventArtists');
 		
 		$this->assertTrue(is_array($event->eventArtists));
 		$this->assertTrue(count($event->eventArtists) > 0);
@@ -80,7 +80,7 @@ class RelationTest extends \NoteMapperDataTestCase
 		$this->assertTrue(current($types) instanceof Demo\ArtistType);
 		$this->assertEquals(array(), current($types)->artists);
 		
-		$this->manager->assignRelatedList($types, 'artists');
+		$this->manager->assignRelated($types, 'artists');
 		$this->assertTrue(current(current($types)->artists) instanceof Demo\Artist);
 		next(current($types)->artists);
 		$this->assertTrue(current(current($types)->artists) instanceof Demo\Artist);

@@ -32,13 +32,7 @@ abstract class Record
 	public function save()
 	{
 		$manager = static::getManager();
-		$meta = static::getMeta();
-		
-		$primary = $meta->primary;
-		if (!$primary)
-			throw new Exception("Active record requires an autoincrement primary if you want to call 'save'");
-		
-		if (!$this->{$primary})
+		if ($manager->shouldInsert($this))
 			$this->insert();
 		else
 			$this->update();
@@ -46,38 +40,16 @@ abstract class Record
 	
 	public function insert()
 	{
-		$manager = static::getManager();
-		$meta = static::getMeta();
-		
 		$this->beforeInsert();
 		$this->beforeSave();
-		$return = $manager->insert($this);
+		$return = static::getManager()->insert($this);
 	}
 	
 	public function update()
 	{
-		$args = func_get_args();
-		$count = func_num_args();
-		$manager = static::getManager();
-		$meta = static::getMeta();
-		
-		$primary = null;
-		
-		if ($count == 0) {
-			$primary = $meta->primary;
-			if (!$primary)
-				throw new Exception("Active record requires an autoincrement primary if you want to call 'update' without a where clause");
-		}
-		
-		$this->beforeSave();
 		$this->beforeUpdate();
-		if ($primary) {
-			$manager->update($this, $primary);
-		}
-		else {
-			$args = array_unshift($args, $this);
-			call_user_func_array(array($manager, 'update'), $args);
-		}
+		$this->beforeSave();
+		$return = static::getManager()->update($this);
 	}
 	
 	public function delete()
@@ -141,11 +113,26 @@ abstract class Record
 		
 		return call_user_func_array(array($manager, 'update'), $args);
 	}
+
+	public function __call($name, $args)
+	{
+		$manager = static::getManager();
+		
+		$exists = null;
+		if ($name == 'getRelated' || $name == 'assignRelated') { 
+			$exists = true; 
+			array_unshift($args, $this);
+		}
+		
+		if ($exists)
+			return call_user_func_array(array($manager, $name), $args);
+		else
+			throw new \BadMethodCallException("Unknown method $name");
+	}
 	
 	public static function __callStatic($name, $args)
 	{
 		$manager = static::getManager();
-		
 		$called = get_called_class();
 		
 		$exists = null;
@@ -154,9 +141,6 @@ abstract class Record
 			array_unshift($args, $called);
 		}
 		
-		if ($exists === null)
-			$exists = method_exists($manager, $name);
-		 
 		if ($exists)
 			return call_user_func_array(array($manager, $name), $args);
 		else

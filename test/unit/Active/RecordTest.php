@@ -82,7 +82,6 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
-	 * @covers Amiss\Active\Record::getByPk
 	 * @group active
 	 */
 	public function testGetByImplicitPk()
@@ -100,7 +99,6 @@ class RecordTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
-	 * @covers Amiss\Active\Record::getByPk
 	 * @group active
 	 */
 	public function testManyImplicitPks()
@@ -116,53 +114,25 @@ class RecordTest extends \CustomTestCase
 	}
 	
 	/**
-	 * @covers Amiss\Active\Record::fetchRelated
 	 * @group active
 	 */
-	public function testFetchRelatedSingle()
+	public function testGetRelated()
 	{
 		$this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
 		
-		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
+		$manager = $this->getMock('Amiss\Manager', array('getRelated'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
 		$manager->expects($this->once())->method('getRelated')->with(
 			$this->isInstanceOf(__NAMESPACE__.'\TestRelatedChild'),
-			$this->equalTo(__NAMESPACE__.'\TestRelatedParent'), 
-			$this->equalTo('parentId')
+			$this->equalTo('parent')
 		)->will($this->returnValue(999));
-		
-		$manager->expects($this->never())->method('getRelatedList');
 		
 		$child = new TestRelatedChild;
 		$child->childId = 6;
 		$child->parentId = 1;
-		$result = $child->fetchRelated('parent');
+		$result = $child->getRelated('parent');
 		$this->assertEquals(999, $result);
-	}
-	
-	/**
-	 * @covers Amiss\Active\Record::fetchRelated
-	 * @group active
-	 */
-	public function testFetchRelatedList()
-	{
-		$this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
-		
-		$manager = $this->getMock('Amiss\Manager', array('getRelated', 'getRelatedList'), array($this->db, $this->mapper));
-		\Amiss\Active\Record::setManager($manager);
-		
-		$manager->expects($this->once())->method('getRelatedList')->with(
-			$this->isInstanceOf(__NAMESPACE__.'\TestRelatedParent'),
-			$this->equalTo(__NAMESPACE__.'\TestRelatedChild'), 
-			$this->equalTo('parentId')
-		)->will($this->returnValue(123));
-		$manager->expects($this->never())->method('getRelated');
-		
-		$parent = new TestRelatedParent;
-		$parent->parentId = 2;
-		$result = $parent->fetchRelated('children');
-		$this->assertEquals(123, $result);
 	}
 	
 	/**
