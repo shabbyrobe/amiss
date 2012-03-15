@@ -7,6 +7,7 @@ use Amiss\Criteria;
 class BuildClauseTest extends \CustomTestCase
 {
 	/**
+	 * @group unit
 	 * @covers Amiss\Criteria\Query::buildClause
 	 */
 	public function testInClause()
@@ -21,6 +22,7 @@ class BuildClauseTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Criteria\Query::buildClause
 	 * @dataProvider dataForInClauseReplacementTolerance
 	 */
@@ -45,6 +47,7 @@ class BuildClauseTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Criteria\Query::buildClause
 	 */
 	public function testMultipleInClause()
@@ -62,8 +65,9 @@ class BuildClauseTest extends \CustomTestCase
 	}
 	
 	/**
-	 * @covers Amiss\Criteria\Query::buildClause
+	 * @group unit
 	 * @group failing
+	 * @covers Amiss\Criteria\Query::buildClause
 	 * @dataProvider dataForInClauseDoesNotRuinString
 	 */
 	public function testInClauseDoesNotRuinString($where, $result)
@@ -89,6 +93,7 @@ class BuildClauseTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Criteria\Query::buildClause
 	 */
 	public function testBuildClauseWithoutParameterColons()
@@ -103,6 +108,7 @@ class BuildClauseTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Criteria\Query::buildClause
 	 */
 	public function testShorthandWhere()

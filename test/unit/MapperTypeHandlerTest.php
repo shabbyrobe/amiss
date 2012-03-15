@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Demo\Active;
+use Amiss\Demo;
 
 class MapperTypeHandlerTest extends \CustomTestCase
 {
