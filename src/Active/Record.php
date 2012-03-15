@@ -3,7 +3,8 @@
 namespace Amiss\Active;
 
 use	Amiss\Connector,
-	Amiss\Exception;
+	Amiss\Exception
+;
 
 abstract class Record
 {
@@ -17,17 +18,13 @@ abstract class Record
 		self::$meta = array();
 	}
 	
-	protected function beforeInsert()
-	{}
+	protected function beforeInsert() {}
 	
-	protected function beforeSave()
-	{}
+	protected function beforeSave() {}
 	
-	protected function beforeUpdate()
-	{}
+	protected function beforeUpdate() {}
 	
-	protected function beforeDelete()
-	{}
+	protected function beforeDelete() {}
 	
 	public function save()
 	{
@@ -54,27 +51,8 @@ abstract class Record
 	
 	public function delete()
 	{
-		$args = func_get_args();
-		$count = func_num_args();
-		
-		$manager = static::getManager();
-		$meta = static::getMeta();
-		
-		$primary = null;
-		if ($count == 0) {
-			$primary = $meta->primary;
-			if (!$primary)
-				throw new Exception("Active record requires an autoincrement primary if you want to call 'update' without a where clause");
-		}
-		
 		$this->beforeDelete();
-		if ($primary) {
-			$manager->delete($this, $primary);
-		}
-		else {
-			$args = array_unshift($args, $this);
-			call_user_func_array(array($manager, 'delete'), $args);
-		}
+		static::getManager()->delete($this);
 	}
 	
 	/**
@@ -101,6 +79,15 @@ abstract class Record
 	{
 		$class = get_called_class();
 		self::$managers[$class] = $manager;
+	}
+
+	public static function getMeta()
+	{
+		$called = get_called_class();
+		if (!isset(self::$meta[$called]))
+			self::$meta[$called] = static::getManager()->getMeta($called);
+		
+		return self::$meta[$called];
 	}
 	
 	public static function updateTable()
@@ -145,15 +132,6 @@ abstract class Record
 			return call_user_func_array(array($manager, $name), $args);
 		else
 			throw new \BadMethodCallException("Unknown method $name");
-	}
-	
-	public static function getMeta()
-	{
-		$called = get_called_class();
-		if (!isset(self::$meta[$called]))
-			self::$meta[$called] = static::getManager()->getMeta($called);
-		
-		return self::$meta[$called];
 	}
 	
 	public function __get($name)
