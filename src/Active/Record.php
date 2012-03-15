@@ -105,40 +105,6 @@ abstract class Record
 		}
 	}
 	
-	public function fetchRelated($name, $into=null)
-	{
-		$manager = static::getManager();
-		$meta = static::getMeta();
-		
-		$relations = $meta->getRelations();
-		
-		if (!isset($relations[$name])) {
-			throw new \InvalidArgumentException("Unknown relation $name");
-		}
-		$relation = $relations[$name];
-		
-		$for = $into ? array($this, $into) : $this;
-		
-		$method = null;
-		if (isset($relation['one'])) {
-			$method = 'getRelated';
-			$type = $relation['one'];
-		}
-		elseif (isset($relation['many'])) {
-			$method = 'getRelatedList';
-			$type = $relation['many'];
-		}
-		else
-			throw new \UnexpectedValueException("Expected 'one' or 'list' for relation, found $type");
-		
-		$type = $manager->mapper->resolveObjectName($type);
-		$details = array($for, $type, $relation['on']);
-		
-		$related = call_user_func_array(array($manager, $method), $details);
-		
-		return $related;
-	}
-	
 	/**
 	 * @return Amiss\Manager
 	 */
@@ -183,7 +149,7 @@ abstract class Record
 		$called = get_called_class();
 		
 		$exists = null;
-		if ($name == 'get' || $name == 'getByPk' || $name == 'getList' || $name == 'getRelated' || $name == 'getRelatedList' || $name == 'count') {
+		if ($name == 'get' || $name == 'getByPk' || $name == 'getList' || $name == 'count' || $name == 'getRelated' || $name == 'assignRelated') { 
 			$exists = true; 
 			array_unshift($args, $called);
 		}

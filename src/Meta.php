@@ -7,13 +7,13 @@ class Meta
 	public $class;
 	public $table;
 	public $primary;
+	public $relations;
 	
 	protected $fields;
 	protected $allFields;
 	protected $parent;
 	protected $defaultFieldType;
-	protected $relations;
-
+	
 	public function __construct($class, $table, array $info, Meta $parent=null)
 	{
 		$this->class = $class;
@@ -61,11 +61,6 @@ class Meta
 		if (isset($this->allFields[$field])) {
 			return $this->allFields[$field];
 		}
-	}
-	
-	function getRelations()
-	{
-		return $this->relations;
 	}
 	
 	function getDefaultFieldType()

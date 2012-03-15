@@ -124,136 +124,134 @@ class Manager
 		return (int)$stmt->fetchColumn();
 	}
 	
-	public function getRelated($source, $object, $on)
+	public function assignRelated($source, $relationName)
 	{
-		$ids = array();
-		$into = null;
+		$result = $this->getRelated($source, $relationName);
 		
-		if (is_array($source)) 
-			list($source, $into) = $source;
-		
-		$isArray = is_array($source);
-		
-		if (!$isArray) $source = array($source);
-		if (is_string($on)) $on = array($on=>$on);
-		
-		$rIndex = array();
-		foreach ($source as $obj) {
-			$key = array();
-			foreach ($on as $l=>$r) {
-				if (is_numeric($l)) $l = $r;
-				$key[] = $obj->$l;
-				
-				if (!isset($ids[$l])) {	
-					$ids[$l] = array('values'=>array(), 'r'=>$r, 'param'=>$this->sanitiseParam($r));
-				}
-				$ids[$l]['values'][] = $obj->$l;
+		if ($result) {
+			$sourceIsArray = is_array($source) || $source instanceof \Traversable;
+			if (!$sourceIsArray) {
+				$source = array($source);
+				$result = array($result);
 			}
-			$str = implode("|", $key);
 			
-			if (!isset($rIndex[$str])) $rIndex[$str] = array();
+			$meta = $this->getMeta(get_class($source[0]));
+			$relation = $meta->relations[$relationName];
 			
-			if ($into) {
-				$rIndex[$str][] = &$obj->$into;
-			} 
+			foreach ($result as $idx=>$item) {
+				if (!isset($relation['setter']))
+					$source[$idx]->{$relationName} = $item;
+				else
+					call_user_func(array($source[$idx], $relation['setter']), $item);
+			}
+		}
+	}
+	
+	public function getRelated($source, $relationName)
+	{
+		if (!$source) return;
+		
+		$sourceIsArray = is_array($source) || $source instanceof \Traversable;
+		if (!$sourceIsArray) $source = array($source);
+		
+		$class = get_class($source[0]);
+		$meta = $this->getMeta($class);
+		if (!isset($meta->relations[$relationName])) {
+			throw new Exception("Unknown relation $relationName on $class");
 		}
 		
+		$relation = $meta->relations[$relationName];
+		
+		// relation type
+		if (isset($relation['one']))
+			$type = 'one';
+		elseif (isset($relation['many']))
+			$type = 'many';
+		else
+			throw new Exception("Couldn't find relation type");
+		
+		$relatedMeta = $this->getMeta($relation[$type]);
+		
+		// if the relationship doesn't specify a field to join on, assume the primary
+		$on = null;
+		if (isset($relation['on']))
+			$on = $relation['on'];
+		else
+			$on = array($meta->primary, $relatedMeta->primary);
+		
+		// populate the 'on' with necessary data
+		$relatedFields = $relatedMeta->getFields();
+		foreach ($on as $l=>$r) {
+			$on[$l] = $relatedFields[$r];
+		}
+		
+		// find query values in source object(s)
+		$resultIndex = array();
+		$ids = array();
+		foreach ($source as $idx=>$obj) {
+			$key = array();
+			
+			foreach ($on as $l=>$r) {
+				$lValue = !isset($relation['getter']) ? $obj->$l : call_user_func(array($obj, $relation['getter']));
+				$key[] = $lValue;
+				
+				if (!isset($ids[$l]))
+					$ids[$l] = array('values'=>array(), 'rField'=>$r, 'param'=>$this->sanitiseParam($r['name']));
+				
+				$ids[$l]['values'][$lValue] = true;
+			}
+			
+			$key = !isset($key[1]) ? $key[0] : implode('|', $key);
+			
+			if (!isset($resultIndex[$key]))
+				$resultIndex[$key] = array();
+			
+			$resultIndex[$key][$idx] = $obj;
+		}
+		
+		// build query
 		$criteria = new Criteria\Select;
 		$where = array();
-		foreach ($ids as $l=>$meta) {
-			$criteria->params[$meta['r']] = $meta['values'];
-			$where[] = '`'.str_replace('`', '', $meta['r']).'` IN(:'.$meta['param'].')';
+		foreach ($ids as $l=>$idInfo) {
+			$rName = $idInfo['rField']['name'];
+			$criteria->params[$rName] = array_keys($idInfo['values']);
+			$where[] = '`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
 		}
 		$criteria->where = implode(' AND ', $where);
 		
-		$list = $this->getList($object, $criteria);
+		$list = $this->getList($relation[$type], $criteria);
 		
-		if ($into) {
-			$index = array();
-			foreach ($list as $item) {
+		// prepare the result
+		$result = null;
+		if (!$sourceIsArray) {
+			if ($list)
+				$result = 'one' == $type ? current($list) : $list;
+		}
+		else {
+			$result = array();
+			foreach ($list as $related) {
 				$key = array();
+				
 				foreach ($on as $l=>$r) {
-					$key[] = $item->$r;
+					$name = $r['name'];
+					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($obj, $r['getter']));
+					$key[] = $rValue;
 				}
-				$key = implode('|', $key);
-				if (isset($rIndex[$key])) {
-					foreach ($rIndex[$key] as &$x) {
-						$x = $item;
+				
+				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
+				
+				foreach ($resultIndex[$key] as $idx=>$lObj) {
+					if ('one' == $type) {
+						$result[$idx] = $related;
+					}
+					elseif ('many' == $type) {
+						if (!isset($result[$idx])) $result[$idx] = array();
+						$result[$idx][] = $related;
 					}
 				}
 			}
 		}
-		else {
-			if ($isArray) return $list;
-			else return current($list);
-		}
-	}
-	
-	/**
-	 * Fetches a list relationship for an object.
-	 * 
-	 * FIXME: lots of copypasta between this and getRelated
-	 */
-	public function getRelatedList($source, $object, $on)
-	{
-		$ids = array();
-		$into = null;
-		
-		if (is_array($source)) 
-			list($source, $into) = $source;
-		
-		$isArray = is_array($source);
-		
-		if (!$isArray)
-			$source = array($source);
-		elseif (!$into) 
-			throw new \Exception("Can't pass an array without using into");
-		
-		if (is_string($on)) $on = array($on=>$on);
-		
-		$popIndex = array();
-		foreach ($source as $obj) {
-			$key = array();
-			foreach ($on as $l=>$r) {
-				if (is_numeric($l)) $l = $r;
-				$key[] = $obj->$l;
-				
-				if (!isset($ids[$l])) {	
-					$ids[$l] = array('values'=>array(), 'r'=>$r, 'param'=>$this->sanitiseParam($r));
-				}
-				$ids[$l]['values'][] = $obj->$l;
-			}
-			if ($into) {
-				$obj->$into = array();
-				$popIndex[implode("|", $key)] = &$obj->$into;
-			} 
-		}
-		
-		$criteria = new Criteria\Select;
-		$where = array();
-		foreach ($ids as $l=>$meta) {
-			$criteria->params[$meta['r']] = $meta['values'];
-			$where[] = '`'.str_replace('`', '', $meta['r']).'` IN(:'.$meta['param'].')';
-		}
-		$criteria->where = implode(' AND ', $where);
-		
-		$list = $this->getList($object, $criteria);
-		
-		if ($into) {
-			foreach ($list as $item) {
-				$key = array();
-				foreach ($on as $l=>$r) {
-					$key[] = $item->$r;
-				}
-				$key = implode('|', $key);
-				if (!isset($popIndex[$key]))
-					$popIndex[$key] = array();
-				$popIndex[$key][] = $item;
-			}
-		}
-		else {
-			return $list;
-		}
+		return $result;
 	}
 	
 	public function insert()

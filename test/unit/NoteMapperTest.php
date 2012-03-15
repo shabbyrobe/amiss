@@ -256,11 +256,10 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
-		$relations = $meta->getRelations();
 		$expected = array(
 			$name.'2'=>array('one'=>$name."Class2", 'on'=>null)
 		);
-		$this->assertEquals($expected, $relations);
+		$this->assertEquals($expected, $meta->relations);
 	}
 
 	/**
@@ -291,11 +290,10 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
-		$relations = $meta->getRelations();
 		$expected = array(
 			$name.'2'=>array('many'=>$name."Class2", 'on'=>null)
 		);
-		$this->assertEquals($expected, $relations);
+		$this->assertEquals($expected, $meta->relations);
 	}
 
 	/**
@@ -333,11 +331,10 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		");
 		$meta = $mapper->getMeta($mapper->objectNamespace."\\{$name}Class1");
-		$relations = $meta->getRelations();
 		$expected = array(
 			'class2'=>array($relType=>$name."Class2", 'on'=>$result)
 		);
-		$this->assertEquals($expected, $relations);
+		$this->assertEquals($expected, $meta->relations);
 	}
 	
 	public function dataForGetMetaOneToOnePropertyRelationWithOn()

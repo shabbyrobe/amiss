@@ -109,7 +109,7 @@ class TableBuilder
 		
 		$idx = array();
 		if ($engine == 'mysql') {
-			foreach ($this->meta->getRelations() as $k=>$details) {
+			foreach ($this->meta->relations as $k=>$details) {
 				$cols = array();
 				if (is_string($details['on'])) {
 					$cols[] = $details['on'];
