@@ -56,7 +56,6 @@ class Manager
 		$meta = $this->getMeta($class);
 		
 		list ($limit, $offset) = $criteria->getLimitOffset();
-		
 		if ($limit && $limit != 1)
 			throw new Exception("Limit must be one or zero");
 		
@@ -66,7 +65,6 @@ class Manager
 		$this->execute($stmt, $params);
 		
 		$obj = null;
-		
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 			if ($obj)
 				throw new Exception("Query returned more than one row");
@@ -264,32 +262,23 @@ class Manager
 		$count = count($args);
 		$meta = null;
 		$object = null;
-		$class = null;
-		$asTable = false;
 		
 		if ($count == 1) {
 			$object = $args[0];
-			$class = get_class($object);
-			$meta = $this->getMeta($class);
+			$meta = $this->getMeta(get_class($object));
 			$values = $this->mapper->exportRow($meta, $object);
 		}
 		elseif ($count == 2) {
-			$class = $args[0];
-			$meta = $this->getMeta($class);
+			$meta = $this->getMeta($args[0]);
 			$values = $args[1];
-			$asTable = true;
 		}
 		
-		if (!$values) {
-			throw new Exception("No values found for class $class. Are your fields defined?");
-		}
+		if (!$values)
+			throw new Exception("No values found for class {$meta->class}. Are your fields defined?");
 		
 		$columns = array();
 		$count = count($values);
 		foreach ($values as $k=>$v) {
-			if ($k[0]==':') {
-				$k = substr($k, 1);
-			}
 			$columns[] = '`'.str_replace('`', '', $k).'`';
 		}
 		$sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
@@ -299,8 +288,7 @@ class Manager
 		$stmt->execute(array_values($values));
 		
 		$lastInsertId = null;
-		
-		if (($object && $meta->primary) || $asTable)
+		if (($object && $meta->primary) || !$object)
 			$lastInsertId = $this->getConnector()->lastInsertId();
 		
 		if ($object && $meta->primary && $lastInsertId)
@@ -337,25 +325,29 @@ class Manager
 	public function delete()
 	{
 		$args = func_get_args();
-		$count = count($args);
+		$meta = null;
+		$class = null;
 		
-		if ($count < 1)
-			throw new \InvalidArgumentException();
-		elseif ($count == 1) {
-			if (!$meta->primary)
-				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
-			// FIXME: this shit needs a good cleanup
-			$args[1] = $meta->primary;
-			++$count;
-		}
+		if (!$args) throw new \InvalidArgumentException();
 		
 		$first = array_shift($args);
+		if (is_object($first)) {
+			$meta = $this->getMeta(get_class($first));
+			$class = $meta->class;
+			if (!$meta->primary)
+				throw new Exception("Can't delete {$meta->class} by object as it doesn't define a primary");
+			
+			$args[0] = $meta->primary;
+		}
+		else $class = $first;
+		
 		if ($args[0] instanceof Criteria\Query) {
 			$criteria = $args[0];
 		}
 		else {
-			// FIXME: pretty ugly hack to make deleting by object property work
-			if (is_object($first) && $count==2 && is_string($args[0]) && property_exists($first, $args[0])) {
+			if ($meta) {
+				$field = $meta->getField($meta->primary);
+				$priValue = !isset($field['getter']) ? $first->{$meta->primary} : call_user_func(array($first, $field['getter']));
 				$args = array(array('where'=>array($args[0]=>$first->{$args[0]})));
 			}
 			
@@ -363,9 +355,7 @@ class Manager
 			$this->populateQueryCriteria($criteria, $args);
 		}
 		
-		$objectName = is_object($first) ? get_class($first) : $first;
-		
-		return $this->executeDelete($objectName, $criteria);
+		return $this->executeDelete($class, $criteria);
 	}
 	
 	/**
