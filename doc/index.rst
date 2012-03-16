@@ -19,9 +19,12 @@ Documentation
 
 The core of Amiss is the Data Mapper.
 
-From `P of EAA <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: A [Data Mapper is a] layer of Mappers (473) that moves data between objects and a database while keeping them independent of each other and the mapper itself.
+From `P of EAA <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: 
 
-The one concession to pragmatism that Amiss makes is that while the domain objects are ignorant of the schema, you're pretty much constrained to one object per table for the time being.
+    A [Data Mapper is a] layer of Mappers (473) that moves data between objects 
+    and a database while keeping them independent of each other and the mapper itself.
+
+Amiss makes some small concessions to pragmatism that may offend domain model purists when you use any of the :doc:`mapping methods <mapping>` that are in the core distribution, but overall it does a decent job of keeping its grubby mitts off your model considering the small codebase.
 
 
 .. toctree::
@@ -38,9 +41,11 @@ The one concession to pragmatism that Amiss makes is that while the domain objec
     schema
     helpers
     active
-    
+    cookbook/index
+        
     development
     glossary
+
 
 
 License

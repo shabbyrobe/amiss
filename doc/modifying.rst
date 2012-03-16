@@ -164,3 +164,40 @@ Saving
     $amiss->save($obj, 'artistId');
     // UPDATE artist SET name='foo baz' WHERE artistId=1
 
+
+Deleting
+--------
+
+``Amiss\Manager``'s delete methods work similarly to updating
+
+Deleting by object can be done a few different ways::
+
+    delete( object $object )
+    delete( object $object , string $positionalWhere , [ string $param1, ... ] )
+    delete( object $object , string $namedWhere , array $params )
+
+
+Deleting by table::
+
+    delete( string $table, string $positionalWhere, [ $param1, ... ] )
+    delete( string $table, string $namedWhere, array $params )
+    delete( string $table, array $criteria )
+    delete( string $table, Criteria\Query $criteria )
+
+
+.. note:: Deleting by table cannot be used with an empty "where" clause. If you really want to delete everything in a table, you should either 
+    truncate directly:
+
+    .. code-block:: php
+
+        <?php
+        $manager->execute("TRUNCATE TABLE ".$manager->getMeta('Object')->table);
+
+
+    Or pass a "match everything" clause:
+
+    .. code-block:: php
+    
+        <?php
+        $manager->delete('Object', '1=1');
+

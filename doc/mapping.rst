@@ -1,6 +1,9 @@
 Mapping
 =======    
 
+Amiss provides several flexible options for mapping your objects to the database as well as facilities for rolling your own mapper if none of the provided ones are suitable.
+
+
 Object mapping with annotations
 -------------------------------
 
@@ -126,7 +129,7 @@ If your property/field mappings are not quite able to be managed by the defaults
 
 
 Type Handling
--------------
+~~~~~~~~~~~~~
 
 There's very little intelligence in how Amiss handles values coming in and out of the database. They go in and out of the DB as whatever PDO treats them as by default, which is pretty much always strings or nulls.
 
@@ -134,7 +137,7 @@ This may be fine for 98% of your interaction with the database (trust me - it re
 
 How are you persisting dates? Probably as a YYYY-MM-DD formatted string, yeah? Maybe as a unix timestamp. What about the occasional serialised object?
 
-Amiss active records provide a facility for handling specific database types arbirtrarily.
+``Amiss\Mapper\Base`` provides a facility for handling specific database types arbirtrarily.
 
 To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface.
 
@@ -322,6 +325,8 @@ The following functions must be implemented:
 .. py:function:: determineTypeHandler($type)
 
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
+
+    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper unless you make use of it yourself. If you don't intend to use the table builer and don't intend to use this facility to map types yourself, just leave the method body empty.
 
     :param type:  The ID of the type to return a handler for.
 

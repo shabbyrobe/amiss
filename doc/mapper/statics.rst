@@ -7,40 +7,141 @@ Static Mapper
 
 If you're a Yii ActiveRecord refugee (or, bog help you, PRADO), this might help ease your migration path. It's a desecration of the sanctity of your model objects, but you know the law... "you gotta do what you gotta do".
 
-When using the static mapper, the absolute bare minimum you have to do to map an object is declare which properties represent its fields:
+When using the static mapper, the absolute bare minimum you have to do to map an object is declare some public properties against it:
 
 .. code-block:: php
     
     <?php
     class Artist
     {
-        public static $fields = array('artistId', 'name');
-
         public $artistId;
         public $name;
     }
 
+When declaring classes like this, the *static mapper* will guess the table, primary key and fields based on the rules outlined in the below sections. This behaviour can be fully overridden by providing static properties with values that help the *static mapper* create the right mappings:
 
-When inheriting, the Statics mapper will merge the fields with the fields declared against the parent class:
+.. code-block:: php
+    
+    <?php
+    class Artist
+    {
+        public static $table = 'artists';
+        public static $primary = 'id';
+        public static $fields = array('id', 'name', 'artistTypeId');
+        public static $relations = array(
+            'aritstType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
+        );
+
+        public $id;
+        public $name;
+        public $artistTypeId;
+        public $artistType;
+        
+        public $notAColumnInTheDatabase;
+    }
+
+
+See :ref:`mapper-common` for more information on how to tweak the static mapper's behaviour.
+
+
+Field Mapping
+-------------
+
+As mentioned earler, Amiss will guess which of your object's properties are fields based on the following rules:
+
+ - The property is public
+ - The property is not static
+ - The property name is not present in the ``$relations`` array
+
+Consider the following:
 
 .. code-block:: php
 
-    <?php
-    class PantsArtist extends Artist
+    class Foo
     {
-        public static $fields = array('pants');
+        public $a;
+        public $b;
+        protected $c;
+        private $d;
+
+        public static $relations = array(
+            'b'=>array('many'=>'Bar'),
+        );
     }
 
-    // PantsArtist will map to the following fields:
-    // artistId, name, pants
+In the above example, the static mapper will determine that only ``$a`` is a field.
 
-See :ref:`mapper-common` for more information on how to tweak the static mapper's behaviour.
+
+To explicitly declare which properties of an object are fields, declare the static property ``$fields`` against your object:
+
+.. code-block:: php
+
+    class Bar
+    {
+        public $fields = array('a');
+        public $a;
+
+        // this will not be considered a field
+        public $b;
+    }
+
+
+Each item in ``$fields`` can optionally specify a field type:
+
+.. code-block:: php
+    
+    <?php
+    class Foo
+    {
+        public static $fields = array(
+            // you don't have to pass the name as the key if there is no type:
+            'bar',
+
+            // but you're most welcome to if you prefer the way it looks:
+            'baz'=>true,
+
+            // you can also pass a field type:
+            'qux'=>'datetime'
+        );
+    }
+
+    $f = new Foo;
+    $f->bar = 'this works';
+    echo $f->bar;
+
+
+If you don't specify the types, Amiss will make a guess at what you want them to be if it needs to (for example with the ``Amiss\TableBuilder``. If you're using SQLite, you'll get ``STRING NULL`` columns. If you're using MySQL, you'll get ``VARCHAR(255) NULL`` columns. If this is not what you want, fret not! You can change the default, or you can specify the types on a per-column basis.
+
+By default, the primary key will be created as an autoincrement integer and if ``$primary`` is not set, the name will be inferred from the name of the class. You can override the type of the primary key's column.
+
+You can specify a default field type using the ``$defaultFieldType`` static property:
+     
+.. code-block:: php
+    
+    <?php
+    class Foo
+    {
+        public $defaultFieldType = 'foobar';
+
+        public static $fields = array(
+            // this will assume the defaultFieldType:
+            'bar',
+
+            // this will also assume the defaultFieldType
+            'baz'=>true,
+
+            // this will not
+            'qux'=>'datetime'
+        );
+    }
 
 
 Table Mapping
 -------------
 
-By default, the table name will be derived from the object. If you want the object to explicitly declare the table to which it refers, specify a static field called ``table``:
+By default, the table name will be derived from the object by stripping the namespace and converting ``TableName`` to ``table_name``.
+
+If you want the object to explicitly declare the table to which it refers, specify a static field called ``table``:
 
 .. code-block:: php
     
@@ -48,8 +149,7 @@ By default, the table name will be derived from the object. If you want the obje
     class Artist
     {
         public static $table = 'whoopee_artist_yeehaw';
-        public static $fields = array('artistId', 'name');
-
+        
         public $artistId;
         public $name;
     }
@@ -191,58 +291,5 @@ Unlinke fields, relations are not inheritable. If you delcare relations against 
                 ),
             );
         }
-    }
-
-
-Type Mapping
-------------
-
-Each item in ``$fields`` can optionally specify a field type:
-
-.. code-block:: php
-    
-    <?php
-    class Foo
-    {
-        public static $fields = array(
-            // you don't have to pass the name as the key if there is no type:
-            'bar',
-
-            // but you're most welcome to if you prefer the way it looks:
-            'baz'=>true,
-
-            // you can also pass a field type:
-            'qux'=>'datetime'
-        );
-    }
-
-    $f = new Foo;
-    $f->bar = 'this works';
-    echo $f->bar;
-
-
-If you don't specify the types, Amiss will make a guess at what you want them to be if it needs to (for example with the ``Amiss\TableBuilder``. If you're using SQLite, you'll get ``STRING NULL`` columns. If you're using MySQL, you'll get ``VARCHAR(255) NULL`` columns. If this is not what you want, fret not! You can change the default, or you can specify the types on a per-column basis.
-
-By default, the primary key will be created as an autoincrement integer and if ``$primary`` is not set, the name will be inferred from the name of the class. You can override the type of the primary key's column.
-
-You can specify a default field type using the ``$defaultFieldType`` static property:
-     
-.. code-block:: php
-    
-    <?php
-    class Foo
-    {
-        public $defaultFieldType = 'foobar';
-
-        public static $fields = array(
-            // this will assume the defaultFieldType:
-            'bar',
-
-            // this will also assume the defaultFieldType
-            'baz'=>true,
-
-            // this will not
-            'qux'=>'datetime'
-        );
     }
 
