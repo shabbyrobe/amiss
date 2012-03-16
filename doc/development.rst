@@ -3,11 +3,11 @@ Development
 
 Amiss' homepage is http://k3jw.com/code/amiss/
 
-The code for Amiss is hosted at http://bitbucket.org/shabbyrobe/amiss
+The code for Amiss is hosted at http://github.com/shabbyrobe/amiss
 
 
 Building the docs
-~~~~~~~~~~~~~~~~~
+-----------------
 
 The source distribution does not include compiled documentation, only restructuredText files. If you need HTML or PDF documentation, it needs to be built.
 

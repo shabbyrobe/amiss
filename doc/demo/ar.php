@@ -24,7 +24,7 @@ class ArtistRecord extends \Amiss\Active\Record
 	public function getType()
 	{
 		if ($this->type === null) {
-			$this->type = $this->fetchRelated('type');
+			$this->type = $this->getRelated('type');
 		}
 		return $this->type;
 	}
@@ -52,7 +52,7 @@ class ArtistType extends \Amiss\Active\Record
 	public function getArtists()
 	{
 		if ($this->artists === null) {
-			$this->artists = $this->fetchRelated('artists');
+			$this->artists = $this->getRelated('artists');
 		}
 		return $this->artists;
 	}
@@ -94,7 +94,7 @@ class EventRecord extends \Amiss\Active\Record
 	public function getVenue()
 	{
 		if (!$this->venue && $this->venueId) {
-			$this->venue = $this->fetchRelated('venue');
+			$this->venue = $this->getRelated('venue');
 		}
 		return $this->venue;
 	}
@@ -102,7 +102,7 @@ class EventRecord extends \Amiss\Active\Record
 	public function getEventArtists()
 	{
 		if (!$this->eventArtists) {
-			 $this->eventArtists = $this->fetchRelated('eventArtists');
+			 $this->eventArtists = $this->getRelated('eventArtists');
 		}
 		return $this->eventArtists;
 	}
