@@ -18,6 +18,20 @@ Options:
   --password      Database password (don't use this - use -p instead) 
   --bootstrap     File to be run before creating tables
   -r, --recurse   Recurse all input directories looking for active records
+  --mapper        Mapper class name. Either pass this or define a mapper in the boostrap
+  --note NOTE     Search for all classes that have this note set at class level 
+  --ns NAMESPACE  Search for all classes in this namespace. Can specify more than once.
+
+Examples:
+Use all classes with the @foo annotation at class level:
+  amiss create-tables --note foo
+
+Use all classes in the Foo\Model namespace
+  amiss create-tables --namespace Foo\\Model
+	
+Use all classes in the Foo\Model and Bar\Model namespaces with the @foo annotation:
+  amiss create-tables --namespace Foo\\Model --namespace Bar\\Model --note foo
+
 ";
 
 $bootstrap = null;
@@ -27,12 +41,19 @@ $prompt = false;
 $user = null;
 $password = null;
 $recursive = false;
+$namespaces = array();
+$mapperClass = null;
+$notes = array();
 
 $iter = new ArrayIterator(array_slice($argv, 1));
 foreach ($iter as $v) {
 	if ($v == '--bootstrap') {
 		$iter->next();
 		$bootstrap = $iter->current(); 
+	}
+	elseif ($v == '--mapper') {
+		$iter->next();
+		$mapperClass = $iter->current(); 
 	}
 	elseif ($v == '--recurse' || $v == '-r') {
 		$recursive = true;
@@ -51,6 +72,14 @@ foreach ($iter as $v) {
 	elseif ($v == '--dsn') {
 		$iter->next();
 		$dsn = $iter->current();
+	}
+	elseif ($v == '--namespace') {
+		$iter->next();
+		$namespaces[] = $iter->current();
+	}
+	elseif ($v == '--note') {
+		$iter->next();
+		$notes[] = $iter->current();
 	}
 	elseif (strpos($v, '--')===0 || $input) {
 		echo "Invalid arguments\n\n";
@@ -86,26 +115,39 @@ if ($bootstrap && !file_exists($bootstrap)) {
 	exit(1);
 }
 
-if ($bootstrap)
-	require($bootstrap);
+if (!$notes && !$namespaces) {
+	echo "Please specify some notes and/or namespaces to search for\n\n";
+	echo $usage;
+	exit(1);
+}
 
-$connector = new Amiss\Connector($dsn, $user, $password);
-Amiss\Active\Record::setManager(new Amiss\Manager($connector));
+$mapper = null;
+$manager = null;
+$connector = null;
+if ($bootstrap) require($bootstrap);
+
+if (!$mapper) {
+	if (!$mapperClass) $mapperClass = 'Amiss\Mapper\Note'; 
+	$mapper = new $mapperClass;
+}
+
+if (!$mapper) {
+	echo "Please pass the --mapper parameter or define a mapper in a bootstrap file\n\n".$usage; exit(1);
+}
+
+if (!$connector)
+	$connector = new Amiss\Connector($dsn, $user, $password);
+
+if (!$manager)
+	$manager = new Amiss\Manager(new Amiss\Connector($engine.':blahblah'), $mapper);
 
 $toCreate = find_classes($input);
+if ($namespaces)
+	$toCreate = filter_classes_by_namespaces($toCreate, $namespaces);
+if ($notes)
+	$toCreate = filter_classes_by_notes($toCreate, $notes);
 
 foreach ($toCreate as $class) {
-	if (is_subclass_of($class, 'Amiss\Active\Record')) {
-		$manager = $class::getManager();
-		if (!$manager) {
-			$class::setManager($defaultManager);
-		}
-		if ($class::$fields) {
-			$builder = new Amiss\TableBuilder($manager, $class);
-			$builder->createTable();
-		}
-		else {
-			echo "Warning: $class does not declare fields\n";
-		}
-	}
+	$builder = new Amiss\TableBuilder($manager, $class);
+	$builder->createTable();
 }
