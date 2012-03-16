@@ -64,14 +64,14 @@ class Manager
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
-		$obj = null;
+		$object = null;
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			if ($obj)
+			if ($object)
 				throw new Exception("Query returned more than one row");
 			
-			$obj = $this->mapper->createObject($meta, $row, $criteria->args);
+			$object = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
-		return $obj;
+		return $object;
 	}
 
 	public function getList($class)
@@ -190,11 +190,11 @@ class Manager
 		// find query values in source object(s)
 		$resultIndex = array();
 		$ids = array();
-		foreach ($source as $idx=>$obj) {
+		foreach ($source as $idx=>$object) {
 			$key = array();
 			
 			foreach ($on as $l=>$r) {
-				$lValue = !isset($relation['getter']) ? $obj->$l : call_user_func(array($obj, $relation['getter']));
+				$lValue = !isset($relation['getter']) ? $object->$l : call_user_func(array($object, $relation['getter']));
 				$key[] = $lValue;
 				
 				if (!isset($ids[$l])) {
@@ -209,7 +209,7 @@ class Manager
 			if (!isset($resultIndex[$key]))
 				$resultIndex[$key] = array();
 			
-			$resultIndex[$key][$idx] = $obj;
+			$resultIndex[$key][$idx] = $object;
 		}
 		
 		// build query
@@ -237,7 +237,7 @@ class Manager
 				
 				foreach ($on as $l=>$r) {
 					$name = $r['name'];
-					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($obj, $r['getter']));
+					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($object, $r['getter']));
 					$key[] = $rValue;
 				}
 				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
@@ -291,8 +291,13 @@ class Manager
 		if (($object && $meta->primary) || !$object)
 			$lastInsertId = $this->getConnector()->lastInsertId();
 		
-		if ($object && $meta->primary && $lastInsertId)
-			$this->mapper->setProperty($meta, $object, $meta->primary, $lastInsertId);
+		if ($object && $meta->primary && $lastInsertId) {
+			$field = $meta->getField($meta->primary);
+			if (!isset($field['setter']))
+				$object->{$meta->primary} = (int)$lastInsertId;
+			else
+				call_user_func(array($object, $field['setter']), (int)$lastInsertId);
+		}
 		
 		return $lastInsertId;
 	}
@@ -367,7 +372,8 @@ class Manager
 		if (!$meta->primary)
 			throw new Exception("Manager requires a primary if you want to call 'save'.");
 		
-		$id = $this->mapper->getProperty($meta, $object, $meta->primary);
+		$field = $meta->getField($meta->primary);
+		$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
 		
 		return $id == false;
 	}
@@ -417,7 +423,10 @@ class Manager
 		if (count($args) < 1) {
 			if (!$meta->primary)
 				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
-			$args[0] = array($meta->primary=>$this->mapper->getProperty($meta, $object, $meta->primary));
+			
+			$field = $meta->getField($meta->primary);
+			$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
+			$args[0] = array($meta->primary=>$id);
 		}
 		
 		if (is_string($args[0])) {

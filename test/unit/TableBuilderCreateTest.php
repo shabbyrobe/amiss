@@ -11,7 +11,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 		\Amiss\Active\Record::_reset();
 		$this->manager = new \Amiss\Manager(
 			new \Amiss\Connector('sqlite::memory:'),
-			new \Amiss\Active\Mapper
+			new \Amiss\Mapper\Statics
 		);
 	}
 	

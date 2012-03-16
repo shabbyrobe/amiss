@@ -2,7 +2,7 @@
 
 require_once($amissPath.'/../doc/demo/ar.php');
 
-$mapper = new Amiss\Active\Mapper;
+$mapper = new Amiss\Mapper\Statics;
 $mapper->objectNamespace = 'Amiss\Demo\Active';
 
 $manager = new Amiss\Manager(new Amiss\Connector('sqlite::memory:'), $mapper);

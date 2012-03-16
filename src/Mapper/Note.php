@@ -4,7 +4,7 @@ namespace Amiss\Mapper;
 
 use Amiss\Exception;
 
-class Note extends \Amiss\Mapper
+class Note extends \Amiss\Mapper\Base
 {
 	private $cache;
 	

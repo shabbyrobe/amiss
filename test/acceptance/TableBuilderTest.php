@@ -17,7 +17,7 @@ class TableBuilderTest extends \ActiveRecordDataTestCase
 	{
 		$db = new \Amiss\Connector('sqlite::memory:');
 		
-		$manager = new \Amiss\Manager($db, new \Amiss\Active\Mapper);
+		$manager = new \Amiss\Manager($db, new \Amiss\Mapper\Statics);
 		
 		\Amiss\Active\Record::_reset();
 		\Amiss\Active\Record::setManager($manager);

@@ -8,7 +8,7 @@ class RecordTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
-		$this->mapper = new \Amiss\Active\Mapper;
+		$this->mapper = new \Amiss\Mapper\Statics;
 		$this->mapper->objectNamespace = 'Amiss\Demo\Active';
 		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
 	}

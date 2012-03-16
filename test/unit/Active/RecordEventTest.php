@@ -10,7 +10,7 @@ class RecordEventTest extends \CustomTestCase
 	{
 		$this->connector = $this->getMock('Amiss\Connector', array(), array(), '', !'callOriginalConstructor');
 		
-		$this->mapper = new \Amiss\Active\Mapper;
+		$this->mapper = new \Amiss\Mapper\Statics;
 		
 		$this->manager = $this->getMock(
 			'Amiss\Manager',

@@ -1,8 +1,8 @@
 <?php
 
-namespace Amiss\Active;
+namespace Amiss\Mapper;
 
-class Mapper extends \Amiss\Mapper
+class Statics extends \Amiss\Mapper\Base
 {
 	function getMeta($class)
 	{
