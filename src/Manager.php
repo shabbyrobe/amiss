@@ -180,7 +180,7 @@ class Manager
 		if (!isset($this->relators[$type]))
 			throw new Exception("Relator $type not found");
 		
-		return $this->relators[$type]->get($this, $type, $source, $relationName);
+		return $this->relators[$type]->getRelated($this, $type, $source, $relationName);
 	}
 	
 	public function insert()

@@ -6,7 +6,7 @@ use Amiss\Criteria;
 
 class OneMany
 {
-	public function get($manager, $type, $source, $relationName)
+	public function getRelated($manager, $type, $source, $relationName)
 	{
 		if (!$source) return;
 		
