@@ -1,46 +1,42 @@
 Table Creation
 ==============
 
-If you're feeling really, really lazy, you can let ``Amiss\Active\Record`` create your tables for you too. All you have to do is provide an array of the fields:
+If you're feeling really, really lazy, you can use ``Amiss\TableBuilder`` to create your tables for you too. This is a *very limited tool* and is not intended to do anything other than spit out some fairly generic initial tables.
+
+Once you have declared your object, you can then either tell the ``Amiss\TableBuilder`` to create the table in the database directly, or emit the SQL for you to use as you please:
 
 .. code-block:: php
 
     <?php
-    namespace Amiss\Demo;
-    class Artist extends \Amiss\Active\Record
+    class Artist
     {
-        public static $fields = array(
-            'name', 'slug'
-        );
-        
-        public $slug;
+        /** @primary */
+        public $artistId;
+
+        /** @field */
+        public $name;
     }
 
+    $builder = new Amiss\TableBuilder($manager, 'Artist');
+    $sql = $builder->buildCreateTableSql();
+    $builder->createTable();
 
-You can omit the property declarations if you like; notice there is no property for ``name``. It will still be set just fine if you retrieve an ``Artist`` from the database. The primary key is also omitted in the above example. It will be inferred when the table is created if you do not specifically set the static ``$primary`` property.
-
-Once you have declared the fields, you can then either tell the ``Active\Record`` to create its own table, or emit the SQL for you to use as you please:
-
-.. code-block:: php
-
-    <?php
-    $sql = Artist::buildCreateTableSql();
-    Artist::createTable();
-
-See the ``Field Mapping`` section of :doc:`defining` for details on how Amiss knows what types to use for fields.
+See the ``Field Mapping`` section of :doc:`mapping` for details on how Amiss knows what types to use for fields.
 
 
 Crappy Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is a command line tool available in the Amiss distribution at ``bin/amiss``. The following commands will help turn a set of Active Records into a sql schema:
+.. warning:: These haven't been updated for v2 yet.
+
+There is a command line tool available in the Amiss distribution at ``bin/amiss``. The following commands will help turn a set of classes into a sql schema:
 
 * bin/amiss create-tables-sql: emits sql to the command line
 * bin/amiss create-tables: creates the tables in your DB
 
-Both scripts recursively scan a directory looking for derivatives of ``Amiss\Active\Record``, and when found, will either echo ``buildCreateTableSql`` or run ``createTable``.
+Both scripts recursively scan a directory looking for classes that match the criteria you specify, and when found, will either echo ``buildCreateTableSql`` or run ``createTable``.
 
-Both scripts will output usage information when run.
+Both scripts will output usage information when run with no arguments.
 
 You can run commands using the demo active records from the root of the Amiss distribution like so::
 

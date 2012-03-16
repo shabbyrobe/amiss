@@ -113,10 +113,10 @@ class Manager
 		return $this->get($meta->class, $criteria);
 	}
 	
-	public function count($object, $criteria=null)
+	public function count($class, $criteria=null)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$meta = $this->getMeta($object);
+		$meta = $this->getMeta($class);
 		
 		$table = $meta->table;
 		

@@ -75,7 +75,7 @@ You can also create an ``Amiss\Connector`` using an array of params like the ini
 
 You can also pass ``Amiss\Manager`` an instance of ``PDO``, or anything else that behaves like a ``PDO`` for that matter, though using ``Amiss\Connector`` instead is highly recommended as some features may not work exactly as expected. 
 
-.. warniing:: ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss.
+.. warning:: ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss.
 
 
 .. _PDO: http://www.php.net/manual/en/book.pdo.php

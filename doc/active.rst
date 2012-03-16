@@ -10,27 +10,48 @@ I'm not in love with this pattern, but I have used it in the past with some othe
 
 ``Amiss\Active\Record`` is an Active Record wrapper around ``Amiss\Manager``. It's not fancy, it's not good, it's not fully-featured, but it does seem to work OK for the quick-n-dirty ports I've done.
 
-It does place the following constraints:
 
-* All Active Records must have an autoincrement primary key if you want to use the ``save`` method. If not, you'll still be able to use ``insert`` and ``update``.
-* Class Hierarchies that use a separate connection must declare a base class.
+Defining
+--------
+
+To define active records, simply extend the ``Amiss\Active\Record class``. Configure everything else just like you would when using Amiss as a Data Mapper.
+
+This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapping`.
+
+.. code-block: php
+
+    <?php
+    class Artist extends Amiss\Active\Record
+    {
+        /** @primary */
+        public $artistId;
+
+        /** @field */
+        public $name;
+
+        /** @field */
+        public $artistTypeId;
+
+        /** @has one ArtistType artistTypeId */
+    }
 
 
 Connecting
 ----------
 
-As per the :doc:`connecting` section, create an ``Amiss\Manager``, then pass it to ``Amiss\Active\Record::setManager()``.
+As per the :doc:`configuring` section, create an ``Amiss\Connector`` and an ``Amiss\Mapper`` and pass it to an ``Amiss\Manager``. Then, assign the manager to ``Amiss\Active\Record::setManager()``.
 
 .. code-block:: php
 
     <?php
     $conn = new Amiss\Connector('sqlite::memory:');
-    $amiss = new Amiss\Manager($conn);
-    Amiss\Active\Record::setManager($amiss);
+    $mapper = new Amiss\Mapper\Note;
+    $manager = new Amiss\Manager($conn, $mapper);
+    Amiss\Active\Record::setManager($manager);
     
     // test it out
-    $test = Amiss\Active\Record::getConnector();
-    var_dump($conn === $test); // outputs true
+    $test = Amiss\Active\Record::getManager();
+    var_dump($conn === $manager); // outputs true
 
 
 Multiple connections are possible, but require subclasses. The separate connections are then assigned to their respective base class:
@@ -48,119 +69,63 @@ Multiple connections are possible, but require subclasses. The separate connecti
     Db2Record::setManager($amiss2);
     
     // will show 'false' to prove that the record types are not 
-    // sharing a connection class
+    // sharing a manager
     var_dump(Artist::getManager() === Burger::getManager());
 
 
-Relations
-=========
+Querying and Modifying
+----------------------
 
-Relations are declared using a simple array notation. Automatic association table mappings are not supported - you will have to use an intermediary object. Bi-directional relations must be declared explicitly. Feel free to submit a patch for any of this, though it would have to be pretty light to get accepted. This isn't `Doctrine <http://www.doctrine-project.org/>`_, remember?
+All of the main storage/retrieval methods in ``Amiss\Manager`` are proxied by ``Amiss\Active\Record``, but for signatures that require the class name or object instance, ``Amiss\Active\Record`` takes care of passing itself.
 
-In the following example, ``Artist`` declares a single-object relation and ``ArtistType`` declares a list relation:
+When an instance is not required, the methods are called statically against your specific active record.
 
-.. code-block:: php
-
-    <?php
-    namespace Amiss\Demo;
-    class Artist extends \Amiss\Active\Record
-    {
-        public $artistId;
-        public $name;
-        public $artistTypeId;
-
-        public static $relations = array(
-            'artistType'=>array('one'=>'Amiss\Demo\ArtistType', 'on'=>'artistTypeId'),
-        );
-    }
-
-    class ArtistType extends \Amiss\Active\Record
-    {
-        public $artistTypeId;
-        public $type;
-
-        public static $relations = array(
-            'artists'=>array('many'=>'Amiss\Demo\Artist', 'on'=>'artistId'),
-        );
-    }
-    
-    $a = Artist::getByPk(1);
-    
-    // retrieves the one related artistType
-    $type = $a->fetchRelated('artistType');
-    
-    // retrieves all related artists from the type
-    $artists = $type->fetchRelated('artists');
-
-
-In the relation definition in the above example, the value of the ``one`` and ``many`` relation keys included the fully qualified class name. This is not necessary if you set the value of ``objectNamespace`` against the ``Amiss\Manager``:
+Consider the following equivalents:
 
 .. code-block:: php
 
     <?php
-    namespace Amiss\Demo;
-    $amiss = new \Amiss\Manager(...);
-    $amiss->objectNamespace = 'Amiss\Demo';
+    // inserting
+    $mapped = new MappedObject;
+    $manager->insert($mapped);
     
-    class Artist extends \Amiss\Active\Record
-    {
-        // ...
-        public static $relations = array(
-            'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
-        );
-    }
+    $active = new ActiveObject;
+    $active->save();
+    
+    // getting by primary key
+    $mapped = $manager->getByPk('MappedObject', 1);
+    $active = ActiveObject::getByPk(1);
+
+    // assigning relations
+    $manager->assignRelated($mapped, 'mappedFriend');
+    $active->assignRelated('mappedFriend');
 
 
-Relations can also be declared using a method, in case you wish to perform additional gymnastics to make them appear how you want. If you don't define a ``getRelations`` method, it will always just return the value of ``YourRecord::$relations``.
+``Amiss\Active\Record`` subclasses make the following **static** methods available::
 
-.. code-block:: php
+    get ( string $positionalWhere, mixed $param1[, mixed $param2...])
+    get ( string $namedWhere, array $params )
+    get ( array $criteria )
+    get ( Amiss\Criteria $criteria )
 
-    <?php
-    namespace Amiss\Demo;
-    class Artist extends \Amiss\Active\Record
-    {
-        // ...
-        public static function getRelations() 
-        {
-            return array(
-                'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
-            );
-        );
-    }
+    getList ( as with get )
 
-.. warning:: ``getRelations`` will only ever be called once per ``Active\Record`` *class* (not *instance*). Don't do anything that would expect multiple calls.
+    getByPk ( $primaryKey )
+
+    count ( string $positionalWhere, mixed $param1[, mixed $param2...])
+    count ( string $namedWhere, array $params )
+    count ( array $criteria )
+    count ( Amiss\Criteria $criteria )
 
 
-Unlinke fields, relations are not inheritable. If you delcare relations against one of your active records and then inherit from it, you will need to declare the relations again or merge them yourself. This is where ``getRelations`` comes in handy.
+``Amiss\Active\Record`` subclasses make the following **instance** methods available::
 
-.. code-block:: php
-
-    <?php
-    class Foo extends \Amiss\Active\Record
-    {
-        public static $relations = array(
-            'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
-        );
-    }
-
-    class DerivedFoo extends \Amiss\Active\Record
-    {
-        public static function getRelations()
-        {
-            return array_merge(
-                Foo::getRelations(),
-                array(
-                    'somethingElse'=>array('one'=>'SomethingElse', 'on'=>'somethingElseId'),
-                ),
-            );
-        }
-    }
-
-
+    getRelated ( $source, $relationName )
+    assignRelated ( $into, $relationName )
 
 
 Lazy Loading
-~~~~~~~~~~~~
+------------
 
 ``Amiss\Active\Record`` has no support for automatic lazy loading. You can implement it yourself using a wrapper function:
 
@@ -197,4 +162,35 @@ You can then simply call the new function to get the related object:
     <?php
     $a = Artist::getByPk(1);
     $type = $a->getArtistType();
+
+
+Hooks
+-----
+
+You can define additional behaviour against your Active Record which will occur when certain events happen inside Amiss.
+
+The ``Amiss\Active\Record`` class defines the following hooks in addition to the ones defined by ``Amiss\Manager``. I sincerely hope these are largely self explanatory:
+
+* ``beforeInsert()``
+* ``beforeUpdate()``
+* ``beforeSave()``
+* ``beforeDelete()``
     
+.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition to ``beforeInsert()`` and ``beforeUpdate()``.
+
+ALWAYS call the parent method of the hook when overriding:
+
+.. code-block:: php
+
+    <?php
+    class MyRecord extends \Amiss\Active\Record
+    {
+        // snipped fields, etc
+
+        function beforeUpdate()
+        {
+            parent::beforeUpdate();
+            // do your own stuff here
+        }
+    }
+

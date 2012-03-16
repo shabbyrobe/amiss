@@ -37,7 +37,6 @@ The one concession to pragmatism that Amiss makes is that while the domain objec
     modifying
     schema
     helpers
-    extending
     active
     
     development

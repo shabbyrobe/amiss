@@ -10,7 +10,7 @@ This quickstart will assume you wish to use an annotation-based mapper. See :doc
 Loading and Configuring
 -----------------------
 
-See :doc:`configuring`, :doc:`connecting` and :doc:`mapping` for more info.
+See :doc:`configuring` and :doc:`mapping` for more info.
 
 .. code-block:: php
 
@@ -34,7 +34,7 @@ See :doc:`configuring`, :doc:`connecting` and :doc:`mapping` for more info.
 Defining objects
 ----------------
 
-See :doc:`defining` for more info and advanced topics.
+See :doc:`mapping` for more info and advanced topics.
 
 .. code-block:: php
 

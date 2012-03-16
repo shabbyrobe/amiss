@@ -1,6 +1,13 @@
 Mapping
 =======
 
+.. toctree::
+    :maxdepth: 2
+
+    mapper/annotation
+    mapper/statics
+    
+
 Object mapping with annotations
 -------------------------------
 
@@ -43,7 +50,7 @@ Objects are marked up in this way:
 Object mapping with static properties
 -------------------------------------
 
-This type of mapper is really mostly there for the sake of :doc:`activerecord`, which we'll get to later, but if you prefer this to annotations there's nothing stopping you from using it.
+This type of mapper is really mostly there for the sake of :doc:`active`, which we'll get to later, but if you prefer this to annotations there's nothing stopping you from using it.
 
 See :doc:`mapper/statics` for full instructions on how to use this mapper.
 
@@ -66,6 +73,8 @@ See :doc:`mapper/statics` for full instructions on how to use this mapper.
     }
 
 
+.. _mapper-common:
+
 Common Mapper Configuration
 ---------------------------
 
@@ -73,7 +82,7 @@ Both ``Amiss\Mapper\Note`` and ``Amiss\Mapper\Statics`` derive from ``Amiss\Mapp
 
 
 Name mapping
-^^^^^^^^^^^^
+~~~~~~~~~~~~
 
 If your property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name mapper to do the job for you using the following properties:
 

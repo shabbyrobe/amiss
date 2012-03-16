@@ -1,12 +1,11 @@
 Annotation Mapper
 =================
 
-.. note::   It is assumed by this mapper that an object and a table are corresponding entities. 
-            More complex mapping should be handled using a custom mapper.
+.. note:: It is assumed by this mapper that an object and a table are corresponding entities. 
+    More complex mapping should be handled using a custom mapper.
 
 
 To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to ``Amiss\Manager``::
-
 
 .. code-block:: php
 
@@ -15,7 +14,10 @@ To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`
     $manager = new \Amiss\Manager($db, $mapper);
 
 
-Annotations are javadoc-style key/values and are formatted like so::
+See :ref:`mapper-common` for more information on how to tweak the note mapper's behaviour.
+
+
+Annotations are javadoc-style key/values and are formatted like so:
 
 .. code-block:: php
     

@@ -24,7 +24,6 @@ The parameters are as follows:
 	.. attribute:: $criteria
 	
 	    An ``Amiss\Criteria`` instance, or an array that can be converted into an Amiss\Criteria instance.
-	    
 
 
 Single Objects
@@ -152,6 +151,61 @@ You can also order ascending on a single column with the following shorthand:
     $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
 
 
+Counting
+--------
+
+You can use all of the same signatures that you use for ``get`` to count rows (excluding LIMITs, of course):
+
+
+Count using positional parameters, shorthand
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: php
+
+    <?php
+    $dukeCount = $manager->count('Artist', 'slug=?', 'duke-nukem');
+
+
+Count using named parameters, shorthand
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: php
+
+    <?php
+    $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
+
+
+Count using named parameters, long form
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: php
+
+    <?php
+    $artistCount = $manager->count(
+        'Artist', 
+        array(
+            'where'=>'slug=:slug', 
+            'params'=>array(':slug'=>'duke-nukem')
+        )
+    );
+
+
+Count using an Amiss\Criteria object
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: php
+
+    <?php
+    $criteria = new Amiss\Criteria\Select;
+    $criteria->where = 'slug=:slug';
+    $criteria->params[':slug'] = 'duke-nukem';
+    
+    // this is detected when using other methods
+    $criteria->namedParams = true;
+    
+    $count = $manager->count('Artist', $criteria);
+
+
 Constructor Arguments
 ---------------------
 
@@ -270,7 +324,7 @@ You can use this with ``Amiss\Manager`` easily:
 
 .. warning::
 
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway)::
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway):
 
     .. code-block: php
 

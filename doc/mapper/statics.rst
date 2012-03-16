@@ -55,6 +55,113 @@ If you wish to change the field it uses for the primary key, simply add a static
     }
 
 
+Relations
+---------
+
+Relations are declared using a simple array notation. Automatic association table mappings are not supported - you will have to use an intermediary object. Bi-directional relations must be declared explicitly. Feel free to submit a patch for any of this, though it would have to be pretty light to get accepted. This isn't `Doctrine <http://www.doctrine-project.org/>`_, remember?
+
+In the following example, ``Artist`` declares a single-object relation and ``ArtistType`` declares a list relation:
+
+.. code-block:: php
+
+    <?php
+    namespace Amiss\Demo;
+    class Artist extends \Amiss\Active\Record
+    {
+        public $artistId;
+        public $name;
+        public $artistTypeId;
+
+        public static $relations = array(
+            'artistType'=>array('one'=>'Amiss\Demo\ArtistType', 'on'=>'artistTypeId'),
+        );
+    }
+
+    class ArtistType extends \Amiss\Active\Record
+    {
+        public $artistTypeId;
+        public $type;
+
+        public static $relations = array(
+            'artists'=>array('many'=>'Amiss\Demo\Artist', 'on'=>'artistId'),
+        );
+    }
+    
+    $a = Artist::getByPk(1);
+    
+    // retrieves the one related artistType
+    $type = $a->fetchRelated('artistType');
+    
+    // retrieves all related artists from the type
+    $artists = $type->fetchRelated('artists');
+
+
+In the relation definition in the above example, the value of the ``one`` and ``many`` relation keys included the fully qualified class name. This is not necessary if you set the value of ``objectNamespace`` against the ``Amiss\Manager``:
+
+.. code-block:: php
+
+    <?php
+    namespace Amiss\Demo;
+    $amiss = new \Amiss\Manager(...);
+    $amiss->objectNamespace = 'Amiss\Demo';
+    
+    class Artist extends \Amiss\Active\Record
+    {
+        // ...
+        public static $relations = array(
+            'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
+        );
+    }
+
+
+Relations can also be declared using a method, in case you wish to perform additional gymnastics to make them appear how you want. If you don't define a ``getRelations`` method, it will always just return the value of ``YourRecord::$relations``.
+
+.. code-block:: php
+
+    <?php
+    namespace Amiss\Demo;
+    class Artist extends \Amiss\Active\Record
+    {
+        // ...
+        public static function getRelations() 
+        {
+            return array(
+                'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
+            );
+        );
+    }
+
+.. warning:: ``getRelations`` will only ever be called once per ``Active\Record`` *class* (not *instance*). Don't do anything that would expect multiple calls.
+
+
+Unlinke fields, relations are not inheritable. If you delcare relations against one of your active records and then inherit from it, you will need to declare the relations again or merge them yourself. This is where ``getRelations`` comes in handy.
+
+.. code-block:: php
+
+    <?php
+    class Foo extends \Amiss\Active\Record
+    {
+        public static $relations = array(
+            'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
+        );
+    }
+
+    class DerivedFoo extends \Amiss\Active\Record
+    {
+        public static function getRelations()
+        {
+            return array_merge(
+                Foo::getRelations(),
+                array(
+                    'somethingElse'=>array('one'=>'SomethingElse', 'on'=>'somethingElseId'),
+                ),
+            );
+        }
+    }
+
+
+
+
 Field Mapping
 -------------
 
@@ -82,70 +189,7 @@ Fields can also be defined using the ``Amiss\Active\Record::$fields`` array inst
     echo $f->bar;
 
 
-.. warning::
-
-    ``Amiss\Active\Record`` derivatives which have their fields declared in this way **are vulnerable** to the :ref:`null-handling` outlined in the Data Mapper's :doc:`/mapper/modifying` documentation. Read on for ways to mitigate this problem.
-
-
 If you don't specify the types, Amiss will make a guess at what you want them to be. If you're using SQLite, you'll get ``STRING NULL`` columns. If you're using MySQL, you'll get ``VARCHAR(255) NULL`` columns. If this is not what you want, fret not! You can change the default, or you can specify the types on a per-column basis.
-
-Changing the default is done statically at the ``Amiss\Active\Record`` level. You can set it for all ``ActiveRecords``:
-
-.. code-block:: php
-
-    <?php
-    Amiss\Active\Record::$defaultFieldType = 'VARCHAR(1024) NOT NULL';
-
-
-You can set it for specific hierarchies (like the example for multiple connections in the :doc:`connecting` section). In the following example, ``Test1`` and ``Test2`` will use ``INTEGER`` as the column type, but ``Test3`` will use ``VARCHAR(2048)``.
-
-.. code-block:: php
-
-    <?php
-    abstract class Base1 extends \Amiss\Active\Record {}
-    abstract class Base2 extends \Amiss\Active\Record {}
-
-    class Test1 extends Base1
-    {
-        public static $fields = array('foo', 'bar');
-    }
-    
-    class Test2 extends Base1
-    {
-        public static $fields = array('foo', 'bar');
-    }
-    
-    class Test3 extends Base2
-    {
-        public static $fields = array('foo', 'bar');
-    }
-    
-    Base1::$defaultFieldType = 'INTEGER';
-    Base2::$defaultFieldType = 'VARCHAR(2048)';
-
-
-Or you can set the default on a single ``Amiss\Active\Record`` derivative and it will only apply to that class:
-
-.. code-block:: php
-
-    <?php
-    // setting the default as part of the definition
-    class Test extends \Amiss\Active\Record
-    {
-        public static $defaultFieldType = 'VARCHAR(1024) NOT NULL';
-        public static $fields = array('foo', 'bar');
-    }
-    
-    // setting the default by hand outside the definition
-    Test::$defaultFieldType = 'VARCHAR(2048)';
-
-
-In the above examples, all of the fields except the primary key (which is not declared in any of the ``$fields`` arrays in the above examples) will be created with the default type. This may not be what you're after - you might also need one property to map to a date column, another to a ``TEXT`` column, etc.
-
-.. note::
-
-    ``Amiss\Active\Record`` derivatives which have their fields declared in this way are **not** vulnerable to the :ref:`null-handling` outlined in the Data Mapper's :doc:`/mapper/mapping` documentation.
-
 
 By default, the primary key will be created as an autoincrement integer and if ``$primary`` is not set, the name will be inferred from the name of the class. You can override the type of the primary key's column.
 
