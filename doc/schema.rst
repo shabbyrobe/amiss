@@ -27,9 +27,7 @@ See the ``Field Mapping`` section of :doc:`mapping` for details on how Amiss kno
 Crappy Command Line Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. warning:: These haven't been updated for v2 yet.
-
-There is a command line tool available in the Amiss distribution at ``bin/amiss``. The following commands will help turn a set of classes into a sql schema:
+There is a crappy command line tool available in the Amiss distribution at ``bin/amiss``. The following commands will help turn a set of classes into a sql schema:
 
 * bin/amiss create-tables-sql: emits sql to the command line
 * bin/amiss create-tables: creates the tables in your DB
@@ -38,10 +36,26 @@ Both scripts recursively scan a directory looking for classes that match the cri
 
 Both scripts will output usage information when run with no arguments.
 
-You can run commands using the demo active records from the root of the Amiss distribution like so::
+You can filter the classes by namespace or by annotation for both of these commands. Searching by annotation will allow you to include only classes that have the class level annotations you specify. For example, you can set your classes up like so:
 
-    bin/amiss create-tables-sql --engine mysql doc/demo/ar.php
-    bin/amiss create-tables --dsn 'sqlite:/tmp/foo.sqlite3' doc/demo/ar.php
+.. code-block: php
+
+    <?php
+    /** @foobar */
+    class Thingy {}
+
+    /** @bazqux */
+    class OtherThingy {}
+
+    /** @dingdong */
+    class NopeThingy {}
+
+And then pass the following arguments to either command ``--note foobar --note bazqux``, and only the ``Thingy`` and ``OtherThingy`` class will be used.
+
+You can run commands using the demo from the root of the Amiss distribution like so::
+
+    bin/amiss create-tables-sql --engine mysql --namespace Amiss\\Demo doc/demo/model.php
+    bin/amiss create-tables --dsn 'sqlite:/tmp/foo.sqlite3' --namespace Amiss\\Demo\\Active doc/demo/ar.php
 
 You can also use the command line tools to emit active record classes from an existing database schema with the ``create-ars`` command.
 
