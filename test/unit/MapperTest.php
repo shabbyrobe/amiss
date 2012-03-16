@@ -15,7 +15,7 @@ class MapperTest extends \CustomTestCase
 	{
 		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
 		$mapper->objectNamespace = 'abcd';
-		$found = $mapper->resolveObjectName('foobar');
+		$found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
 		$this->assertEquals('abcd\foobar', $found);
 	}
 
@@ -28,7 +28,7 @@ class MapperTest extends \CustomTestCase
 	{
 		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
 		$mapper->objectNamespace = 'abcd';
-		$found = $mapper->resolveObjectName('efgh\foobar');
+		$found = $this->callProtected($mapper, 'resolveObjectName', 'efgh\foobar');
 		$this->assertEquals('efgh\foobar', $found);
 	}
 
@@ -41,7 +41,7 @@ class MapperTest extends \CustomTestCase
 	{
 		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
 		$mapper->objectNamespace = null;
-		$found = $mapper->resolveObjectName('foobar');
+		$found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
 		$this->assertEquals('foobar', $found);
 	}
 }

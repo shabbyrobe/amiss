@@ -4,11 +4,9 @@ namespace Amiss\Mapper;
 
 class Statics extends \Amiss\Mapper\Base
 {
-	function getMeta($class)
+	protected function createMeta($class)
 	{
 		$info = array();
-		
-		$class = $this->resolveObjectName($class);
 		
 		$rc = new \ReflectionClass($class);
 		

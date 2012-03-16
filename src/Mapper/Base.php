@@ -12,7 +12,13 @@ abstract class Base implements \Amiss\Mapper
 	
 	private $typeHandlerMap = array();
 	
-	abstract function getMeta($class);
+	public function getMeta($class)
+	{
+		$class = $this->resolveObjectname($class);
+		return $this->createMeta($class);
+	}
+	
+	abstract protected function createMeta($class);
 	
 	public function addTypeHandler($handler, $types)
 	{
@@ -24,17 +30,7 @@ abstract class Base implements \Amiss\Mapper
 		}
 	}
 	
-	/**
-	 * Assumes that any name that contains a backslash is already resolved.
-	 * This allows you to use fully qualified class names that are outside
-	 * the mapped namespace.
-	 */
-	public function resolveObjectName($name)
-	{
-		return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
-	}
-	
-	function createObject($meta, $row, $args)
+	public function createObject($meta, $row, $args)
 	{
 		if ($args) {
 			$rc = new \ReflectionClass($meta->class);
@@ -71,7 +67,7 @@ abstract class Base implements \Amiss\Mapper
 		return $object;
 	}
 	
-	function exportRow($meta, $object)
+	public function exportRow($meta, $object)
 	{
 		$row = array();
 		
@@ -111,6 +107,16 @@ abstract class Base implements \Amiss\Mapper
 		return isset($this->typeHandlers[$id]) ? $this->typeHandlers[$id] : false;
 	}
 	
+	/**
+	 * Assumes that any name that contains a backslash is already resolved.
+	 * This allows you to use fully qualified class names that are outside
+	 * the mapped namespace.
+	 */
+	protected function resolveObjectName($name)
+	{
+		return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
+	}
+	
 	protected function getDefaultTable($class)
 	{
 		$table = $class;
@@ -120,7 +126,7 @@ abstract class Base implements \Amiss\Mapper
 		$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
 			return "_".strtolower($match[0]);
 		}, str_replace('_', '', $table)), '_');
-
+		
 		return $table;
 	}
 	

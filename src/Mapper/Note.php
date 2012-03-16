@@ -31,11 +31,9 @@ class Note extends \Amiss\Mapper\Base
 		$this->cache = $cache;
 	}
 	
-	public function getMeta($class)
+	protected function createMeta($class)
 	{
 		$meta = null;
-		
-		$class = $this->resolveObjectName($class);
 		
 		if ($this->cache) {
 			$meta = $this->cache[0]($class);
