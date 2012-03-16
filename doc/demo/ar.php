@@ -47,7 +47,7 @@ class ArtistType extends \Amiss\Active\Record
 	/**
 	 * @var Amiss\Demo\ArtistRecord[]
 	 */
-	private $artists = array();
+	private $artists = null;
 	
 	public function getArtists()
 	{
@@ -57,9 +57,12 @@ class ArtistType extends \Amiss\Active\Record
 		return $this->artists;
 	}
 	
-	public static $relations = array(
-		'artists'=>array('many'=>'ArtistRecord', 'on'=>'artistTypeId'),
-	);
+	public static function getRelations()
+	{
+		return array(
+			'artists'=>array('many'=>'ArtistRecord', 'on'=>'artistTypeId', 'getter'=>'getArtists'),
+		);
+	}
 }
 
 class EventRecord extends \Amiss\Active\Record

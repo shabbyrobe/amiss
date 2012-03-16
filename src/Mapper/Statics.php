@@ -15,8 +15,25 @@ class Statics extends \Amiss\Mapper\Base
 		$table = isset($statics['table']) ? $statics['table'] : $this->getDefaultTable($class);
 		$info = array(
 			'fields'=>array(),
-			'relations'=>isset($statics['relations']) ? $statics['relations'] : array(), 
+			'relations'=>null,
 		);
+		
+		if ($rc->hasMethod('getRelations')) {
+			$relationMethod = $rc->getMethod('getRelations');
+			if ($relationMethod && $relationMethod->isStatic()) {
+				$info['relations'] = $relationMethod->invoke(null);
+			}
+		}
+		
+		if (!$info['relations']) {
+			$info['relations'] = isset($statics['relations']) ? $statics['relations'] : array();
+		}
+		
+		foreach ($info['relations'] as $id=>$rel) {
+			if (isset($rel['getter']) && !isset($rel['setter'])) {
+				$rel['setter'] = 'set'.ucfirst(strpos($rel['getter'], 'get')===0 ? substr($rel['getter'], 3) : $rel['getter']);
+			}
+		}
 		
 		if (isset($statics['defaultFieldType']))
 			 $info['defaultFieldType'] = $statics['defaultFieldType'];
