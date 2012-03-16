@@ -38,7 +38,7 @@ Both scripts will output usage information when run with no arguments.
 
 You can filter the classes by namespace or by annotation for both of these commands. Searching by annotation will allow you to include only classes that have the class level annotations you specify. For example, you can set your classes up like so:
 
-.. code-block: php
+.. code-block:: php
 
     <?php
     /** @foobar */
