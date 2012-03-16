@@ -35,10 +35,11 @@ The one concession to pragmatism that Amiss makes is that while the domain objec
     selecting
     relations
     modifying
+    schema
     helpers
     extending
-
-    active/index
+    active
+    
     development
     glossary
 

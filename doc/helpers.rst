@@ -12,14 +12,10 @@ The ``indexBy()`` method
 .. code-block:: php
 
     <?php
-    class Pants
-    {
-        public $foo;
-    }
     $objects = array(
-        (Pants)array('foo'=>'a'),
-        (Pants)array('foo'=>'b'),
-        (Pants)array('foo'=>'c'),
+        (object)array('foo'=>'a'),
+        (object)array('foo'=>'b'),
+        (object)array('foo'=>'c'),
     );
     
     $manager = new Amiss\Manager(...);
@@ -32,7 +28,7 @@ The ``indexBy()`` method
     var_dump($objects[0] == $indexed['a']); // will output true
 
 
-If you have more than one object with the same property value, indexBy will merrily overwrite an existing key. Pass ``Amiss::INDEX_DUPE_FAIL`` as the third parameter if you would prefer an exception on a duplicate key:
+If you have more than one object with the same property value, ``indexBy`` will merrily overwrite an existing key. Pass ``Amiss::INDEX_DUPE_FAIL`` as the third parameter if you would prefer an exception on a duplicate key:
 
 .. code-block:: php
 
@@ -45,13 +41,13 @@ If you have more than one object with the same property value, indexBy will merr
     $manager = new Amiss\Manager(...);
     $indexed = $manager->indexBy('foo', $objects, Amiss::INDEX_DUPE_FAIL);
 
-BZZT! UnexpectedValueException!
+BZZT! ``UnexpectedValueException``!
 
 
 The ``keyValue()`` method
 -------------------------
 
-``keyValue`` turns an array of objects or arrays in to an array of scalar=>string key/values.
+``keyValue`` scans an array of objects or arrays and selects a property for the key and a property for the value.
 
 ``keyValue`` works in two ways. Firstly, you can feed it the result of a query with two columns and it'll make the first column the key and the second column the value:
 

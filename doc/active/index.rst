@@ -25,10 +25,8 @@ It will benefit you tremendously to understand how the :doc:`/mapper/index` work
 
 .. toctree::
     :maxdepth: 2
-
-    defining
+    
     connecting
-    selecting
     relations
     saving
     schema

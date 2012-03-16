@@ -95,7 +95,7 @@ What about when we have a list of ``Events``, we have retrieved each related lis
 
 Easy! We can use ``Amiss\Manager->getChildren()``.
 
-Before we go any further, let's outline a relation graph present in the ``demo/model.php`` file:
+Before we go any further, let's outline a relation graph present in the ``doc/demo/model.php`` file:
 
 1. ``Event`` has many ``EventArtist``
 2. ``EventArtist`` has one ``Artist``

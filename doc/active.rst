@@ -1,3 +1,57 @@
+Active Records
+==============
+
+From `P of EAA`_:
+An object that wraps a row in a database table or view, encapsulates the database access, and adds domain logic on that data.
+
+.. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
+
+I'm not in love with this pattern, but I have used it in the past with some other libraries. This has been added to facilitate a migration for an old project of mine, but people seem to be quite fond of Active Records so why not include it.
+
+``Amiss\Active\Record`` is an Active Record wrapper around ``Amiss\Manager``. It's not fancy, it's not good, it's not fully-featured, but it does seem to work OK for the quick-n-dirty ports I've done.
+
+It does place the following constraints:
+
+* All Active Records must have an autoincrement primary key if you want to use the ``save`` method. If not, you'll still be able to use ``insert`` and ``update``.
+* Class Hierarchies that use a separate connection must declare a base class.
+
+
+Connecting
+----------
+
+As per the :doc:`connecting` section, create an ``Amiss\Manager``, then pass it to ``Amiss\Active\Record::setManager()``.
+
+.. code-block:: php
+
+    <?php
+    $conn = new Amiss\Connector('sqlite::memory:');
+    $amiss = new Amiss\Manager($conn);
+    Amiss\Active\Record::setManager($amiss);
+    
+    // test it out
+    $test = Amiss\Active\Record::getConnector();
+    var_dump($conn === $test); // outputs true
+
+
+Multiple connections are possible, but require subclasses. The separate connections are then assigned to their respective base class:
+
+.. code-block:: php
+
+    <?php
+    abstract class Db1Record extends Amiss\Active\Record {}
+    abstract class Db2Record extends Amiss\Active\Record {}
+    
+    class Artist extends Db1Record {}
+    class Burger extends Db2Record {}
+    
+    Db1Record::setManager($amiss1);
+    Db2Record::setManager($amiss2);
+    
+    // will show 'false' to prove that the record types are not 
+    // sharing a connection class
+    var_dump(Artist::getManager() === Burger::getManager());
+
+
 Relations
 =========
 
@@ -101,6 +155,8 @@ Unlinke fields, relations are not inheritable. If you delcare relations against 
             );
         }
     }
+
+
 
 
 Lazy Loading
