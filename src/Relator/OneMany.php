@@ -40,14 +40,15 @@ class OneMany
 		}
 		
 		// find query values in source object(s)
+		$fields = $meta->getFields();
 		$resultIndex = array();
 		$ids = array();
 		foreach ($source as $idx=>$object) {
 			$key = array();
 			
 			foreach ($on as $l=>$r) {
-				$lField = $meta->getField($l);
-				$lValue = !isset($field['getter']) ? $object->$l : call_user_func(array($object, $field['getter']));
+				$lField = $fields[$l];
+				$lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
 				
 				$key[] = $lValue;
 				
