@@ -10,6 +10,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	{
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
 		$event = $this->manager->getRelated($eventArtist, 'event');
+		
 		$this->assertTrue($event instanceof Demo\Event);
 		$this->assertEquals('awexxome-fest-20x6', $event->slug);
 	}
