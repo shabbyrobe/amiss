@@ -5,7 +5,7 @@ Annotation Mapper
     More complex mapping should be handled using a custom mapper.
 
 
-To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to ``Amiss\Manager``::
+To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to ``Amiss\Manager``:
 
 .. code-block:: php
 

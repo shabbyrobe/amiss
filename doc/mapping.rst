@@ -1,19 +1,18 @@
 Mapping
-=======
-
-.. toctree::
-    :maxdepth: 2
-
-    mapper/annotation
-    mapper/statics
-    
+=======    
 
 Object mapping with annotations
 -------------------------------
 
 Amiss provides a javadoc-style key/value mapper called ``Amiss\Mapper\Note``, which derives from ``Amiss\Mapper\Base``. 
 
-See :doc:`mapper/annotation` for full instructions on how to use this mapper.
+More information is on this mapper is available here:
+
+.. toctree::
+    :maxdepth: 1
+    
+    mapper/annotation
+
 
 Objects are marked up in this way:
 
@@ -52,7 +51,13 @@ Object mapping with static properties
 
 This type of mapper is really mostly there for the sake of :doc:`active`, which we'll get to later, but if you prefer this to annotations there's nothing stopping you from using it.
 
-See :doc:`mapper/statics` for full instructions on how to use this mapper.
+More information is on this mapper is available here:
+
+.. toctree::
+    :maxdepth: 1
+    
+    mapper/statics
+
 
 .. code-block:: php
 

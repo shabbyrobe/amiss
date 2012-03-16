@@ -51,7 +51,7 @@ Just be aware that although ``Amiss\Connector`` shares 100% of the interface wit
 
 One critical difference between ``PDO`` and ``Amiss\Connector`` is that ``PDO`` will *connect to the database as soon as you instantiate it*. ``Amiss\Connector`` defers creating this connection until it is actually needed.
 
-Creating an instance of ``Amiss\Connector`` is the same as creating an instance of ``PDO``::
+Creating an instance of ``Amiss\Connector`` is the same as creating an instance of ``PDO``:
 
 .. code-block:: php
 
@@ -75,7 +75,7 @@ You can also create an ``Amiss\Connector`` using an array of params like the ini
 
 You can also pass ``Amiss\Manager`` an instance of ``PDO``, or anything else that behaves like a ``PDO`` for that matter, though using ``Amiss\Connector`` instead is highly recommended as some features may not work exactly as expected. 
 
-.. warning:: ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss.
+.. warning:: ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss instead of an ``Amiss\Connector``.
 
 
 .. _PDO: http://www.php.net/manual/en/book.pdo.php

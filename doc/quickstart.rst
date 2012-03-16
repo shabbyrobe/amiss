@@ -16,15 +16,15 @@ See :doc:`configuring` and :doc:`mapping` for more info.
 
     <?php
 
-    // Include autoloader. Amiss is PSR-0 compliant, so this is just for convenience.
+    // Include autoloader. Amiss is PSR-0 compliant, so you can use any loader that supports that standard.
     require_once('/path/to/amiss/src/Loader.php');
     spl_autoload_register(array(new Amiss\Loader, 'load'));
 
-    // Amiss requires a class that inherits (or looks like) \Amiss\Mapper in order to
-    // get information about how your objects map to tables
+    // Amiss requires a class that implements \Amiss\Mapper in order to get information about how 
+    // your objects map to tables
     $mapper = new Amiss\Mapper\Note;
 
-    // This is basically a PDO with a bit of extra fluff
+    // This is basically a PDO with a bit of extra niceness. Don't use a PDO though.
     $connector = new Amiss\Connector('mysql:host=127.0.0.1', 'user', 'password');
 
     // And this binds the whole mess together
@@ -42,29 +42,19 @@ See :doc:`mapping` for more info and advanced topics.
 
     class Event
     {
-        /**
-         * @field
-         */
+        /** @primary */
         public $eventId;
 
-        /**
-         * @field
-         */
+        /** @field */
         public $name;
 
-        /**
-         * @field
-         */
+        /** @field */
         public $startDate;
 
-        /**
-         * @field
-         */
+        /** @field */
         public $venueId;
 
-        /**
-         * @has one Venue venueId
-         */
+        /** @has one Venue venueId */
         public $venue;
     }
 
@@ -75,29 +65,19 @@ See :doc:`mapping` for more info and advanced topics.
      */
     class Venue
     {
-        /**
-         * @field
-         */
+        /** @primary */
         public $venueId;
 
-        /**
-         * @field venueName
-         */
+        /** @field venueName */
         public $name;
 
-        /**
-         * @field
-         */
+        /** @field */
         public $slug;
 
-        /**
-         * @field
-         */
+        /** @field */
         public $address;
 
-        /**
-         * @has one Event
-         */
+        /** @has one Event */
         public $events;
     }
 
@@ -110,7 +90,6 @@ See :doc:`schema` for more info.
 .. code-block:: php
 
     <?php
-
     $tableBuilder = new Amiss\TableBuilder($manager, 'Venue');
     $tableBuilder->createTable();
 
@@ -153,9 +132,7 @@ Relations
 
 Amiss supports one-to-one and one-to-many relations, and provides a plugin for adding additional relationship retrieval methods. See :doc:`relations` for more info.
 
-
-One-to-one
-~~~~~~~~~~
+One-to-one relations:
 
 .. code-block:: php
 
@@ -175,8 +152,7 @@ One-to-one
     $manager->assignRelated($events, 'venue');
 
 
-One-to-many
-~~~~~~~~~~~
+One-to-many relations:
 
 .. code-block:: php
 
@@ -209,9 +185,7 @@ Modifying
 
 See :doc:`modifying` for more info.
 
-
-By Object
-~~~~~~~~~
+Modifying by object:
 
 .. code-block:: php
 
@@ -238,8 +212,7 @@ By Object
     $manager->save($event);
 
 
-By Table
-~~~~~~~~
+Modifying by table:
 
 .. code-block:: php
 
