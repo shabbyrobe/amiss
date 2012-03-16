@@ -114,7 +114,7 @@ class TableBuilder
 				if (is_string($details['on'])) {
 					$cols[] = $details['on'];
 				}
-				else {
+				elseif ($details['on']) {
 					foreach ($details['on'] as $l=>$r) {
 						if (is_numeric($l)) $l = $r;
 						$cols[] = $l;
@@ -132,7 +132,7 @@ class TableBuilder
 		$fields = $this->meta->getFields();
 		
 		if (!$fields)
-			throw new Exception("Can't create an object that doesn't declare fields");
+			throw new Exception("Tried to create table for object {$this->meta->class} but it doesn't declare fields");
 		
 		$table = '`'.str_replace('`', '', $this->meta->table).'`';
 		$connector = $this->manager->getConnector();
