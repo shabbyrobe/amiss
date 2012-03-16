@@ -3,10 +3,10 @@ Selecting
 
 ``Amiss\Manager`` has two methods for handling object retrieval: ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways::
 
-    get ( string $model, string $positionalWhere, mixed $param1[, mixed $param2...])
-    get ( string $model, string $namedWhere, array $params )
-    get ( string $model, array $criteria )
-    get ( string $model, Amiss\Criteria $criteria )
+    get ( string $modelName, string $positionalWhere, mixed $param1[, mixed $param2...])
+    get ( string $modelName, string $namedWhere, array $params )
+    get ( string $modelName, array $criteria )
+    get ( string $modelName, Amiss\Criteria $criteria )
 
 
 The parameters are as follows:
@@ -23,42 +23,41 @@ The parameters are as follows:
 	
 	.. attribute:: $criteria
 	
-	    An Amiss\Criteria instance, or an array that can be converted into an Amiss\Criteria instance.
+	    An ``Amiss\Criteria`` instance, or an array that can be converted into an Amiss\Criteria instance.
 	    
 
 
 Single Objects
-~~~~~~~~~~~~~~
+--------------
 
 Single objets are retrieved using the ``get`` method. This is designed to retrieve only one object - it will throw an exception if more than one row is found.
 
 
 Single object using positional parameters, shorthand
-----------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-.. code-block:: html+php
+.. code-block:: php
 
     <?php
-    $duke = $amiss->get('Artist', 'slug=?', 'duke-nukem');
+    $duke = $manager->get('Artist', 'slug=?', 'duke-nukem');
 
 
 Single object with named parameters, shorthand
-----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: html+php
+.. code-block:: php
 
     <?php
-    $duke = $amiss->get('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
+    $duke = $manager->get('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
 
 
 Single object using named parameters, long form
------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: html+php
+.. code-block:: php
 
     <?php
-    $artist = $amiss->get(
+    $artist = $manager->get(
         'Artist', 
         array(
             'where'=>'slug=:slug', 
@@ -68,9 +67,9 @@ Single object using named parameters, long form
 
 
 Single object using an Amiss\Criteria object
---------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: html+php
+.. code-block:: php
 
     <?php
     $criteria = new Amiss\Criteria\Select;
@@ -80,29 +79,29 @@ Single object using an Amiss\Criteria object
     // this is detected when using other methods
     $criteria->namedParams = true;
     
-    $artist = $amiss->get('Artist', $criteria);
+    $artist = $manager->get('Artist', $criteria);
 
 
 Lists
-~~~~~
+-----
 
 This will return every row in the Artist table (careful!):
 
-.. code-block:: html+php
+.. code-block:: php
 
     <?php
-    $artists = $amiss->getList('Artist');
+    $artists = $manager->getList('Artist');
 
 
 Paged List
-----------
+~~~~~~~~~~
 
 Retrieve page 1, page size 30:
 
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList('Artist', array('page'=>array(1, 30)));
+    $artists = $manager->getList('Artist', array('page'=>array(1, 30)));
 
 
 Retrieve page 2, page size 30:
@@ -110,7 +109,7 @@ Retrieve page 2, page size 30:
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList('Artist', array('page'=>array(2, 30)));
+    $artists = $manager->getList('Artist', array('page'=>array(2, 30)));
 
 
 Limit to 30 rows, skip 60 (equivalent to "Retrieve page 3, page size 30"):
@@ -118,7 +117,7 @@ Limit to 30 rows, skip 60 (equivalent to "Retrieve page 3, page size 30"):
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList('Artist', array('limit'=>30, 'offset'=>60));
+    $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
 
 
 Limit to 30 rows:
@@ -126,18 +125,18 @@ Limit to 30 rows:
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList('Artist', array('limit'=>30);
+    $artists = $manager->getList('Artist', array('limit'=>30);
 
 
 Ordering
---------
+~~~~~~~~
 
 This will order by ``priority`` descending, then by ``sequence`` ascending:
 
-.. code-block:: html+php
+.. code-block:: php
     
     <?php
-    $eventArtists = $amiss->getList('EventArtist', array(
+    $eventArtists = $manager->getList('EventArtist', array(
         'order'=>array(
             'priority'=>'desc',
             'sequence',
@@ -150,11 +149,51 @@ You can also order ascending on a single column with the following shorthand:
 .. code-block:: php
 
     <?php
-    $eventArtists = $amiss->getList('EventArtist', array('order'=>'priority'));
+    $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
+
+
+Constructor Arguments
+---------------------
+
+If you are mapping an object that requires constructor arguments, you can pass them using criteria.
+
+.. code-block:: php
+    
+    <?php
+    class Foo
+    {
+        /** @primary */
+        public $id;
+
+        public function __construct(Bar $bar)
+        {
+            $this->bar = $bar;
+        }
+    }
+
+    class Bar {}
+
+    // retrieving by primary with args
+    $manager->getByPk('Foo', 1, array(new Bar));
+
+    // retrieving single object by criteria with args
+    $manager->get('Foo', array(
+        'where'=>'id=?',
+        'params'=>array(1),
+        'args'=>array(new Bar)
+    ));
+
+    // retrieving list by criteria with args
+    $manager->getList('Foo', array(
+        'args'=>array(new Bar)
+    ));
+
+
+.. note:: Amiss does not yet support using row values as constructor arguments.
 
 
 Clauses
-~~~~~~~
+-------
 
 The "where" clause is written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that your clauses may not necessarily be portable.
 
@@ -165,7 +204,7 @@ This is a stupid query, but it does illustrate what this aspect will let you get
 .. code-block:: php
     
     <?php
-    $artists = $amiss->getList(
+    $artists = $manager->getList(
         'Artist', 
         'artistTypeId=:foo AND artistId IN (SELECT artistId FROM event_artist WHERE eventId=:event)', 
         array(':foo'=>1, ':event'=>5)
@@ -177,14 +216,14 @@ You can also just specify an array for the where clause if you are passing in an
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList(
+    $artists = $manager->getList(
         'Artist',
         array('where'=>array('artistTypeId'=>1))
     );
 
 
 "In" Clauses
-------------
+~~~~~~~~~~~~
 
 Vanilla PDO statements with parameters don't work with arrays and IN clauses:
 
@@ -196,7 +235,7 @@ Vanilla PDO statements with parameters don't work with arrays and IN clauses:
     $stmt->bindValue(':foo', array(1, 2, 3));
     $stmt->execute(); 
 
-BZZT! Nope. No workee.
+BZZT! Nope.
 
 Amiss handles unrolling non-nested array parameters:
 
@@ -218,7 +257,7 @@ You can use this with ``Amiss\Manager`` easily:
 .. code-block:: php
 
     <?php
-    $artists = $amiss->getList(
+    $artists = $manager->getList(
         'Artist', 
         'artistId IN (:artistIds)', 
         array(':artistIds'=>array(1, 2, 3))
@@ -229,24 +268,30 @@ You can use this with ``Amiss\Manager`` easily:
 
 	This does not work with positional parameters (question-mark style).
 
+.. warning::
 
-Object Population Rules
-~~~~~~~~~~~~~~~~~~~~~~~
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway)::
 
-Amiss will just throw each field into an object property with a similar name. It won't bother to check if it exists, it won't bother to check if it cares to receive it, it will just smash that value in regardless of whether it fits or not.
+    .. code-block: php
 
-By default, any field name will have underscores stripped, and the character trailing an underscore will be uppercased. For example, the database field ``artist_name`` will be translated to the property ``artistName``.
+        <?php
+        $criteria = new Criteria\Query;
+        $criteria->params = array(
+            ':foo'=>array(1, 2),
+            ':bar'=>array(3, 4),
+        );
+        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
+        
+        list ($where, $params) = $criteria->buildClause();
+        echo $where;
+    
+    The output should be::
 
-This default behaviour will, like so many other aspects of Amiss, be fine and dandy for almost everything you'll ever do. 
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
+    
+    However, the output will actually be::
+        
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
 
-But what about when it's not? There are two options.
-
-
-Overriding the Default Name Mapper
-----------------------------------
-
-
-Custom Object Population
-------------------------
-
+    It's not pretty, but Amiss does not intend to babysit you so it's unlikely it will be fixed.
 

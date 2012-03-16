@@ -6,7 +6,6 @@ An object that wraps a row in a database table or view, encapsulates the databas
 
 Amiss contains a very simple approximation of a Data Mapper. It will allow you to map objects to and from a database while keeping your model objects free of any persistence-specific code.
 
-
 .. toctree::
     :maxdepth: 2
 
