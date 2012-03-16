@@ -24,6 +24,7 @@ class RecordEventTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::beforeUpdate
 	 * @group active
+	 * @group unit
 	 */
 	public function testBeforeUpdate()
 	{
@@ -36,6 +37,7 @@ class RecordEventTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::beforeInsert
 	 * @group active
+	 * @group unit
 	 */
 	public function testBeforeInsert()
 	{
@@ -48,6 +50,7 @@ class RecordEventTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::delete
 	 * @group active
+	 * @group unit
 	 */
 	public function testBeforeDelete()
 	{
@@ -60,6 +63,7 @@ class RecordEventTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::beforeSave
 	 * @group active
+	 * @group unit
 	 */
 	public function testBeforeSaveCalledOnInsert()
 	{

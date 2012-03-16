@@ -66,52 +66,22 @@ class RecordTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\Active\Record::__callStatic
 	 * @group active
+	 * @group unit
 	 */
-	public function testGetByExplicitPk()
+	public function testGetByPk()
 	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
+		$manager = $this->getMock('Amiss\Manager', array('getByPk'), array($this->db, $this->mapper));
 		\Amiss\Active\Record::setManager($manager);
 		
-		$manager->expects($this->once())->method('get')->with(
+		$manager->expects($this->once())->method('getByPk')->with(
 			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
-			$this->equalTo(array('where'=>'fooBar=?', 'params'=>array(1)))
+			$this->equalTo(1)
 		);
 		TestActiveRecord1::getByPk(1);
 	}
 	
 	/**
-	 * @covers Amiss\Active\Record::__callStatic
 	 * @group active
-	 */
-	public function testGetByImplicitPk()
-	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
-		\Amiss\Active\Record::setManager($manager);
-		
-		$manager->expects($this->once())->method('get')->with(
-			$this->equalTo(__NAMESPACE__.'\TestActiveRecord2'), 
-			$this->equalTo(array('where'=>'testActiveRecord2Id=?', 'params'=>array(1)))
-		);
-		TestActiveRecord2::getByPk(1);
-	}
-	
-	/**
-	 * @covers Amiss\Active\Record::__callStatic
-	 * @group active
-	 */
-	public function testManyImplicitPks()
-	{
-		$manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
-		\Amiss\Active\Record::setManager($manager);
-		
-		TestActiveRecord2::getByPk(1);
-		TestActiveRecord3::getByPk(1);
-		
-		$this->assertEquals(TestActiveRecord2::getMeta()->primary, 'testActiveRecord2Id');
-		$this->assertEquals(TestActiveRecord3::getMeta()->primary, 'testActiveRecord3Id');
-	}
-	
-	/**
 	 * @group active
 	 */
 	public function testGetRelated()

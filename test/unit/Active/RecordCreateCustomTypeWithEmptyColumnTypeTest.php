@@ -19,6 +19,7 @@ class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 	/**
 	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
+	 * @group unit
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
 	{

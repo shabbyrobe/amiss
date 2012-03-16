@@ -9,17 +9,18 @@ class DeleteObjectTest extends \NoteMapperDataTestCase
 		parent::setUp();
 		
 		$this->artist = $this->manager->get('Artist', 'artistId=?', 1);
-		$this->assertEquals('Limozeen', $this->artist->name);
+		if (!$this->artist)
+			throw new \UnexpectedValueException("Unexpected test data");
 	}
 	
 	/**
 	 * Ensures the signature for the 'autoincrement primary key' update method works
-	 *   Amiss\Manager->delete( object $object , string $pkField )
+	 *   Amiss\Manager->delete( object $object )
 	 * 
 	 */
 	public function testDeleteObjectByAutoincrementPrimaryKey()
 	{
-		$this->manager->delete($this->artist, 'artistId');
+		$this->manager->delete($this->artist);
 		$this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
 		
 		// sanity check: make sure we didn't delete everything!

@@ -20,6 +20,7 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
 	 * @group tablebuilder
+	 * @group unit
 	 */
 	public function testCreateTableWithCustomTypeUsesRubbishValueWhenTypeHandlerNotRegistered()
 	{
@@ -39,6 +40,7 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	 * @covers Amiss\TableBuilder::buildFields
 	 * @group active
 	 * @group tablebuilder
+	 * @group unit
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
 	{
