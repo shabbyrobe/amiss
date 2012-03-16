@@ -46,7 +46,9 @@ class OneMany
 			$key = array();
 			
 			foreach ($on as $l=>$r) {
-				$lValue = !isset($relation['getter']) ? $object->$l : call_user_func(array($object, $relation['getter']));
+				$lField = $meta->getField($l);
+				$lValue = !isset($field['getter']) ? $object->$l : call_user_func(array($object, $field['getter']));
+				
 				$key[] = $lValue;
 				
 				if (!isset($ids[$l])) {
