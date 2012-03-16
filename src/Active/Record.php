@@ -136,7 +136,7 @@ abstract class Record
 	
 	public function __get($name)
 	{
-		$meta = static::getManager()->getMeta(get_called_class());
+		$meta = static::getMeta();
 		
 		$fields = $meta->getFields();
 		if (!isset($fields[$name])) {
