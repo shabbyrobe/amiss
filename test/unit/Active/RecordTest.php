@@ -74,8 +74,7 @@ class RecordTest extends \CustomTestCase
 		
 		$manager->expects($this->once())->method('get')->with(
 			$this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
-			$this->equalTo('fooBar=?'), 
-			$this->equalTo(1)
+			$this->equalTo(array('where'=>'fooBar=?', 'params'=>array(1)))
 		);
 		TestActiveRecord1::getByPk(1);
 	}
@@ -91,8 +90,7 @@ class RecordTest extends \CustomTestCase
 		
 		$manager->expects($this->once())->method('get')->with(
 			$this->equalTo(__NAMESPACE__.'\TestActiveRecord2'), 
-			$this->equalTo('testActiveRecord2Id=?'), 
-			$this->equalTo(1)
+			$this->equalTo(array('where'=>'testActiveRecord2Id=?', 'params'=>array(1)))
 		);
 		TestActiveRecord2::getByPk(1);
 	}

@@ -93,14 +93,20 @@ class Manager
 		return $objects;
 	}
 	
-	public function getByPk($class, $id)
+	public function getByPk($class, $id, $args=null)
 	{
 		$meta = $this->getMeta($class);
 		$primary = $meta->primary;
 		if (!$primary)
 			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
 		
-		return $this->get($meta->class, $primary.'=?', $id);
+		$criteria = array(
+			'where'=>$primary.'=?',
+			'params'=>array($id),
+		);
+		if ($args) $criteria['args'] = $args;
+		
+		return $this->get($meta->class, $criteria);
 	}
 	
 	public function count($object, $criteria=null)
