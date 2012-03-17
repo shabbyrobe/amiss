@@ -25,7 +25,7 @@ class Note extends \Amiss\Mapper\Base
 		elseif ($cache == 'apc') {
 			$cache = array(
 				function($key) use ($cache) { return apc_fetch($key); },
-				function($key, $value) use ($cache) { return apc_store($key, $value); },
+				function($key, $value) use ($cache) { return apc_store($key, $value, 86400); },
 			);
 		}
 		$this->cache = $cache;
