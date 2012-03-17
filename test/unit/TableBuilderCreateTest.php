@@ -17,7 +17,6 @@ class TableBuilderCreateTest extends \CustomTestCase
 	/**
 	 * @group tablebuilder
 	 * @group unit
-	 * @covers Amiss\TableBuilder::createTable
 	 */
 	public function testCreateDefaultTableSql()
 	{
