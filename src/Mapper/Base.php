@@ -134,9 +134,9 @@ abstract class Base implements \Amiss\Mapper
 			
 			if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
 			
-			$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
+			$table = '`'.trim(preg_replace_callback('/[A-Z]/', function($match) {
 				return "_".strtolower($match[0]);
-			}, str_replace('_', '', $table)), '_');
+			}, str_replace('_', '', $table)), '_').'`';
 		}
 		
 		return $table;
@@ -146,7 +146,7 @@ abstract class Base implements \Amiss\Mapper
 	{
 		$unnamed = array();
 		foreach ($fields as $prop=>$f) {
-			if (!$f['name']) $unnamed[$prop] = $prop;
+			if (!isset($f['name']) || !$f['name']) $unnamed[$prop] = $prop;
 		}
 		
 		if ($unnamed) {
