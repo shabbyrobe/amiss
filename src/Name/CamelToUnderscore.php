@@ -53,5 +53,5 @@ class CamelToUnderscore implements Translator
 		}
 		
 		return $trans;
-	} 
+	}
 }

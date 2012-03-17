@@ -4,9 +4,9 @@ namespace Amiss\Mapper;
 
 abstract class Base implements \Amiss\Mapper
 {
-	public $unnamedPropertyMapper;
+	public $unnamedPropertyTranslator;
 	
-	public $defaultTableNameMapper;
+	public $defaultTableNameTranslator;
 	
 	public $typeHandlers = array();
 	
@@ -121,22 +121,23 @@ abstract class Base implements \Amiss\Mapper
 	
 	protected function getDefaultTable($class)
 	{
-		if (!$this->defaultTableNameMapper) {
-			$this->defaultTableNameMapper = function ($table) {
-				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-		
-				$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
-					return "_".strtolower($match[0]);
-				}, str_replace('_', '', $table)), '_');
-				
-				return $table;
-			};
+		$table = null;
+		if ($this->defaultTableNameTranslator) {
+			if ($this->defaultTableNameTranslator instanceof \Amiss\Name\Translator) 
+				$table = $this->defaultTableNameTranslator->to($class);
+			else
+				$table = call_user_func($this->defaultTableNameTranslator, $class);
 		}
 		
-		if ($this->defaultTableNameMapper instanceof \Amiss\Name\Translator) 
-			$table = $this->defaultTableNameMapper->to($class);
-		else
-			$table = call_user_func($this->defaultTableNameMapper, $class);
+		if ($table === null) {
+			$table = $class;
+			
+			if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
+			
+			$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
+				return "_".strtolower($match[0]);
+			}, str_replace('_', '', $table)), '_');
+		}
 		
 		return $table;
 	}
@@ -149,8 +150,8 @@ abstract class Base implements \Amiss\Mapper
 		}
 		
 		if ($unnamed) {
-			if ($this->unnamedPropertyMapper)
-				$unnamed = $this->unnamedPropertyMapper->to($unnamed);
+			if ($this->unnamedPropertyTranslator)
+				$unnamed = $this->unnamedPropertyTranslator->to($unnamed);
 			
 			foreach ($unnamed as $name=>$field) {
 				$fields[$name]['name'] = $field;
