@@ -130,7 +130,7 @@ If your property/field mappings are not quite able to be managed by the defaults
     Converts a property name to a database column name and vice-versa. This property *only* accepts an instance of ``Amiss\Name\Translator``. It uses the ``to()`` method to convert a property name to a column name, and the ``from()`` method to convert a column name back to a property name.
 
 
-You can create your own name translator by implementing ``Amiss\\Name\\Translator`` and defining the following methods:
+You can create your own name translator by implementing ``Amiss\\Name\\Translator`` and defining the following methods::
 
     string to(string $name)
     string from(string $name)
@@ -155,6 +155,37 @@ This may be fine for 98% of your interaction with the database (trust me - it re
 How are you persisting dates? Probably as a YYYY-MM-DD formatted string, yeah? Maybe as a unix timestamp. What about the occasional serialised object?
 
 ``Amiss\Mapper\Base`` provides a facility for handling specific database types arbirtrarily.
+
+
+Using Type Handlers
+^^^^^^^^^^^^^^^^^^^
+
+Amiss provides the following type handlers out of the box:
+
+.. py:class:: Amiss\Type\Date($withTime=true, $timeZone=null)
+
+    Converts database ``DATE`` or ``DATETIME`` into a PHP ``DateTime`` on object creation and PHP DateTime objects into a ``DATE`` or ``DATETIME`` on row export.
+
+    :param withTime: Pass ``true`` if the type is a ``DATETIME``, ``false`` if it's a ``DATE``
+    :param timeZone: Use this timezone with all created ``DateTime`` objects. If not passed, will rely on PHP's default timezone (see `date_default_timezone_set <http://php.net/date_default_timezone_set>`_)
+
+
+In order to register this handler with Amiss and allow it to be used, you need to either assign it directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler(s), $id)``:
+
+.. code-block:: php
+
+    <?php
+    // anything which derives from Amiss\Mapper\Base will work.
+    $mapper = new Amiss\Mapper\Note;
+    $dateHandler = new Amiss\Type\Date;
+    $mapper->addTypeHandler($dateHandler, array('datetime', 'timestamp'));
+
+
+.. note:: Type handler IDs are always lower case, even if the field type contains uppercase letters
+
+
+Creating your own type handler
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface.
 
@@ -202,7 +233,7 @@ The following (naive) handler demonstrates serialising/deserialising an object i
     }
 
 
-In order to register this handler with Amiss and allow it to be used, you need to call ``Amiss\Mapper\Base::addTypeHandler($typeHandler)``:
+Define an object and register this handler with your mapper:
 
 .. code-block:: php
 
@@ -259,7 +290,7 @@ To determine the id for the handler to use, it takes everything up to the first 
 .. code-block:: php
 
     <?php
-    class Foo extends \Amiss\Active\Record
+    class Foo
     {
         /**
          * @field
