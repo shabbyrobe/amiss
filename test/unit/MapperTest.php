@@ -9,7 +9,7 @@ class MapperTest extends \CustomTestCase
 	/**
 	 * @group unit
 	 * @group mapper
-	 * @covers Amiss\Mapper::resolveObjectName
+	 * @covers Amiss\Mapper\Base::resolveObjectName
 	 */
 	public function testResolveObjectNameWithNonNamespacedName()
 	{
@@ -18,11 +18,11 @@ class MapperTest extends \CustomTestCase
 		$found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
 		$this->assertEquals('abcd\foobar', $found);
 	}
-
+	
 	/**
 	 * @group unit
 	 * @group mapper
-	 * @covers Amiss\Mapper::resolveObjectName
+	 * @covers Amiss\Mapper\Base::resolveObjectName
 	 */
 	public function testResolveObjectNameWithNamespacedName()
 	{
@@ -31,11 +31,11 @@ class MapperTest extends \CustomTestCase
 		$found = $this->callProtected($mapper, 'resolveObjectName', 'efgh\foobar');
 		$this->assertEquals('efgh\foobar', $found);
 	}
-
+	
 	/**
 	 * @group unit
 	 * @group mapper
-	 * @covers Amiss\Mapper::resolveObjectName
+	 * @covers Amiss\Mapper\Base::resolveObjectName
 	 */
 	public function testResolveObjectNameWithoutNamespaceWhenNoNamespaceSet()
 	{
@@ -43,5 +43,122 @@ class MapperTest extends \CustomTestCase
 		$mapper->objectNamespace = null;
 		$found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
 		$this->assertEquals('foobar', $found);
+	}
+	
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @dataProvider dataForDefaultTableName
+	 * @covers Amiss\Mapper\Base::getDefaultTable
+	 */
+	public function testDefaultTableNameWhenNoTranslatorSet($name, $result)
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+		$table = $this->callProtected($mapper, 'getDefaultTable', $name);
+		$this->assertEquals($result, $table);
+	}
+	
+	public function dataForDefaultTableName()
+	{
+		return array(
+			array('Artist', '`artist`'),
+			array('ArtistPants', '`artist_pants`'),
+			array('ArtistPantsBurger', '`artist_pants_burger`'),
+		);
+	}
+	
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @dataProvider dataForDefaultTableNameWithTranslator
+	 * @covers Amiss\Mapper\Base::getDefaultTable
+	 */
+	public function testDefaultTableNameWithTranslator($name, $result)
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+		$mapper->defaultTableNameTranslator = function ($class) {
+			return 'woohoo';
+		};
+		$table = $this->callProtected($mapper, 'getDefaultTable', $name);
+		$this->assertEquals($result, $table);
+	}
+	
+	public function dataForDefaultTableNameWithTranslator()
+	{
+		return array(
+			array('Artist', 'woohoo'),
+			array('ArtistType', 'woohoo'),
+			array('ArtistPantsBurger', 'woohoo'),
+			array('', 'woohoo'),
+		);
+	}
+	
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @dataProvider dataForDefaultTableName
+	 * @covers Amiss\Mapper\Base::getDefaultTable
+	 */
+	public function testDefaultTableNameFallbackWhenTranslatorReturnsNull($name, $result)
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+		$mapper->defaultTableNameTranslator = function ($class) {
+			return null;
+		};
+		$table = $this->callProtected($mapper, 'getDefaultTable', $name);
+		$this->assertEquals($result, $table);
+	}
+	
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @covers Amiss\Mapper\Base::resolveUnnamedFields
+	 */
+	public function testResolveUnnamedFieldsColumn()
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+		
+		$mapper->unnamedPropertyTranslator = new TestPropertyTranslator; 
+		
+		$fields = array(
+			'fooBar'=>array(),
+			'fooBaz'=>array('name'=>''),
+			'pants_yep'=>array(),
+			'ahoy'=>array('name'=>'ahoy'),
+			'ding'=>array('name'=>'dingdong'),
+		);
+		
+		$expected = array(
+			'fooBar'=>array('name'=>'field_fooBar'),
+			'fooBaz'=>array('name'=>'field_fooBaz'),
+			'pants_yep'=>array('name'=>'field_pants_yep'),
+			'ahoy'=>array('name'=>'ahoy'),
+			'ding'=>array('name'=>'dingdong'),
+		);
+		
+		$found = $this->callProtected($mapper, 'resolveUnnamedFields', $fields);
+		
+		$this->assertEquals($expected, $found);
+	}
+}
+
+class TestPropertyTranslator implements \Amiss\Name\Translator
+{
+	public function to(array $names)
+	{
+		$trans = array();
+		foreach ($names as $n) {
+			$trans[$n] = 'field_'.$n;
+		}
+		return $trans;
+	}
+	
+	public function from(array $names)
+	{
+		$trans = array();
+		foreach ($names as $n) {
+			$trans[$n] = substr($n, 6);
+		}
+		return $trans;
 	}
 }
