@@ -1,8 +1,8 @@
 <?php
 
-namespace Amiss\Test\Unit\Active;
+namespace Amiss\Test\Unit;
 
-class RecordTest extends \CustomTestCase
+class ActiveRecordTest extends \CustomTestCase
 {
 	public function setUp()
 	{

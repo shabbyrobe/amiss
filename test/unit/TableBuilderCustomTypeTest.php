@@ -1,24 +1,21 @@
 <?php
 
-namespace Amiss\Test\Unit\Active;
+namespace Amiss\Test\Unit;
 
 use Amiss\TableBuilder;
 
-class RecordCreateCustomTypeTest extends \CustomTestCase
+class TableBuilderCustomTypeTest extends \CustomTestCase
 {
 	public function setUp()
 	{
-		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
 		$this->mapper = new \Amiss\Mapper\Statics();
 		$this->manager = new \Amiss\Manager($this->connector, $this->mapper);
-		\Amiss\Active\Record::setManager($this->manager);
-		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateActiveRecordWithCustomType');
+		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithCustomType');
 	}
 	
 	/**
 	 * @covers Amiss\TableBuilder::buildFields
-	 * @group active
 	 * @group tablebuilder
 	 * @group unit
 	 */
@@ -26,7 +23,7 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	{
 		$pattern = "
 			CREATE TABLE `bar` (
-				`testCreateActiveRecordId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				`testCreateId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 				`foo1` slappywag,
 				`foo2` slappywag,
 				`pants` int unsigned not null
@@ -38,17 +35,16 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\TableBuilder::buildFields
-	 * @group active
 	 * @group tablebuilder
 	 * @group unit
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
 	{
-		$this->mapper->addTypeHandler(new TestCreateActiveRecordWithCustomTypeTypeHandler, 'slappywag');
+		$this->mapper->addTypeHandler(new TestCreateWithCustomTypeTypeHandler, 'slappywag');
 		
 		$pattern = "
 			CREATE TABLE `bar` (
-				`testCreateActiveRecordId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				`testCreateId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 				`foo1` OH YEAH,
 				`foo2` OH YEAH,
 				`pants` int unsigned not null
@@ -60,10 +56,10 @@ class RecordCreateCustomTypeTest extends \CustomTestCase
 	}
 }
 
-class TestCreateActiveRecordWithCustomType extends \Amiss\Active\Record
+class TestCreateWithCustomType
 {
 	public static $table = 'bar';
-	public static $primary = 'testCreateActiveRecordId';
+	public static $primary = 'testCreateId';
 	
 	public static $fields = array(
 		'foo1'=>'slappywag',
@@ -72,7 +68,7 @@ class TestCreateActiveRecordWithCustomType extends \Amiss\Active\Record
 	);
 }
 
-class TestCreateActiveRecordWithCustomTypeTypeHandler implements \Amiss\Type\Handler
+class TestCreateWithCustomTypeTypeHandler implements \Amiss\Type\Handler
 {
 	function prepareValueForDb($value, $object, $fieldName)
 	{

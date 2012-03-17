@@ -1,10 +1,10 @@
 <?php
 
-namespace Amiss\Test\Unit\Active;
+namespace Amiss\Test\Unit;
 
 use Amiss\Active\Record;
 
-class RecordEventTest extends \CustomTestCase
+class ActiveRecordEventTest extends \CustomTestCase
 {
 	public function setUp()
 	{

@@ -1,10 +1,10 @@
 <?php
 
-namespace Amiss\Test\Unit\Active;
+namespace Amiss\Test\Unit;
 
 use Amiss\TableBuilder;
 
-class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
+class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 {
 	public function setUp()
 	{
@@ -18,7 +18,7 @@ class RecordCreateCustomTypeWithEmptyColumnTypeTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\TableBuilder::buildFields
-	 * @group active
+	 * @group tablebuilder
 	 * @group unit
 	 */
 	public function testCreateTableWithCustomTypeUsesTypeHandler()
