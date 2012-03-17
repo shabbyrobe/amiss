@@ -89,10 +89,10 @@ Common Mapper Configuration
 Both ``Amiss\Mapper\Note`` and ``Amiss\Mapper\Statics`` derive from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
 
 
-Name mapping
-~~~~~~~~~~~~
+Name translation
+~~~~~~~~~~~~~~~~
 
-If your property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name mapper to do the job for you using the following properties:
+If your property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name translator to do the job for you using the following properties:
 
 
 .. py:attribute:: Amiss\\Mapper\\Base->objectNamespace
@@ -118,14 +118,31 @@ If your property/field mappings are not quite able to be managed by the defaults
         }
 
 
-.. py:attribute:: Amiss\\Mapper\\Base->defaultTableNameMapper
+.. py:attribute:: Amiss\\Mapper\\Base->defaultTableNameTranslator
     
-    Converts an object name to a table name. This property accepts either a PHP :term:`callback` type or an instance of ``Amiss\Name\Mapper``, although in the latter case, only the ``to()`` method will ever be used.
+    Converts an object name to a table name. This property accepts either a PHP :term:`callback` type or an instance of ``Amiss\Name\Translator``, although in the latter case, only the ``to()`` method will ever be used.
+
+    If the value returned by your translator function is equal to (===) ``null``, ``Amiss\Mapper\Base`` will revert to the standard ``TableName`` to ``table_name`` method.
 
 
-.. py:attribute:: Amiss\\Manager\\Base->unnamedPropertyMapper
+.. py:attribute:: Amiss\\Manager\\Base->unnamedPropertyTranslator
     
-    Converts a property name to a database column name and vice-versa. This property *only* accepts an instance of ``Amiss\Name\Mapper``. It uses the ``to()`` method to convert a property name to a column name, and the ``from()`` method to convert a column name back to a property name.
+    Converts a property name to a database column name and vice-versa. This property *only* accepts an instance of ``Amiss\Name\Translator``. It uses the ``to()`` method to convert a property name to a column name, and the ``from()`` method to convert a column name back to a property name.
+
+
+You can create your own name translator by implementing ``Amiss\\Name\\Translator`` and defining the following methods:
+
+    string to(string $name)
+    string from(string $name)
+
+
+It is helpful to name the translator based on the translation with the word "To" inbetween, i.e. ``CamelToUnderscore``.
+
+Speaking of which, Amiss comes with the following name translators:
+
+.. py:class:: Amiss\\Name\\CamelToUnderscore
+
+    Translates ``TableName`` to ``table_name`` using the ``to()`` method, and back from ``table_name`` to ``TableName`` using the ``from()`` method.
 
 
 Type Handling

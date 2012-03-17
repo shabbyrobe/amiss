@@ -19,7 +19,7 @@ Documentation
 
 The core of Amiss is the Data Mapper.
 
-From `P of EAA <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: 
+From Martin Fowler's `Patterns of Enterprise Application Architecture <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: 
 
     A [Data Mapper is a] layer of Mappers (473) that moves data between objects 
     and a database while keeping them independent of each other and the mapper itself.
