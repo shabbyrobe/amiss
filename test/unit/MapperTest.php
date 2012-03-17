@@ -140,6 +140,40 @@ class MapperTest extends \CustomTestCase
 		
 		$this->assertEquals($expected, $found);
 	}
+	
+	/**
+	 * @group mapper
+	 * @covers Amiss\Mapper\Note::determineTypeHandler
+	 * @dataProvider dataForDetermineTypeHandler
+	 */
+	public function testDetermineTypeHandler($in, $out)
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+		$mapper->typeHandlers[$out] = $out;
+		$found = $this->callProtected($mapper, 'determineTypeHandler', $in);
+		$this->assertEquals($out, $found);
+	}
+	
+	public function dataForDetermineTypeHandler()
+	{
+		return array(
+			array('VARCHAR(80)', 'varchar'),
+			array('VARCHAR (80) NOT NULL FOO BAR', 'varchar'),
+			array('', ''),
+			array('ID', 'id'),
+			array('BZZ|BZZ', 'bzz'),
+			array('  foo bar', 'foo'),
+			array('|  foo bar', ''),
+		);
+	}
+	
+	/**
+	 * @covers Amiss\Mapper
+	 */
+	public function testMapperInterface()
+	{
+		$mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+	}
 }
 
 class TestPropertyTranslator implements \Amiss\Name\Translator

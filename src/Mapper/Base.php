@@ -103,7 +103,7 @@ abstract class Base implements \Amiss\Mapper
 		// this splits off any extra crap that you may have defined
 		// in the field's definition, i.e. "varchar(80) not null etc etc"
 		// becomes "varchar"
-		$x = preg_split('@[ \(]@', $type, 2);
+		$x = preg_split('@[^A-z0-9\-\_]@', trim($type), 2);
 		$id = strtolower($x[0]);
 		
 		return isset($this->typeHandlers[$id]) ? $this->typeHandlers[$id] : false;

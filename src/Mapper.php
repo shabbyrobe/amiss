@@ -1,7 +1,8 @@
-<?php 
+<?php
 
 namespace Amiss;
 
+// @codeCoverageIgnoreStart
 interface Mapper
 {
 	function getMeta($class);

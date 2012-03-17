@@ -30,6 +30,8 @@ class ActiveRecordTest extends \CustomTestCase
 		
 	/**
 	 * @group active
+	 * @covers Amiss\Active\Record::getManager
+	 * @covers Amiss\Active\Record::setManager
 	 */
 	public function testMultiConnection()
 	{
@@ -81,8 +83,9 @@ class ActiveRecordTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @covers Amiss\Active\Record::__callStatic
 	 * @group active
-	 * @group active
+	 * @group unit
 	 */
 	public function testGetRelated()
 	{
@@ -109,6 +112,7 @@ class ActiveRecordTest extends \CustomTestCase
 	 * 
 	 * @covers Amiss\Active\Record::__get
 	 * @group active
+	 * @group unit
 	 * @expectedException BadMethodCallException
 	 */
 	public function testGetUnknownPropertyWhenFieldsUndefinedOnNewObjectReturnsNull()
