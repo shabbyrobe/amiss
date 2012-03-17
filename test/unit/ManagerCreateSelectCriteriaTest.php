@@ -4,7 +4,7 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Manager;
 
-class CreateSelectCriteriaTest extends \CustomTestCase
+class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 {	
 	public function setUp()
 	{
