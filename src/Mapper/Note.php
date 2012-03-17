@@ -103,6 +103,11 @@ class Note extends \Amiss\Mapper\Base
 						if ($field)
 							throw new \UnexpectedValueException("Invalid class {$class}: relation and a field declared together on {$name}");
 						
+						if ($type == 'method') {
+							if (!isset($itemNotes['getter'])) {
+								$itemNotes['getter'] = $name;
+							}
+						}
 						$relationNotes[$name] = $itemNotes;
 					}
 				}

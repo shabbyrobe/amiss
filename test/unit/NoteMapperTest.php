@@ -10,7 +10,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithDefinedTable()
 	{
@@ -26,7 +26,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithDefaultTable()
 	{
@@ -46,7 +46,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaCache()
 	{
@@ -77,7 +77,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 * @expectedException UnexpectedValueException
 	 */
 	public function testGetMetaThrowsWhenMultiplePrimariesSet()
@@ -95,7 +95,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaFieldsFound()
 	{
@@ -114,7 +114,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaSkipsPropertiesWithNoFieldNote()
 	{
@@ -133,7 +133,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaGetterWithDefaultSetter()
 	{
@@ -153,7 +153,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaPrimaryNoteImpliesFieldNote()
 	{
@@ -170,7 +170,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaPrimaryNoteFound()
 	{
@@ -187,7 +187,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaFieldTypeFound()
 	{
@@ -209,7 +209,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithParentClass()
 	{
@@ -228,11 +228,87 @@ class NoteMapperTest extends \CustomTestCase
 		$meta2 = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__.'2');
 		$this->assertEquals($meta1, $this->getProtected($meta2, 'parent'));
 	}
+
+	/**
+	 * @group mapper
+	 * @covers Amiss\Mapper\Note::buildRelations
+	 * @covers Amiss\Mapper\Note::findGetterSetter
+	 */
+	public function testGetMetaRelationWithInferredGetterAndInferredSetter()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		$name = __FUNCTION__;
+		eval("
+			namespace ".__NAMESPACE__.";
+			class {$name}Foo {
+				/** @primary */ 
+				public \$id;
+				/** @field */
+				public \$barId;
+				
+				private \$bar;
+				
+				/** 
+				 * @has one {$name}Bar barId
+				 */
+				public function getBar()
+				{
+					return \$this->bar;
+				}
+			}
+		");
+		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+		$expected = array(
+			'bar'=>array('one'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
+		);
+		$this->assertEquals($expected, $meta->relations);
+	}
+
+	/**
+	 * @group mapper
+	 * @covers Amiss\Mapper\Note::buildRelations
+	 * @covers Amiss\Mapper\Note::findGetterSetter
+	 */
+	public function testGetMetaRelationWithInferredGetterAndExplicitSetter()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		$name = __FUNCTION__;
+		eval("
+			namespace ".__NAMESPACE__.";
+			class {$name}Foo {
+				/** @primary */ 
+				public \$id;
+				/** @field */
+				public \$barId;
+				
+				private \$bar;
+				
+				/** 
+				 * @has one {$name}Bar barId
+				 * @setter setLaDiDaBar
+				 */
+				public function getBar()
+				{
+					return \$this->bar;
+				}
+				
+				public function setLaDiDaBar(\$value)
+				{
+					\$this->bar = \$value;
+				}
+			}
+		");
+		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+		$expected = array(
+			'bar'=>array('one'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+		);
+		$this->assertEquals($expected, $meta->relations);
+	}
 	
 	/**
 	 * @group mapper
 	 * @group unimplemented
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaOneToOnePropertyRelationWithNoOn()
 	{
@@ -264,8 +340,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
-	 * @group unimplemented
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 */
 	public function testGetMetaOneToManyPropertyRelationWithNoOn()
@@ -303,8 +378,7 @@ class NoteMapperTest extends \CustomTestCase
 	 * type of test.
 	 * 
 	 * @group mapper
-	 * @group unimplemented
-	 * @covers Amiss\Mapper\Note::getMeta
+	 * @covers Amiss\Mapper\Note::createMeta
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 * @dataProvider dataForGetMetaOneToOnePropertyRelationWithOn
 	 */
