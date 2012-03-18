@@ -4,18 +4,27 @@ Mapping
 Amiss provides several flexible options for mapping your objects to the database as well as facilities for rolling your own mapper if none of the provided ones are suitable.
 
 
-Object mapping with annotations
--------------------------------
+Object mapping
+--------------
 
-Amiss provides a javadoc-style key/value mapper called ``Amiss\Mapper\Note``, which derives from ``Amiss\Mapper\Base``. 
-
-More information is on this mapper is available here:
+Amiss provides the following mappers:
 
 .. toctree::
     :maxdepth: 1
-    
-    mapper/annotation
 
+    mapper/annotation
+    mapper/statics
+
+
+The ``Amiss\Mapper\Note`` is recommended, though if neither mapper meets your needs you can create your own as described in :ref:`custom-mapping`.
+
+
+Annotations Quickstart
+----------------------
+
+Amiss provides a javadoc-style key/value mapper called ``Amiss\Mapper\Note``, which derives from ``Amiss\Mapper\Base``. 
+
+See :doc:`mapper/annotation` for more details.
 
 Objects are marked up in this way:
 
@@ -24,60 +33,47 @@ Objects are marked up in this way:
     <?php
     /**
      * @table your_table
+     * @fieldType VARCHAR(255)
      */
     class Foo
     {
-        /**
-         * @primary
-         */
+        /** @primary */
         public $id;
 
-        /**
-         * @field some_column
-         */
+        /** @field some_column */
         public $name;
-        
-        /**
-         * @field
-         */
+
+        /** @field */
         public $barId;
 
-        /**
-         * @has many Bar
+        /** 
+         * One-to-many relation:
+         * @has many Bar 
          */
         public $bars;
-    }
 
+        /**
+         * One-to-one relation: 
+         * @has one Baz bazId
+         */
+        public $baz;
 
-Object mapping with static properties
--------------------------------------
+        // field is defined below using getter/setter
+        private $fooDate;
 
-This type of mapper is really mostly there for the sake of :doc:`active`, which we'll get to later, but if you prefer this to annotations there's nothing stopping you from using it.
+        /**
+         * @field
+         * @type date
+         */
+        public function getFooDate()
+        {
+            return $this->fooDate;
+        }
 
-More information is on this mapper is available here:
-
-.. toctree::
-    :maxdepth: 1
-    
-    mapper/statics
-
-
-.. code-block:: php
-
-    <?php
-    
-    class Foo
-    {
-        public static $table = 'your_table';
-        public static $fields = array('id', 'name', 'barId');
-        public static $primary = 'id';
-        public static $relations = array(
-            'bars'=>array('one'=>'Bar', 'on'=>'barId');
-        );
-
-        public $id;
-        public $barId;
-        public $name;
+        public function setFooDate($value)
+        {
+            $this->fooDate = $value;
+        }
     }
 
 
@@ -87,6 +83,8 @@ Common Mapper Configuration
 ---------------------------
 
 Both ``Amiss\Mapper\Note`` and ``Amiss\Mapper\Statics`` derive from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
+
+Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality.
 
 
 Name translation
@@ -302,6 +300,8 @@ To determine the id for the handler to use, it takes everything up to the first 
 
 .. note:: Handler ids are case insensitive.
 
+
+.. _custom-mapping:
 
 Creating your own mapper
 ------------------------
