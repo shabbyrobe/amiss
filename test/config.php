@@ -32,6 +32,14 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 		return $property->getValue($class);
 	}
 	
+	protected function setProtected($class, $name, $value)
+	{
+		$ref = new ReflectionClass($class);
+		$property = $ref->getProperty($name);
+		$property->setAccessible(true);
+		return $property->setValue($class, $value);
+	}
+	
 	public function matchesLoose($string)
 	{
 		return new \LooseStringMatch($string);

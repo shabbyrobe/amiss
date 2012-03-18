@@ -25,8 +25,9 @@ class Connector
 	public $username;
 	public $password;
 	public $driverOptions;
-	public $attributes=array();
 	public $transactionDepth=0;
+	
+	private $attributes=array();
 	
 	public function __clone()
 	{
@@ -78,16 +79,6 @@ class Connector
 		return new static($dsn, $user, $password, $options ?: array());
 	}
 	
-	public function getEngine()
-	{
-		return substr($dsn, 0, strpos($this->dsn, ':'));
-	}
-	
-	public function connect()
-	{
-		$this->getPDO();
-	}
-	
 	public function getPDO()
 	{
 		if ($this->pdo == null) {
@@ -99,10 +90,15 @@ class Connector
 	public function createPDO()
 	{
 		$pdo = new \PDO($this->dsn, $this->username, $this->password, $this->driverOptions);
+		
 		if (!isset($this->attributes[\PDO::ATTR_ERRMODE]))
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		
 		foreach ($this->attributes as $k=>$v)
 			$pdo->setAttribute($k, $v);
+		
+		$this->attributes = null;
+		
 		return $pdo;
 	}
 	
