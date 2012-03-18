@@ -78,7 +78,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
 	
 	/**
 	 * @covers Amiss\Manager::getChildren
-	 * @group failing
 	 */
 	public function testGetMultiLevelArrayChildren()
 	{
