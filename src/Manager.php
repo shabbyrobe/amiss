@@ -447,25 +447,24 @@ class Manager
 	public function getChildren($objects, $path)
 	{
 		$array = array();
-		$items = is_array($path) ? $path : explode('/', $path);
-		$one = count($items)==1;
+		if (!is_array($path)) $path = explode('/', $path);
+		if (!is_array($objects)) $objects = array($objects);
+		
+		$count = count($path);
 		
 		foreach ($objects as $o) {
-			if ($one) {
-				$item = $o->{$items[0]};
-			}
-			else {
-				$current = $o;
-				foreach ($items as $i) {
-					$current = $current->$i;
-				}
-				$item = $current;
-			}
-			if (is_array($item)) {
-				foreach ($item as $i) $array[] = $i;
-			}
-			else $array[] = $item;
+			$value = $o->{$path[0]};
+			
+			if (is_array($value))
+				$array = array_merge($array, $value);
+			elseif ($value !== null)
+				$array[] = $value;
 		}
+		
+		if ($count > 1) {
+			$array = $this->getChildren($array, array_slice($path, 1));
+		}
+		
 		return $array;
 	}
 	
