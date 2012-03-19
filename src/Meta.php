@@ -20,8 +20,8 @@ class Meta
 		$this->parent = $parent;
 		$this->table = $table;
 		$this->primary = isset($info['primary']) ? $info['primary'] : null;
-		$this->fields = isset($info['fields']) ? $info['fields'] : null;
-		$this->relations = isset($info['relations']) ? $info['relations'] : null;
+		$this->fields = isset($info['fields']) ? $info['fields'] : array();
+		$this->relations = isset($info['relations']) ? $info['relations'] : array();
 		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
 	}
 	
