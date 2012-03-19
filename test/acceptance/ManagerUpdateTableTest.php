@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Criteria\Update;
 
-class UpdateTableTest extends \NoteMapperDataTestCase
+class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{

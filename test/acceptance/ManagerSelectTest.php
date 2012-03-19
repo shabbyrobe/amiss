@@ -8,6 +8,39 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	 * @group acceptance
 	 * @group manager 
 	 */
+	public function testGetByPkSingle()
+	{
+		$a = $this->manager->getByPk('Artist', 1);
+		$this->assertTrue($a instanceof \Amiss\Demo\Artist);
+		$this->assertEquals('Limozeen', $a->name);
+	}
+
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
+	public function testGetByPkMultiPositional()
+	{
+		$a = $this->manager->getByPk('EventArtist', 1, 1);
+		$this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
+		$this->assertEquals('Limozeen', $a->name);
+	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
+	public function testGetByPkMultiNamed()
+	{
+		$a = $this->manager->getByPk('EventArtist', array('eventId'=>1, 'artistId'=>1));
+		$this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
+		$this->assertEquals('Limozeen', $a->name);
+	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testSingleObjectPositionalParametersShorthand()
 	{
 		$a = $this->manager->get('Artist', 'slug=?', 'limozeen');

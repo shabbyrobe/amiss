@@ -182,7 +182,25 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
-		$this->assertEquals('id', $meta->primary);
+		$this->assertEquals(array('id'), $meta->primary);
+	}
+
+	/**
+	 * @group mapper
+	 * @covers Amiss\Mapper\Note::createMeta
+	 */
+	public function testGetMetaMultiPrimaryNoteFound()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		eval('
+			namespace '.__NAMESPACE__.';
+			class '.__FUNCTION__.' {
+				/** @primary */ public $idPart1;
+				/** @primary */ public $idPart2;
+			}
+		');
+		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+		$this->assertEquals(array('idPart1', 'idPart2'), $meta->primary);
 	}
 	
 	/**

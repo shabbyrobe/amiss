@@ -131,9 +131,11 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      */
     public function evaluate($other, $description = '', $returnResult = FALSE)
     {
-    	$pattern = '/'.preg_replace('/\s+/', '\s*', preg_quote($this->string, '/')).'/ix';
-    	$result = preg_match($pattern, $other) > 0;
-    	
+    	$result = false;
+    	if ($this->string) {
+	    	$pattern = '/'.preg_replace('/\s+/', '\s*', preg_quote($this->string, '/')).'/ix';
+	    	$result = preg_match($pattern, $other) > 0;
+    	}
     	if (!$returnResult) {
     		if (!$result) $this->fail($other, $description);
     	}
@@ -162,12 +164,52 @@ class TestConnector extends \Amiss\Connector
 	
 	public function exec($statement)
 	{
-		$this->calls[] = $statement;
+		$this->calls[] = array($statement, array());
+	}
+	
+	public function prepareWithResult($statement, $result, array $driverOptions=array())
+	{
+		$stmt = $this->prepare($statement, $driverOptions);
+		$stmt->result = $result;
+		return $stmt;
+	}
+	
+	public function prepare($statement, array $driverOptions=array())
+	{
+		return new TestStatement($this, $statement, $driverOptions);
 	}
 	
 	public function getLastCall()
 	{
 		return $this->calls[count($this->calls)-1];
+	}
+}
+
+class TestStatement
+{
+	public $queryString;
+	public $params = array();
+	public $driverOptions = array();
+	public $result;
+	
+	public function __construct($connector, $statement, $driverOptions)
+	{
+		$this->connector = $connector;
+		$this->driverOptions = $driverOptions;
+		$this->queryString = $statement;
+	}
+	
+	public function execute()
+	{
+		$this->connector->calls[] = array($this->queryString, $this->params);
+		$this->params = array();
+	}
+	
+	public function fetchColumn()
+	{
+		$result = $this->result;
+		$this->result = null;
+		return $result;
 	}
 }
 

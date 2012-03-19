@@ -52,14 +52,13 @@ class Note extends \Amiss\Mapper\Base
 			}
 			
 			$info = array(
-				'primary'=>null,
+				'primary'=>array(),
 				'fields'=>array(),
 				'relations'=>array(),
 				'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
 			);
 			
 			$setters = array();
-			$priFound = false;
 			
 			$relationNotes = array();
 			
@@ -75,11 +74,7 @@ class Note extends \Amiss\Mapper\Base
 						$relationNote = $itemNotes['has'];
 					
 					if (isset($itemNotes['primary'])) {
-						if ($priFound)
-							throw new \UnexpectedValueException("Found two primaries for $class");
-						
-						$info['primary'] = $name;
-						$priFound = true;
+						$info['primary'][] = $name;
 						if (!$field) $field = $name;
 					}
 					

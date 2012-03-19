@@ -194,7 +194,7 @@ class EventArtist
 	public $eventId;
 	
 	/**
-	 * @field
+	 * @primary
 	 */
 	public $artistId;
 	

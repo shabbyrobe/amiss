@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class UpdateObjectTest extends \NoteMapperDataTestCase
+class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{
@@ -10,6 +10,35 @@ class UpdateObjectTest extends \NoteMapperDataTestCase
 		
 		$this->artist = $this->manager->get('Artist', 'artistId=?', 1);
 		$this->assertEquals('Limozeen', $this->artist->name);
+	}
+	
+	/**
+	 * Ensures that only the EventArtist that we selected is updated. EventArtist
+	 * has a multi-column primary.
+	 * 
+	 * @group acceptance
+	 */
+	public function testUpdateObjectByMultiKey()
+	{
+		$original = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
+		
+		// make sure we have the right object
+		$this->assertEquals(1, $original->artistId);
+		$this->assertEquals(1, $original->eventId);
+		$this->assertEquals(1, $original->priority);
+		$this->assertEquals(1, $original->sequence);
+		
+		$original->sequence = 3000;
+		
+		$this->manager->update($original);
+		
+		$beforeEventArtists = $this->manager->get('EventArtist', 'eventId=1 AND artistId!=1');
+		$afterEventArtists = $this->manager->get('EventArtist', 'eventId=1 AND artistId!=1');
+		
+		$this->assertEquals($beforeEventArtists, $afterEventArtists);
+		
+		$found = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
+		$this->assertEquals(3000, $found->sequence);
 	}
 	
 	/**
@@ -52,6 +81,7 @@ class UpdateObjectTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( object $object , string $namedWhere , array $params )
 	 * 
+	 * @group acceptance
 	 */
 	public function testUpdateObjectWithNamedWhereAndSingleParameter()
 	{

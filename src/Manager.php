@@ -122,7 +122,16 @@ class Manager
 		
 		list ($where, $params) = $criteria->buildClause();
 		
-		$field = $meta->primary ?: '*';
+		$field = '*';
+		if ($meta->primary) {
+			$fields = $meta->getFields();
+			$field = array();
+			foreach ($meta->primary as $p) {
+				$field[] = $fields[$p]['name'];
+			}
+			$field = implode(', ', $field);
+		}
+		
 		$query = "SELECT COUNT($field) FROM $table "
 			.($where  ? "WHERE $where" : '')
 		;
@@ -472,8 +481,8 @@ class Manager
 		if (is_string($stmt)) 
 			$stmt = $this->getConnector()->prepare($stmt);
 		
-		if (!$stmt instanceof \PDOStatement)
-			throw new \InvalidArgumentException();
+		if (!isset($stmt->queryString))
+			throw new \InvalidArgumentException("Statement didn't look like a PDOStatement");
 		
 		if ($params) {
 			foreach ($params as $k=>$v) {

@@ -33,6 +33,8 @@ INSERT INTO planned_event(eventId, name, sub_name, slug, completeness, venueId) 
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 3, 2, 1);
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 1, 1, 1);
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 2, 1, 2);
+INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(2, 2, 1, 1);
+INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(2, 1, 1, 2);
 
 /* don't change or remove the 2000 and 3000 values here: they are relied upon by some tests. */
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 7, 2000, 3000);
