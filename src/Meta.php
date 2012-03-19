@@ -20,6 +20,10 @@ class Meta
 		$this->parent = $parent;
 		$this->table = $table;
 		$this->primary = isset($info['primary']) ? $info['primary'] : array();
+		
+		if ($this->primary && !is_array($this->primary))
+			$this->primary = array($this->primary);
+		
 		$this->fields = isset($info['fields']) ? $info['fields'] : array();
 		$this->relations = isset($info['relations']) ? $info['relations'] : array();
 		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
@@ -58,5 +62,23 @@ class Meta
 			$this->defaultFieldType = $this->parent->getDefaultFieldType();
 		}
 		return $this->defaultFieldType;
+	}
+	
+	function getPrimaryValue($object)
+	{
+		$foundValue = false;
+		
+		$prival = array();
+		foreach ($this->primary as $p) {
+			$field = $this->getField($p);
+			$value = !isset($field['getter']) ? $object->{$p} : call_user_func(array($object, $field['getter']));
+			if ($value)
+				$foundValue = true;
+			
+			$prival[$p] = $value;
+		}
+		
+		if ($foundValue)
+			return $prival;
 	}
 }

@@ -66,9 +66,13 @@ class TableBuilder
 		
 		// make sure the primary key ends up first
 		if ($this->meta->primary) {
-			$primaryField = $fields[$this->meta->primary];
-			unset($fields[$this->meta->primary]);
-			$fields = array_merge(array($this->meta->primary=>$primaryField), $fields);
+			$pFields = array();
+			foreach ($this->meta->primary as $p) {
+				$primaryField = $fields[$p];
+				unset($fields[$p]);
+				$pFields[$p] = $primaryField;
+			}
+			$fields = array_merge($pFields, $fields);
 		}
 		
 		foreach ($fields as $id=>$info) {

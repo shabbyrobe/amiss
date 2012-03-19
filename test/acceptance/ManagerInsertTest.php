@@ -11,6 +11,7 @@ class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->insert( object $object )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testInsertObject()
 	{
@@ -32,6 +33,7 @@ class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 	 * defines explicit field mappings)
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testInsertObjectWithManualNoteFields()
 	{
@@ -58,6 +60,7 @@ class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->insert( string $table , array $values )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testInsertToTable()
 	{

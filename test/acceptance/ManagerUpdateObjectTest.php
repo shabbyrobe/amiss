@@ -17,6 +17,7 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 	 * has a multi-column primary.
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateObjectByMultiKey()
 	{
@@ -32,8 +33,8 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 		
 		$this->manager->update($original);
 		
-		$beforeEventArtists = $this->manager->get('EventArtist', 'eventId=1 AND artistId!=1');
-		$afterEventArtists = $this->manager->get('EventArtist', 'eventId=1 AND artistId!=1');
+		$beforeEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
+		$afterEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
 		
 		$this->assertEquals($beforeEventArtists, $afterEventArtists);
 		
@@ -44,7 +45,9 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 	/**
 	 * Ensures the signature for the 'autoincrement primary key' update method works
 	 *   Amiss\Manager->update( object $object )
-	 * 
+	 *   
+	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateObjectByAutoincrementPrimaryKey()
 	{
@@ -64,6 +67,8 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( object $object , string $positionalWhere , [ string $param1, ... ] )
 	 * 
+	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateObjectWithPositionalWhereAndSingleParameter()
 	{
@@ -82,6 +87,7 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->update( object $object , string $namedWhere , array $params )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateObjectWithNamedWhereAndSingleParameter()
 	{
@@ -93,18 +99,5 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('Foobar', $this->artist->name);
 		
 		$this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));
-	}
-	
-	public function testUpdateUsingRowExporter()
-	{
-		$venue = $this->manager->get('Venue', 'venueId=?', 1);
-		
-		$this->assertEquals('Strong Badia', $venue->venueName);
-		
-		$venue->venueName = 'Pants Burg';
-		$this->manager->update($venue, 'venueId');
-		
-		$venue = $this->manager->get('Venue', 'venueId=?', 1);
-		$this->assertEquals('Pants Burg', $venue->venueName);
 	}
 }

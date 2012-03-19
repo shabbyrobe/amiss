@@ -69,9 +69,11 @@ class Manager
 		$this->execute($stmt, $params);
 		
 		$object = null;
+		
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			if ($object)
+			if ($object) {
 				throw new Exception("Query returned more than one row");
+			}
 			
 			$object = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
@@ -104,11 +106,20 @@ class Manager
 		if (!$primary)
 			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
 		
+		if (!is_array($id)) $id = array($id);
+		$where = array();
+		
+		foreach ($primary as $idx=>$p) {
+			$idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
+			if (!$idVal)
+				throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by pk");
+			$where[$p] = $idVal;
+		}
+		
 		$criteria = array(
-			'where'=>$primary.'=?',
-			'params'=>array($id),
+			'where'=>$where,
+			'args'=>$args ?: array(),
 		);
-		if ($args) $criteria['args'] = $args;
 		
 		return $this->get($meta->class, $criteria);
 	}
@@ -228,9 +239,12 @@ class Manager
 			$lastInsertId = $this->getConnector()->lastInsertId();
 		
 		if ($object && $meta->primary && $lastInsertId) {
-			$field = $meta->getField($meta->primary);
+			if (($count=count($meta->primary)) != 1)
+				throw new Exception("Autoincrement ID $lastInsertId for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
+			
+			$field = $meta->getField($meta->primary[0]);
 			if (!isset($field['setter']))
-				$object->{$meta->primary} = (int)$lastInsertId;
+				$object->{$field['name']} = (int)$lastInsertId;
 			else
 				call_user_func(array($object, $field['setter']), (int)$lastInsertId);
 		}
@@ -287,9 +301,8 @@ class Manager
 		}
 		else {
 			if ($meta) {
-				$field = $meta->getField($meta->primary);
-				$priValue = !isset($field['getter']) ? $first->{$meta->primary} : call_user_func(array($first, $field['getter']));
-				$args = array(array('where'=>array($args[0]=>$first->{$args[0]})));
+				$prival = $meta->getPrimaryValue($first);
+				$args = array(array('where'=>$prival));
 			}
 			
 			$criteria = new Criteria\Query;
@@ -307,10 +320,8 @@ class Manager
 		if (!$meta->primary)
 			throw new Exception("Manager requires a primary if you want to call 'save'.");
 		
-		$field = $meta->getField($meta->primary);
-		$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
-		
-		return $id == false;
+		$prival = $meta->getPrimaryValue($object);
+		return $prival == false;
 	}
 	
 	public function save($object)
@@ -359,9 +370,7 @@ class Manager
 			if (!$meta->primary)
 				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
 			
-			$field = $meta->getField($meta->primary);
-			$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
-			$args[0] = array($meta->primary=>$id);
+			$args[0] = $meta->getPrimaryValue($object);
 		}
 		
 		if (is_string($args[0])) {

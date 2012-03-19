@@ -4,10 +4,11 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class RelationTest extends \NoteMapperDataTestCase
+class ManagerRelationTest extends \NoteMapperDataTestCase
 {
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testRetrieveSingleRelated()
 	{
@@ -20,6 +21,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testAssignSingleRelated()
 	{
@@ -31,6 +33,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testAssignSingleRelatedToList()
 	{
@@ -49,6 +52,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testRetrieveRelatedList()
 	{
@@ -63,6 +67,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testAssignRelatedList()
 	{
@@ -77,6 +82,7 @@ class RelationTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testAssignRelatedListToList()
 	{

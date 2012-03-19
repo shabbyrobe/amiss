@@ -14,6 +14,8 @@ class ManagerTest extends \CustomTestCase
 
 	/**
 	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::keyValue
 	 */
 	public function testKeyValueWith2Tuples()
@@ -32,6 +34,8 @@ class ManagerTest extends \CustomTestCase
 
 	/**
 	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::keyValue
 	 */
 	public function testKeyValueWith2TupleKeyOverwriting()
@@ -49,6 +53,8 @@ class ManagerTest extends \CustomTestCase
 
 	/**
 	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::keyValue
 	 */
 	public function testKeyValueFromObjectsWithKeyValueProperties()

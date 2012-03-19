@@ -10,6 +10,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseClass
 	 */
 	public function testParseClass()
@@ -30,6 +31,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParseCondensedValuelessNote()
@@ -39,6 +41,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParseCondensedValueNote()
@@ -48,6 +51,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParseSingleValuelessNote()
@@ -59,6 +63,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParseManyValuelessNotes()
@@ -70,6 +75,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParseManyNotesWithIrregularMargin()
@@ -81,6 +87,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParsingWorksWhenCommentIsNotDocblock()
@@ -92,6 +99,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParsingWorksWhenInputIsNotComment()
@@ -103,6 +111,7 @@ class NoteParserTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Note\Parser::parseComment
 	 */
 	public function testParsingIgnoresEmailAddresses()

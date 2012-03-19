@@ -13,6 +13,7 @@ class ManagerCountTest extends \CustomTestCase
 	
 	/**
 	 * @group unit
+	 * @group manager
 	 * @covers Amiss\Manager::count
 	 */
 	public function testCountQueryWithoutPrimary()
@@ -28,6 +29,7 @@ class ManagerCountTest extends \CustomTestCase
 	
 	/**
 	 * @group unit
+	 * @group manager
 	 * @covers Amiss\Manager::count
 	 */
 	public function testCountQueryWithSingleColumnPrimary()
@@ -52,6 +54,7 @@ class ManagerCountTest extends \CustomTestCase
 	
 	/**
 	 * @group unit
+	 * @group manager
 	 * @covers Amiss\Manager::count
 	 */
 	public function testCountQueryWithMultiColumnPrimary()

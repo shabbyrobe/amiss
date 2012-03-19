@@ -10,6 +10,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithDefinedTable()
@@ -26,6 +27,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithDefaultTable()
@@ -46,6 +48,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaCache()
@@ -77,10 +80,10 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
-	 * @expectedException UnexpectedValueException
 	 */
-	public function testGetMetaThrowsWhenMultiplePrimariesSet()
+	public function testGetMetaMultiplePrimaries()
 	{
 		$mapper = new \Amiss\Mapper\Note;
 		eval('
@@ -91,10 +94,12 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+		$this->assertEquals(array('id1', 'id2'), $meta->primary);
 	}
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaFieldsFound()
@@ -114,6 +119,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaSkipsPropertiesWithNoFieldNote()
@@ -133,6 +139,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaGetterWithDefaultSetter()
@@ -153,6 +160,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaPrimaryNoteImpliesFieldNote()
@@ -170,6 +178,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaPrimaryNoteFound()
@@ -187,6 +196,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaMultiPrimaryNoteFound()
@@ -205,6 +215,7 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaFieldTypeFound()
@@ -227,6 +238,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaWithParentClass()
@@ -249,6 +261,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 * @covers Amiss\Mapper\Note::findGetterSetter
 	 */
@@ -284,6 +297,7 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 * @covers Amiss\Mapper\Note::findGetterSetter
 	 */
@@ -325,11 +339,17 @@ class NoteMapperTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
+	 * 
+	 * @group failing
 	 * @group unimplemented
+	 * 
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
 	public function testGetMetaOneToOnePropertyRelationWithNoOn()
 	{
+		throw new \Exception('not implemented');
+		
 		$mapper = new \Amiss\Mapper\Note;
 		$name = __FUNCTION__;
 		eval("
@@ -358,6 +378,8 @@ class NoteMapperTest extends \CustomTestCase
 
 	/**
 	 * @group mapper
+	 * @group unit
+	 * 
 	 * @covers Amiss\Mapper\Note::createMeta
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 */
@@ -396,8 +418,11 @@ class NoteMapperTest extends \CustomTestCase
 	 * type of test.
 	 * 
 	 * @group mapper
+	 * @group unit
+	 * 
 	 * @covers Amiss\Mapper\Note::createMeta
 	 * @covers Amiss\Mapper\Note::buildRelations
+	 * 
 	 * @dataProvider dataForGetMetaOneToOnePropertyRelationWithOn
 	 */
 	public function testGetMetaPropertyRelationWithOn($index, $relType, $onSpec, $result)

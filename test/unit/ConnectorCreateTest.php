@@ -4,7 +4,7 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Connector;
 
-class ConnectionCreateTest extends \CustomTestCase
+class ConnectorCreateTest extends \CustomTestCase
 {
 	/**
 	 * @covers Amiss\Connector::create

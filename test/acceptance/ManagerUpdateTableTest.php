@@ -15,7 +15,8 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( string $table, array $set , array $where )
 	 * 
-	 * 
+	 * @group acceptance
+	 * @group manager
 	// TOO TRICKY - confused signature with criteria array.
 
 	public function testUpdateTableWithArraySetAndArrayWhere()
@@ -29,6 +30,10 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	
 	 */
 
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
 	public function testUpdateTableAllowsNonKeyedArraySet()
 	{
 		$stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -43,6 +48,10 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 		$this->assertEquals(11, $min);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
 	public function testUpdateTableAllowsNonKeyedItemMixedInWithParameterForSet()
 	{
 		$stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -59,10 +68,12 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 		$stmt = $this->manager->getConnector()->prepare("SELECT COUNT(*) FROM event_artist WHERE sequence=15001");
 		$stmt->execute();
 		$min = $stmt->fetchColumn();
-		$this->assertEquals(5, $min);
+		$this->assertEquals(7, $min);
 	}
 
 	/**
+	 * @group acceptance
+	 * @group manager
 	 * @expectedException InvalidArgumentException
 	 */
 	public function testUpdateTableFailsWithNoWhereClause()
@@ -74,6 +85,8 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( string $table, array $set , string $positionalWhere, [ $param1, ... ] )
 	 * 
+ 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateTableWithArraySetAndPositionalWhere()
 	{
@@ -89,6 +102,8 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( string $table, array $set , string $namedWhere, array $params )
 	 * 
+ 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateTableWithArraySetAndNamedWhere()
 	{
@@ -103,6 +118,8 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( string $table, array $criteria )
 	 * 
+ 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateTableWithArrayCriteria()
 	{
@@ -117,6 +134,8 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->update( string $table, Criteria\Update $criteria )
 	 * 
+ 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testUpdateTableWithObjectCriteria()
 	{

@@ -142,6 +142,7 @@ class MapperTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @group mapper
 	 * @covers Amiss\Mapper\Note::determineTypeHandler
 	 * @dataProvider dataForDetermineTypeHandler
@@ -165,14 +166,6 @@ class MapperTest extends \CustomTestCase
 			array('  foo bar', 'foo'),
 			array('|  foo bar', ''),
 		);
-	}
-	
-	/**
-	 * @covers Amiss\Mapper
-	 */
-	public function testMapperInterface()
-	{
-		$mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
 	}
 }
 

@@ -65,4 +65,60 @@ class MetaTest extends \CustomTestCase
 		);
 		$this->assertEquals($expected, $child->getFields());
 	}
+	
+	/**
+	 * @group unit
+	 * @covers Amiss\Meta::getPrimaryValue
+	 */
+	public function testGetPrimaryValueSingleCol()
+	{
+		$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+			'primary'=>array('a'),
+		));
+		
+		$obj = (object)array('a'=>1, 'b'=>2);
+		$this->assertEquals(array('a'=>1), $meta->getPrimaryValue($obj));
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Meta::getPrimaryValue
+	 */
+	public function testGetPrimaryValueMultiCol()
+	{
+		$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+			'primary'=>array('a', 'b'),
+		));
+		
+		$obj = (object)array('a'=>1, 'b'=>2);
+		$this->assertEquals(array('a'=>1, 'b'=>2), $meta->getPrimaryValue($obj));
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Meta::getPrimaryValue
+	 */
+	public function testGetPrimaryValueMultiReturnsNullWhenNoValues()
+	{
+		$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+			'primary'=>array('a', 'b'),
+		));
+		
+		$obj = (object)array('a'=>null, 'b'=>null, 'c'=>3);
+		$this->assertEquals(null, $meta->getPrimaryValue($obj));
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Meta::getPrimaryValue
+	 */
+	public function testGetPrimaryValueMultiWhenOneValueIsNull()
+	{
+		$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+			'primary'=>array('a', 'b'),
+		));
+		
+		$obj = (object)array('a'=>null, 'b'=>2, 'c'=>3);
+		$this->assertEquals(array('a'=>null, 'b'=>2), $meta->getPrimaryValue($obj));
+	}
 }

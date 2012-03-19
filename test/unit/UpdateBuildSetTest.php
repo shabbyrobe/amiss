@@ -6,6 +6,9 @@ use Amiss\Criteria\Update;
 
 class UpdateBuildSetTest extends \CustomTestCase
 {
+	/**
+	 * @group unit
+	 */
 	public function testBuildNamedSet()
 	{
 		$uq = $this->getMock('Amiss\Criteria\Update', array('paramsAreNamed'));
@@ -18,6 +21,9 @@ class UpdateBuildSetTest extends \CustomTestCase
 		$this->assertEquals(array(':set_foo'=>'bar', ':set_baz'=>'qux'), $params);
 	}
 	
+	/**
+	 * @group unit
+	 */
 	public function testBuildPositionalSet()
 	{
 		$uq = $this->getMock('Amiss\Criteria\Update', array('paramsAreNamed'));

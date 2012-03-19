@@ -16,6 +16,7 @@ class MapperTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Base::addTypeHandler
 	 */
 	public function testAddTypeHandler()
@@ -32,6 +33,7 @@ class MapperTypeHandlerTest extends \CustomTestCase
 	
 	/**
 	 * @group mapper
+	 * @group unit
 	 * @covers Amiss\Mapper\Base::addTypeHandler
 	 */
 	public function testAddTypeHandlerToManyTypes()

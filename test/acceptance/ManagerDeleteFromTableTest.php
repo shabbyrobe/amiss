@@ -16,6 +16,7 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( string $table, string $positionalWhere, [ $param1, ... ] )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testDeleteTableWithArraySetAndPositionalWhere()
 	{
@@ -34,6 +35,7 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( string $table, string $namedWhere, array $params )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testDeleteTableWithArraySetAndNamedWhere()
 	{
@@ -52,6 +54,7 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( string $table, array $criteria )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testDeleteTableWithArrayCriteria()
 	{
@@ -70,6 +73,7 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( string $table, Criteria\Query $criteria )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testDeleteTableWithObjectCriteria()
 	{

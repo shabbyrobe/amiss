@@ -22,15 +22,22 @@ class OneMany
 		$relation = $meta->relations[$relationName];
 		$relatedMeta = $manager->getMeta($relation[$type]);
 		
+		$on = null;
 		// prepare the relation's "on" field
-		if ('one'==$type) {
-			if (!isset($relation['on']))
-				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
+		
+		if (isset($relation['on']))
 			$on = $relation['on'];
+		else {
+			if ('one'==$type)
+				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
+			else {
+				$on = array();
+				foreach ($meta->primary as $p) {
+					$on[$p] = $p;
+				}
+			}
 		}
-		else { // many
-			$on = $meta->primary;
-		}
+		
 		if (!is_array($on)) $on = array($on=>$on);
 		
 		// populate the 'on' with necessary data
@@ -45,7 +52,6 @@ class OneMany
 		$ids = array();
 		foreach ($source as $idx=>$object) {
 			$key = array();
-			
 			foreach ($on as $l=>$r) {
 				$lField = $fields[$l];
 				$lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));

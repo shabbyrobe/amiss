@@ -21,9 +21,10 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	 */
 	public function testGetByPkMultiPositional()
 	{
-		$a = $this->manager->getByPk('EventArtist', 1, 1);
+		$a = $this->manager->getByPk('EventArtist', array(2, 1));
 		$this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
-		$this->assertEquals('Limozeen', $a->name);
+		$this->assertEquals(2, $a->eventId);
+		$this->assertEquals(1, $a->artistId);
 	}
 	
 	/**
@@ -32,9 +33,10 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	 */
 	public function testGetByPkMultiNamed()
 	{
-		$a = $this->manager->getByPk('EventArtist', array('eventId'=>1, 'artistId'=>1));
+		$a = $this->manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>2));
 		$this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
-		$this->assertEquals('Limozeen', $a->name);
+		$this->assertEquals(2, $a->eventId);
+		$this->assertEquals(2, $a->artistId);
 	}
 	
 	/**

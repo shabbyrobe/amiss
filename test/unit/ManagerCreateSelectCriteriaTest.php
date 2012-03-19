@@ -15,6 +15,9 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::createSelectCriteria
 	 * @covers Amiss\Manager::populateQueryCriteria
 	 */
@@ -28,6 +31,9 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::createSelectCriteria
 	 * @covers Amiss\Manager::populateQueryCriteria
 	 */
@@ -41,6 +47,9 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::createSelectCriteria
 	 * @covers Amiss\Manager::populateQueryCriteria
 	 */
@@ -54,6 +63,9 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::createSelectCriteria
 	 * @covers Amiss\Manager::populateQueryCriteria
 	 */
@@ -67,6 +79,9 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
+	 * @group manager
+	 * 
 	 * @covers Amiss\Manager::createSelectCriteria
 	 * @covers Amiss\Manager::populateQueryCriteria
 	 */

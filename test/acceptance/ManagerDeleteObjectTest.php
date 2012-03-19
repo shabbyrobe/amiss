@@ -18,6 +18,7 @@ class ManagerDeleteObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( object $object )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 */
 	public function testDeleteObjectByAutoincrementPrimaryKey()
 	{
@@ -33,6 +34,7 @@ class ManagerDeleteObjectTest extends \NoteMapperDataTestCase
 	 *   Amiss\Manager->delete( object $object )
 	 * 
 	 * @group acceptance
+	 * @group manager
 	 * @expectedException Amiss\Exception
 	 */
 	public function testDeleteObjectWithoutAutoincrementPrimaryKeyFails()
