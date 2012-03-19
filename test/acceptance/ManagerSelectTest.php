@@ -214,6 +214,20 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	
 	/**
 	 * @group acceptance
+	 * @group manager 
+	 */
+	public function testOrderByGetterProperty()
+	{
+		$events = $this->manager->getList('Event', array('order'=>array('subName')));
+		$this->assertTrue(is_array($events));
+		
+		$this->assertEquals(2, current($events)->eventId);
+		foreach ($events as $e); // get the last element regardless of if the array is keyed or indexed
+		$this->assertEquals(1, $e->eventId);
+	}
+	
+	/**
+	 * @group acceptance
 	 * @group manager
 	 */
 	public function testSelectSingleObjectFromMultipleResultWhenLimitIsOne()

@@ -22,11 +22,11 @@ INSERT INTO venue(venueId, name, slug, address, shortAddress, latitude, longitud
 
 
 
-INSERT INTO event(eventId, name, slug, dateStart, dateEnd, venueId) VALUES(1, 'AwexxomeFest', 'awexxome-fest', '1936-01-01', '1936-01-02', 1);
-INSERT INTO event(eventId, name, slug, dateStart, dateEnd, venueId) VALUES(2, 'AwexxomeFest 20X6', 'awexxome-fest-20x6', '2096-02-01', '2096-02-02', 1);
+INSERT INTO event(eventId, name, sub_name, slug, dateStart, dateEnd, venueId) VALUES(1, 'AwexxomeFest', 'The Awexxomest Festival Ever', 'awexxome-fest', '1936-01-01', '1936-01-02', 1);
+INSERT INTO event(eventId, name, sub_name, slug, dateStart, dateEnd, venueId) VALUES(2, 'AwexxomeFest 20X6', 'Curated by Awexxome McAwexxome', 'awexxome-fest-20x6', '2096-02-01', '2096-02-02', 1);
 
-INSERT INTO planned_event(eventId, name, slug, completeness, venueId) VALUES(1, 'AwexxomeFest 2025', 'awexxome-fest-2025', 20, 1);
-INSERT INTO planned_event(eventId, name, slug, completeness, venueId) VALUES(2, 'Something else', 'something-else', 0, 1);
+INSERT INTO planned_event(eventId, name, sub_name, slug, completeness, venueId) VALUES(1, 'AwexxomeFest 2025', 'Awexxome Future Times', 'awexxome-fest-2025', 20, 1);
+INSERT INTO planned_event(eventId, name, sub_name, slug, completeness, venueId) VALUES(2, 'Something else', null, 'something-else', 0, 1);
 
 
 /* don't order these by priority/sequence in this file */

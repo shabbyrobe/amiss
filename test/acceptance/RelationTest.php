@@ -6,6 +6,9 @@ use Amiss\Demo;
 
 class RelationTest extends \NoteMapperDataTestCase
 {
+	/**
+	 * @group acceptance
+	 */
 	public function testRetrieveSingleRelated()
 	{
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
@@ -15,6 +18,9 @@ class RelationTest extends \NoteMapperDataTestCase
 		$this->assertEquals('awexxome-fest-20x6', $event->getSlug());
 	}
 	
+	/**
+	 * @group acceptance
+	 */
 	public function testAssignSingleRelated()
 	{
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
@@ -23,19 +29,9 @@ class RelationTest extends \NoteMapperDataTestCase
 		$this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
 	}
 	
-	/*
-	This is actually not supported - it's just a bit too hacked up to try to tell the
-	difference between an array of models passed as the source, and array($source, $intoProperty). 
-	public function testRetrieveSingleRelatedForList()
-	{
-		$eventArtists = $this->manager->getList('EventArtist', 'eventId=?', 1);
-		$events = $this->manager->getRelated($eventArtists, 'Event', 'eventId');
-		$this->assertTrue(is_array($events));
-		$this->assertTrue(current($events) instanceof Demo\Event);
-		$this->assertEquals('awexxome-fest', current($events)->getSlug());
-	}
-	*/
-	
+	/**
+	 * @group acceptance
+	 */
 	public function testAssignSingleRelatedToList()
 	{
 		$eventArtist = $this->manager->getList('EventArtist', 'eventId=?', 1);
@@ -51,6 +47,9 @@ class RelationTest extends \NoteMapperDataTestCase
 		$this->assertTrue($current->event === $next->event);
 	}
 	
+	/**
+	 * @group acceptance
+	 */
 	public function testRetrieveRelatedList()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
@@ -62,6 +61,9 @@ class RelationTest extends \NoteMapperDataTestCase
 		// TODO: improve checking
 	}
 	
+	/**
+	 * @group acceptance
+	 */
 	public function testAssignRelatedList()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
@@ -73,6 +75,9 @@ class RelationTest extends \NoteMapperDataTestCase
 		$this->assertEquals(2, $event->eventArtists[1]->artistId);
 	}
 	
+	/**
+	 * @group acceptance
+	 */
 	public function testAssignRelatedListToList()
 	{
 		$types = $this->manager->getList('ArtistType');

@@ -103,6 +103,8 @@ class Event extends Object
 	
 	private $name;
 	
+	private $subName;
+	
 	private $slug;
 	
 	/**
@@ -167,6 +169,20 @@ class Event extends Object
 				'-'
 			);
 		} 
+	}
+	
+	/**
+	 * @field sub_name
+	 * @setter setTheSubName
+	 */
+	public function getSubName()
+	{
+		return $this->subName;
+	}
+	
+	public function setTheSubName($value)
+	{
+		$this->subName = $value;
 	}
 }
 

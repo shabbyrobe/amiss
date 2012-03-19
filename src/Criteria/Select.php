@@ -20,7 +20,7 @@ class Select extends Query
 		}
 	}
 	
-	public function buildFields($meta)
+	protected function buildFields($meta)
 	{
 		$fields = '*';
 		
@@ -46,7 +46,7 @@ class Select extends Query
 		$table = $meta->table;
 		
 		list ($where, $params) = $this->buildClause();
-		$order = $this->buildOrder();
+		$order = $this->buildOrder($meta);
 		list ($limit, $offset) = $this->getLimitOffset();
 		
 		$query = "SELECT ".$this->buildFields($meta)." FROM $table "
@@ -59,17 +59,22 @@ class Select extends Query
 		return array($query, $params);
 	}
 	
-	public function buildOrder()
+	protected function buildOrder($meta)
 	{
 		$order = array();
 		if (is_string($this->order)) {
 			return $this->order;
 		}
 		else {
+			$fields = $meta->getFields();
 			foreach ($this->order as $field=>$dir) {
 				if (is_numeric($field)) { 
 					$field = $dir; $dir = 'asc';
 				}
+				
+				$fieldMeta = $fields[$field];
+				$field = $fieldMeta['name'];
+				
 				$dir = trim(strtolower($dir));
 				$order[] = '`'.str_replace('`', '', $field).'`'.($dir == 'asc' ? '' : ' desc');
 			}

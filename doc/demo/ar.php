@@ -71,6 +71,7 @@ class EventRecord extends \Amiss\Active\Record
 	public static $primary = 'eventId';
 	public static $fields = array(
 		'name'=>'varchar(50)',
+		'sub_name',
 		'slug', 
 		'dateStart'=>'datetime', 
 		'dateEnd'=>'datetime',
@@ -79,6 +80,10 @@ class EventRecord extends \Amiss\Active\Record
 	
 	public $eventId;
 	public $name;
+	
+	// statics mapper doesn't support translating property names explicitly yet  
+	public $sub_name;
+	
 	public $slug;
 	public $dateStart;
 	public $dateEnd;

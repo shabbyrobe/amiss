@@ -499,6 +499,7 @@ class Manager
 			$criteria = new Criteria\Select();
 			$this->populateQueryCriteria($criteria, $args);
 		}
+		
 		return $criteria;
 	}
 	
