@@ -3,11 +3,25 @@ Development
 
 Amiss' homepage is http://k3jw.com/code/amiss/
 
-The code for Amiss is hosted at http://bitbucket.org/shabbyrobe/amiss
+The code for Amiss is hosted at http://github.com/shabbyrobe/amiss
+
+
+Running the tests
+-----------------
+
+PHPUnit Tests are in the ``tests/`` directory of the distribution. You can run the tests like so::
+
+    cd /path/to/amiss/dist/tests/
+    phpunit
+
+
+There are some tests that are currently known to fail. These can be excluded by running the tests like so::
+
+    phpunit --exclude-group failing
 
 
 Building the docs
-~~~~~~~~~~~~~~~~~
+-----------------
 
 The source distribution does not include compiled documentation, only restructuredText files. If you need HTML or PDF documentation, it needs to be built.
 

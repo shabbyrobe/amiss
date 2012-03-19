@@ -2,7 +2,7 @@
 
 namespace Amiss\Name;
 
-class CamelToUnderscore implements Mapper
+class CamelToUnderscore implements Translator
 {
 	public $strict = true;
 	
@@ -13,8 +13,10 @@ class CamelToUnderscore implements Mapper
 		foreach ($names as $name) {
 			if ($this->strict) {
 				$pos = strpos($name, '_');
-				if ($pos !== 0) {
-					throw new \InvalidArgumentException("Property $name contains underscores - this will not successfully map bi-directionally. If you insist on using this name, your type should implement RowBuilder and RowExporter");
+				
+				// it's ok if the property has a leading underscore - it will be stripped
+				if ($pos !== false && $pos > 0) {
+					throw new \InvalidArgumentException("Property $name contains underscores - this will not successfully map bi-directionally. If you insist on using this name, you should declare the field name explicitly.");
 				}
 			}
 			
@@ -51,5 +53,5 @@ class CamelToUnderscore implements Mapper
 		}
 		
 		return $trans;
-	} 
+	}
 }

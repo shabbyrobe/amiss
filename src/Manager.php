@@ -12,51 +12,26 @@ class Manager
 	 */
 	public $connector;
 	
-	public $tableMap=array();
-	
-	/**
-	 * Translator for object names to table names.
-	 * 
-	 * If an ``Amiss\Name\Mapper`` is used, only the ``to()`` method will be used.
-	 * 
-	 * @var mixed callable or Amiss\Name\Mapper
-	 */
-	public $objectToTableMapper=null;
-	
-	/**
-	 * Translator for property names to column names.
-	 * 
-	 * Should implement ``to()`` to turn a property name into a column name,
-	 * and ``from()`` to turn a column name into a property name 
-	 * 
-	 * @var Amiss\Name\Mapper
-	 */
-	public $propertyColumnMapper=null;
-	
-	public $convertTableNames=true;
-	
-	public $convertFieldUnderscores=false;
-	
-	public $objectNamespace=null;
-	
-	/**
-	 * Whether or not Amiss should skip properties with a null value
-	 * when converting an object to a row.
-	 * 
-	 * @var bool
-	 */
-	public $dontSkipNulls=false;
-	
 	public $queries = 0;
 	
-	private $afterFetch = array();
+	/**
+	 * @var Amiss\Meta
+	 */
+	protected $meta = array();
 	
-	public function __construct($connector)
+	public $mapper;
+	
+	public $relators = array();
+	
+	public function __construct($connector, Mapper $mapper)
 	{
 		if (is_array($connector)) 
 			$connector = Connector::create($connector);
 		
 		$this->connector = $connector;
+		$this->mapper = $mapper;
+		
+		$this->relators['one'] = $this->relators['many'] = new Relator\OneMany;
 	}
 	
 	/**
@@ -67,222 +42,191 @@ class Manager
 		return $this->connector;
 	}
 	
-	public function get($object)
+	public function getMeta($object)
+	{
+		if (isset($this->meta[$object]))
+			return $this->meta[$object];
+		
+		$meta = $this->mapper->getMeta($object);
+		
+		$this->meta[$object] = $meta;
+		
+		return $meta;
+	}
+	
+	public function get($class)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($class);
 		
 		list ($limit, $offset) = $criteria->getLimitOffset();
-		
 		if ($limit && $limit != 1)
 			throw new Exception("Limit must be one or zero");
 		
-		list ($query, $params) = $criteria->buildQuery($table);
+		list ($query, $params) = $criteria->buildQuery($meta);
+		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
-		$obj = null;
-		while ($row = $this->fetchObject($stmt, $object, $criteria->args)) {
-			if ($obj)
+		$object = null;
+		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+			if ($object)
 				throw new Exception("Query returned more than one row");
-			$obj = $row;
+			
+			$object = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
-		return $obj;
+		return $object;
 	}
 
-	public function getList($object)
+	public function getList($class)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($class);
 		
-		list ($query, $params) = $criteria->buildQuery($table);
+		list ($query, $params) = $criteria->buildQuery($meta);
 		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		
 		$objects = array();
-		while ($row = $this->fetchObject($stmt, $object, $criteria->args)) {
-			$objects[] = $row;
+	
+		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+			$objects[] = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
+		
 		return $objects;
 	}
-
-	public function count($object, $criteria=null)
+	
+	public function getByPk($class, $id, $args=null)
+	{
+		$meta = $this->getMeta($class);
+		$primary = $meta->primary;
+		if (!$primary)
+			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
+		
+		$criteria = array(
+			'where'=>$primary.'=?',
+			'params'=>array($id),
+		);
+		if ($args) $criteria['args'] = $args;
+		
+		return $this->get($meta->class, $criteria);
+	}
+	
+	public function count($class, $criteria=null)
 	{
 		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
-		$table = $this->getTableName($object);
+		$meta = $this->getMeta($class);
+		
+		$table = $meta->table;
 		
 		list ($where, $params) = $criteria->buildClause();
 		
-		$fields = $criteria->buildFields();
-		$query = "SELECT COUNT($fields) FROM $table "
+		$field = $meta->primary ?: '*';
+		$query = "SELECT COUNT($field) FROM $table "
 			.($where  ? "WHERE $where" : '')
 		;
+		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
 		return (int)$stmt->fetchColumn();
 	}
 	
-	public function getRelated($source, $object, $on)
+	public function assignRelated($source, $relationName)
 	{
-		$ids = array();
-		$into = null;
+		$result = $this->getRelated($source, $relationName);
 		
-		if (is_array($source)) 
-			list($source, $into) = $source;
-		
-		$isArray = is_array($source);
-		
-		if (!$isArray) $source = array($source);
-		if (is_string($on)) $on = array($on=>$on);
-		
-		$rIndex = array();
-		foreach ($source as $obj) {
-			$key = array();
-			foreach ($on as $l=>$r) {
-				if (is_numeric($l)) $l = $r;
-				$key[] = $obj->$l;
-				
-				if (!isset($ids[$l])) {	
-					$ids[$l] = array('values'=>array(), 'r'=>$r, 'param'=>$this->sanitiseParam($r));
-				}
-				$ids[$l]['values'][] = $obj->$l;
+		if ($result) {
+			$sourceIsArray = is_array($source) || $source instanceof \Traversable;
+			if (!$sourceIsArray) {
+				$source = array($source);
+				$result = array($result);
 			}
-			$str = implode("|", $key);
 			
-			if (!isset($rIndex[$str])) $rIndex[$str] = array();
+			$meta = $this->getMeta(get_class($source[0]));
+			$relation = $meta->relations[$relationName];
 			
-			if ($into) {
-				$rIndex[$str][] = &$obj->$into;
-			} 
-		}
-		
-		$criteria = new Criteria\Select;
-		$where = array();
-		foreach ($ids as $l=>$meta) {
-			$criteria->params[$meta['r']] = $meta['values'];
-			$where[] = '`'.str_replace('`', '', $meta['r']).'` IN(:'.$meta['param'].')';
-		}
-		$criteria->where = implode(' AND ', $where);
-		
-		$list = $this->getList($object, $criteria);
-		
-		if ($into) {
-			$index = array();
-			foreach ($list as $item) {
-				$key = array();
-				foreach ($on as $l=>$r) {
-					$key[] = $item->$r;
-				}
-				$key = implode('|', $key);
-				if (isset($rIndex[$key])) {
-					foreach ($rIndex[$key] as &$x) {
-						$x = $item;
-					}
-				}
+			foreach ($result as $idx=>$item) {
+				if (!isset($relation['setter']))
+					$source[$idx]->{$relationName} = $item;
+				else
+					call_user_func(array($source[$idx], $relation['setter']), $item);
 			}
-		}
-		else {
-			if ($isArray) return $list;
-			else return current($list);
 		}
 	}
 	
-	/**
-	 * Fetches a list relationship for an object.
-	 * 
-	 * FIXME: lots of copypasta between this and getRelated
-	 */
-	public function getRelatedList($source, $object, $on)
+	public function getRelated($source, $relationName)
 	{
-		$ids = array();
-		$into = null;
+		if (!$source) return;
 		
-		if (is_array($source)) 
-			list($source, $into) = $source;
+		$test = $source;
+		if (is_array($test) || $test instanceof \Traversable)
+			$test = $test[0];
 		
-		$isArray = is_array($source);
+		$class = !is_object($test) ? $test : get_class($test);
 		
-		if (!$isArray)
-			$source = array($source);
-		elseif (!$into) 
-			throw new \Exception("Can't pass an array without using into");
-		
-		if (is_string($on)) $on = array($on=>$on);
-		
-		$popIndex = array();
-		foreach ($source as $obj) {
-			$key = array();
-			foreach ($on as $l=>$r) {
-				if (is_numeric($l)) $l = $r;
-				$key[] = $obj->$l;
-				
-				if (!isset($ids[$l])) {	
-					$ids[$l] = array('values'=>array(), 'r'=>$r, 'param'=>$this->sanitiseParam($r));
-				}
-				$ids[$l]['values'][] = $obj->$l;
-			}
-			if ($into) {
-				$obj->$into = array();
-				$popIndex[implode("|", $key)] = &$obj->$into;
-			} 
+		$meta = $this->getMeta($class);
+		if (!isset($meta->relations[$relationName])) {
+			throw new Exception("Unknown relation $relationName on $class");
 		}
 		
-		$criteria = new Criteria\Select;
-		$where = array();
-		foreach ($ids as $l=>$meta) {
-			$criteria->params[$meta['r']] = $meta['values'];
-			$where[] = '`'.str_replace('`', '', $meta['r']).'` IN(:'.$meta['param'].')';
-		}
-		$criteria->where = implode(' AND ', $where);
+		$relation = $meta->relations[$relationName];
 		
-		$list = $this->getList($object, $criteria);
+		// FIXME: this hack expects the relation type to be the first key in the
+		// relation definition. The internal relation definition needs to be 
+		// cleaned up.
+		$type = key($relation);
 		
-		if ($into) {
-			foreach ($list as $item) {
-				$key = array();
-				foreach ($on as $l=>$r) {
-					$key[] = $item->$r;
-				}
-				$key = implode('|', $key);
-				if (!isset($popIndex[$key]))
-					$popIndex[$key] = array();
-				$popIndex[$key][] = $item;
-			}
-		}
-		else {
-			return $list;
-		}
+		if (!isset($this->relators[$type]))
+			throw new Exception("Relator $type not found");
+		
+		return $this->relators[$type]->getRelated($this, $type, $source, $relationName);
 	}
 	
 	public function insert()
 	{
 		$args = func_get_args();
 		$count = count($args);
+		$meta = null;
+		$object = null;
 		
 		if ($count == 1) {
-			$table = $this->getTableName(get_class($args[0]));
-			$values = $this->exportRow($args[0]);
+			$object = $args[0];
+			$meta = $this->getMeta(get_class($object));
+			$values = $this->mapper->exportRow($meta, $object);
 		}
 		elseif ($count == 2) {
-			$table = $this->getTableName($args[0]);
+			$meta = $this->getMeta($args[0]);
 			$values = $args[1];
 		}
+		
+		if (!$values)
+			throw new Exception("No values found for class {$meta->class}. Are your fields defined?");
 		
 		$columns = array();
 		$count = count($values);
 		foreach ($values as $k=>$v) {
-			if ($k[0]==':') {
-				$k = substr($k, 1);
-			}
 			$columns[] = '`'.str_replace('`', '', $k).'`';
 		}
-		$sql = "INSERT INTO $table(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
+		$sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
 		
 		$stmt = $this->getConnector()->prepare($sql);
 		++$this->queries;
 		$stmt->execute(array_values($values));
-		return $this->getConnector()->lastInsertId();
+		
+		$lastInsertId = null;
+		if (($object && $meta->primary) || !$object)
+			$lastInsertId = $this->getConnector()->lastInsertId();
+		
+		if ($object && $meta->primary && $lastInsertId) {
+			$field = $meta->getField($meta->primary);
+			if (!isset($field['setter']))
+				$object->{$meta->primary} = (int)$lastInsertId;
+			else
+				call_user_func(array($object, $field['setter']), (int)$lastInsertId);
+		}
+		
+		return $lastInsertId;
 	}
 	
 	public function update()
@@ -290,15 +234,16 @@ class Manager
 		$args = func_get_args();
 		$count = count($args);
 		
-		if ($count < 2)
-			throw new \InvalidArgumentException();
-		
 		$first = array_shift($args);
 		if (is_object($first)) {
 			$criteria = $this->createObjectUpdateCriteria($first, $args);
 			$objectName = get_class($first);
 		}
 		elseif (is_string($first)) {
+			// FIXME: improve text
+			if ($count < 2)
+				throw new \InvalidArgumentException();
+			
 			$criteria = $this->createTableUpdateCriteria($first, $args);
 			$objectName = $first;
 		}
@@ -312,138 +257,63 @@ class Manager
 	public function delete()
 	{
 		$args = func_get_args();
-		$count = count($args);
+		$meta = null;
+		$class = null;
 		
-		if ($count < 2)
-			throw new \InvalidArgumentException();
+		if (!$args) throw new \InvalidArgumentException();
 		
 		$first = array_shift($args);
+		if (is_object($first)) {
+			$meta = $this->getMeta(get_class($first));
+			$class = $meta->class;
+			if (!$meta->primary)
+				throw new Exception("Can't delete {$meta->class} by object as it doesn't define a primary");
+			
+			$args[0] = $meta->primary;
+		}
+		else $class = $first;
+		
 		if ($args[0] instanceof Criteria\Query) {
 			$criteria = $args[0];
 		}
 		else {
-			// FIXME: pretty ugly hack to make deleting by object property work
-			if (is_object($first) && $count==2 && is_string($args[0]) && property_exists($first, $args[0])) {
+			if ($meta) {
+				$field = $meta->getField($meta->primary);
+				$priValue = !isset($field['getter']) ? $first->{$meta->primary} : call_user_func(array($first, $field['getter']));
 				$args = array(array('where'=>array($args[0]=>$first->{$args[0]})));
 			}
 			
 			$criteria = new Criteria\Query;
 			$this->populateQueryCriteria($criteria, $args);
 		}
-		
-		$objectName = is_object($first) ? get_class($first) : $first;
-		
-		return $this->executeDelete($objectName, $criteria);
-	}
-	
-	public function save($object, $autoIncrementId)
-	{
-		if (!$object->$autoIncrementId) {
-			$id = $this->insert($object);
-			$object->$autoIncrementId = $id;
-		}
-		else {
-			$this->update($object, $autoIncrementId);
-			$id = $object->$autoIncrementId;
-		}
-		return $id;
-	}
-	
-	public function resolveObjectName($name)
-	{
-		return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
-	}
-	
-	public function fetchObject($stmt, $name, $args=null)
-	{
-		$fqcn = $this->resolveObjectName($name);
-		
-		$assoc = $stmt->fetch(\PDO::FETCH_ASSOC);
-		if (!$assoc) return false;
-		
-		$class = new $fqcn;
-		
-		if ($class instanceof RowBuilder) {
-			$class->buildObject($assoc);
-		}
-		else {
-			$names = null;
-			if (isset($this->propertyColumnMapper)) {
-				$names = $this->propertyColumnMapper->from(array_keys($assoc));
-			}
-			foreach ($assoc as $k=>$v) {
-				if ($names && isset($names[$k])) {
-					$prop = $names[$k];
-				}
-				else {
-					if ($this->convertFieldUnderscores) {
-						$prop = trim(preg_replace_callback('/_(.)/', function($match) {
-							return strtoupper($match[1]);
-						}, $k), '_');
-					}
-					else {
-						$prop = $k;
-					}
-				}
-				$class->$prop = $v;
-			}
-		}
-		
-		if (!isset($this->afterFetch[$name])) {
-			$this->afterFetch[$name] = method_exists($class, 'afterFetch');
-		}
-		
-		if ($this->afterFetch[$name]) {
-			$class->afterFetch($this);
-		}
-		
-		return $class;
-	}
-	
-	protected function exportRow($obj)
-	{
-		if ($obj instanceof RowExporter) {
-			$values = $obj->exportRow();
-			if (!is_array($values)) {
-				throw new Exception("Row exporter must return an array!");
-			}
-		}
-		else {
-			$values = $this->getDefaultRowValues($obj);
-		}
-		
-		return $values;
+		return $this->executeDelete($class, $criteria);
 	}
 	
 	/**
-	 * Active records need this to be public
+	 * Hack to allow active record to intercept saving and fire events
 	 */
-	public function getDefaultRowValues($obj)
+	public function shouldInsert($object)
 	{
-		$values = array();
+		$meta = $this->getMeta(get_class($object));
+		if (!$meta->primary)
+			throw new Exception("Manager requires a primary if you want to call 'save'.");
 		
-		$data = (array)$obj;
-		$names = null;
-		if ($this->propertyColumnMapper)
-			$names = $this->propertyColumnMapper->to(array_keys($data));
+		$field = $meta->getField($meta->primary);
+		$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
 		
-		foreach ($obj as $k=>$v) {
-			if ($names && isset($names[$k])) {
-				$k = $names[$k];
-			}
-			elseif ($this->convertFieldUnderscores) {
-				$k = trim(preg_replace_callback('/[A-Z]/', function($match) {
-						return '_'.strtolower($match[0]);
-				}, $k), '_');
-			}
-			if (!is_array($v) && !is_object($v) && !is_resource($v) && ($this->dontSkipNulls || $v !== null)) {
-				$values[$k] = $v;
-			}
-		}
-		
-		return $values;
+		return $id == false;
 	}
 	
+	public function save($object)
+	{
+		$shouldInsert = $this->shouldInsert($object);
+		
+		if ($shouldInsert)
+			$this->insert($object);
+		else
+			$this->update($object);
+	}
+
 	protected function createTableUpdateCriteria($table, $args)
 	{
 		$criteria = null;
@@ -470,12 +340,20 @@ class Manager
 	}
 	
 	protected function createObjectUpdateCriteria($object, $args)
-	{	
-		$uc = new Criteria\Update();	
-		$uc->set = $this->exportRow($object);
+	{
+		$meta = $this->getMeta(get_class($object));
 		
-		if (count($args) < 1)
-			throw new \InvalidArgumentException();
+		$uc = new Criteria\Update();
+		$uc->set = $this->mapper->exportRow($meta, $object);
+		
+		if (count($args) < 1) {
+			if (!$meta->primary)
+				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
+			
+			$field = $meta->getField($meta->primary);
+			$id = !isset($field['getter']) ? $object->{$meta->primary} : call_user_func(array($object, $field['getter']));
+			$args[0] = array($meta->primary=>$id);
+		}
 		
 		if (is_string($args[0])) {
 			if (isset($uc->set[$args[0]])) {
@@ -495,7 +373,8 @@ class Manager
 	
 	protected function executeUpdate($objectName, Criteria\Update $update)
 	{
-		$table = $this->getTableName($objectName);
+		$meta = $this->getMeta($objectName);
+		$table = $meta->table;
 		
 		list ($setClause,   $setParams)   = $update->buildSet();
 		list ($whereClause, $whereParams) = $update->buildClause();
@@ -510,7 +389,6 @@ class Manager
 			throw new \InvalidArgumentException("No where clause specified for table update. Explicitly specify 1=1 as the clause if you meant to do this.");
 		
 		$sql = "UPDATE $table SET $setClause WHERE $whereClause";
-		
 		$stmt = $this->getConnector()->prepare($sql);
 		++$this->queries;
 		$stmt->execute($params);
@@ -518,7 +396,8 @@ class Manager
 	
 	protected function executeDelete($objectName, Criteria\Query $criteria)
 	{
-		$table = $this->getTableName($objectName);
+		$meta = $this->getMeta($objectName);
+		$table = $meta->table;
 		
 		list ($whereClause, $whereParams) = $criteria->buildClause();
 		
@@ -529,7 +408,7 @@ class Manager
 		$stmt->execute($whereParams);
 	}
 	
-	protected function sanitiseParam($id) 
+	public function sanitiseParam($id) 
 	{
 		return preg_replace('/[^A-z0-9_]/', '', $id);
 	}
@@ -567,32 +446,25 @@ class Manager
 	public function getChildren($objects, $path)
 	{
 		$array = array();
-		$items = is_array($path) ? $path : explode('/', $path);
-		$one = count($items)==1;
+		if (!is_array($path)) $path = explode('/', $path);
+		if (!is_array($objects)) $objects = array($objects);
+		
+		$count = count($path);
 		
 		foreach ($objects as $o) {
-			if ($one) {
-				$item = $o->{$items[0]};
-			}
-			else {
-				$current = $o;
-				foreach ($items as $i) {
-					$current = $current->$i;
-				}
-				$item = $current;
-			}
-			if (is_array($item)) {
-				foreach ($item as $i) $array[] = $i;
-			}
-			else $array[] = $item;
+			$value = $o->{$path[0]};
+			
+			if (is_array($value))
+				$array = array_merge($array, $value);
+			elseif ($value !== null)
+				$array[] = $value;
 		}
+		
+		if ($count > 1) {
+			$array = $this->getChildren($array, array_slice($path, 1));
+		}
+		
 		return $array;
-	}
-	
-	public function bindValues($stmt, $params)
-	{
-		foreach ($params as $k=>$v)
-			$stmt->bindValue($k, $v);
 	}
 	
 	public function execute($stmt, $params=null)
@@ -614,43 +486,6 @@ class Manager
 		return $stmt;
 	}
 	
-	/**
-	 * Returns a quoted table name for a class name
-	 */
-	public function getTableName($class)
-	{
-		$class = ltrim($class, '\\');
-		
-		if (isset($this->tableMap[$class])) {
-			$table = $this->tableMap[$class];
-		}
-		else {
-			if (isset($this->objectToTableMapper)) {
-				if ($this->objectToTableMapper instanceof Name\Mapper) {
-					$result = $this->objectToTableMapper->to(array($class));
-					$table = current($result);
-				}
-				else {
-					$table = call_user_func($this->objectToTableMapper, $class);
-				}
-			}
-			else {
-				$table = $class;
-				
-				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-				
-				if ($this->convertTableNames) {
-					$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
-						return "_".strtolower($match[0]);
-					}, $table), '_');
-				}
-			}
-		}
-		
-		$table = '`'.str_replace('`', '', $table).'`';
-		return $table;
-	}
-	
 	protected function createSelectCriteria($args)
 	{
 		if (!$args) {
@@ -663,6 +498,7 @@ class Manager
 			$criteria = new Criteria\Select();
 			$this->populateQueryCriteria($criteria, $args);
 		}
+		
 		return $criteria;
 	}
 	
@@ -689,7 +525,27 @@ class Manager
 			}
 		} 
 		else {
-			throw new \InvalidArgumentException('Couldn\'t parse arguments');
+			throw new \InvalidArgumentException("Couldn't parse arguments");
 		}
+	}
+	
+	public function __get($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+	
+	public function __set($name, $value)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+	
+	public function __isset($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
+	}
+	
+	public function __unset($name)
+	{
+		throw new \BadMethodCallException("$name does not exist");
 	}
 }

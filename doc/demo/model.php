@@ -36,13 +36,35 @@ abstract class Object
 
 class Artist extends Object
 {
+	/**
+	 * @field
+	 * @primary
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $name;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
+	
+	/**
+	 * @field
+	 * @type LONGTEXT
+	 */
 	public $bio;
 	
 	/**
+	 * @has one ArtistType artistTypeId
 	 * @var Amiss\Demo\ArtistType
 	 */
 	public $artistType;
@@ -50,11 +72,23 @@ class Artist extends Object
 
 class ArtistType extends Object
 {
+	/**
+	 * @primary
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $type;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
 	
 	/**
+	 * @has many Artist
 	 * @var Amiss\Demo\Artist[]
 	 */
 	public $artists = array();
@@ -62,74 +96,170 @@ class ArtistType extends Object
 
 class Event extends Object
 {
+	/**
+	 * @primary
+	 */
 	public $eventId;
-	public $name;
-	public $slug;
+	
+	private $name;
+	
+	private $subName;
+	
+	private $slug;
+	
+	/**
+	 * @field
+	 */
 	public $dateStart;
+	
+	/**
+	 * @field
+	 */
 	public $dateEnd;
+	
+	/**
+	 * @field
+	 */
 	public $venueId;
 	
 	/**
+	 * @has many EventArtist
 	 * @var Amiss\Demo\EventArtist[]
 	 */
 	public $eventArtists;
 	
 	/**
+	 * @has one Venue venueId
 	 * @var Amiss\Demo\Venue
 	 */
 	public $venue;
+	
+	/**
+	 * @field
+	 */
+	public function getSlug()
+	{
+		return $this->slug;
+	}
+	
+	public function setSlug($value)
+	{
+		$this->slug = $value;
+	}
+	
+	/**
+	 * @field
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	public function setName($value)
+	{
+		$this->name = $value;
+		if (!$this->slug) {
+			$this->slug = trim(
+				preg_replace('/-+/', '-', 
+				preg_replace('/\s+/', '-', 
+				preg_replace('/[^a-z0-9/', '', 
+				strtolower(
+					$value
+				)))), 
+				'-'
+			);
+		} 
+	}
+	
+	/**
+	 * @field sub_name
+	 * @setter setTheSubName
+	 */
+	public function getSubName()
+	{
+		return $this->subName;
+	}
+	
+	public function setTheSubName($value)
+	{
+		$this->subName = $value;
+	}
 }
 
-class EventArtist extends Artist
+class EventArtist
 {
+	/**
+	 * @primary
+	 */
 	public $eventId;
+	
+	/**
+	 * @field
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $priority;
+	
+	/**
+	 * @field
+	 */
 	public $sequence;
+	
+	/**
+	 * @field
+	 */
 	public $eventArtistName;
 	
 	/**
+	 * @has one Event eventId
 	 * @var Amiss\Demo\Event
 	 */
 	public $event;
 	
 	/**
+	 * @has one Artist artistId
 	 * @var Amiss\Demo\Artist
 	 */
 	public $artist;
 }
 
-class Venue extends Object implements \Amiss\RowBuilder, \Amiss\RowExporter
+class Venue extends Object
 {
+	/**
+	 * @primary
+	 */
 	public $venueId;
+	
+	/**
+	 * @field name
+	 */
 	public $venueName;
+	
+	/**
+	 * @field slug
+	 */
 	public $venueSlug;
+	
+	/**
+	 * @field address
+	 */
 	public $venueAddress;
+	
+	/**
+	 * @field shortAddress
+	 */
 	public $venueShortAddress;
+	
+	/**
+	 * @field latitude
+	 */
 	public $venueLatitude;
+	
+	/**
+	 * @field longitude
+	 */
 	public $venueLongitude;
-	
-	public function buildObject(array $row)
-	{
-		$this->venueId = (int)$row['venueId'];
-		$this->venueName = $row['name'];
-		$this->venueSlug = $row['slug'];
-		$this->venueAddress = $row['address'];
-		$this->venueShortAddress = $row['shortAddress'];
-		$this->venueLatitude = $row['latitude'];
-		$this->venueLongitude = $row['longitude'];
-	}
-	
-	public function exportRow()
-	{
-		return array(
-			'venueId'=>$this->venueId,
-			'name'=>$this->venueName,
-			'slug'=>$this->venueSlug,
-			'address'=>$this->venueAddress,
-			'shortAddress'=>$this->venueShortAddress,
-			'latitude'=>$this->venueLatitude,
-			'longitude'=>$this->venueLongitude,
-		);
-	}
 }

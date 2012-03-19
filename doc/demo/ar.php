@@ -24,7 +24,7 @@ class ArtistRecord extends \Amiss\Active\Record
 	public function getType()
 	{
 		if ($this->type === null) {
-			$this->type = $this->fetchRelated('type');
+			$this->type = $this->getRelated('type');
 		}
 		return $this->type;
 	}
@@ -47,19 +47,22 @@ class ArtistType extends \Amiss\Active\Record
 	/**
 	 * @var Amiss\Demo\ArtistRecord[]
 	 */
-	private $artists = array();
+	private $artists = null;
 	
 	public function getArtists()
 	{
 		if ($this->artists === null) {
-			$this->artists = $this->fetchRelated('artists');
+			$this->artists = $this->getRelated('artists');
 		}
 		return $this->artists;
 	}
 	
-	public static $relations = array(
-		'artists'=>array('many'=>'ArtistRecord', 'on'=>'artistTypeId'),
-	);
+	public static function getRelations()
+	{
+		return array(
+			'artists'=>array('many'=>'ArtistRecord', 'on'=>'artistTypeId', 'getter'=>'getArtists'),
+		);
+	}
 }
 
 class EventRecord extends \Amiss\Active\Record
@@ -68,6 +71,7 @@ class EventRecord extends \Amiss\Active\Record
 	public static $primary = 'eventId';
 	public static $fields = array(
 		'name'=>'varchar(50)',
+		'sub_name',
 		'slug', 
 		'dateStart'=>'datetime', 
 		'dateEnd'=>'datetime',
@@ -76,6 +80,10 @@ class EventRecord extends \Amiss\Active\Record
 	
 	public $eventId;
 	public $name;
+	
+	// statics mapper doesn't support translating property names explicitly yet  
+	public $sub_name;
+	
 	public $slug;
 	public $dateStart;
 	public $dateEnd;
@@ -94,7 +102,7 @@ class EventRecord extends \Amiss\Active\Record
 	public function getVenue()
 	{
 		if (!$this->venue && $this->venueId) {
-			$this->venue = $this->fetchRelated('venue');
+			$this->venue = $this->getRelated('venue');
 		}
 		return $this->venue;
 	}
@@ -102,7 +110,7 @@ class EventRecord extends \Amiss\Active\Record
 	public function getEventArtists()
 	{
 		if (!$this->eventArtists) {
-			 $this->eventArtists = $this->fetchRelated('eventArtists');
+			 $this->eventArtists = $this->getRelated('eventArtists');
 		}
 		return $this->eventArtists;
 	}

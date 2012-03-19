@@ -24,7 +24,7 @@ function source($code)
 	return ob_get_clean();
 }
 
-function dump($obj, $depth=3, $highlight=true)
+function dump($obj, $depth=10, $highlight=true)
 {
 	$trace = debug_backtrace();
 	$line = $trace[0]['line'];

@@ -1,6 +1,7 @@
 <?php
 
-use Amiss\Active\TableBuilder;
+use Amiss\TableBuilder;
+
 require_once(__DIR__.'/../src/Loader.php');
 
 date_default_timezone_set('Australia/Melbourne');
@@ -31,6 +32,14 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 		return $property->getValue($class);
 	}
 	
+	protected function setProtected($class, $name, $value)
+	{
+		$ref = new ReflectionClass($class);
+		$property = $ref->getProperty($name);
+		$property->setAccessible(true);
+		return $property->setValue($class, $value);
+	}
+	
 	public function matchesLoose($string)
 	{
 		return new \LooseStringMatch($string);
@@ -55,24 +64,46 @@ abstract class SqliteDataTestCase extends CustomTestCase
 	 */
 	public $manager;
 	
+	public abstract function getMapper();
+	
 	public function setUp()
 	{
 		\Amiss\Active\Record::_reset();
 		
-		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+		$this->db = new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite'));
 		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite'));
 		
-		$this->manager = new \Amiss\Manager($this->db);
-		$this->manager->objectNamespace = 'Amiss\Demo';
+		$this->mapper = $this->getMapper();
+		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
+		\Amiss\Active\Record::setManager($this->manager);
 	}
 	
 	public function createRecordMemoryDb($class)
 	{
-		$tb = new TableBuilder($class);
-		$manager = new \Amiss\Manager(new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION)));
-		forward_static_call(array($class, 'setManager'), $manager);
+		$tb = new TableBuilder($this->manager, $class);
+		forward_static_call(array($class, 'setManager'), $this->manager);
 		$tb->createTable();
+	}
+}
+
+abstract class ActiveRecordDataTestCase extends SqliteDataTestCase
+{
+	public function getMapper()
+	{
+		$mapper = new \Amiss\Mapper\Statics();
+		$mapper->objectNamespace = 'Amiss\Demo\Active';
+		return $mapper;
+	}
+}
+
+abstract class NoteMapperDataTestCase extends SqliteDataTestCase
+{
+	public function getMapper()
+	{
+		$mapper = new \Amiss\Mapper\Note();
+		$mapper->objectNamespace = 'Amiss\Demo';
+		return $mapper;
 	}
 }
 
@@ -98,10 +129,16 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      * @param mixed $other Value or object to evaluate.
      * @return bool
      */
-    public function evaluate($other)
+    public function evaluate($other, $description = '', $returnResult = FALSE)
     {
     	$pattern = '/'.preg_replace('/\s+/', '\s*', preg_quote($this->string, '/')).'/ix';
-        return preg_match($pattern, $other) > 0;
+    	$result = preg_match($pattern, $other) > 0;
+    	
+    	if (!$returnResult) {
+    		if (!$result) $this->fail($other, $description);
+    	}
+    	else
+    		return $result;
     }
 
     /**
@@ -134,7 +171,28 @@ class TestConnector extends \Amiss\Connector
 	}
 }
 
-class TestTypeHandler implements \Amiss\Active\TypeHandler
+class TestMapper implements \Amiss\Mapper
+{
+	public $meta;
+	
+	function __construct($meta=array())
+	{
+		$this->meta = $meta;
+	}
+	
+	function getMeta($class)
+	{
+		return isset($this->meta[$class]) ? $this->meta[$class] : null;
+	}
+	
+	function createObject($meta, $row, $args) {}
+	
+	function exportRow($meta, $object) {}
+	
+	function determineTypeHandler($type) {}
+}
+
+class TestTypeHandler implements \Amiss\Type\Handler
 {
 	public $valueForDb;
 	public $valueFromDb;

@@ -14,13 +14,30 @@ INPUT:
 Options:
   --engine        Database engine (mysql, sqlite)
   --bootstrap     File to be run before creating tables
-  -r, --recurse   Recurse all input directories looking for active records
+  -r, --recurse   Recurse all input directories looking for items
+  --mapper        Mapper class name. Either pass this or define a mapper in the boostrap
+  --note NOTE     Search for all classes that have this note set at class level 
+  --ns NAMESPACE  Search for all classes in this namespace. Can specify more than once.
+
+Examples:
+Use all classes with the @foo annotation at class level:
+  amiss create-tables-sql --note foo
+
+Use all classes in the Foo\Model namespace
+  amiss create-tables-sql --namespace Foo\\Model
+	
+Use all classes in the Foo\Model and Bar\Model namespaces with the @foo annotation:
+  amiss create-tables-sql --namespace Foo\\Model --namespace Bar\\Model --note foo
+
 ";
 
 $bootstrap = null;
 $input = null;
 $recursive = false;
 $engine = 'mysql';
+$namespaces = array();
+$notes = array();
+$mapperClass = null;
 
 $iter = new ArrayIterator(array_slice($argv, 1));
 foreach ($iter as $v) {
@@ -28,12 +45,24 @@ foreach ($iter as $v) {
 		$iter->next();
 		$bootstrap = $iter->current(); 
 	}
-	if ($v == '--engine') {
+	elseif ($v == '--mapper') {
+		$iter->next();
+		$mapperClass = $iter->current(); 
+	}
+	elseif ($v == '--engine') {
 		$iter->next();
 		$engine = $iter->current(); 
 	}
 	elseif ($v == '--recurse' || $v == '-r') {
 		$recursive = true;
+	}
+	elseif ($v == '--namespace') {
+		$iter->next();
+		$namespaces[] = $iter->current();
+	}
+	elseif ($v == '--note') {
+		$iter->next();
+		$notes[] = $iter->current();
 	}
 	elseif (strpos($v, '--')===0 || $input) {
 		echo "Invalid arguments\n\n".$usage; exit(1);
@@ -43,6 +72,9 @@ foreach ($iter as $v) {
 	}
 }
 
+if (!$notes && !$namespaces) {
+	echo "Please specify some notes and/or namespaces to search for\n\n".$usage; exit(1);
+}
 if (!$input) {
 	echo "Input not specified\n\n".$usage; exit(1);
 }
@@ -53,27 +85,33 @@ if ($bootstrap && !file_exists($bootstrap)) {
 	echo "Bootstrap file did not exist\n\n".$usage; exit(1);
 }
 
-if ($bootstrap)
-	require($bootstrap);
+$mapper = null;
+$manager = null;
+$connector = null;
+if ($bootstrap) require($bootstrap);
 
-$defaultManager = new Amiss\Manager(new Amiss\Connector($engine.':blahblah'));
-Amiss\Active\Record::setManager($defaultManager);
+if (!$mapper) {
+	if (!$mapperClass) $mapperClass = 'Amiss\Mapper\Note'; 
+	$mapper = new $mapperClass;
+}
+
+if (!$mapper) {
+	echo "Please pass the --mapper parameter or define a mapper in a bootstrap file\n\n".$usage; exit(1);
+}
+
+if (!$manager)
+	$manager = new Amiss\Manager(new Amiss\Connector($engine.':blahblah'), $mapper);
 
 $toCreate = find_classes($input);
+if ($namespaces)
+	$toCreate = filter_classes_by_namespaces($toCreate, $namespaces);
+if ($notes)
+	$toCreate = filter_classes_by_notes($toCreate, $notes);
 
 foreach ($toCreate as $class) {
-	if (is_subclass_of($class, 'Amiss\Active\Record')) {
-		$manager = $class::getMeta()->getManager();
-		
-		if ($class::$fields) {
-			$builder = new Amiss\Active\TableBuilder($class);
-			$create = $builder->buildCreateTableSql();
-			if (!preg_match("/;\s*$/", $create))
-				$create .= ';';
-			echo $create.PHP_EOL.PHP_EOL;
-		}
-		else {
-			echo "Warning: $class does not declare fields\n";
-		}
-	}
+	$builder = new Amiss\TableBuilder($manager, $class);
+	$create = $builder->buildCreateTableSql();
+	if (!preg_match("/;\s*$/", $create))
+		$create .= ';';
+	echo $create.PHP_EOL.PHP_EOL;
 }

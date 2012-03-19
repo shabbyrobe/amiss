@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class UpdateObjectTest extends \SqliteDataTestCase
+class UpdateObjectTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{
@@ -14,7 +14,7 @@ class UpdateObjectTest extends \SqliteDataTestCase
 	
 	/**
 	 * Ensures the signature for the 'autoincrement primary key' update method works
-	 *   Amiss\Manager->update( object $object , string $pkField )
+	 *   Amiss\Manager->update( object $object )
 	 * 
 	 */
 	public function testUpdateObjectByAutoincrementPrimaryKey()
@@ -23,7 +23,7 @@ class UpdateObjectTest extends \SqliteDataTestCase
 		
 		$this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
 		
-		$this->manager->update($this->artist, 'artistId');
+		$this->manager->update($this->artist);
 		
 		$this->artist = $this->manager->get('Artist', 'artistId=?', 1);
 		$this->assertEquals('Foobar', $this->artist->name);
