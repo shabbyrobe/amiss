@@ -28,8 +28,8 @@ class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 	}
 
 	/**
-	 * Ensures the signature for object insertion works with a RowExporter
-	 *   Amiss\Manager->insert( object $object )
+	 * Ensures object insertion works with a complex mapping (Venue
+	 * defines explicit field mappings)
 	 * 
 	 * @group acceptance
 	 */
@@ -46,7 +46,11 @@ class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 		
 		$this->assertGreaterThan(0, $venue->venueId);
 		
-		$this->assertEquals(1, $this->manager->count('Venue', 'slug="insert-test"'));
+		$row = $this->manager->execute("SELECT * from venue WHERE venueId=?", array($venue->venueId))->fetch(\PDO::FETCH_ASSOC);
+		$this->assertEquals($venue->venueName, $row['name']);
+		$this->assertEquals($venue->venueSlug, $row['slug']);
+		$this->assertEquals($venue->venueAddress, $row['address']);
+		$this->assertEquals($venue->venueShortAddress, $row['shortAddress']);
 	}
 	
 	/**
