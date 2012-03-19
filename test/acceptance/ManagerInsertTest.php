@@ -4,12 +4,13 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class InsertObjectTest extends \NoteMapperDataTestCase
+class ManagerInsertObjectTest extends \NoteMapperDataTestCase
 {
 	/**
 	 * Ensures the signature for object insertion works
 	 *   Amiss\Manager->insert( object $object )
 	 * 
+	 * @group acceptance
 	 */
 	public function testInsertObject()
 	{
@@ -30,6 +31,7 @@ class InsertObjectTest extends \NoteMapperDataTestCase
 	 * Ensures the signature for object insertion works with a RowExporter
 	 *   Amiss\Manager->insert( object $object )
 	 * 
+	 * @group acceptance
 	 */
 	public function testInsertObjectWithManualNoteFields()
 	{
@@ -51,6 +53,7 @@ class InsertObjectTest extends \NoteMapperDataTestCase
 	 * Ensures the signature for table insertion works
 	 *   Amiss\Manager->insert( string $table , array $values )
 	 * 
+	 * @group acceptance
 	 */
 	public function testInsertToTable()
 	{

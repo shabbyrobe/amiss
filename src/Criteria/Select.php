@@ -19,6 +19,24 @@ class Select extends Query
 			return array($this->page[1], ($this->page[0] - 1) * $this->page[1]); 
 		}
 	}
+
+	public function buildQuery($meta)
+	{
+		$table = $meta->table;
+		
+		list ($where, $params) = $this->buildClause();
+		$order = $this->buildOrder($meta);
+		list ($limit, $offset) = $this->getLimitOffset();
+		
+		$query = "SELECT ".$this->buildFields($meta)." FROM $table "
+			.($where  ? "WHERE $where "            : '').' '
+			.($order  ? "ORDER BY $order "         : '').' '
+			.($limit  ? "LIMIT  ".(int)$limit." "  : '').' '
+			.($offset ? "OFFSET ".(int)$offset." " : '').' '
+		;
+		
+		return array($query, $params);
+	}
 	
 	protected function buildFields($meta)
 	{
@@ -41,24 +59,6 @@ class Select extends Query
 		return $fields;
 	}
 	
-	public function buildQuery($meta)
-	{
-		$table = $meta->table;
-		
-		list ($where, $params) = $this->buildClause();
-		$order = $this->buildOrder($meta);
-		list ($limit, $offset) = $this->getLimitOffset();
-		
-		$query = "SELECT ".$this->buildFields($meta)." FROM $table "
-			.($where  ? "WHERE $where "            : '').' '
-			.($order  ? "ORDER BY $order "         : '').' '
-			.($limit  ? "LIMIT  ".(int)$limit." "  : '').' '
-			.($offset ? "OFFSET ".(int)$offset." " : '').' '
-		;
-		
-		return array($query, $params);
-	}
-	
 	protected function buildOrder($meta)
 	{
 		$order = array();
@@ -71,6 +71,9 @@ class Select extends Query
 				if (is_numeric($field)) { 
 					$field = $dir; $dir = 'asc';
 				}
+				
+				if (!isset($fields[$field]))
+					throw new \Amiss\Exception("Attempted to order by nonexistent property $field for class {$meta->class}");
 				
 				$fieldMeta = $fields[$field];
 				$field = $fieldMeta['name'];

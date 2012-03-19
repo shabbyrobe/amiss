@@ -171,6 +171,27 @@ class TestConnector extends \Amiss\Connector
 	}
 }
 
+class TestMapper implements \Amiss\Mapper
+{
+	public $meta;
+	
+	function __construct($meta=array())
+	{
+		$this->meta = $meta;
+	}
+	
+	function getMeta($class)
+	{
+		return isset($this->meta[$class]) ? $this->meta[$class] : null;
+	}
+	
+	function createObject($meta, $row, $args) {}
+	
+	function exportRow($meta, $object) {}
+	
+	function determineTypeHandler($type) {}
+}
+
 class TestTypeHandler implements \Amiss\Type\Handler
 {
 	public $valueForDb;

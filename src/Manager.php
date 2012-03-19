@@ -286,7 +286,6 @@ class Manager
 			$criteria = new Criteria\Query;
 			$this->populateQueryCriteria($criteria, $args);
 		}
-		
 		return $this->executeDelete($class, $criteria);
 	}
 	

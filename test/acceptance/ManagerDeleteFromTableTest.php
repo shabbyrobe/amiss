@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Criteria\Query;
 
-class DeleteFromTableTest extends \NoteMapperDataTestCase
+class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 {
 	public function setUp()
 	{
@@ -15,6 +15,7 @@ class DeleteFromTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->delete( string $table, string $positionalWhere, [ $param1, ... ] )
 	 * 
+	 * @group acceptance
 	 */
 	public function testDeleteTableWithArraySetAndPositionalWhere()
 	{
@@ -32,6 +33,7 @@ class DeleteFromTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->delete( string $table, string $namedWhere, array $params )
 	 * 
+	 * @group acceptance
 	 */
 	public function testDeleteTableWithArraySetAndNamedWhere()
 	{
@@ -49,6 +51,7 @@ class DeleteFromTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->delete( string $table, array $criteria )
 	 * 
+	 * @group acceptance
 	 */
 	public function testDeleteTableWithArrayCriteria()
 	{
@@ -66,6 +69,7 @@ class DeleteFromTableTest extends \NoteMapperDataTestCase
 	 * Ensures the following signature works as expected:
 	 *   Amiss\Manager->delete( string $table, Criteria\Query $criteria )
 	 * 
+	 * @group acceptance
 	 */
 	public function testDeleteTableWithObjectCriteria()
 	{
