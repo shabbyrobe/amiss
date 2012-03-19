@@ -192,8 +192,7 @@ Modifying by object:
     <?php
     // inserting an object:
     $event = new Event;
-    $event->name = 'Abc Def';
-    $event->slug = 'abc-def';
+    $event->setName('Abc Def');
     $event->startDate = '2020-01-01';
     $manager->insert($event);
     

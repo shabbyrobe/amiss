@@ -2,8 +2,12 @@
 
 namespace Amiss\Test\Acceptance;
 
-class SelectTest extends \NoteMapperDataTestCase
+class ManagerSelectTest extends \NoteMapperDataTestCase
 {
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testSingleObjectPositionalParametersShorthand()
 	{
 		$a = $this->manager->get('Artist', 'slug=?', 'limozeen');
@@ -11,6 +15,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('Limozeen', $a->name);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testSingleObjectNamedParametersShorthand()
 	{
 		$a = $this->manager->get('Artist', 'slug=:slug', array(':slug'=>'limozeen'));
@@ -18,6 +26,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('Limozeen', $a->name);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testSingleObjectNamedParametersLongForm()
 	{
 		$a = $this->manager->get(
@@ -31,6 +43,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('Limozeen', $a->name);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testSingleObjectUsingCriteria()
 	{
 		$criteria = new \Amiss\Criteria\Select;
@@ -43,6 +59,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('Limozeen', $a->name);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testList()
 	{
 		$artists = $this->manager->getList('Artist');
@@ -53,6 +73,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('taranchula', current($artists)->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testPagedListFirstPage()
 	{
 		$artists = $this->manager->getList('Artist', array('page'=>array(1, 3)));
@@ -64,6 +88,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('taranchula', current($artists)->slug);
 	}
 
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testPagedListSecondPage()
 	{
 		$artists = $this->manager->getList('Artist', array('page'=>array(2, 3)));
@@ -75,6 +103,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('david-cross', current($artists)->slug);
 	}
 
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testListLimit()
 	{
 		$artists = $this->manager->getList('Artist', array('limit'=>3));
@@ -86,6 +118,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('taranchula', current($artists)->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testListOffset()
 	{
 		$artists = $this->manager->getList('Artist', array('limit'=>3, 'offset'=>3));
@@ -97,6 +133,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('david-cross', current($artists)->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testOrderByManualImpliedAsc()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>'name'));
@@ -106,6 +146,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testOrderByManualDesc()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>'name desc'));
@@ -115,6 +159,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('bad-news', $a->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testOrderByManualMulti()
 	{
 		$eventArtists = $this->manager->getList('EventArtist', array(
@@ -137,6 +185,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		), $result);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testOrderBySingleLongForm()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>array('name')));
@@ -146,6 +198,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
 	}
 
+	/**
+	 * @group acceptance
+	 * @group manager 
+	 */
 	public function testOrderBySingleLongFormDescending()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>array('name'=>'desc')));
@@ -156,6 +212,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$this->assertEquals('bad-news', $a->slug);
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
 	public function testSelectSingleObjectFromMultipleResultWhenLimitIsOne()
 	{
 		$artist = $this->manager->get('Artist', array('order'=>array('name'=>'desc'), 'limit'=>1));
@@ -165,6 +225,8 @@ class SelectTest extends \NoteMapperDataTestCase
 	}
 	
 	/**
+	 * @group acceptance
+	 * @group manager
 	 * @expectedException Amiss\Exception
 	 */
 	public function testSelectSingleObjectFailsWhenResultReturnsMany()
@@ -173,6 +235,8 @@ class SelectTest extends \NoteMapperDataTestCase
 	}
 	
 	/**
+	 * @group acceptance
+	 * @group manager
 	 * @expectedException Amiss\Exception
 	 */
 	public function testSelectSingleObjectFailsWithoutIssuingQueryWhenLimitSetButNotOne()
@@ -182,6 +246,10 @@ class SelectTest extends \NoteMapperDataTestCase
 		$artist = $this->manager->get('Artist', array('limit'=>2));
 	}
 	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
 	public function testOrderByMulti()
 	{
 		$eventArtists = $this->manager->getList('EventArtist', array(

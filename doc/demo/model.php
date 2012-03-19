@@ -101,15 +101,9 @@ class Event extends Object
 	 */
 	public $eventId;
 	
-	/**
-	 * @field
-	 */
-	public $name;
+	private $name;
 	
-	/**
-	 * @field
-	 */
-	public $slug;
+	private $slug;
 	
 	/**
 	 * @field
@@ -137,6 +131,43 @@ class Event extends Object
 	 * @var Amiss\Demo\Venue
 	 */
 	public $venue;
+	
+	/**
+	 * @field
+	 */
+	public function getSlug()
+	{
+		return $this->slug;
+	}
+	
+	public function setSlug($value)
+	{
+		$this->slug = $value;
+	}
+	
+	/**
+	 * @field
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	public function setName($value)
+	{
+		$this->name = $value;
+		if (!$this->slug) {
+			$this->slug = trim(
+				preg_replace('/-+/', '-', 
+				preg_replace('/\s+/', '-', 
+				preg_replace('/[^a-z0-9/', '', 
+				strtolower(
+					$value
+				)))), 
+				'-'
+			);
+		} 
+	}
 }
 
 class EventArtist

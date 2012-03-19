@@ -12,7 +12,7 @@ class RelationTest extends \NoteMapperDataTestCase
 		$event = $this->manager->getRelated($eventArtist, 'event');
 		
 		$this->assertTrue($event instanceof Demo\Event);
-		$this->assertEquals('awexxome-fest-20x6', $event->slug);
+		$this->assertEquals('awexxome-fest-20x6', $event->getSlug());
 	}
 	
 	public function testAssignSingleRelated()
@@ -20,7 +20,7 @@ class RelationTest extends \NoteMapperDataTestCase
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
 		$this->manager->assignRelated($eventArtist, 'event');
 		$this->assertTrue($eventArtist->event instanceof Demo\Event);
-		$this->assertEquals('awexxome-fest-20x6', $eventArtist->event->slug);
+		$this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
 	}
 	
 	/*
@@ -32,7 +32,7 @@ class RelationTest extends \NoteMapperDataTestCase
 		$events = $this->manager->getRelated($eventArtists, 'Event', 'eventId');
 		$this->assertTrue(is_array($events));
 		$this->assertTrue(current($events) instanceof Demo\Event);
-		$this->assertEquals('awexxome-fest', current($events)->slug);
+		$this->assertEquals('awexxome-fest', current($events)->getSlug());
 	}
 	*/
 	
@@ -43,7 +43,7 @@ class RelationTest extends \NoteMapperDataTestCase
 		
 		$current = current($eventArtist);
 		$this->assertTrue($current->event instanceof Demo\Event);
-		$this->assertEquals('awexxome-fest', $current->event->slug);
+		$this->assertEquals('awexxome-fest', $current->event->getSlug());
 		
 		// make sure the second object has exactly the same instance
 		next($eventArtist);

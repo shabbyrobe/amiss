@@ -27,8 +27,7 @@ If you have an autoincrement ID column it is populated into the corresponding ob
     <?php
     // exampe from the doc/demo/model.php file
     $e = new Event;
-    $e->slug = 'foo-bar';
-    $e->name = 'Foo Bar';
+    $e->setName('Foo Bar');
     
     // assign the autoincrement PK by hand
     $manager->insert('Event');
