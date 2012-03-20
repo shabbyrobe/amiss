@@ -30,7 +30,8 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 			) ENGINE=InnoDB
 		";
 		$this->tableBuilder->createTable();
-		$this->assertLoose(array($pattern, array()), $this->connector->getLastCall());
+		$last = $this->connector->getLastCall();
+		$this->assertLoose($pattern, $last[0]);
 	}
 	
 	/**
@@ -52,7 +53,8 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 		";
 		$this->tableBuilder->createTable();
 		
-		$this->assertLoose(array($pattern, array()), $this->connector->getLastCall());
+		$last = $this->connector->getLastCall();
+		$this->assertLoose($pattern, $last[0]);
 	}
 }
 

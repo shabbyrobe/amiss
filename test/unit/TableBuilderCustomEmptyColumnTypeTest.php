@@ -33,7 +33,8 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 		";
 		$this->tableBuilder->createTable();
 		
-		$this->assertLoose(array($pattern, array()), $this->connector->getLastCall());
+		$last = $this->connector->getLastCall();
+		$this->assertLoose($pattern, $last[0]);
 	}
 }
 
