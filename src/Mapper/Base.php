@@ -34,6 +34,7 @@ abstract class Base implements \Amiss\Mapper
 	
 	public function createObject($meta, $row, $args)
 	{
+		$object = null;
 		if ($args) {
 			$rc = new \ReflectionClass($meta->class);
 			$object = $rc->newInstanceArgs($args);
@@ -42,13 +43,21 @@ abstract class Base implements \Amiss\Mapper
 			$cname = $meta->class;
 			$object = new $cname;
 		}
-		
+		return $object;
+	}
+	
+	public function populateObject($meta, $object, $row)
+	{
 		$defaultType = $meta->getDefaultFieldType();
 		
-		foreach ($meta->getFields() as $prop=>$field) {
-			// TODO: getter and setter support
-			$value = $row[$field['name']];
+		$fields = $meta->getFields();
+		$map = $meta->getColumnToPropertyMap();
+		foreach ($row as $col=>$value) {
+			if (!isset($map[$col]))
+				continue; // throw exception?
 			
+			$prop = $map[$col];
+			$field = $fields[$prop];
 			$type = $field['type'] ?: $defaultType;
 			
 			if ($type) {
@@ -65,8 +74,6 @@ abstract class Base implements \Amiss\Mapper
 			else
 				call_user_func(array($object, $field['setter']), $value);
 		}
-		
-		return $object;
 	}
 	
 	public function exportRow($meta, $object)

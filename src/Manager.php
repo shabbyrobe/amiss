@@ -71,11 +71,11 @@ class Manager
 		$object = null;
 		
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			if ($object) {
+			if ($object)
 				throw new Exception("Query returned more than one row");
-			}
 			
 			$object = $this->mapper->createObject($meta, $row, $criteria->args);
+			$this->mapper->populateObject($meta, $object, $row);
 		}
 		return $object;
 	}
@@ -93,7 +93,9 @@ class Manager
 		$objects = array();
 	
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			$objects[] = $this->mapper->createObject($meta, $row, $criteria->args);
+			$object = $this->mapper->createObject($meta, $row, $criteria->args);
+			$this->mapper->populateObject($meta, $object, $row);
+			$objects[] = $object;
 		}
 		
 		return $objects;
@@ -240,13 +242,9 @@ class Manager
 		
 		if ($object && $meta->primary && $lastInsertId) {
 			if (($count=count($meta->primary)) != 1)
-				throw new Exception("Autoincrement ID $lastInsertId for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
+				throw new Exception("Last insert ID $lastInsertId found for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
 			
-			$field = $meta->getField($meta->primary[0]);
-			if (!isset($field['setter']))
-				$object->{$field['name']} = (int)$lastInsertId;
-			else
-				call_user_func(array($object, $field['setter']), (int)$lastInsertId);
+			$this->mapper->populateObject($meta, $object, array($meta->primary[0]=>$lastInsertId));
 		}
 		
 		return $lastInsertId;

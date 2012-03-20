@@ -3,7 +3,7 @@
 require_once($amissPath.'/../doc/demo/model.php');
 
 $cache = null;
-$cacheType = 'hack';
+$cacheType = 'apc';
 
 if (!isset($_GET['nocache'])) {
 	if ($cacheType == 'hack') {

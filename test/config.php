@@ -229,6 +229,8 @@ class TestMapper implements \Amiss\Mapper
 	
 	function createObject($meta, $row, $args) {}
 	
+	function populateObject($meta, $object, $row) {}
+
 	function exportRow($meta, $object) {}
 	
 	function determineTypeHandler($type) {}

@@ -13,6 +13,7 @@ class Meta
 	protected $allFields;
 	protected $parent;
 	protected $defaultFieldType;
+	protected $columnToPropertyMap;
 	
 	public function __construct($class, $table, array $info, Meta $parent=null)
 	{
@@ -28,7 +29,7 @@ class Meta
 		$this->relations = isset($info['relations']) ? $info['relations'] : array();
 		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
 	}
-	
+
 	public function getFields()
 	{
 		if ($this->allFields===null) {
@@ -44,6 +45,19 @@ class Meta
 		}
 		
 		return $this->allFields;
+	}
+
+	public function getColumnToPropertyMap()
+	{
+		if ($this->columnToPropertyMap===null) {
+			$map = array();
+			foreach ($this->getFields() as $prop=>$f) {
+				$map[$f['name']] = $prop;
+			}
+			$this->columnToPropertyMap = $map;
+		}
+		
+		return $this->columnToPropertyMap;
 	}
 	
 	function getField($field)
@@ -80,5 +94,15 @@ class Meta
 		
 		if ($foundValue)
 			return $prival;
+	}
+	
+	function __sleep()
+	{
+		// precache this stuff before serialization
+		$this->getFields();
+		$this->getDefaultFieldType();
+		$this->getColumnToPropertyMap();
+		
+		return array('class', 'table', 'primary', 'relations', 'fields', 'allFields', 'parent', 'defaultFieldType', 'columnToPropertyMap'); 
 	}
 }
