@@ -49,12 +49,6 @@ class TableBuilder
 		$engine = $this->manager->getConnector()->engine;
 		$primary = $this->meta->primary;
 		
-		$autoinc = null;
-		if ($primary)
-			$autoinc = $engine == 'sqlite' ? 'AUTOINCREMENT' : 'AUTO_INCREMENT';
-		
-		$primaryType = "INTEGER NOT NULL PRIMARY KEY $autoinc";
-		
 		$default = $this->meta->getDefaultFieldType();
 		if (!$default) {
 			$default = $engine == 'sqlite' ? 'STRING NULL' : 'VARCHAR(255) NULL';
@@ -79,15 +73,10 @@ class TableBuilder
 			$current = "`{$info['name']}` ";
 			
 			$type = null;
-			if ($info['type']) {
+			if ($info['type'])
 				$type = $info['type'];
-			}
-			else {
-				if ($id != $primary)
-					$type = $default;
-				else
-					$type = $primaryType;
-			}
+			else
+				$type = $default;
 			
 			$handler = $this->manager->mapper->determineTypeHandler($type);
 			if ($handler) {
@@ -98,10 +87,6 @@ class TableBuilder
 			$current .= $type;
 			$f[] = $current;
 			$found[] = $id;
-		}
-		
-		if ($primary && !in_array($primary, $found)) {
-			array_unshift($f, "`$primary` $primaryType");
 		}
 		
 		return $f;

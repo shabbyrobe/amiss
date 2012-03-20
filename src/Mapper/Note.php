@@ -10,6 +10,8 @@ class Note extends \Amiss\Mapper\Base
 	
 	public function __construct($cache=null)
 	{
+		parent::__construct();
+		
 		$this->parser = new \Amiss\Note\Parser;
 		$this->setCache($cache);
 	}

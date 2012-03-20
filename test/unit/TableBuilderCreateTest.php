@@ -171,7 +171,7 @@ class TestCreate
 class TestCreateDefaultField
 {
 	public static $fields = array(
-		'testCreateDefaultFieldId',
+		'testCreateDefaultFieldId'=>'autoinc',
 		'foo',
 		'bar',
 	);
@@ -182,6 +182,7 @@ class TestCreateWithIndexedSingleOnRelation
 	public static $table = 'bar';
 	public static $primary = 'barId';
 	public static $fields = array(
+		'barId'=>'autoinc',
 		'fooId',
 		'quack',
 	);
@@ -196,6 +197,7 @@ class TestCreateWithIndexedMultiOnRelation
 	public static $table = 'bar';
 	public static $primary = 'barId';
 	public static $fields = array(
+		'barId'=>'autoinc',
 		'myFooId',
 		'myOtherFooId',
 		'bar',

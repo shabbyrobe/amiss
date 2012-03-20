@@ -43,6 +43,7 @@ class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Active\Record
 	public static $table = 'bar';
 	public static $primary = 'id';
 	public static $fields = array(
+		'id'=>'autoinc',
 		'foo1'=>'int',
 	);
 }

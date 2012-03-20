@@ -14,6 +14,11 @@ abstract class Base implements \Amiss\Mapper
 	
 	private $typeHandlerMap = array();
 	
+	public function __construct()
+	{
+		$this->typeHandlers['autoinc'] = new \Amiss\Type\Autoinc;
+	}
+	
 	public function getMeta($class)
 	{
 		$class = $this->resolveObjectname($class);

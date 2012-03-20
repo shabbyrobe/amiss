@@ -75,6 +75,34 @@ function extract_file_metadata($file)
 	return $meta;
 }
 
+function get_note_cache($type, $active=true)
+{
+	$cache = null;
+	if ($active) {
+		if ($type == 'hack') {
+			$path = sys_get_temp_dir();
+			$cache = array(
+				function ($key) use ($path) {
+					$key = md5($key);
+					$file = $path.'/nc-'.$key;
+					if (file_exists($file)) {
+						return unserialize(file_get_contents($file));
+					}
+				},
+				function ($key, $value) use ($path) {
+					$key = md5($key);
+					$file = $path.'/nc-'.$key;
+					file_put_contents($file, serialize($value));
+				}
+			);
+		}
+		elseif ($type == 'apc') {
+			$cache = 'apc';
+		}
+	}
+	return $cache;
+}
+
 function titleise_slug($slug)
 {
 	return ucfirst(preg_replace('/[_-]/', ' ', $slug));

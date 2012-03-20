@@ -64,6 +64,7 @@ class TestCreateWithCustomType
 	public static $primary = 'testCreateId';
 	
 	public static $fields = array(
+		'testCreateId'=>'autoinc',
 		'foo1'=>'slappywag',
 		'foo2'=>'slappywag',
 		'pants'=>'int unsigned not null',

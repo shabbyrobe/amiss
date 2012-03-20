@@ -37,8 +37,8 @@ abstract class Object
 class Artist extends Object
 {
 	/**
-	 * @field
 	 * @primary
+	 * @type autoinc
 	 */
 	public $artistId;
 	
@@ -74,6 +74,7 @@ class ArtistType extends Object
 {
 	/**
 	 * @primary
+	 * @type autoinc
 	 */
 	public $artistTypeId;
 	
@@ -98,6 +99,7 @@ class Event extends Object
 {
 	/**
 	 * @primary
+	 * @type autoinc
 	 */
 	public $eventId;
 	
@@ -230,6 +232,7 @@ class Venue extends Object
 {
 	/**
 	 * @primary
+	 * @type autoinc
 	 */
 	public $venueId;
 	

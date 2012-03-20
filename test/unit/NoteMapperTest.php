@@ -181,6 +181,28 @@ class NoteMapperTest extends \CustomTestCase
 	 * @group unit
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
+	public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsTypeSet()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		eval('
+			namespace '.__NAMESPACE__.';
+			class '.__FUNCTION__.' {
+				/**
+				 * @primary
+				 * @type autoinc 
+				 */ 
+				public $id;
+			}
+		');
+		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+		$this->assertEquals(array('id'=>array('name'=>'id', 'type'=>'autoinc')), $meta->getFields());
+	}
+	
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @covers Amiss\Mapper\Note::createMeta
+	 */
 	public function testGetMetaPrimaryNoteFound()
 	{
 		$mapper = new \Amiss\Mapper\Note;

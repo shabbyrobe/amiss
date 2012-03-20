@@ -4,6 +4,11 @@ namespace Amiss\Mapper;
 
 class Statics extends \Amiss\Mapper\Base
 {
+	public function __construct()
+	{
+		parent::__construct();
+	}
+	
 	protected function createMeta($class)
 	{
 		$info = array();

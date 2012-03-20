@@ -7,7 +7,7 @@ class ArtistRecord extends \Amiss\Active\Record
 	public static $table = 'artist';
 	public static $primary = 'artistId';
 	public static $fields = array(
-		'artistTypeId', 'name', 'slug', 'bio'
+		'artistTypeId'=>'autoinc', 'name', 'slug', 'bio'
 	);
 	
 	public $artistId;
@@ -37,7 +37,8 @@ class ArtistRecord extends \Amiss\Active\Record
 class ArtistType extends \Amiss\Active\Record
 {
 	public static $fields = array(
-		'artistTypeId', 'type', 'slug'
+		'artistTypeId'=>'autoinc', 
+		'type', 'slug'
 	);
 	
 	public $artistTypeId;
@@ -70,6 +71,7 @@ class EventRecord extends \Amiss\Active\Record
 	public static $table = 'event';
 	public static $primary = 'eventId';
 	public static $fields = array(
+		'eventId'=>'autoinc',
 		'name'=>'varchar(50)',
 		'sub_name',
 		'slug', 
@@ -140,6 +142,8 @@ class EventArtist extends \Amiss\Active\Record
 		'eventId', 'artistId', 'priority', 'sequence', 'eventArtistName',
 	);
 	
+	public static $primary = array('eventId', 'artistId');
+	
 	public $eventId;
 	public $artistId;
 	public $priority;
@@ -165,7 +169,7 @@ class EventArtist extends \Amiss\Active\Record
 class VenueRecord extends \Amiss\Active\Record
 {
 	public static $fields = array(
-		'venueId', 'name', 'slug', 'address', 'shortAddress', 'latitude', 'longitude'
+		'venueId'=>'autoinc', 'name', 'slug', 'address', 'shortAddress', 'latitude', 'longitude'
 	);
 	
 	public static $primary = 'venueId';
