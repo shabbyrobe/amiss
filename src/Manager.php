@@ -493,14 +493,9 @@ class Manager
 		if (!isset($stmt->queryString))
 			throw new \InvalidArgumentException("Statement didn't look like a PDOStatement");
 		
-		if ($params) {
-			foreach ($params as $k=>$v) {
-				if (is_numeric($k)) ++$k;
-				$stmt->bindValue($k, $v);
-			}
-		}
 		++$this->queries;
-		$stmt->execute();
+		$stmt->execute($params);
+		
 		return $stmt;
 	}
 	
