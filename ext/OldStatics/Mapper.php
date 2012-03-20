@@ -1,8 +1,12 @@
 <?php
 
-namespace Amiss\Mapper;
+namespace Amiss\Ext\OldStatics;
 
-class Statics extends \Amiss\Mapper\Base
+/**
+ * Holdover from Amiss v1. This allows old-style ActiveRecords to
+ * work with Amiss v2 with minimal (if any) changes.
+ */
+class Mapper extends \Amiss\Mapper\Base
 {
 	public function __construct()
 	{

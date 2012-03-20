@@ -11,6 +11,7 @@ Amiss provides a very simple autoloader that should be compatible with well-writ
     <?php
     $amissPath = '/path/to/amiss';
     require_once($amissPath.'/Loader.php');
+    Amiss\Loader::configure();
     spl_autoload_register(array(new Amiss\Loader, 'load'));
 
 

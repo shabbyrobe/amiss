@@ -1,8 +1,11 @@
 <?php
 
 $amissPath = __DIR__.'/../src';
+
 require_once($amissPath.'/Loader.php');
-spl_autoload_register(array(new Amiss\Loader, 'load'));
+
+Amiss\Loader::configureExt();
+Amiss\Loader::configure();
 
 function e($val) {
 	return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
