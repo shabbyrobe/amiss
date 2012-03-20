@@ -74,7 +74,7 @@ class Note extends \Amiss\Mapper\Base
 						$relationNote = $itemNotes['has'];
 					
 					if (isset($itemNotes['primary'])) {
-						$info['primary'][] = $name;
+						$info['primary'][$name] = $itemNotes['primary']; 
 						if (!$field) $field = $name;
 					}
 					

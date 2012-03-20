@@ -94,7 +94,7 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
-		$this->assertEquals(array('id1', 'id2'), $meta->primary);
+		$this->assertEquals(array('id1'=>true, 'id2'=>true), $meta->primary);
 	}
 	
 	/**
@@ -191,7 +191,7 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
-		$this->assertEquals(array('id'), $meta->primary);
+		$this->assertEquals(array('id'=>true), $meta->primary);
 	}
 
 	/**
@@ -210,7 +210,7 @@ class NoteMapperTest extends \CustomTestCase
 			}
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
-		$this->assertEquals(array('idPart1', 'idPart2'), $meta->primary);
+		$this->assertEquals(array('idPart1'=>true, 'idPart2'=>true), $meta->primary);
 	}
 	
 	/**

@@ -69,9 +69,9 @@ class Statics extends \Amiss\Mapper\Base
 		
 		if (isset($info['primary'])) {
 			if (!is_array($info['primary']))
-				$info['primary'] = array($info['primary']);
+				$info['primary'] = array($info['primary']=>true);
 			
-			foreach ($info['primary'] as $p) {
+			foreach ($info['primary'] as $p=>$type) {
 				if (!isset($info['fields'][$p])) {
 					$info['fields'][$p] = array(
 						'name'=>$p, 

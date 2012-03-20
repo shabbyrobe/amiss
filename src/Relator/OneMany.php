@@ -32,7 +32,7 @@ class OneMany
 				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
 			else {
 				$on = array();
-				foreach ($meta->primary as $p) {
+				foreach ($meta->primary as $p=>$priType) {
 					$on[$p] = $p;
 				}
 			}

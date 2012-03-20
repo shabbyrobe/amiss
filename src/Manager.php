@@ -67,7 +67,6 @@ class Manager
 		
 		$stmt = $this->getConnector()->prepare($query);
 		$this->execute($stmt, $params);
-		
 		$object = null;
 		
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -77,6 +76,7 @@ class Manager
 			
 			$object = $this->mapper->createObject($meta, $row, $criteria->args);
 		}
+		
 		return $object;
 	}
 
@@ -109,11 +109,13 @@ class Manager
 		if (!is_array($id)) $id = array($id);
 		$where = array();
 		
-		foreach ($primary as $idx=>$p) {
+		$idx = 0;
+		foreach ($primary as $p=>$type) {
 			$idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
 			if (!$idVal)
 				throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by pk");
 			$where[$p] = $idVal;
+			++$idx;
 		}
 		
 		$criteria = array(
@@ -137,7 +139,7 @@ class Manager
 		if ($meta->primary) {
 			$fields = $meta->getFields();
 			$field = array();
-			foreach ($meta->primary as $p) {
+			foreach ($meta->primary as $p=>$pType) {
 				$field[] = $fields[$p]['name'];
 			}
 			$field = implode(', ', $field);
@@ -231,6 +233,7 @@ class Manager
 		$sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
 		
 		$stmt = $this->getConnector()->prepare($sql);
+		
 		++$this->queries;
 		$stmt->execute(array_values($values));
 		
@@ -242,7 +245,8 @@ class Manager
 			if (($count=count($meta->primary)) != 1)
 				throw new Exception("Autoincrement ID $lastInsertId for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
 			
-			$field = $meta->getField($meta->primary[0]);
+			reset($meta->primary);
+			$field = $meta->getField(key($meta->primary));
 			if (!isset($field['setter']))
 				$object->{$field['name']} = (int)$lastInsertId;
 			else
