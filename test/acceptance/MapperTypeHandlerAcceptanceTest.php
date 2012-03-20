@@ -21,6 +21,7 @@ class MapperTypeHandlerAcceptanceTest extends \ActiveRecordDataTestCase
 	{
 		$this->createRecordMemoryDb(__NAMESPACE__.'\TestCustomFieldTypeRecord');
 		$this->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
+		
 		$r = new TestCustomFieldTypeRecord;
 		$r->yep1 = 'foo';
 		$r->save();

@@ -6,12 +6,7 @@ class Meta
 {
 	public $class;
 	public $table;
-	
-	/**
-	 * Key/value map of primary key property names to primary key types.
-	 * Value must be "true" if no primary key type is to be set. 
-	 */
-	public $primary=array();
+	public $primary;
 	public $relations;
 	
 	protected $fields;
@@ -24,19 +19,10 @@ class Meta
 		$this->class = $class;
 		$this->parent = $parent;
 		$this->table = $table;
+		$this->primary = isset($info['primary']) ? $info['primary'] : array();
 		
-		$primary = isset($info['primary']) ? $info['primary'] : array();
-		
-		if ($primary && !is_array($primary))
-			$primary = array($primary=>true);
-		
-		// allows us to accept array('pri1', 'pri2') as well as array('pri1'=>true)
-		foreach ($primary as $p=>$pType) {
-			if ($p==0 && $p !== 0)
-				$this->primary[$p] = $pType;
-			else
-				$this->primary[$pType] = true;
-		}
+		if ($this->primary && !is_array($this->primary))
+			$this->primary = array($this->primary);
 		
 		$this->fields = isset($info['fields']) ? $info['fields'] : array();
 		$this->relations = isset($info['relations']) ? $info['relations'] : array();
@@ -83,7 +69,7 @@ class Meta
 		$foundValue = false;
 		
 		$prival = array();
-		foreach ($this->primary as $p=>$type) {
+		foreach ($this->primary as $p) {
 			$field = $this->getField($p);
 			$value = !isset($field['getter']) ? $object->{$p} : call_user_func(array($object, $field['getter']));
 			if ($value)
