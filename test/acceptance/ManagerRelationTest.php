@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class ManagerRelationTest extends \NoteMapperDataTestCase
+class ManagerRelationTest extends \SqliteDataTestCase
 {
 	/**
 	 * @group acceptance

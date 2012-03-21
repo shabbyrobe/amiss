@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class ManagerSelectTest extends \NoteMapperDataTestCase
+class ManagerSelectTest extends \SqliteDataTestCase
 {
 	/**
 	 * @group acceptance
@@ -176,7 +176,7 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>'name'));
 		$this->assertTrue(is_array($artists));
-		$this->assertEquals('bad-news', current($artists)->slug);
+		$this->assertEquals('anvil', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
 	}
@@ -191,7 +191,7 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 		$this->assertTrue(is_array($artists));
 		$this->assertEquals('the-sonic-manipulator', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
-		$this->assertEquals('bad-news', $a->slug);
+		$this->assertEquals('anvil', $a->slug);
 	}
 	
 	/**
@@ -227,7 +227,7 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 	public function testOrderBySingleLongForm()
 	{
 		$artists = $this->manager->getList('Artist', array('order'=>array('name')));
-		$this->assertEquals('bad-news', current($artists)->slug);
+		$this->assertEquals('anvil', current($artists)->slug);
 		$this->assertTrue(is_array($artists));
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
 		$this->assertEquals('the-sonic-manipulator', $a->slug);
@@ -244,7 +244,7 @@ class ManagerSelectTest extends \NoteMapperDataTestCase
 		
 		$this->assertEquals('the-sonic-manipulator', current($artists)->slug);
 		foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
-		$this->assertEquals('bad-news', $a->slug);
+		$this->assertEquals('anvil', $a->slug);
 	}
 	
 	/**

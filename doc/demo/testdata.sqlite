@@ -16,6 +16,11 @@ INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(9, 1, 'Bad News', 
 INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(10, 1, 'Stillwater', 'stillwater');
 INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(11, 1, 'Spinal Täp', 'spinal-tap');
 
+/* this artist is meant to have the same name as another */ 
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(12, 2, 'Bad News', 'bad-news-2');
+
+INSERT INTO artist(artistId, artistTypeId, name, slug) VALUES(13, 1, 'Anvil', 'anvil');
+
 
 
 INSERT INTO venue(venueId, name, slug, address, shortAddress, latitude, longitude) VALUES(1, 'Strong Badia', 'strong-badia', 'The field behind the dumpsters, Free-Country USA', 'Dumpster-field', '31.1234', '124.4444');

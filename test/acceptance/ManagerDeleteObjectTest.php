@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class ManagerDeleteObjectTest extends \NoteMapperDataTestCase
+class ManagerDeleteObjectTest extends \SqliteDataTestCase
 {
 	public function setUp()
 	{

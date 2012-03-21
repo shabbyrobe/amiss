@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Criteria\Update;
 
-class ManagerUpdateTableTest extends \NoteMapperDataTestCase
+class ManagerUpdateTableTest extends \SqliteDataTestCase
 {
 	public function setUp()
 	{
@@ -90,11 +90,11 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testUpdateTableWithArraySetAndPositionalWhere()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=?', 2);
 		
-		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 	
 	
@@ -107,11 +107,11 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testUpdateTableWithArraySetAndNamedWhere()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
 		
-		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 	
 	/**
@@ -123,11 +123,11 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testUpdateTableWithArrayCriteria()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->update('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
 		
-		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 	
 	/**
@@ -139,11 +139,11 @@ class ManagerUpdateTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testUpdateTableWithObjectCriteria()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$criteria = new Update(array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
 		$this->manager->update('Artist', $criteria);
 		
-		$this->assertEquals(10, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
 	}
 }

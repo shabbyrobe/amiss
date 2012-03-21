@@ -2,7 +2,7 @@
 
 namespace Amiss\Test\Acceptance;
 
-class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
+class ManagerUpdateObjectTest extends \SqliteDataTestCase
 {
 	public function setUp()
 	{

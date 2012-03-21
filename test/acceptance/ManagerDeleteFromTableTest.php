@@ -4,7 +4,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Criteria\Query;
 
-class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
+class ManagerDeleteFromTableTest extends \SqliteDataTestCase
 {
 	public function setUp()
 	{
@@ -29,14 +29,14 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testDeleteTableWithoutClauseFails()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist');
 		
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		// sanity check: make sure we didn't delete everything!
-		$this->assertEquals(3, $this->manager->count('Artist'));
+		$this->assertEquals(4, $this->manager->count('Artist'));
 	}
 	
 	/**
@@ -48,14 +48,14 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testDeleteTableWithArraySetAndPositionalWhere()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', 'artistTypeId=?', 1);
 		
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		// sanity check: make sure we didn't delete everything!
-		$this->assertEquals(3, $this->manager->count('Artist'));
+		$this->assertEquals(4, $this->manager->count('Artist'));
 	}
 	
 	/**
@@ -67,14 +67,14 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testDeleteTableWithArraySetAndNamedWhere()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', 'artistTypeId=:id', array(':id'=>1));
 		
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		// sanity check: make sure we didn't delete everything!
-		$this->assertEquals(3, $this->manager->count('Artist'));
+		$this->assertEquals(4, $this->manager->count('Artist'));
 	}
 	
 	/**
@@ -86,14 +86,14 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testDeleteTableWithArrayCriteria()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$this->manager->delete('Artist', array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
 		
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
 
 		// sanity check: make sure we didn't delete everything!
-		$this->assertEquals(3, $this->manager->count('Artist'));
+		$this->assertEquals(4, $this->manager->count('Artist'));
 	}
 	
 	/**
@@ -105,7 +105,7 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	 */
 	public function testDeleteTableWithObjectCriteria()
 	{
-		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		$this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		$criteria = new Query(array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
 		$this->manager->delete('Artist', $criteria);
@@ -113,6 +113,6 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
 		
 		// sanity check: make sure we didn't delete everything!
-		$this->assertEquals(3, $this->manager->count('Artist'));
+		$this->assertEquals(4, $this->manager->count('Artist'));
 	}
 }
