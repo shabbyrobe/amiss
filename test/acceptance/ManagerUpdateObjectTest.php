@@ -62,42 +62,4 @@ class ManagerUpdateObjectTest extends \NoteMapperDataTestCase
 		
 		$this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));
 	}
-	
-	/**
-	 * Ensures the following signature works as expected:
-	 *   Amiss\Manager->update( object $object , string $positionalWhere , [ string $param1, ... ] )
-	 * 
-	 * @group acceptance
-	 * @group manager
-	 */
-	public function testUpdateObjectWithPositionalWhereAndSingleParameter()
-	{
-		$this->artist->name = 'Foobar';
-		
-		$this->manager->update($this->artist, 'artistId=?', 1);
-		
-		$this->artist = $this->manager->get('Artist', 'artistId=?', 1);
-		$this->assertEquals('Foobar', $this->artist->name);
-		
-		$this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));
-	}
-	
-	/**
-	 * Ensures the following signature works as expected:
-	 *   Amiss\Manager->update( object $object , string $namedWhere , array $params )
-	 * 
-	 * @group acceptance
-	 * @group manager
-	 */
-	public function testUpdateObjectWithNamedWhereAndSingleParameter()
-	{
-		$this->artist->name = 'Foobar';
-		
-		$this->manager->update($this->artist, 'artistId=:id', array('id'=>1));
-		
-		$this->artist = $this->manager->get('Artist', 'artistId=?', 1);
-		$this->assertEquals('Foobar', $this->artist->name);
-		
-		$this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));
-	}
 }

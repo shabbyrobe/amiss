@@ -256,9 +256,13 @@ class Manager
 		$count = count($args);
 		
 		$first = array_shift($args);
+		
 		if (is_object($first)) {
-			$criteria = $this->createObjectUpdateCriteria($first, $args);
-			$objectName = get_class($first);
+			$class = get_class($first);
+			$meta = $this->getMeta($class);
+			$criteria = new Criteria\Update();
+			$criteria->set = $this->mapper->exportRow($meta, $first);
+			$criteria->where = $meta->getPrimaryValue($first);
 		}
 		elseif (is_string($first)) {
 			// FIXME: improve text
@@ -266,13 +270,13 @@ class Manager
 				throw new \InvalidArgumentException();
 			
 			$criteria = $this->createTableUpdateCriteria($first, $args);
-			$objectName = $first;
+			$class = $first;
 		}
 		else {
 			throw new \InvalidArgumentException();
 		}
 		
-		return $this->executeUpdate($objectName, $criteria);
+		return $this->executeUpdate($class, $criteria);
 	}
 	
 	public function delete()
@@ -287,25 +291,19 @@ class Manager
 		if (is_object($first)) {
 			$meta = $this->getMeta(get_class($first));
 			$class = $meta->class;
-			if (!$meta->primary)
-				throw new Exception("Can't delete {$meta->class} by object as it doesn't define a primary");
-			
-			$args[0] = $meta->primary;
-		}
-		else $class = $first;
-		
-		if ($args[0] instanceof Criteria\Query) {
-			$criteria = $args[0];
+			$criteria = new Criteria\Query();
+			$criteria->where = $meta->getPrimaryValue($first);
 		}
 		else {
-			if ($meta) {
-				$prival = $meta->getPrimaryValue($first);
-				$args = array(array('where'=>$prival));
+			$class = $first;
+			if ($args[0] instanceof Criteria\Query)
+				$criteria = $args[0];
+			else {
+				$criteria = new Criteria\Query;
+				$this->populateQueryCriteria($criteria, $args);
 			}
-			
-			$criteria = new Criteria\Query;
-			$this->populateQueryCriteria($criteria, $args);
 		}
+		
 		return $this->executeDelete($class, $criteria);
 	}
 	
@@ -355,36 +353,6 @@ class Manager
 			}
 		}
 		return $criteria;
-	}
-	
-	protected function createObjectUpdateCriteria($object, $args)
-	{
-		$meta = $this->getMeta(get_class($object));
-		
-		$uc = new Criteria\Update();
-		$uc->set = $this->mapper->exportRow($meta, $object);
-		
-		if (count($args) < 1) {
-			if (!$meta->primary)
-				throw new Exception("Can't update {$meta->class} without passing criteria as it doesn't define a primary");
-			
-			$args[0] = $meta->getPrimaryValue($object);
-		}
-		
-		if (is_string($args[0])) {
-			if (isset($uc->set[$args[0]])) {
-				$uc->where = array($args[0]=>$uc->set[$args[0]]);
-			}
-			else {
-				$this->populateQueryCriteria($uc, $args);
-			}
-		}
-		elseif (is_array($args[0]))
-			$uc->where = $args[0];
-		else
-			throw new \InvalidArgumentException("Couldn't understand args");
-		
-		return $uc;
 	}
 	
 	protected function executeUpdate($objectName, Criteria\Update $update)

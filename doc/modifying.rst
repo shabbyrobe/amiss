@@ -66,14 +66,9 @@ Updating can work on a specific object or a whole table.
 Objects
 ~~~~~~~
 
-To update an object, call the ``update`` method of ``Amiss\Manager``. The following signatures are available::
+To update an object's representation in the database, call the ``update`` method of ``Amiss\Manager`` with the object as the argument.
 
-    update ( object $model )
-    update ( object $object , string $positionalWhere [ , string $param1 ... ] )
-    update ( object $object , string $namedWhere , array $params )
-
-
-The first signature only works if the mapping has a primary key:
+.. note:: This only works if the object has a primary key.
 
 .. code-block:: php
     
@@ -82,19 +77,6 @@ The first signature only works if the mapping has a primary key:
     $a->name = 'foo bar';
     $manager->update($a);
     // UPDATE artist SET name='foo bar' WHERE artistId=1
-
-
-The second and third signatures allow you to update objects that don't have a single column primary key. They behave much like the positional and named where statements described in the "Selecting" chapter:
-
-.. code-block:: php
-    
-    <?php
-    $obj = $amiss->get('EventArtist', 'artistId=? AND eventId=?', 1, 1);
-    $obj->priority = 123999;
-    $manager->update($obj, 'artistId=? AND eventId=?', 1, 1);
-    // UPDATE artist SET name='foo bar' WHERE artistId=1
-
-.. warning:: The second and third signatures are throwbacks to Amiss v1. They will probably be removed at a later date.
 
 
 Tables
@@ -169,11 +151,9 @@ Deleting
 
 ``Amiss\Manager``'s delete methods work similarly to updating
 
-Deleting by object can be done a few different ways::
+Deleting by object works the same way as updating by object:
 
     delete( object $object )
-    delete( object $object , string $positionalWhere , [ string $param1, ... ] )
-    delete( object $object , string $namedWhere , array $params )
 
 
 Deleting by table::

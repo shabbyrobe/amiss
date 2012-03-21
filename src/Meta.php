@@ -82,6 +82,9 @@ class Meta
 	{
 		$foundValue = false;
 		
+		if (!$this->primary)
+			throw new Exception("Class {$this->class} doesn't define primary key(s)");
+		
 		$prival = array();
 		foreach ($this->primary as $p) {
 			$field = $this->getField($p);
