@@ -10,6 +10,34 @@ class ManagerDeleteFromTableTest extends \NoteMapperDataTestCase
 	{
 		parent::setUp();	
 	}
+
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testDeleteTableWithMatchAllClause()
+	{
+		$this->assertGreaterThan(0, $this->manager->count('Artist'));
+		$this->manager->delete('Artist', '1=1');
+		$this->assertEquals(0, $this->manager->count('Artist'));
+	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testDeleteTableWithoutClauseFails()
+	{
+		$this->assertEquals(8, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		
+		$this->manager->delete('Artist');
+		
+		$this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));
+		
+		// sanity check: make sure we didn't delete everything!
+		$this->assertEquals(3, $this->manager->count('Artist'));
+	}
 	
 	/**
 	 * Ensures the following signature works as expected:

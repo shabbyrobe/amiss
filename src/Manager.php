@@ -278,6 +278,8 @@ class Manager
 			$criteria->where = $meta->getPrimaryValue($first);
 		}
 		else {
+			if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
+			
 			$class = $first;
 			if ($args[0] instanceof Criteria\Query)
 				$criteria = $args[0];
