@@ -2,25 +2,46 @@
 
 namespace Amiss\Demo\Active;
 
+/**
+ * @table artist
+ */
 class ArtistRecord extends \Amiss\Active\Record
 {
-	public static $table = 'artist';
-	public static $primary = 'artistId';
-	public static $fields = array(
-		'artistTypeId'=>'autoinc', 'name', 'slug', 'bio'
-	);
-	
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $name;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
+	
+	/**
+	 * @field
+	 * @type LONGTEXT
+	 */
 	public $bio;
 	
 	/**
-	 * @var Amiss\Demo\ArtistTypeRecord
+	 * @var Amiss\Demo\Active\ArtistType
 	 */
 	private $type;
 	
+	/**
+	 * @has one ArtistType artistTypeId
+	 */
 	public function getType()
 	{
 		if ($this->type === null) {
@@ -28,28 +49,34 @@ class ArtistRecord extends \Amiss\Active\Record
 		}
 		return $this->type;
 	}
-	
-	public static $relations = array(
-		'type'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
-	);
 }
 
 class ArtistType extends \Amiss\Active\Record
 {
-	public static $fields = array(
-		'artistTypeId'=>'autoinc', 
-		'type', 'slug'
-	);
-	
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
 	public $artistTypeId;
+	
+	/**
+	 * @field
+	 */
 	public $type;
+	
+	/**
+	 * @field
+	 */
 	public $slug;
 	
 	/**
-	 * @var Amiss\Demo\ArtistRecord[]
+	 * @var Amiss\Demo\Active\ArtistRecord[]
 	 */
 	private $artists = null;
 	
+	/**
+	 * @has many Artist
+	 */
 	public function getArtists()
 	{
 		if ($this->artists === null) {
@@ -57,50 +84,64 @@ class ArtistType extends \Amiss\Active\Record
 		}
 		return $this->artists;
 	}
-	
-	public static function getRelations()
-	{
-		return array(
-			'artists'=>array('many'=>'ArtistRecord', 'on'=>'artistTypeId', 'getter'=>'getArtists'),
-		);
-	}
 }
 
+/**
+ * @table event
+ */
 class EventRecord extends \Amiss\Active\Record
 {
-	public static $table = 'event';
-	public static $primary = 'eventId';
-	public static $fields = array(
-		'eventId'=>'autoinc',
-		'name'=>'varchar(50)',
-		'sub_name',
-		'slug', 
-		'dateStart'=>'datetime', 
-		'dateEnd'=>'datetime',
-		'venueId'
-	);
-	
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
 	public $eventId;
-	public $name;
 	
-	// statics mapper doesn't support translating property names explicitly yet  
-	public $sub_name;
-	
-	public $slug;
+	/**
+	 * @field
+	 * @type datetime
+	 */
 	public $dateStart;
+	
+	/**
+	 * @field
+	 * @type datetime
+	 */
 	public $dateEnd;
+	
+	/**
+	 * @field
+	 */
 	public $venueId;
 	
 	/**
-	 * @var Amiss\Demo\EventArtistRecord[]
+	 * @field
 	 */
-	public $eventArtists;
+	public $name;
 	
 	/**
-	 * @var Amiss\Demo\VenueRecord
+	 * @field sub_name
+	 */
+	public $subName;
+	
+	/**
+	 * @field
+	 */
+	public $slug;
+	
+	/**
+	 * @var Amiss\Demo\Active\EventArtist[]
+	 */
+	private $eventArtists;
+	
+	/**
+	 * @var Amiss\Demo\Active\VenueRecord
 	 */
 	private $venue;
 	
+	/**
+	 * @has one Venue venueId
+	 */
 	public function getVenue()
 	{
 		if (!$this->venue && $this->venueId) {
@@ -109,6 +150,9 @@ class EventRecord extends \Amiss\Active\Record
 		return $this->venue;
 	}
 	
+	/**
+	 * @has many EventArtist
+	 */
 	public function getEventArtists()
 	{
 		if (!$this->eventArtists) {
@@ -116,70 +160,104 @@ class EventRecord extends \Amiss\Active\Record
 		}
 		return $this->eventArtists;
 	}
-	
-	public static $relations = array(
-		'eventArtists'=>array('many'=>'EventArtist', 'on'=>'eventId'),
-		'venue'=>array('one'=>'VenueRecord', 'on'=>'venueId'),
-	);
 }
 
 class PlannedEvent extends EventRecord
 {
-	public static $table = 'planned_event';
+	/**
+	 * @field
+	 * @type tinyint
+	 */
+	public $completeness;
 	
-	public static $fields = array(
-		'completeness'=>'tinyint',
-	);
-	
-	public static $relations = array(
-		'venue'=>array('one'=>'VenueRecord', 'on'=>'venueId'),
-	);
+	/**
+	 * @has one VenueRecord venueId
+	 * Note: relations are not inherited by the note mapper
+	 */
+	public function getVenue()
+	{
+		return parent::getVenue();
+	}
 }
 
 class EventArtist extends \Amiss\Active\Record
 {
-	public static $fields = array(
-		'eventId', 'artistId', 'priority', 'sequence', 'eventArtistName',
-	);
-	
-	public static $primary = array('eventId', 'artistId');
-	
+	/**
+	 * @primary
+	 */
 	public $eventId;
+	
+	/**
+	 * @primary
+	 */
 	public $artistId;
+	
+	/**
+	 * @field
+	 */
 	public $priority;
+	
+	/**
+	 * @field
+	 */
 	public $sequence;
+	
+	/**
+	 * @field
+	 */
 	public $eventArtistName;
 	
 	/**
-	 * @var Amiss\Demo\EventRecord
+	 * @has one EventRecord eventId
+	 * @var Amiss\Demo\Active\EventRecord
 	 */
 	public $event;
 	
 	/**
-	 * @var Amiss\Demo\ArtistRecord
+	 * @has one ArtistRecord artistId
+	 * @var Amiss\Demo\Active\ArtistRecord
 	 */
 	public $artist;
-	
-	public static $relations = array(
-		'event'=>array('one'=>'EventRecord', 'on'=>'eventId'),
-		'artist'=>array('one'=>'ArtistRecord', 'on'=>'artistId'),
-	);
 }
 
+/**
+ * @table venue
+ */
 class VenueRecord extends \Amiss\Active\Record
 {
-	public static $fields = array(
-		'venueId'=>'autoinc', 'name', 'slug', 'address', 'shortAddress', 'latitude', 'longitude'
-	);
-	
-	public static $primary = 'venueId';
-	public static $table = 'venue';
-	
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
 	public $venueId;
-	public $name;
-	public $slug;
-	public $address;
-	public $shortAddress;
 	
-	// latitude and longitude deliberately omitted for acceptance testing
+	/**
+	 * @field name
+	 */
+	public $venueName;
+	
+	/**
+	 * @field slug
+	 */
+	public $venueSlug;
+	
+	/**
+	 * @field address
+	 */
+	public $venueAddress;
+	
+	/**
+	 * @field shortAddress
+	 */
+	public $venueShortAddress;
+	
+	/**
+	 * @field latitude
+	 */
+	public $venueLatitude;
+	
+	/**
+	 * @field longitude
+	 */
+	public $venueLongitude;
 }

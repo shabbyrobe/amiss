@@ -10,7 +10,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 	{
 		$this->manager = new \Amiss\Manager(
 			new \Amiss\Connector('sqlite::memory:'),
-			new \Amiss\Mapper\Statics
+			new \Amiss\Mapper\Note
 		);
 	}
 	
@@ -160,50 +160,105 @@ class TestNoFieldsCreate
 
 class TestCreate
 {
-	public static $fields = array(
-		'testCreateId'=>'int',
-		'foo1'=>'varchar(128)',
-		'foo2'=>'varchar(128)',
-		'pants'=>'int unsigned not null',
-	);
+	/**
+	 * @primary
+	 * @type int
+	 */
+	public $testCreateId;
+	
+	/**
+	 * @field
+	 * @type varchar(128)
+	 */
+	public $foo1;
+	
+	/**
+	 * @field
+	 * @type varchar(128)
+	 */
+	public $foo2;
+	
+	/**
+	 * @field
+	 * @type int unsigned not null
+	 */
+	public $pants;
 }
-
+	
 class TestCreateDefaultField
 {
-	public static $fields = array(
-		'testCreateDefaultFieldId'=>'autoinc',
-		'foo',
-		'bar',
-	);
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
+	public $testCreateDefaultFieldId;
+	
+	/**
+	 * @field
+	 */
+	public $foo;
+	
+	/**
+	 * @field
+	 */
+	public $bar;
 }
 
+/**
+ * @table bar
+ */
 class TestCreateWithIndexedSingleOnRelation
 {
-	public static $table = 'bar';
-	public static $primary = 'barId';
-	public static $fields = array(
-		'barId'=>'autoinc',
-		'fooId',
-		'quack',
-	);
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
+	public $barId;
 	
-	public static $relations = array(
-		'foo'=>array('one'=>'FooRecord', 'on'=>'fooId'),
-	);
+	/**
+	 * @field
+	 */
+	public $fooId;
+	
+	/**
+	 * @field
+	 */
+	public $quack;
+	
+	/**
+	 * @has one FooRecord fooId
+	 */
+	public $foo;
 }
 
+/**
+ * @table bar
+ */
 class TestCreateWithIndexedMultiOnRelation
 {
-	public static $table = 'bar';
-	public static $primary = 'barId';
-	public static $fields = array(
-		'barId'=>'autoinc',
-		'myFooId',
-		'myOtherFooId',
-		'bar',
-	);
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
+	public $barId;
 	
-	public static $relations = array(
-		'foo'=>array('one'=>'FooRecord', 'on'=>array('myFooId'=>'fooId', 'myOtherFooId'=>'otherFooId')),
-	);
+	/**
+	 * @field
+	 */
+	public $myFooId;
+	
+	/**
+	 * @field
+	 */
+	public $myOtherFooId;
+	
+	/**
+	 * @field
+	 */
+	public $bar;
+	
+	/**
+	 * @has one FooRecord myFooId=fooId&myOtherFooId=otherFooId
+	 */
+	public $foo;
 }

@@ -2,8 +2,7 @@
 
 require_once('config.php');
 $dirs = array(
-	'active-note',
-	'active-statics',
+	'active',
 	'note',
 );
 ?>

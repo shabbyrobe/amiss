@@ -66,7 +66,7 @@ class BuildClauseTest extends \CustomTestCase
 	
 	/**
 	 * @group unit
-	 * @group failing
+	 * @group faulty
 	 * @covers Amiss\Criteria\Query::buildClause
 	 * @dataProvider dataForInClauseDoesNotRuinString
 	 */

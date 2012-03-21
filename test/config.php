@@ -91,7 +91,7 @@ abstract class ActiveRecordDataTestCase extends SqliteDataTestCase
 {
 	public function getMapper()
 	{
-		$mapper = new \Amiss\Mapper\Statics();
+		$mapper = new \Amiss\Mapper\Note();
 		$mapper->objectNamespace = 'Amiss\Demo\Active';
 		return $mapper;
 	}

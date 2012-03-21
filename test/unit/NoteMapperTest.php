@@ -362,9 +362,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * 
-	 * @group failing
-	 * @group unimplemented
+	 * @group faulty
 	 * 
 	 * @covers Amiss\Mapper\Note::createMeta
 	 */
@@ -492,6 +490,12 @@ class NoteMapperTest extends \CustomTestCase
 			
 			// multi-column "on" with mix-n-match
 			array('one', 'class2IdLeft=class2IdRight&class1IdLeft', array('class2IdLeft'=>'class2IdRight', 'class1IdLeft'=>'class1IdLeft')),
+			
+			// multi-column "on" with mix-n-match and readability whitespace
+			array('one', 'class2IdLeft = class2IdRight & class1IdLeft', array('class2IdLeft'=>'class2IdRight', 'class1IdLeft'=>'class1IdLeft')),
+			
+			// multi-column "on" with mix-n-match, readability whitespace and underscores
+			array('one', 'class_2_Id_Left = class_2_Id_Right & class_1_Id_Left', array('class_2_Id_Left'=>'class_2_Id_Right', 'class_1_Id_Left'=>'class_1_Id_Left')),
 		);
 		
 		foreach ($tests as $idx=>&$item) {

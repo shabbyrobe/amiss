@@ -15,9 +15,9 @@ PHPUnit Tests are in the ``tests/`` directory of the distribution. You can run t
     phpunit
 
 
-There are some tests that are currently known to fail. These can be excluded by running the tests like so::
+There are some tests that are known to report incorrect results. These can be excluded by running the tests like so::
 
-    phpunit --exclude-group failing
+    phpunit --exclude-group faulty
 
 
 Building the docs

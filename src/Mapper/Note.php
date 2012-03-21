@@ -132,6 +132,8 @@ class Note extends \Amiss\Mapper\Base
 			
 			if (isset($relationNote[2])) {
 				$relation['on'] = array();
+				$relationNote[2] = str_replace(' ', '', $relationNote[2]);
+				
 				parse_str($relationNote[2], $on);
 				foreach ($on as $k=>$v) {
 					if (!$v) $v = $k;

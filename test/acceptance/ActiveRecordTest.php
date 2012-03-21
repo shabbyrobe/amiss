@@ -12,7 +12,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		\Amiss\Active\Record::_reset();
 		\Amiss\Active\Record::setManager($this->manager);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -23,7 +23,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj instanceof Active\ArtistRecord);
 		$this->assertEquals(1, $obj->artistId);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -34,7 +34,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj instanceof Active\ArtistRecord);
 		$this->assertEquals(1, $obj->artistId);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -45,7 +45,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj instanceof Active\ArtistRecord);
 		$this->assertEquals(1, $obj->artistId);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -56,10 +56,11 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj instanceof Active\ArtistRecord);
 		$this->assertEquals(1, $obj->artistId);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
+	 * @group faulty
 	 */
 	public function testGetPopulatesUndeclaredProperties()
 	{
@@ -69,7 +70,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertEquals('31.1234', $obj->latitude);
 		$this->assertEquals('124.4444', $obj->longitude);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -78,13 +79,13 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
 		$this->assertTrue($obj==true, "Couldn't retrieve object");
-		
+
 		$related = $obj->getRelated('type');
-		
+
 		$this->assertTrue($related instanceof Active\ArtistType);
 		$this->assertEquals(1, $related->artistTypeId);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -93,14 +94,14 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 	{
 		$obj = Active\ArtistRecord::getByPk(1);
 		$this->assertTrue($obj==true, "Couldn't retrieve object");
-		
+
 		$obj->delete();
 		$this->assertEquals(0, $this->manager->count('ArtistRecord', 'artistId=1'));
-		
+
 		// sanity check: make sure we didn't delete everything!
 		$this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -111,11 +112,11 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$obj = Active\ArtistRecord::getByPk(1);
 		$obj->name = $n;
 		$obj->update();
-		
+
 		$obj = Active\ArtistRecord::getByPk(1);
 		$this->assertEquals($n, $obj->name);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -123,19 +124,19 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 	public function testInsert()
 	{
 		$n = uniqid('', true);
-		
+
 		$obj = new Active\ArtistRecord;
 		$this->assertNull($obj->artistId);
 		$obj->artistTypeId = 1;
 		$obj->name = $n;
 		$obj->slug = $n;
 		$obj->insert();
-		
+
 		$this->assertGreaterThan(0, $obj->artistId);
 		$obj = Active\ArtistRecord::getByPk($obj->artistId);
 		$this->assertEquals($obj->name, $n);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -146,11 +147,11 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$obj = Active\ArtistRecord::getByPk(1);
 		$obj->name = $n;
 		$obj->save();
-		
+
 		$obj = Active\ArtistRecord::getByPk(1);
 		$this->assertEquals($n, $obj->name);
 	}
-	
+
 	/**
 	 * @group active
 	 * @group acceptance
@@ -158,14 +159,14 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 	public function testSaveInsert()
 	{
 		$n = uniqid('', true);
-		
+
 		$obj = new Active\ArtistRecord;
 		$this->assertNull($obj->artistId);
 		$obj->artistTypeId = 1;
 		$obj->name = $n;
 		$obj->slug = $n;
 		$obj->save();
-		
+
 		$this->assertGreaterThan(0, $obj->artistId);
 		$obj = Active\ArtistRecord::getByPk($obj->artistId);
 		$this->assertEquals($obj->name, $n);

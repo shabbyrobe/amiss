@@ -9,7 +9,7 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 	public function setUp()
 	{
 		$this->connector = new \TestConnector('mysql:xx');
-		$this->mapper = new \Amiss\Mapper\Statics();
+		$this->mapper = new \Amiss\Mapper\Note();
 		$this->manager = new \Amiss\Manager($this->connector, $this->mapper);
 		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithCustomType');
 	}
@@ -58,17 +58,34 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 	}
 }
 
+/**
+ * @table bar
+ */
 class TestCreateWithCustomType
 {
-	public static $table = 'bar';
-	public static $primary = 'testCreateId';
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
+	public $testCreateId;
 	
-	public static $fields = array(
-		'testCreateId'=>'autoinc',
-		'foo1'=>'slappywag',
-		'foo2'=>'slappywag',
-		'pants'=>'int unsigned not null',
-	);
+	/**
+	 * @field
+	 * @type slappywag
+	 */
+	public $foo1;
+	
+	/**
+	 * @field
+	 * @type slappywag
+	 */
+	public $foo2;
+	
+	/**
+	 * @field
+	 * @type int unsigned not null
+	 */
+	public $pants;
 }
 
 class TestCreateWithCustomTypeTypeHandler implements \Amiss\Type\Handler

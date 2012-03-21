@@ -10,7 +10,7 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->connector = new \TestConnector('mysql:xx');
-		$this->mapper = new \Amiss\Mapper\Statics;
+		$this->mapper = new \Amiss\Mapper\Note;
 		$this->manager = new \Amiss\Manager($this->connector, $this->mapper);
 		\Amiss\Active\Record::setManager($this->manager);
 		$this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
@@ -38,14 +38,22 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 	}
 }
 
+/**
+ * @table bar
+ */
 class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Active\Record
 {
-	public static $table = 'bar';
-	public static $primary = 'id';
-	public static $fields = array(
-		'id'=>'autoinc',
-		'foo1'=>'int',
-	);
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
+	public $id;
+	
+	/**
+	 * @field
+	 * @type int
+	 */
+	public $foo1;
 }
 
 class RecordCreateCustomTypeWithEmptyColumnTypeHandler implements \Amiss\Type\Handler

@@ -8,7 +8,7 @@ class ActiveRecordTest extends \CustomTestCase
 	{
 		\Amiss\Active\Record::_reset();
 		$this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
-		$this->mapper = new \Amiss\Mapper\Statics;
+		$this->mapper = new \Amiss\Mapper\Note;
 		$this->mapper->objectNamespace = 'Amiss\Demo\Active';
 		$this->manager = new \Amiss\Manager($this->db, $this->mapper);
 	}
@@ -170,24 +170,28 @@ class ActiveRecordTest extends \CustomTestCase
 	}
 }
 
+/**
+ * @table table_1
+ */
 class TestActiveRecord1 extends \Amiss\Active\Record
 {
-	public static $table = 'table_1';
-	public static $primary = 'fooBar';
-	
+	/** @primary */
 	public $fooBar;
 }
 
+/**
+ * @table table_2
+ */
 class TestActiveRecord2 extends \Amiss\Active\Record
 {
-	public static $table = 'table_2';
-	
-	public static $fields = array('testActiveRecord2Id');
+	/** @primary */
+	public $testActiveRecord2Id;
 }
 
 class TestActiveRecord3 extends \Amiss\Active\Record
 {
-	public static $fields = array('testActiveRecord3Id');
+	/** @primary */
+	public $testActiveRecord3Id;
 }
 
 abstract class OtherConnBase extends \Amiss\Active\Record {}
@@ -198,17 +202,23 @@ class TestOtherConnRecord2 extends OtherConnBase {}
 
 class TestRelatedParent extends \Amiss\Active\Record
 {
+	/** @primary */
 	public $parentId;
-	public static $relations = array(
-		'children'=>array('many'=>'TestRelatedChild', 'on'=>'parentId')
-	);
+	
+	/**
+	 * @has many TestRelatedChild
+	 */
+	public $children;
 }
 
 class TestRelatedChild extends \Amiss\Active\Record
 {
+	/** @primary */
 	public $childId;
+	
+	/** @field */
 	public $parentId;
-	public static $relations = array(
-		'parent'=>array('one'=>'TestRelatedParent', 'on'=>'parentId')
-	);
+	
+	/** @has one TestRelatedParent parentId */
+	public $parent;
 }

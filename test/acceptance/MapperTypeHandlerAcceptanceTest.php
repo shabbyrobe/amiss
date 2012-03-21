@@ -86,12 +86,16 @@ class TestTypeHandler implements \Amiss\Type\Handler
 
 class TestCustomFieldTypeRecord extends \Amiss\Active\Record
 {
-	public static $fields = array(
-		'testCustomFieldTypeRecordId'=>'autoinc',
-		'yep1'=>'foo bar',
-	);
-	
+	/**
+	 * @primary
+	 * @type autoinc
+	 */
 	public $testCustomFieldTypeRecordId;
+	
+	/**
+	 * @field
+	 * @type foo bar
+	 */
 	public $yep1;
 }
 

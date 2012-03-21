@@ -1,5 +1,7 @@
 <?php 
 
+throw new Exception("Not updated for 2.0!");
+
 require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
 spl_autoload_register(array(new Amiss\Loader, 'load'));
