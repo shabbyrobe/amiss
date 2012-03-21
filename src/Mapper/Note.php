@@ -27,87 +27,92 @@ class Note extends \Amiss\Mapper\Base
 		}
 		
 		if (!$meta) {
-			$ref = new \ReflectionClass($class);
-			$notes = $this->parser->parseClass($ref);
-			$classNotes = $notes->notes;
-			$table = isset($classNotes['table']) ? $classNotes['table'] : $this->getDefaultTable($class);
-			
-			$parentClass = get_parent_class($class);
-			$parent = null;
-			if ($parentClass) {
-				$parent = $this->getMeta($parentClass);
-			}
-			
-			$info = array(
-				'primary'=>array(),
-				'fields'=>array(),
-				'relations'=>array(),
-				'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
-			);
-			
-			$setters = array();
-			
-			$relationNotes = array();
-			
-			foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
-				foreach ($noteBag as $name=>$itemNotes) {
-					$field = null;
-					$relationNote = null;
-					
-					if (isset($itemNotes['field']))
-						$field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
-					
-					if (isset($itemNotes['has']))
-						$relationNote = $itemNotes['has'];
-					
-					if (isset($itemNotes['primary'])) {
-						$info['primary'][] = $name;
-						if (!$field) $field = $name;
-					}
-					
-					if ($field !== null) {
-						$fieldInfo = array();
-						
-						if ($type == 'method') {
-							list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
-						}
-						
-						$fieldInfo['name'] = $field;
-						$fieldInfo['type'] = isset($itemNotes['type']) 
-							? $itemNotes['type'] 
-							: null
-						;
-						
-						$info['fields'][$name] = $fieldInfo;
-					}
-					
-					if ($relationNote !== null) {
-						if ($field)
-							throw new \UnexpectedValueException("Invalid class {$class}: relation and a field declared together on {$name}");
-						
-						if ($type == 'method') {
-							if (!isset($itemNotes['getter'])) {
-								$itemNotes['getter'] = $name;
-							}
-						}
-						$relationNotes[$name] = $itemNotes;
-					}
-				}
-			}
-			
-			if ($relationNotes) {
-				$info['relations'] = $this->buildRelations($relationNotes);
-			}
-			
-			$info['fields'] = $this->resolveUnnamedFields($info['fields']);
-			
-			$meta = new \Amiss\Meta($class, $table, $info, $parent);
-			
+			$meta = $this->loadMeta($class);
 			if ($this->cache) {
 				$this->cache[1]($class, $meta);
 			}
 		}
+		
 		return $meta;
+	}
+	
+	protected function loadMeta($class)
+	{
+		$ref = new \ReflectionClass($class);
+		$notes = $this->parser->parseClass($ref);
+		$classNotes = $notes->notes;
+		$table = isset($classNotes['table']) ? $classNotes['table'] : $this->getDefaultTable($class);
+		
+		$parentClass = get_parent_class($class);
+		$parent = null;
+		if ($parentClass) {
+			$parent = $this->getMeta($parentClass);
+		}
+		
+		$info = array(
+			'primary'=>array(),
+			'fields'=>array(),
+			'relations'=>array(),
+			'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
+		);
+		
+		$setters = array();
+		
+		$relationNotes = array();
+		
+		foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
+			foreach ($noteBag as $name=>$itemNotes) {
+				$field = null;
+				$relationNote = null;
+				
+				if (isset($itemNotes['field']))
+					$field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
+				
+				if (isset($itemNotes['has']))
+					$relationNote = $itemNotes['has'];
+				
+				if (isset($itemNotes['primary'])) {
+					$info['primary'][] = $name;
+					if (!$field) $field = $name;
+				}
+				
+				if ($field !== null) {
+					$fieldInfo = array();
+					
+					if ($type == 'method') {
+						list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
+					}
+					
+					$fieldInfo['name'] = $field;
+					$fieldInfo['type'] = isset($itemNotes['type']) 
+						? $itemNotes['type'] 
+						: null
+					;
+					
+					$info['fields'][$name] = $fieldInfo;
+				}
+				
+				if ($relationNote !== null) {
+					if ($field)
+						throw new \UnexpectedValueException("Invalid class {$class}: relation and a field declared together on {$name}");
+					
+					if ($type == 'method') {
+						if (!isset($itemNotes['getter'])) {
+							$itemNotes['getter'] = $name;
+						}
+					}
+					$relationNotes[$name] = $itemNotes;
+				}
+			}
+		}
+		
+		if ($relationNotes) {
+			$info['relations'] = $this->buildRelations($relationNotes);
+		}
+		
+		$info['fields'] = $this->resolveUnnamedFields($info['fields']);
+		
+		return new \Amiss\Meta($class, $table, $info, $parent);
 	}
 	
 	protected function findGetterSetter($name, $itemNotes)

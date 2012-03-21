@@ -81,13 +81,13 @@ abstract class Record
 		self::$managers[$class] = $manager;
 	}
 
-	public static function getMeta()
+	public static function getMeta($class=null)
 	{
-		$called = get_called_class();
-		if (!isset(self::$meta[$called]))
-			self::$meta[$called] = static::getManager()->getMeta($called);
+		$class = $class ?: get_called_class();
+		if (!isset(self::$meta[$class]))
+			self::$meta[$class] = static::getManager()->getMeta($class);
 		
-		return self::$meta[$called];
+		return self::$meta[$class];
 	}
 	
 	public static function updateTable()

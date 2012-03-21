@@ -8,13 +8,13 @@ class Loader
 	public $path;
 	private $nslen;
 	
-	public static function register()
+	public static function register($namespace='Amiss\\', $path=__DIR__)
 	{
 		$class = __CLASS__;
-		spl_autoload_register(array(new $class, 'load'));
+		spl_autoload_register(array(new $class($namespace, $path), 'load'));
 	}
 	
-	public function __construct($namespace='Amiss\\', $path=__DIR__)
+	public function __construct($namespace, $path)
 	{
 		$this->namespace = $namespace;
 		$this->nslen = strlen($namespace);

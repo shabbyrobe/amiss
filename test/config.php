@@ -3,10 +3,9 @@
 use Amiss\TableBuilder;
 
 require_once(__DIR__.'/../src/Loader.php');
+Amiss\Loader::register();
 
 date_default_timezone_set('Australia/Melbourne');
-
-spl_autoload_register(array(new Amiss\Loader, 'load'));
 
 require_once(__DIR__.'/../doc/demo/model.php');
 require_once(__DIR__.'/../doc/demo/ar.php');
