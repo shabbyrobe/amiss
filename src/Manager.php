@@ -103,27 +103,10 @@ class Manager
 	
 	public function getByPk($class, $id, $args=null)
 	{
-		$meta = $this->getMeta($class);
-		$primary = $meta->primary;
-		if (!$primary)
-			throw new Exception("Can't retrieve {$meta->class} by primary - none defined.");
-		
-		if (!is_array($id)) $id = array($id);
-		$where = array();
-		
-		foreach ($primary as $idx=>$p) {
-			$idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
-			if (!$idVal)
-				throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by pk");
-			$where[$p] = $idVal;
-		}
-		
-		$criteria = array(
-			'where'=>$where,
-			'args'=>$args ?: array(),
-		);
-		
-		return $this->get($meta->class, $criteria);
+		$criteria = $this->createPkCriteria($class, $id);
+		if ($args)
+			$criteria['args'] = $args; 
+		return $this->get($class, $criteria);
 	}
 	
 	public function count($class, $criteria=null)
@@ -307,6 +290,11 @@ class Manager
 		return $this->executeDelete($class, $criteria);
 	}
 	
+	public function deleteByPk($class, $pk)
+	{
+		return $this->delete($class, $this->createPkCriteria($class, $pk));
+	}
+	
 	/**
 	 * Hack to allow active record to intercept saving and fire events
 	 */
@@ -328,6 +316,26 @@ class Manager
 			$this->insert($object);
 		else
 			$this->update($object);
+	}
+	
+	protected function createPkCriteria($class, $pk)
+	{
+		$meta = $this->getMeta($class);
+		$primary = $meta->primary;
+		if (!$primary)
+			throw new Exception("Can't delete retrieve {$meta->class} by primary - none defined.");
+		
+		if (!is_array($pk)) $pk = array($pk);
+		$where = array();
+		
+		foreach ($primary as $idx=>$p) {
+			$idVal = isset($pk[$p]) ? $pk[$p] : (isset($pk[$idx]) ? $pk[$idx] : null);
+			if (!$idVal)
+				throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by pk");
+			$where[$p] = $idVal;
+		}
+		
+		return array('where'=>$where);
 	}
 
 	protected function createTableUpdateCriteria($table, $args)

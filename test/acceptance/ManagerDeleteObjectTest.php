@@ -12,15 +12,25 @@ class ManagerDeleteObjectTest extends \NoteMapperDataTestCase
 		if (!$this->artist)
 			throw new \UnexpectedValueException("Unexpected test data");
 	}
-	
+
 	/**
-	 * Ensures the signature for the 'autoincrement primary key' update method works
-	 *   Amiss\Manager->delete( object $object )
-	 * 
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testDeleteObjectByAutoincrementPrimaryKey()
+	public function testDeleteByPk()
+	{
+		$this->manager->deleteByPk('Artist', 1);
+		$this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
+		
+		// sanity check: make sure we didn't delete everything!
+		$this->assertGreaterThan(0, $this->manager->count('Artist'));
+	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testDeleteObject()
 	{
 		$this->manager->delete($this->artist);
 		$this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
@@ -30,14 +40,11 @@ class ManagerDeleteObjectTest extends \NoteMapperDataTestCase
 	}
 	
 	/**
-	 * Ensures the signature for the 'autoincrement primary key' update method works
-	 *   Amiss\Manager->delete( object $object )
-	 * 
 	 * @group acceptance
 	 * @group manager
 	 * @expectedException Amiss\Exception
 	 */
-	public function testDeleteObjectWithoutAutoincrementPrimaryKeyFails()
+	public function testDeleteObjectWithoutPrimaryFails()
 	{
 		$mapper = new \TestMapper(array(
 			'Amiss\Demo\Artist'=>new \Amiss\Meta('Artist', 'artist', array()),
