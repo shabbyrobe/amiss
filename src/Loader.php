@@ -8,16 +8,10 @@ class Loader
 	public $path;
 	private $nslen;
 	
-	public static function configure()
+	public static function register()
 	{
 		$class = __CLASS__;
 		spl_autoload_register(array(new $class, 'load'));
-	}
-
-	public static function configureExt()
-	{
-		$class = __CLASS__;
-		spl_autoload_register(array(new $class('Amiss\\Ext', __DIR__.'/../ext'), 'load'));
 	}
 	
 	public function __construct($namespace='Amiss\\', $path=__DIR__)

@@ -1,22 +1,7 @@
 Mapping
 =======    
 
-Amiss provides several flexible options for mapping your objects to the database as well as facilities for rolling your own mapper if none of the provided ones are suitable.
-
-
-Object mapping
---------------
-
-Amiss provides the following mappers:
-
-.. toctree::
-    :maxdepth: 1
-
-    mapper/annotation
-    mapper/statics
-
-
-The ``Amiss\Mapper\Note`` is recommended, though if neither mapper meets your needs you can create your own as described in :ref:`custom-mapping`.
+Amiss provides a complete annotation-based option for mapping your objects to the database as well as facilities for rolling your own mapper if you prefer.
 
 
 Annotations Quickstart
@@ -82,9 +67,9 @@ Objects are marked up in this way:
 Common Mapper Configuration
 ---------------------------
 
-Both ``Amiss\Mapper\Note`` and ``Amiss\Mapper\Statics`` derive from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
+``Amiss\Mapper\Note``derives from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
 
-Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality.
+Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality. It is recommended that you use ``Amiss\Mapper\Base`` when rolling your own mapper, as outlined below.
 
 
 Name translation

@@ -4,8 +4,7 @@ $amissPath = __DIR__.'/../src';
 
 require_once($amissPath.'/Loader.php');
 
-Amiss\Loader::configureExt();
-Amiss\Loader::configure();
+Amiss\Loader::register();
 
 function e($val) {
 	return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
