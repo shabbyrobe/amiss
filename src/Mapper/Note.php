@@ -13,24 +13,9 @@ class Note extends \Amiss\Mapper\Base
 		parent::__construct();
 		
 		$this->parser = new \Amiss\Note\Parser;
-		$this->setCache($cache);
-	}
-	
-	protected function setCache($cache)
-	{
-		if (is_object($cache)) {
-			$cache = array(
-				function($key) use ($cache) { return $cache->get($key); },
-				function($key, $value) use ($cache) { return $cache->set($key, $value); },
-			);
-		}
-		elseif ($cache == 'apc') {
-			$cache = array(
-				function($key) use ($cache) { return apc_fetch($key); },
-				function($key, $value) use ($cache) { return apc_store($key, $value, 86400); },
-			);
-		}
-		$this->cache = $cache;
+		
+		if ($cache)
+			$this->cache = static::normaliseCache($cache);
 	}
 	
 	protected function createMeta($class)
