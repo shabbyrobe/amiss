@@ -85,6 +85,20 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($related instanceof Active\ArtistType);
 		$this->assertEquals(1, $related->artistTypeId);
 	}
+	
+	/**
+	 * @group active
+	 * @group acceptance
+	 */
+	public function testGetRelatedWithLazyLoad()
+	{
+		$obj = Active\ArtistRecord::getByPk(1);
+		$this->assertTrue($obj==true, "Couldn't retrieve object");
+		
+		$this->assertNull($this->getProtected($obj, 'type'));
+		$type = $obj->getType();
+		$this->assertTrue($this->getProtected($obj, 'type') instanceof Active\ArtistType);
+	}
 
 	/**
 	 * @group active
