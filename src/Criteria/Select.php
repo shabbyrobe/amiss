@@ -38,7 +38,7 @@ class Select extends Query
 		return array($query, $params);
 	}
 	
-	protected function buildFields($meta)
+	public function buildFields($meta, $prefix=null)
 	{
 		$fields = '*';
 		
@@ -47,7 +47,7 @@ class Select extends Query
 			if ($metaFields) {
 				$fields = array();
 				foreach ($metaFields as $field) {
-					$fields[] = '`'.$field['name'].'`';
+					$fields[] = ($prefix ? $prefix.'.' : '').'`'.$field['name'].'`';
 				}
 				$fields = implode(', ', $fields);
 			}
@@ -59,7 +59,7 @@ class Select extends Query
 		return $fields;
 	}
 	
-	protected function buildOrder($meta)
+	public function buildOrder($meta)
 	{
 		$order = array();
 		if (is_string($this->order)) {
