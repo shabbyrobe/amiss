@@ -128,26 +128,45 @@ class Note extends \Amiss\Mapper\Base
 	protected function buildRelations($relationNotes)
 	{
 		$relations = array();
+		
 		foreach ($relationNotes as $name=>$info) {
-			$relationNote = preg_split('/\s+/', $info['has'], 3, PREG_SPLIT_NO_EMPTY);
-			$relation = array($relationNote[0], 'to'=>$relationNote[1], 'on'=>null);
+			$relationNote = preg_split('/\s+/', $info['has'], 2, PREG_SPLIT_NO_EMPTY);
 			
-			if (isset($relationNote[2])) {
-				$relation['on'] = array();
-				$relationNote[2] = str_replace(' ', '', $relationNote[2]);
+			$type = $relationNote[0];
+			if ($type == 'one' || $type == 'many') {
+				var_dump($this->readRelation($relationNote[1]));
+				exit;
 				
-				parse_str($relationNote[2], $on);
-				foreach ($on as $k=>$v) {
-					if (!$v) $v = $k;
-					$relation['on'][$k] = $v;
+				$typeNote = preg_split('/\s+/', $relationNote[1], 2, PREG_SPLIT_NO_EMPTY);
+				
+				$relation = array($type, 'of'=>$typeNote[0], 'on'=>null);
+				
+				if (isset($typeNote[1])) {
+					$on = $this->readRelation($typeNote[1]);
+					
+					foreach ($on as $k=>$v) {
+						if (!$v) $v = $k;
+						$relation['on'][$k] = $v;
+					}
 				}
+				
+				if (isset($info['getter']))
+					list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
+			}
+			else {
+				$relation = $this->readRelation($relationNote[1]);
+				array_unshift($relation, $relationNote[0]);
 			}
 			
-			if (isset($info['getter'])) { 
-				list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
-			}
 			$relations[$name] = $relation;
 		}
 		return $relations;
+	}
+	
+	protected function readRelation($noteValue)
+	{
+		$relnote = trim(preg_replace('/\s*([=&])\s*/', '$1', str_replace(';', '&', $noteValue)));
+		parse_str($relnote, $data);
+		return $data;
 	}
 }

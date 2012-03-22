@@ -21,9 +21,9 @@ class Manager
 	
 	public $mapper;
 	
-	public $relators = array();
+	public $relators;
 	
-	public function __construct($connector, Mapper $mapper)
+	public function __construct($connector, Mapper $mapper, $relators=null)
 	{
 		if (is_array($connector)) 
 			$connector = Connector::create($connector);
@@ -31,7 +31,14 @@ class Manager
 		$this->connector = $connector;
 		$this->mapper = $mapper;
 		
-		$this->relators['one'] = $this->relators['many'] = new Relator\OneMany;
+		if ($relators===null) {
+			$this->relators = array();
+			$this->relators['one'] = $this->relators['many'] = new Relator\OneMany;
+			$this->relators['assoc'] = new Relator\Association;
+		}
+		else {
+			$this->relators = $relators;
+		}
 	}
 	
 	/**

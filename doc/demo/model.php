@@ -125,16 +125,21 @@ class Event extends Object
 	public $venueId;
 	
 	/**
-	 * @has many EventArtist
+	 * @has many of=EventArtist
 	 * @var Amiss\Demo\EventArtist[]
 	 */
 	public $eventArtists;
 	
 	/**
-	 * @has one Venue venueId
+	 * @has one of=Venue; on=venueId
 	 * @var Amiss\Demo\Venue
 	 */
 	public $venue;
+	
+	/**
+	 * @has assoc of=Artist; via=EventArtist
+	 */
+	public $artists;
 	
 	/**
 	 * @field

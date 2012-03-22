@@ -25,7 +25,7 @@ class OneMany
 		if ($type != 'one' && $type != 'many')
 			throw new \InvalidArgumentException("This relator only works with 'one' or 'many' as the type");
 		
-		$relatedMeta = $manager->getMeta($relation['to']);
+		$relatedMeta = $manager->getMeta($relation['of']);
 		
 		// prepare the relation's "on" field
 		$on = null;
@@ -87,7 +87,7 @@ class OneMany
 		}
 		$criteria->where = implode(' AND ', $where);
 		
-		$list = $manager->getList($relation['to'], $criteria);
+		$list = $manager->getList($relation['of'], $criteria);
 		
 		// prepare the result
 		$result = null;

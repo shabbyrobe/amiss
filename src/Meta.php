@@ -17,8 +17,8 @@ class Meta
 	 * 
 	 * For e.g.
 	 * $meta->relations = array(
-	 *     // the 'to' and 'on' keys are required by Amiss\Relator\OneMany
-	 *     'foo'=>array('one', 'to'=>'Artist', 'on'=>'artistId'),
+	 *     // the 'of' and 'on' keys are required by Amiss\Relator\OneMany
+	 *     'foo'=>array('one', 'of'=>'Artist', 'on'=>'artistId'),
 	 *     
 	 *     // the blahblah relator has different ideas
 	 *     'bar'=>array('blahblah', 'fee'=>'fi', 'fo'=>'fum'),

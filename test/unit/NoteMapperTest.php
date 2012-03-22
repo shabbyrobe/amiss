@@ -312,7 +312,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one', 'to'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
+			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -354,7 +354,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one', 'to'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -391,7 +391,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
 		$expected = array(
-			$name.'2'=>array('one', 'to'=>$name."Class2", 'on'=>null)
+			$name.'2'=>array('one', 'of'=>$name."Class2", 'on'=>null)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -426,7 +426,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
 		$expected = array(
-			$name.'2'=>array('many', 'to'=>$name."Class2", 'on'=>null)
+			$name.'2'=>array('many', 'of'=>$name."Class2", 'on'=>null)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -441,7 +441,6 @@ class NoteMapperTest extends \CustomTestCase
 	 * @group unit
 	 * 
 	 * @covers Amiss\Mapper\Note::createMeta
-	 * @covers Amiss\Mapper\Note::buildRelations
 	 * 
 	 * @dataProvider dataForGetMetaOneToOnePropertyRelationWithOn
 	 */
@@ -469,7 +468,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta($mapper->objectNamespace."\\{$name}Class1");
 		$expected = array(
-			'class2'=>array($relType, 'to'=>$name."Class2", 'on'=>$result)
+			'class2'=>array($relType, 'of'=>$name."Class2", 'on'=>$result)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -503,5 +502,48 @@ class NoteMapperTest extends \CustomTestCase
 		}
 		
 		return $tests;
+	}
+	
+	/**
+	 * @group unit
+	 * @covers Amiss\Mapper\Note::buildRelations
+	 * @dataProvider dataForBuildRelations
+	 */
+	public function testBuildRelations($note, $expected)
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		$notes = array('myprop'=>array(
+			'has'=>$note
+		));
+		$result = $this->callProtected($mapper, 'buildRelations', $notes);
+		$this->assertEquals($expected, $result['myprop']);
+	}
+	
+	public function dataForBuildRelations()
+	{
+		return array(
+			array('one Foobar', array('one', 'of'=>'Foobar', 'on'=>null)),
+			
+			// straight single-column on
+			array('one Foobar foo=bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
+			
+			// some whitespace around the equals
+			array('one Foobar foo = bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
+			
+			// straight multi-column on
+			array('one Foobar foo=bar&baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			
+			// multi-column on with whitespace 
+			array('one Foobar foo = bar  &  baz = qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			
+			// multi-column on with no whitespace and semicolon 
+			array('one Foobar foo=bar;baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			
+			// multi-column on with a little bit of whitespace and semicolon 
+			array('one Foobar foo=bar; baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			
+			// multi-column on with heaps of whitespace and semicolon 
+			array('one Foobar foo = bar  ;     baz    =   qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+		);
 	}
 }
