@@ -60,9 +60,35 @@ class ManagerRelationTest extends \SqliteDataTestCase
 		$eventArtists = $this->manager->getRelated($event, 'eventArtists');
 		
 		$this->assertTrue(is_array($eventArtists));
-		$this->assertTrue(count($eventArtists) > 0);
-		
+		$this->assertTrue(count($eventArtists) > 1);
+		$this->assertTrue($eventArtists[0] instanceof Demo\EventArtist);
 		// TODO: improve checking
+	}
+
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testRetrieveRelatedAssocForSingle()
+	{
+		$event = $this->manager->get('Event', 'eventId=1');
+		$artists = $this->manager->getRelated($event, 'artists');
+		
+		$this->assertTrue(is_array($artists));
+		$this->assertGreaterThan(0, count($artists));
+		$this->assertTrue($artists[0] instanceof Demo\Artist);
+		var_dump($artists);
+	}
+
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testRetrieveRelatedAssocForList()
+	{
+		$events = $this->manager->getList('Event');
+		$this->manager->assignRelated($events, 'artists');
+		var_dump($events);
 	}
 	
 	/**

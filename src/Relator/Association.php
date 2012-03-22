@@ -2,6 +2,8 @@
 
 namespace Amiss\Relator;
 
+use Amiss\Criteria\Select;
+
 use Amiss\Criteria;
 
 /**
@@ -16,7 +18,7 @@ use Amiss\Criteria;
  * If the 'via' object defines multiple relations to the same object, you can declare it (otherwise
  * you'll get the first one of the 'of' type):
  * 
- * 	  $event->relations['artists'] = array('assoc', 'of'=>'Artist', 'via'=>array('EventArtist', 'artist2'))
+ * 	  $event->relations['artists'] = array('assoc', 'of'=>'Artist', 'via'=>'EventArtist', 'rel'=>'artist2')
  */
 class Association
 {
@@ -24,60 +26,78 @@ class Association
 	{
 		if (!$source) return;
 		
+		// find the source object details
 		$sourceIsArray = is_array($source) || $source instanceof \Traversable;
 		if (!$sourceIsArray) $source = array($source);
 		
 		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
 		$meta = $manager->getMeta($class);
-		if (!isset($meta->relations[$relationName])) {
+		if (!isset($meta->relations[$relationName]))
 			throw new Exception("Unknown relation $relationName on $class");
-		}
 		
 		$relation = $meta->relations[$relationName];
-		$type = $relation[0];
+		if ($relation[0] != 'assoc')
+			throw new \InvalidArgumentException("This relator only works with 'assoc' as the type");
 		
-		if ($type != 'one' && $type != 'many')
-			throw new \InvalidArgumentException("This relator only works with 'one' or 'many' as the type");
+		$sourceFields = $meta->getFields();
 		
+		
+		// find all the necessary metadata
 		$relatedMeta = $manager->getMeta($relation['of']);
+		$relatedFields = $relatedMeta->getFields();
 		
-		// prepare the relation's "on" field
-		$on = null;
-		if (isset($relation['on']))
-			$on = $relation['on'];
-		else {
-			if ('one'==$type)
-				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
-			else {
-				$on = array();
-				foreach ($meta->primary as $p) {
-					$on[$p] = $p;
+		$viaMeta = $manager->getMeta($relation['via']);
+		$viaFields = $viaMeta->getFields();
+		$sourceToViaRelationName = isset($relation['rel']) ? $relation['rel'] : null;
+		$sourceToViaRelation = null;
+		$viaToDestRelationName = null;
+		$viaToDestRelation = null;
+		
+		if ($sourceToViaRelationName)
+			$sourceToViaRelation = $viaMeta->relations[$relation];
+		
+		foreach ($viaMeta->relations as $k=>$v) {
+			// inefficient. consider requiring this to be specified rather than inferred
+			$of = $manager->getMeta($v['of']);
+			if ($of->class == $meta->class) {
+				if (!$sourceToViaRelation) {
+					$sourceToViaRelation = $v;
+					$sourceToViaRelationName = $k;
 				}
 			}
+			if ($of->class == $relatedMeta->class) {
+				if (!$viaToDestRelationName) {
+					$viaToDestRelation = $v;
+					$viaToDestRelationName = $k;
+				}
+			}
+			if ($viaToDestRelation && $sourceToViaRelation) break;
 		}
 		
-		if (!is_array($on)) $on = array($on=>$on);
+		if (!$sourceToViaRelation || !$viaToDestRelation)
+			throw new \Amiss\Exception("Could not find relation between {$meta->class} and {$relation['via']} for relation $relationName");
 		
-		// populate the 'on' with necessary data
-		$relatedFields = $relatedMeta->getFields();
-		foreach ($on as $l=>$r) {
-			$on[$l] = $relatedFields[$r];
-		}
+		$sourceToViaOn = $sourceToViaRelation['on'];
+		if (is_string($sourceToViaOn))
+			$sourceToViaOn = array($sourceToViaOn=>$sourceToViaOn);
 		
-		// find query values in source object(s)
-		$fields = $meta->getFields();
-		$resultIndex = array();
+		$viaToDestOn = $viaToDestRelation['on'];
+		if (is_string($viaToDestOn))
+			$viaToDestOn = array($viaToDestOn=>$viaToDestOn);
+		
+		
+		// get the source ids
 		$ids = array();
 		foreach ($source as $idx=>$object) {
 			$key = array();
-			foreach ($on as $l=>$r) {
-				$lField = $fields[$l];
+			foreach ($sourceToViaOn as $l=>$r) {
+				$lField = $sourceFields[$l];
 				$lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
 				
 				$key[] = $lValue;
 				
 				if (!isset($ids[$l])) {
-					$ids[$l] = array('values'=>array(), 'rField'=>$r, 'param'=>$manager->sanitiseParam($r['name']));
+					$ids[$l] = array('values'=>array(), 'rField'=>$viaFields[$r], 'param'=>$manager->sanitiseParam($viaFields[$r]['name']));
 				}
 				
 				$ids[$l]['values'][$lValue] = true;
@@ -91,44 +111,70 @@ class Association
 			$resultIndex[$key][$idx] = $object;
 		}
 		
-		// build query
-		$criteria = new Criteria\Select;
+		$query = new Select();
+	
 		$where = array();
 		foreach ($ids as $l=>$idInfo) {
 			$rName = $idInfo['rField']['name'];
-			$criteria->params[$rName] = array_keys($idInfo['values']);
-			$where[] = '`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
+			$query->params[$rName] = array_keys($idInfo['values']);
+			$where[] = 't2.`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
 		}
-		$criteria->where = implode(' AND ', $where);
+		$query->where = implode(' AND ', $where);
 		
-		$list = $manager->getList($relation['of'], $criteria);
+		$queryFields = $query->buildFields($relatedMeta, 't1');
+		$sourcePkFields = array();
+		foreach ($sourceToViaOn as $l=>$r) {
+			$field = $viaMeta->getField($r);
+			$sourcePkFields[] = $field['name'];
+		}
+		
+		$joinOn = array();
+		foreach ($viaToDestOn as $l=>$r) {
+			$joinOn[] = 't2.`'.$viaFields[$l]['name'].'` = t1.`'.$relatedFields[$r]['name'].'`';
+		}
+		$joinOn = implode(' AND ', $joinOn);
+		
+		list ($where, $params) = $query->buildClause();
+		
+		$sql = "
+			SELECT 
+				$queryFields, t2.".'`'.implode('`, t2.`', $sourcePkFields).'`'."
+			FROM
+				{$viaMeta->table} t2
+			INNER JOIN
+				{$relatedMeta->table} t1
+				ON  ({$joinOn})
+			WHERE 
+				$where
+		";
+		
+		$stmt = $manager->execute($sql, $params);
+		
+		$list = array();
+		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+			$object = $manager->mapper->createObject($relatedMeta, $row, array());
+			$manager->mapper->populateObject($relatedMeta, $object, $row);
+			
+			$item = array('id'=>array(), 'object'=>$object);
+			foreach ($sourcePkFields as $field) {
+				$item['id'][] = $row[$field];
+			}
+			$list[] = $item;
+		}
 		
 		// prepare the result
 		$result = null;
 		if (!$sourceIsArray) {
-			if ($list)
-				$result = 'one' == $type ? current($list) : $list;
+			$result = $list;
 		}
 		else {
 			$result = array();
 			foreach ($list as $related) {
-				$key = array();
-				
-				foreach ($on as $l=>$r) {
-					$name = $r['name'];
-					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($object, $r['getter']));
-					$key[] = $rValue;
-				}
-				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
+				$key = !isset($related['id'][1]) ? $related['id'][0] : implode('|', $related['id']);
 				
 				foreach ($resultIndex[$key] as $idx=>$lObj) {
-					if ('one' == $type) {
-						$result[$idx] = $related;
-					}
-					elseif ('many' == $type) {
-						if (!isset($result[$idx])) $result[$idx] = array();
-						$result[$idx][] = $related;
-					}
+					if (!isset($result[$idx])) $result[$idx] = array();
+					$result[$idx][] = $related['object'];
 				}
 			}
 		}

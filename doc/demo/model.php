@@ -68,6 +68,11 @@ class Artist extends Object
 	 * @var Amiss\Demo\ArtistType
 	 */
 	public $artistType;
+	
+	/**
+	 * @has assoc of=Event; via=EventArtist
+	 */
+	public $events;
 }
 
 class ArtistType extends Object
