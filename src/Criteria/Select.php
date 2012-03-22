@@ -47,7 +47,7 @@ class Select extends Query
 			if ($metaFields) {
 				$fields = array();
 				foreach ($metaFields as $field) {
-					$fields[] = $field['name'];
+					$fields[] = '`'.$field['name'].'`';
 				}
 				$fields = implode(', ', $fields);
 			}
