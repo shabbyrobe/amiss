@@ -130,7 +130,7 @@ class Note extends \Amiss\Mapper\Base
 		$relations = array();
 		
 		foreach ($relationNotes as $name=>$info) {
-			$relationNote = preg_split('/\s+/', $info['has'], 2, PREG_SPLIT_NO_EMPTY);
+			$relationNote = preg_split('/\s+/', ltrim($info['has']), 2, PREG_SPLIT_NO_EMPTY);
 			
 			$relation = $this->readRelation($relationNote[1]);
 			array_unshift($relation, $relationNote[0]);
