@@ -303,8 +303,15 @@ class Manager
 	public function shouldInsert($object)
 	{
 		$meta = $this->getMeta(get_class($object));
-		if (!$meta->primary)
-			throw new Exception("Manager requires a primary if you want to call 'save'.");
+		$nope = false;
+		if (!$meta->primary || count($meta->primary) > 1)
+			$nope = true;
+		else {
+			$field = $meta->getField($meta->primary[0]);
+			if ($field['type'] != 'autoinc')
+				$nope = true;
+		}
+		if ($nope) throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
 		
 		$prival = $meta->getPrimaryValue($object);
 		return $prival == false;
