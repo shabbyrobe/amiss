@@ -114,6 +114,9 @@ class ActiveRecordEventTest extends \CustomTestCase
 
 class RecordEventTestRecord extends Record
 {
-	/** @primary */
+	/** 
+	 * @primary
+	 * @type autoinc 
+	 */
 	public $id;
 }
