@@ -43,6 +43,14 @@ class Connector
 		$this->password = $password;
 		$this->driverOptions = $driverOptions;
 	}
+
+	public function __sleep()
+	{
+		$this->pdo = null;
+		$keys = array_keys(get_object_vars($this));
+		$keys[] = 'attributes';
+		return $keys;
+	}
 	
 	/**
 	 * Creates a Connector from an array of connection parameters.
@@ -94,9 +102,10 @@ class Connector
 		if (!isset($this->attributes[\PDO::ATTR_ERRMODE]))
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
-		foreach ($this->attributes as $k=>$v)
-			$pdo->setAttribute($k, $v);
-		
+		if ($this->attributes) {
+			foreach ($this->attributes as $k=>$v)
+				$pdo->setAttribute($k, $v);
+		}
 		$this->attributes = null;
 		
 		return $pdo;
@@ -110,6 +119,11 @@ class Connector
 	public function ensurePDO()
 	{
 		if ($this->pdo == null) throw new PDOException("Not connected");
+	}
+
+	public function connect()
+	{
+		$this->getPDO();
 	}
 	
 	/**
