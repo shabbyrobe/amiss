@@ -114,7 +114,7 @@ abstract class Record
 		if ($exists)
 			return call_user_func_array(array($manager, $name), $args);
 		else
-			throw new \BadMethodCallException("Unknown method $name");
+			throw new \BadMethodCallException("Unknown method $name on class ".get_class($this));
 	}
 	
 	public static function __callStatic($name, $args)
@@ -139,8 +139,8 @@ abstract class Record
 		$meta = static::getMeta();
 		
 		$fields = $meta->getFields();
-		if (!isset($fields[$name])) {
-			throw new \BadMethodCallException("Unknown property $name");
+		if (isset($fields[$name])) {
+			throw new \BadMethodCallException("Unknown property $name on class ".get_class($this));
 		}
 		else {
 			// add the property to stop this from being called again
