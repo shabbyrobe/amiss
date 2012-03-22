@@ -130,10 +130,7 @@ class Note extends \Amiss\Mapper\Base
 		$relations = array();
 		foreach ($relationNotes as $name=>$info) {
 			$relationNote = preg_split('/\s+/', $info['has'], 3, PREG_SPLIT_NO_EMPTY);
-			$relation = array(
-				$relationNote[0]=>$relationNote[1],
-				'on'=>null,
-			);
+			$relation = array($relationNote[0], 'to'=>$relationNote[1], 'on'=>null);
 			
 			if (isset($relationNote[2])) {
 				$relation['on'] = array();

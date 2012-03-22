@@ -99,18 +99,20 @@ class TableBuilder
 		$idx = array();
 		if ($engine == 'mysql') {
 			foreach ($this->meta->relations as $k=>$details) {
-				$cols = array();
-				if (is_string($details['on'])) {
-					$cols[] = $details['on'];
-				}
-				elseif ($details['on']) {
-					foreach ($details['on'] as $l=>$r) {
-						if (is_numeric($l)) $l = $r;
-						$cols[] = $l;
+				if ($details[0] == 'one' || $details[0] == 'many') {
+					$cols = array();
+					if (is_string($details['on'])) {
+						$cols[] = $details['on'];
 					}
+					elseif ($details['on']) {
+						foreach ($details['on'] as $l=>$r) {
+							if (is_numeric($l)) $l = $r;
+							$cols[] = $l;
+						}
+					}
+					if ($details[0] == 'one')
+						$idx[] = "KEY `idx_$k` (`".implode('`, `', $cols).'`)';
 				}
-				if (isset($details['one']))
-					$idx[] = "KEY `idx_$k` (`".implode('`, `', $cols).'`)';
 			}
 		}
 		return $idx;

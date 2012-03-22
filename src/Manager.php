@@ -177,15 +177,12 @@ class Manager
 		
 		$relation = $meta->relations[$relationName];
 		
-		// FIXME: this hack expects the relation type to be the first key in the
-		// relation definition. The internal relation definition needs to be 
-		// cleaned up.
-		$type = key($relation);
+		$type = $relation[0];
 		
 		if (!isset($this->relators[$type]))
 			throw new Exception("Relator $type not found");
 		
-		return $this->relators[$type]->getRelated($this, $type, $source, $relationName);
+		return $this->relators[$type]->getRelated($this, $source, $relationName);
 	}
 	
 	public function insert()

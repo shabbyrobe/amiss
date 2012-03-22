@@ -7,6 +7,23 @@ class Meta
 	public $class;
 	public $table;
 	public $primary;
+	
+	/**
+	 * Array of relation arrays, hashed by property name
+	 * 
+	 * Relation arrays *must* contain at least a type at index 0. All other
+	 * values in the array are defined by the relator. The meta only cares
+	 * about the type.
+	 * 
+	 * For e.g.
+	 * $meta->relations = array(
+	 *     // the 'to' and 'on' keys are required by Amiss\Relator\OneMany
+	 *     'foo'=>array('one', 'to'=>'Artist', 'on'=>'artistId'),
+	 *     
+	 *     // the blahblah relator has different ideas
+	 *     'bar'=>array('blahblah', 'fee'=>'fi', 'fo'=>'fum'),
+	 * );
+	 */
 	public $relations;
 	
 	protected $fields;

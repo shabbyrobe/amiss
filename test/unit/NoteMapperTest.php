@@ -312,7 +312,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
+			'bar'=>array('one', 'to'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -354,7 +354,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+			'bar'=>array('one', 'to'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -391,7 +391,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
 		$expected = array(
-			$name.'2'=>array('one'=>$name."Class2", 'on'=>null)
+			$name.'2'=>array('one', 'to'=>$name."Class2", 'on'=>null)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -426,7 +426,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
 		$expected = array(
-			$name.'2'=>array('many'=>$name."Class2", 'on'=>null)
+			$name.'2'=>array('many', 'to'=>$name."Class2", 'on'=>null)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -469,7 +469,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta($mapper->objectNamespace."\\{$name}Class1");
 		$expected = array(
-			'class2'=>array($relType=>$name."Class2", 'on'=>$result)
+			'class2'=>array($relType, 'to'=>$name."Class2", 'on'=>$result)
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}

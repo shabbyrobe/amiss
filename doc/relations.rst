@@ -153,10 +153,9 @@ Adding Relators
 
 You can add your own relationship types to Amiss by creating your own ``Relator`` class and adding it to the ``Amiss\Manager->relators`` array. It must contain the following method:
 
-.. py:method:: getRelated($manager, $type, $source, $relationName)
+.. py:method:: getRelated($manager, $source, $relationName)
 
     :param manager: ``Amiss\Manager`` instance calling your relator. You'll need this to do queries.
-    :param type: The type of relation. 
     :param source: The source object(s). This could be either a single object or an array of objects depending on your context. You are free to raise an exception if your ``Relator`` only supports single objects or arrays
     :param relationName: The name of the relation which was passed to ``getRelated``
 

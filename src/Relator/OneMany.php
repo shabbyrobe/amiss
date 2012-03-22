@@ -6,7 +6,7 @@ use Amiss\Criteria;
 
 class OneMany
 {
-	public function getRelated($manager, $type, $source, $relationName)
+	public function getRelated($manager, $source, $relationName)
 	{
 		if (!$source) return;
 		
@@ -20,11 +20,15 @@ class OneMany
 		}
 		
 		$relation = $meta->relations[$relationName];
-		$relatedMeta = $manager->getMeta($relation[$type]);
+		$type = $relation[0];
 		
-		$on = null;
+		if ($type != 'one' && $type != 'many')
+			throw new \InvalidArgumentException("This relator only works with 'one' or 'many' as the type");
+		
+		$relatedMeta = $manager->getMeta($relation['to']);
+		
 		// prepare the relation's "on" field
-		
+		$on = null;
 		if (isset($relation['on']))
 			$on = $relation['on'];
 		else {
@@ -83,7 +87,7 @@ class OneMany
 		}
 		$criteria->where = implode(' AND ', $where);
 		
-		$list = $manager->getList($relation[$type], $criteria);
+		$list = $manager->getList($relation['to'], $criteria);
 		
 		// prepare the result
 		$result = null;
