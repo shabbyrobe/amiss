@@ -54,6 +54,9 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
 	 */
 	public function testUpdateTableAllowsNonKeyedItemMixedInWithParameterForSet()
 	{
+		$count = $this->manager->count('EventArtist');
+		$this->assertGreaterThan(0, $count);
+		
 		$stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
 		$stmt->execute();
 		$min = $stmt->fetchColumn();
@@ -68,7 +71,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
 		$stmt = $this->manager->getConnector()->prepare("SELECT COUNT(*) FROM event_artist WHERE sequence=15001");
 		$stmt->execute();
 		$min = $stmt->fetchColumn();
-		$this->assertEquals(7, $min);
+		$this->assertEquals($count, $min);
 	}
 
 	/**

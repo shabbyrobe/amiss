@@ -61,7 +61,7 @@ class Query
 		return array($where, $params);
 	}
 	
-	protected function paramsAreNamed()
+	public function paramsAreNamed()
 	{
 		return !ctype_digit(implode('', array_keys($this->params)));
 	}

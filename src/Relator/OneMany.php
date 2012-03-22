@@ -6,7 +6,7 @@ use Amiss\Criteria;
 
 class OneMany
 {
-	public function getRelated($manager, $source, $relationName)
+	public function getRelated($manager, $source, $relationName, $criteria)
 	{
 		if (!$source) return;
 		
@@ -78,16 +78,22 @@ class OneMany
 		}
 		
 		// build query
-		$criteria = new Criteria\Select;
+		$query = new Criteria\Select;
 		$where = array();
 		foreach ($ids as $l=>$idInfo) {
 			$rName = $idInfo['rField']['name'];
-			$criteria->params[$rName] = array_keys($idInfo['values']);
-			$where[] = '`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
+			$query->params['r_'.$rName] = array_keys($idInfo['values']);
+			$where[] = '`'.str_replace('`', '', $rName).'` IN(:r_'.$idInfo['param'].')';
 		}
-		$criteria->where = implode(' AND ', $where);
+		$query->where = implode(' AND ', $where);
 		
-		$list = $manager->getList($relation['of'], $criteria);
+		if ($criteria) {
+			list ($cWhere, $cParams) = $criteria->buildClause();
+			$query->params = array_merge($cParams, $query->params);
+			$query->where .= ' AND ('.$cWhere.')';
+		}
+		
+		$list = $manager->getList($relation['of'], $query);
 		
 		// prepare the result
 		$result = null;

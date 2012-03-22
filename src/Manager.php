@@ -126,13 +126,9 @@ class Manager
 		list ($where, $params) = $criteria->buildClause();
 		
 		$field = '*';
-		if ($meta->primary) {
-			$fields = $meta->getFields();
-			$field = array();
-			foreach ($meta->primary as $p) {
-				$field[] = $fields[$p]['name'];
-			}
-			$field = implode(', ', $field);
+		if ($meta->primary && count($meta->primary) == 1) {
+			$metaField = $meta->getField($meta->primary[0]);
+			$field = $metaField['name'];
 		}
 		
 		$query = "SELECT COUNT($field) FROM $table "
@@ -167,7 +163,7 @@ class Manager
 		}
 	}
 	
-	public function getRelated($source, $relationName)
+	public function getRelated($source, $relationName, $criteria=null)
 	{
 		if (!$source) return;
 		
@@ -184,12 +180,10 @@ class Manager
 		
 		$relation = $meta->relations[$relationName];
 		
-		$type = $relation[0];
+		if (!isset($this->relators[$relation[0]]))
+			throw new Exception("Relator {$relation[0]} not found");
 		
-		if (!isset($this->relators[$type]))
-			throw new Exception("Relator $type not found");
-		
-		return $this->relators[$type]->getRelated($this, $source, $relationName);
+		return $this->relators[$relation[0]]->getRelated($this, $source, $relationName, $criteria);
 	}
 	
 	public function insert()

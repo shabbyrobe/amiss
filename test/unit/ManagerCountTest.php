@@ -71,7 +71,7 @@ class ManagerCountTest extends \CustomTestCase
 		
 		$this->manager->count('stdClass');
 		
-		$expected = 'SELECT COUNT(a_field, b_field) FROM std_class';
+		$expected = 'SELECT COUNT(*) FROM std_class';
 		$found = $this->db->getLastCall();
 		
 		$this->assertLoose($expected, $found[0]);

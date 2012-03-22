@@ -2,6 +2,8 @@
 
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Criteria\Query;
+
 use Amiss\Demo;
 
 class ManagerRelationTest extends \SqliteDataTestCase
@@ -76,8 +78,12 @@ class ManagerRelationTest extends \SqliteDataTestCase
 		
 		$this->assertTrue(is_array($artists));
 		$this->assertGreaterThan(0, count($artists));
-		$this->assertTrue($artists[0] instanceof Demo\Artist);
-		var_dump($artists);
+		
+		$ids = array();
+		foreach ($artists as $a) {
+			$ids[] = $a->artistId;
+		}
+		$this->assertEquals(array(1, 2, 3, 4, 5, 7), $ids);
 	}
 
 	/**
@@ -88,7 +94,42 @@ class ManagerRelationTest extends \SqliteDataTestCase
 	{
 		$events = $this->manager->getList('Event');
 		$this->manager->assignRelated($events, 'artists');
-		var_dump($events);
+		
+		$ids = array();
+		foreach ($events as $e) {
+			$ids[$e->eventId] = array();
+			foreach ($e->artists as $a) {
+				$ids[$e->eventId][] = $a->artistId;
+			}
+		}
+		
+		$expected = array(
+			1=>array(1, 2, 3, 4, 5, 7),
+			2=>array(1, 2, 6),
+		);
+		
+		$this->assertEquals($expected, $ids);
+	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testGetRelatedAssocWithCriteria()
+	{ 
+		$event = $this->manager->get('Event', 'eventId=1');
+		$criteria = new Query();
+		$criteria->where = 'artistTypeId=:tid';
+		$criteria->params = array('tid'=>1);
+		
+		$artists = $this->manager->getRelated($event, 'artists', $criteria);
+		
+		$ids = array();
+		foreach ($artists as $a) {
+			$ids[] = $a->artistId;
+		}
+		
+		$this->assertEquals(array(1, 2, 3, 7), $ids);
 	}
 	
 	/**

@@ -22,9 +22,12 @@ use Amiss\Criteria;
  */
 class Association
 {
-	public function getRelated($manager, $source, $relationName)
+	public function getRelated($manager, $source, $relationName, $criteria)
 	{
 		if (!$source) return;
+		
+		if ($criteria && !$criteria->paramsAreNamed())
+			throw new \InvalidArgumentException("Association mapper criteria requires named parameters");
 		
 		// find the source object details
 		$sourceIsArray = is_array($source) || $source instanceof \Traversable;
@@ -135,6 +138,11 @@ class Association
 		$joinOn = implode(' AND ', $joinOn);
 		
 		list ($where, $params) = $query->buildClause();
+		if ($criteria) {
+			list ($cWhere, $cParams) = $criteria->buildClause();
+			$params = array_merge($cParams, $params);
+			$where .= ' AND ('.$cWhere.')';
+		}
 		
 		$sql = "
 			SELECT 
@@ -147,19 +155,21 @@ class Association
 			WHERE 
 				$where
 		";
-		
+				
 		$stmt = $manager->execute($sql, $params);
 		
 		$list = array();
+		$ids = array();
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 			$object = $manager->mapper->createObject($relatedMeta, $row, array());
 			$manager->mapper->populateObject($relatedMeta, $object, $row);
 			
-			$item = array('id'=>array(), 'object'=>$object);
+			$list[] = $object;
+			$id = array();
 			foreach ($sourcePkFields as $field) {
-				$item['id'][] = $row[$field];
+				$id[] = $row[$field];
 			}
-			$list[] = $item;
+			$ids[] = $id;
 		}
 		
 		// prepare the result
@@ -169,12 +179,13 @@ class Association
 		}
 		else {
 			$result = array();
-			foreach ($list as $related) {
-				$key = !isset($related['id'][1]) ? $related['id'][0] : implode('|', $related['id']);
+			foreach ($list as $idx=>$related) {
+				$id = $ids[$idx];
+				$key = !isset($id[1]) ? $id[0] : implode('|', $id['id']);
 				
 				foreach ($resultIndex[$key] as $idx=>$lObj) {
 					if (!isset($result[$idx])) $result[$idx] = array();
-					$result[$idx][] = $related['object'];
+					$result[$idx][] = $related;
 				}
 			}
 		}
