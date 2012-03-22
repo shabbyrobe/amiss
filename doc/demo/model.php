@@ -64,7 +64,7 @@ class Artist extends Object
 	public $bio;
 	
 	/**
-	 * @has one ArtistType artistTypeId
+	 * @has one of=ArtistType; on=artistTypeId
 	 * @var Amiss\Demo\ArtistType
 	 */
 	public $artistType;
@@ -89,7 +89,7 @@ class ArtistType extends Object
 	public $slug;
 	
 	/**
-	 * @has many Artist
+	 * @has many of=Artist
 	 * @var Amiss\Demo\Artist[]
 	 */
 	public $artists = array();
@@ -221,13 +221,13 @@ class EventArtist
 	public $eventArtistName;
 	
 	/**
-	 * @has one Event eventId
+	 * @has one of=Event; on=eventId
 	 * @var Amiss\Demo\Event
 	 */
 	public $event;
 	
 	/**
-	 * @has one Artist artistId
+	 * @has one of=Artist; on=artistId
 	 * @var Amiss\Demo\Artist
 	 */
 	public $artist;

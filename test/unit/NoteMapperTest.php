@@ -302,7 +302,7 @@ class NoteMapperTest extends \CustomTestCase
 				private \$bar;
 				
 				/** 
-				 * @has one {$name}Bar barId
+				 * @has one of={$name}Bar; on=barId
 				 */
 				public function getBar()
 				{
@@ -312,7 +312,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setBar'),
+			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -338,7 +338,7 @@ class NoteMapperTest extends \CustomTestCase
 				private \$bar;
 				
 				/** 
-				 * @has one {$name}Bar barId
+				 * @has one of={$name}Bar; on=barId
 				 * @setter setLaDiDaBar
 				 */
 				public function getBar()
@@ -354,7 +354,7 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
 		$expected = array(
-			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>array('barId'=>'barId'), 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+			'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
 		);
 		$this->assertEquals($expected, $meta->relations);
 	}
@@ -381,7 +381,7 @@ class NoteMapperTest extends \CustomTestCase
 				/** @field */ 
 				public \${$name}2Id;
 				
-				/** @has one {$name}Class2 */
+				/** @has one of={$name}Class2 */
 				public \${$name}2;
 			}
 			class {$name}Class2 {
@@ -416,7 +416,7 @@ class NoteMapperTest extends \CustomTestCase
 				/** @field */ 
 				public \${$name}2Id;
 				
-				/** @has many {$name}Class2 */
+				/** @has many of={$name}Class2 */
 				public \${$name}2;
 			}
 			class {$name}Class2 {
@@ -426,82 +426,9 @@ class NoteMapperTest extends \CustomTestCase
 		");
 		$meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
 		$expected = array(
-			$name.'2'=>array('many', 'of'=>$name."Class2", 'on'=>null)
+			$name.'2'=>array('many', 'of'=>$name."Class2")
 		);
 		$this->assertEquals($expected, $meta->relations);
-	}
-
-	/**
-	 * The data provider for this test creates invalid relations, but these
-	 * are not validated by the mapper. When they are, this will need to be
-	 * unrolled to create the valid classes and relation annotations for each 
-	 * type of test.
-	 * 
-	 * @group mapper
-	 * @group unit
-	 * 
-	 * @covers Amiss\Mapper\Note::createMeta
-	 * 
-	 * @dataProvider dataForGetMetaOneToOnePropertyRelationWithOn
-	 */
-	public function testGetMetaPropertyRelationWithOn($index, $relType, $onSpec, $result)
-	{
-		$mapper = new \Amiss\Mapper\Note;
-		$mapper->objectNamespace = __NAMESPACE__."\\Test{$index}";
-		$name = __FUNCTION__;
-		eval("
-			namespace {$mapper->objectNamespace};
-			class {$name}Class1 {
-				/** @primary */ 
-				public \$class1id;
-				
-				/** @field */ 
-				public \$class2Id;
-				
-				/** @has {$relType} {$name}Class2 {$onSpec} */
-				public \$class2;
-			}
-			class {$name}Class2 {
-				/** @primary */ 
-				public \$class2Id;
-			}
-		");
-		$meta = $mapper->getMeta($mapper->objectNamespace."\\{$name}Class1");
-		$expected = array(
-			'class2'=>array($relType, 'of'=>$name."Class2", 'on'=>$result)
-		);
-		$this->assertEquals($expected, $meta->relations);
-	}
-	
-	public function dataForGetMetaOneToOnePropertyRelationWithOn()
-	{ 
-		$tests = array(
-			array('one', 'class2Id', array('class2Id'=>'class2Id')),
-			
-			// single, same
-			array('one', 'class2Id=class2Id', array('class2Id'=>'class2Id')),
-			
-			// single, different
-			array('one', 'class2IdLeft=class2IdRight', array('class2IdLeft'=>'class2IdRight')),
-			
-			// multi-column "on" with left and right
-			array('one', 'class2IdLeft=class2IdRight&class1IdLeft=class1IdRight', array('class2IdLeft'=>'class2IdRight', 'class1IdLeft'=>'class1IdRight')),
-			
-			// multi-column "on" with mix-n-match
-			array('one', 'class2IdLeft=class2IdRight&class1IdLeft', array('class2IdLeft'=>'class2IdRight', 'class1IdLeft'=>'class1IdLeft')),
-			
-			// multi-column "on" with mix-n-match and readability whitespace
-			array('one', 'class2IdLeft = class2IdRight & class1IdLeft', array('class2IdLeft'=>'class2IdRight', 'class1IdLeft'=>'class1IdLeft')),
-			
-			// multi-column "on" with mix-n-match, readability whitespace and underscores
-			array('one', 'class_2_Id_Left = class_2_Id_Right & class_1_Id_Left', array('class_2_Id_Left'=>'class_2_Id_Right', 'class_1_Id_Left'=>'class_1_Id_Left')),
-		);
-		
-		foreach ($tests as $idx=>&$item) {
-			array_unshift($item, $idx);
-		}
-		
-		return $tests;
 	}
 	
 	/**
@@ -522,28 +449,34 @@ class NoteMapperTest extends \CustomTestCase
 	public function dataForBuildRelations()
 	{
 		return array(
-			array('one Foobar', array('one', 'of'=>'Foobar', 'on'=>null)),
+			array('one of=Foobar', array('one', 'of'=>'Foobar')),
 			
-			// straight single-column on
-			array('one Foobar foo=bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
+			// straight query string
+			array('one of=Foobar&on[foo]=bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
 			
 			// some whitespace around the equals
-			array('one Foobar foo = bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
+			array('one of = Foobar&on[foo] = bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
 			
 			// straight multi-column on
-			array('one Foobar foo=bar&baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			array('one of=Foobar&on[foo]=bar&on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
 			
 			// multi-column on with whitespace 
-			array('one Foobar foo = bar  &  baz = qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			array('one of = Foobar & on[foo] = bar & on[baz] = qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
 			
 			// multi-column on with no whitespace and semicolon 
-			array('one Foobar foo=bar;baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			array('one of=Foobar;on[foo]=bar;on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
 			
 			// multi-column on with a little bit of whitespace and semicolon 
-			array('one Foobar foo=bar; baz=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			array('one of=Foobar; on[foo]=bar; on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
 			
-			// multi-column on with heaps of whitespace and semicolon 
-			array('one Foobar foo = bar  ;     baz    =   qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			// multi-column on with heaps of whitespace, semicolon and ampersand mix-n-match
+			array('   one of=Foobar    ;  on[foo] =    bar  &     on[baz]    =   qux   ', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
+			
+			// crazy characters in values
+			array('one of=Foo\Bar; on[foo]=`bar`', array('one', 'of'=>'Foo\Bar', 'on'=>array('foo'=>'`bar`'))),
+			
+			// URL encoding
+			array('one of=%20%26%3B%3D%20', array('one', 'of'=>' &;= ')),
 		);
 	}
 }

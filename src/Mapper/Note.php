@@ -132,32 +132,12 @@ class Note extends \Amiss\Mapper\Base
 		foreach ($relationNotes as $name=>$info) {
 			$relationNote = preg_split('/\s+/', $info['has'], 2, PREG_SPLIT_NO_EMPTY);
 			
-			$type = $relationNote[0];
-			if ($type == 'one' || $type == 'many') {
-				var_dump($this->readRelation($relationNote[1]));
-				exit;
-				
-				$typeNote = preg_split('/\s+/', $relationNote[1], 2, PREG_SPLIT_NO_EMPTY);
-				
-				$relation = array($type, 'of'=>$typeNote[0], 'on'=>null);
-				
-				if (isset($typeNote[1])) {
-					$on = $this->readRelation($typeNote[1]);
-					
-					foreach ($on as $k=>$v) {
-						if (!$v) $v = $k;
-						$relation['on'][$k] = $v;
-					}
-				}
-				
-				if (isset($info['getter']))
-					list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
-			}
-			else {
-				$relation = $this->readRelation($relationNote[1]);
-				array_unshift($relation, $relationNote[0]);
-			}
+			$relation = $this->readRelation($relationNote[1]);
+			array_unshift($relation, $relationNote[0]);
 			
+			if (isset($info['getter']))
+				list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
+				
 			$relations[$name] = $relation;
 		}
 		return $relations;

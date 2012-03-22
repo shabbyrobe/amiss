@@ -33,13 +33,13 @@ Objects are marked up in this way:
 
         /** 
          * One-to-many relation:
-         * @has many Bar 
+         * @has many of=Bar 
          */
         public $bars;
 
         /**
          * One-to-one relation: 
-         * @has one Baz bazId
+         * @has one of=Baz; on=bazId
          */
         public $baz;
 

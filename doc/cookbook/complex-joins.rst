@@ -40,7 +40,7 @@ Secondly, create an object to represent the row:
         /** @field */
         public $sequence;
         
-        /** @has one Event eventId */
+        /** @has one of=Event; on=eventId */
         public $event;
     }
 

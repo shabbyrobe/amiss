@@ -54,7 +54,7 @@ See :doc:`mapping` for more info and advanced topics.
         /** @field */
         public $venueId;
 
-        /** @has one Venue venueId */
+        /** @has one of=Venue; on=venueId */
         public $venue;
     }
 
@@ -77,7 +77,7 @@ See :doc:`mapping` for more info and advanced topics.
         /** @field */
         public $address;
 
-        /** @has one Event */
+        /** @has one of=Event */
         public $events;
     }
 

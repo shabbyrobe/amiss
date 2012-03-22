@@ -32,7 +32,7 @@ This guide will assume you are using the :doc:`mapper/annotation`. For more info
         /** @field */
         public $artistTypeId;
 
-        /** @has one ArtistType artistTypeId */
+        /** @has one of=ArtistType; on=artistTypeId */
     }
 
 
