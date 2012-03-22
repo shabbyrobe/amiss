@@ -139,7 +139,7 @@ abstract class Record
 		$meta = static::getMeta();
 		
 		$fields = $meta->getFields();
-		if (isset($fields[$name])) {
+		if (!isset($fields[$name])) {
 			throw new \BadMethodCallException("Unknown property $name on class ".get_class($this));
 		}
 		else {
