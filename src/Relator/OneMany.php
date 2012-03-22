@@ -102,7 +102,7 @@ class OneMany
 				
 				foreach ($on as $l=>$r) {
 					$name = $r['name'];
-					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($object, $r['getter']));
+					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($related, $r['getter']));
 					$key[] = $rValue;
 				}
 				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
