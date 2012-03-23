@@ -164,4 +164,24 @@ class ManagerRelationTest extends \SqliteDataTestCase
 		next(current($types)->artists);
 		$this->assertTrue(current(current($types)->artists) instanceof Demo\Artist);
 	}
+	
+	/**
+	 * @group acceptance
+	 * @group manager
+	 */
+	public function testAssignRelatedDeepThroughAssocToSingle()
+	{
+		$event = $this->manager->getByPk('Event', 1);
+    	
+		// Relation 1: populate each Event object's list of artists through EventArtists
+		$this->manager->assignRelated($event, 'artists');
+		
+		// Relation 2: populate each Artist object's artistType property
+		$this->manager->assignRelated($this->manager->getChildren($event, 'artists'), 'artistType');
+		
+		$this->assertInstanceOf('Amiss\Demo\Event', $event);
+		$this->assertGreaterThan(0, count($event->artists));
+		$this->assertInstanceOf('Amiss\Demo\Artist', $event->artists[0]);
+		$this->assertInstanceOf('Amiss\Demo\ArtistType', $event->artists[0]->artistType);
+	}
 }
