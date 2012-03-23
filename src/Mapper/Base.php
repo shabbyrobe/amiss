@@ -173,7 +173,7 @@ abstract class Base implements \Amiss\Mapper
 		return $fields;
 	}
 	
-	protected static function normaliseCache($cache)
+	public static function normaliseCache($cache)
 	{
 		if (is_object($cache)) {
 			$cache = array(

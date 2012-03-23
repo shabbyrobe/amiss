@@ -14,10 +14,9 @@ class OneMany extends Base
 		if (!$sourceIsArray) $source = array($source);
 		
 		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
-		
 		$meta = $this->manager->getMeta($class);
 		if (!isset($meta->relations[$relationName])) {
-			throw new Exception("Unknown relation $relationName on $class");
+			throw new \Amiss\Exception("Unknown relation $relationName on $class");
 		}
 		
 		$relation = $meta->relations[$relationName];
@@ -33,11 +32,12 @@ class OneMany extends Base
 		
 		// prepare the relation's "on" field
 		$on = null;
-		if (isset($relation['on']))
+		if (isset($relation['on'])) {
 			$on = $relation['on'];
+		}
 		else {
 			if ('one'==$type)
-				throw new Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
+				throw new \Amiss\Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
 			else {
 				$on = array();
 				foreach ($meta->primary as $p) {
@@ -46,9 +46,15 @@ class OneMany extends Base
 			}
 		}
 		
-		if (!is_array($on)) $on = array($on=>$on);
-		
 		$relatedFields = $relatedMeta->getFields();
+		
+		if (!is_array($on)) {
+			if ($type == 'one' && count($relatedMeta->primary)==1)
+				$rOn = $relatedMeta->primary[0];
+			else $rOn = $on;
+			
+			$on = array($on=>$rOn);
+		}
 		
 		// find query values in source object(s)
 		$fields = $meta->getFields();
@@ -76,8 +82,12 @@ class OneMany extends Base
 		// prepare the result
 		$result = null;
 		if (!$sourceIsArray) {
-			if ($list)
-				$result = 'one' == $type ? current($list) : $list;
+			if ($type == 'one') {
+				if ($list) $result = current($list);
+			}
+			else {
+				$result = $list;
+			}
 		}
 		else {
 			$result = array();
