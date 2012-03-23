@@ -4,6 +4,7 @@ require_once('config.php');
 $dirs = array(
 	'active',
 	'note',
+	'array',
 );
 ?>
 <html>
