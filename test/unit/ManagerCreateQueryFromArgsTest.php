@@ -4,7 +4,7 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Manager;
 
-class ManagerCreateSelectCriteriaTest extends \CustomTestCase
+class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 {	
 	public function setUp()
 	{
@@ -24,7 +24,7 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	public function testHandlePositionalShorthandUnrolled()
 	{
 		$args = array('pants=? AND foo=?', 'pants', 'foo');
-		$criteria = $this->callProtected($this->manager, 'createSelectCriteria', $args);
+		$criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
 		
 		$this->assertEquals(array('pants', 'foo'), $criteria->params);
 		$this->assertEquals('pants=? AND foo=?', $criteria->where);
@@ -40,7 +40,7 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	public function testHandlePositionalShorthandRolled()
 	{
 		$args = array('pants=? AND foo=?', array('pants', 'foo'));
-		$criteria = $this->callProtected($this->manager, 'createSelectCriteria', $args);
+		$criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
 		
 		$this->assertEquals(array('pants', 'foo'), $criteria->params);
 		$this->assertEquals('pants=? AND foo=?', $criteria->where);
@@ -56,7 +56,7 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	public function testHandlePositionalLongform()
 	{
 		$args = array(array('where'=>'pants=? AND foo=?', 'params'=>array('pants', 'foo')));
-		$criteria = $this->callProtected($this->manager, 'createSelectCriteria', $args);
+		$criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
 		
 		$this->assertEquals(array('pants', 'foo'), $criteria->params);
 		$this->assertEquals('pants=? AND foo=?', $criteria->where);
@@ -72,7 +72,7 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	public function testHandleNamedShorthand()
 	{
 		$args = array('pants=:pants AND foo=:foo', array(':pants'=>'pants', ':foo'=>'foo'));
-		$criteria = $this->callProtected($this->manager, 'createSelectCriteria', $args);
+		$criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
 		
 		$this->assertEquals(array(':pants'=>'pants', ':foo'=>'foo'), $criteria->params);
 		$this->assertEquals('pants=:pants AND foo=:foo', $criteria->where);
@@ -88,7 +88,7 @@ class ManagerCreateSelectCriteriaTest extends \CustomTestCase
 	public function testHandleNamedLongform()
 	{
 		$args = array(array('where'=>'pants=:pants AND foo=:foo', 'params'=>array(':pants'=>'pants', ':foo'=>'foo')));
-		$criteria = $this->callProtected($this->manager, 'createSelectCriteria', $args);
+		$criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
 		
 		$this->assertEquals(array(':pants'=>'pants', ':foo'=>'foo'), $criteria->params);
 		$this->assertEquals('pants=:pants AND foo=:foo', $criteria->where);

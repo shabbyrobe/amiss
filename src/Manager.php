@@ -63,7 +63,7 @@ class Manager
 	
 	public function get($class)
 	{
-		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
+		$criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
 		$meta = $this->getMeta($class);
 		
 		list ($limit, $offset) = $criteria->getLimitOffset();
@@ -89,7 +89,7 @@ class Manager
 
 	public function getList($class)
 	{
-		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
+		$criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
 		$meta = $this->getMeta($class);
 		
 		list ($query, $params) = $criteria->buildQuery($meta);
@@ -118,7 +118,7 @@ class Manager
 	
 	public function count($class, $criteria=null)
 	{
-		$criteria = $this->createSelectCriteria(array_slice(func_get_args(), 1));
+		$criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
 		$meta = $this->getMeta($class);
 		
 		$table = $meta->table;
@@ -183,7 +183,12 @@ class Manager
 		if (!isset($this->relators[$relation[0]]))
 			throw new Exception("Relator {$relation[0]} not found");
 		
-		return $this->relators[$relation[0]]->getRelated($this, $source, $relationName, $criteria);
+		$query = null;
+		if ($criteria) {
+			$query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Criteria\Query');
+		}
+		
+		return $this->relators[$relation[0]]->getRelated($this, $source, $relationName, $query);
 	}
 	
 	public function insert()
@@ -279,12 +284,7 @@ class Manager
 			if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
 			
 			$class = $first;
-			if ($args[0] instanceof Criteria\Query)
-				$criteria = $args[0];
-			else {
-				$criteria = new Criteria\Query;
-				$this->populateQueryCriteria($criteria, $args);
-			}
+			$criteria = $this->createQueryFromArgs($args, 'Amiss\Criteria\Query');
 		}
 		
 		return $this->executeDelete($class, $criteria);
@@ -361,7 +361,7 @@ class Manager
 					throw new \InvalidArgumentException("Set must be an array");
 				$criteria = new Criteria\Update();
 				$criteria->set = array_shift($args);
-				$this->populateQueryCriteria($criteria, $args);
+				$this->populateWhereAndParamsFromArgs($criteria, $args);
 			}
 			else {
 				throw new \InvalidArgumentException("Unknown args count $cnt");
@@ -480,17 +480,17 @@ class Manager
 		return $stmt;
 	}
 	
-	protected function createSelectCriteria($args)
+	protected function createQueryFromArgs($args, $type='Amiss\Criteria\Select')
 	{
 		if (!$args) {
-			$criteria = new Criteria\Select();
+			$criteria = new $type();
 		}
-		elseif ($args[0] instanceof Criteria\Select) {
+		elseif ($args[0] instanceof $type) {
 			$criteria = $args[0];
 		}
 		else {
-			$criteria = new Criteria\Select();
-			$this->populateQueryCriteria($criteria, $args);
+			$criteria = new $type();
+			$this->populateWhereAndParamsFromArgs($criteria, $args);
 		}
 		
 		return $criteria;
@@ -503,8 +503,10 @@ class Manager
 	 * get('Name', 'pants=? AND foo=?', 'pants', 'foo')
 	 * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
 	 * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
+	 * 
+	 * The class name 'Name' argument should be lopped off before this gets called. 
 	 */
-	protected function populateQueryCriteria(Criteria\Query $criteria, $args)
+	protected function populateWhereAndParamsFromArgs(Criteria\Query $criteria, $args)
 	{
 		if (count($args)==1 && is_array($args[0])) {
 			$criteria->populate($args[0]);

@@ -12,7 +12,7 @@ class ManagerRelationTest extends \SqliteDataTestCase
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testRetrieveSingleRelated()
+	public function testGetRelatedSingle()
 	{
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
 		$event = $this->manager->getRelated($eventArtist, 'event');
@@ -25,7 +25,7 @@ class ManagerRelationTest extends \SqliteDataTestCase
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testAssignSingleRelated()
+	public function testAssignRelatedSingle()
 	{
 		$eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
 		$this->manager->assignRelated($eventArtist, 'event');
@@ -37,7 +37,7 @@ class ManagerRelationTest extends \SqliteDataTestCase
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testAssignSingleRelatedToList()
+	public function testAssignRelatedSingleToList()
 	{
 		$eventArtist = $this->manager->getList('EventArtist', 'eventId=?', 1);
 		$this->manager->assignRelated($eventArtist, 'event');
@@ -56,7 +56,7 @@ class ManagerRelationTest extends \SqliteDataTestCase
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testRetrieveRelatedList()
+	public function testGetRelatedList()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
 		$eventArtists = $this->manager->getRelated($event, 'eventArtists');
@@ -66,12 +66,12 @@ class ManagerRelationTest extends \SqliteDataTestCase
 		$this->assertTrue($eventArtists[0] instanceof Demo\EventArtist);
 		// TODO: improve checking
 	}
-
+	
 	/**
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testRetrieveRelatedAssocForSingle()
+	public function testGetRelatedAssocForSingle()
 	{
 		$event = $this->manager->get('Event', 'eventId=1');
 		$artists = $this->manager->getRelated($event, 'artists');
@@ -85,12 +85,12 @@ class ManagerRelationTest extends \SqliteDataTestCase
 		}
 		$this->assertEquals(array(1, 2, 3, 4, 5, 7), $ids);
 	}
-
+	
 	/**
 	 * @group acceptance
 	 * @group manager
 	 */
-	public function testRetrieveRelatedAssocForList()
+	public function testGetRelatedAssocForList()
 	{
 		$events = $this->manager->getList('Event');
 		$this->manager->assignRelated($events, 'artists');

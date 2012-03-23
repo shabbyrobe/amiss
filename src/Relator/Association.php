@@ -7,6 +7,8 @@ use Amiss\Criteria\Select;
 use Amiss\Criteria;
 
 /**
+ * TODO: Two stage query? Pros: can allow full use of criteria. Cons: two queries (duh).
+ * 
  * Relation definition:
  * 
  * This relator *requires an intermediary object to be available and mapped*.
@@ -20,7 +22,7 @@ use Amiss\Criteria;
  * 
  * 	  $event->relations['artists'] = array('assoc', 'of'=>'Artist', 'via'=>'EventArtist', 'rel'=>'artist2')
  */
-class Association
+class Association extends Base
 {
 	public function getRelated($manager, $source, $relationName, $criteria)
 	{
@@ -88,75 +90,12 @@ class Association
 		if (is_string($viaToDestOn))
 			$viaToDestOn = array($viaToDestOn=>$viaToDestOn);
 		
+		// get the source ids, prepare an index to link the relationships
+		list($ids, $resultIndex) = $this->indexSource($manager, $source, $sourceToViaOn, $sourceFields, $viaFields);
 		
-		// get the source ids
-		$ids = array();
-		foreach ($source as $idx=>$object) {
-			$key = array();
-			foreach ($sourceToViaOn as $l=>$r) {
-				$lField = $sourceFields[$l];
-				$lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
-				
-				$key[] = $lValue;
-				
-				if (!isset($ids[$l])) {
-					$ids[$l] = array('values'=>array(), 'rField'=>$viaFields[$r], 'param'=>$manager->sanitiseParam($viaFields[$r]['name']));
-				}
-				
-				$ids[$l]['values'][$lValue] = true;
-			}
-			
-			$key = !isset($key[1]) ? $key[0] : implode('|', $key);
-			
-			if (!isset($resultIndex[$key]))
-				$resultIndex[$key] = array();
-			
-			$resultIndex[$key][$idx] = $object;
-		}
+		list($query, $params, $sourcePkFields) = $this->buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria);
 		
-		$query = new Select();
-	
-		$where = array();
-		foreach ($ids as $l=>$idInfo) {
-			$rName = $idInfo['rField']['name'];
-			$query->params[$rName] = array_keys($idInfo['values']);
-			$where[] = 't2.`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
-		}
-		$query->where = implode(' AND ', $where);
-		
-		$queryFields = $query->buildFields($relatedMeta, 't1');
-		$sourcePkFields = array();
-		foreach ($sourceToViaOn as $l=>$r) {
-			$field = $viaMeta->getField($r);
-			$sourcePkFields[] = $field['name'];
-		}
-		
-		$joinOn = array();
-		foreach ($viaToDestOn as $l=>$r) {
-			$joinOn[] = 't2.`'.$viaFields[$l]['name'].'` = t1.`'.$relatedFields[$r]['name'].'`';
-		}
-		$joinOn = implode(' AND ', $joinOn);
-		
-		list ($where, $params) = $query->buildClause();
-		if ($criteria) {
-			list ($cWhere, $cParams) = $criteria->buildClause();
-			$params = array_merge($cParams, $params);
-			$where .= ' AND ('.$cWhere.')';
-		}
-		
-		$sql = "
-			SELECT 
-				$queryFields, t2.".'`'.implode('`, t2.`', $sourcePkFields).'`'."
-			FROM
-				{$viaMeta->table} t2
-			INNER JOIN
-				{$relatedMeta->table} t1
-				ON  ({$joinOn})
-			WHERE 
-				$where
-		";
-				
-		$stmt = $manager->execute($sql, $params);
+		$stmt = $manager->execute($query, $params);
 		
 		$list = array();
 		$ids = array();
@@ -191,5 +130,55 @@ class Association
 		}
 		
 		return $result;
+	}
+	
+	protected function buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria)
+	{
+		$viaFields = $viaMeta->getFields();
+		$relatedFields = $relatedMeta->getFields();
+		
+		$query = new Select();
+		
+		$where = array();
+		foreach ($ids as $l=>$idInfo) {
+			$rName = $idInfo['rField']['name'];
+			$query->params[$rName] = array_keys($idInfo['values']);
+			$where[] = 't2.`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
+		}
+		$query->where = implode(' AND ', $where);
+		
+		$queryFields = $query->buildFields($relatedMeta, 't1');
+		$sourcePkFields = array();
+		foreach ($sourceToViaOn as $l=>$r) {
+			$field = $viaFields[$r];
+			$sourcePkFields[] = $field['name'];
+		}
+		
+		$joinOn = array();
+		foreach ($viaToDestOn as $l=>$r) {
+			$joinOn[] = 't2.`'.$viaFields[$l]['name'].'` = t1.`'.$relatedFields[$r]['name'].'`';
+		}
+		$joinOn = implode(' AND ', $joinOn);
+		
+		list ($where, $params) = $query->buildClause();
+		if ($criteria) {
+			list ($cWhere, $cParams) = $criteria->buildClause();
+			$params = array_merge($cParams, $params);
+			$where .= ' AND ('.$cWhere.')';
+		}
+		
+		$sql = "
+			SELECT 
+				$queryFields, t2.".'`'.implode('`, t2.`', $sourcePkFields).'`'."
+			FROM
+				{$viaMeta->table} t2
+			INNER JOIN
+				{$relatedMeta->table} t1
+				ON  ({$joinOn})
+			WHERE 
+				$where
+		";
+		
+		return array($sql, $params, $sourcePkFields);
 	}
 }

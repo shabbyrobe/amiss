@@ -4,7 +4,7 @@ namespace Amiss\Relator;
 
 use Amiss\Criteria;
 
-class OneMany
+class OneMany extends Base
 {
 	public function getRelated($manager, $source, $relationName, $criteria)
 	{
@@ -14,6 +14,7 @@ class OneMany
 		if (!$sourceIsArray) $source = array($source);
 		
 		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
+		
 		$meta = $manager->getMeta($class);
 		if (!isset($meta->relations[$relationName])) {
 			throw new Exception("Unknown relation $relationName on $class");
@@ -24,6 +25,9 @@ class OneMany
 		
 		if ($type != 'one' && $type != 'many')
 			throw new \InvalidArgumentException("This relator only works with 'one' or 'many' as the type");
+		
+		if ($type == 'one' && $criteria)
+			throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
 		
 		$relatedMeta = $manager->getMeta($relation['of']);
 		
@@ -44,38 +48,12 @@ class OneMany
 		
 		if (!is_array($on)) $on = array($on=>$on);
 		
-		// populate the 'on' with necessary data
 		$relatedFields = $relatedMeta->getFields();
-		foreach ($on as $l=>$r) {
-			$on[$l] = $relatedFields[$r];
-		}
 		
 		// find query values in source object(s)
 		$fields = $meta->getFields();
-		$resultIndex = array();
-		$ids = array();
-		foreach ($source as $idx=>$object) {
-			$key = array();
-			foreach ($on as $l=>$r) {
-				$lField = $fields[$l];
-				$lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
-				
-				$key[] = $lValue;
-				
-				if (!isset($ids[$l])) {
-					$ids[$l] = array('values'=>array(), 'rField'=>$r, 'param'=>$manager->sanitiseParam($r['name']));
-				}
-				
-				$ids[$l]['values'][$lValue] = true;
-			}
-			
-			$key = !isset($key[1]) ? $key[0] : implode('|', $key);
-			
-			if (!isset($resultIndex[$key]))
-				$resultIndex[$key] = array();
-			
-			$resultIndex[$key][$idx] = $object;
-		}
+		
+		list($ids, $resultIndex) = $this->indexSource($manager, $source, $on, $fields, $relatedFields);
 		
 		// build query
 		$query = new Criteria\Select;
@@ -107,8 +85,9 @@ class OneMany
 				$key = array();
 				
 				foreach ($on as $l=>$r) {
-					$name = $r['name'];
-					$rValue = !isset($r['getter']) ? $related->$name : call_user_func(array($related, $r['getter']));
+					$rField = $relatedFields[$r];
+					$name = $rField['name'];
+					$rValue = !isset($rField['getter']) ? $related->$name : call_user_func(array($related, $rField['getter']));
 					$key[] = $rValue;
 				}
 				$key = !isset($key[1]) ? $key[0] : implode('|', $key);
