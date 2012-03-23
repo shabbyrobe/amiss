@@ -33,8 +33,8 @@ class Manager
 		
 		if ($relators===null) {
 			$this->relators = array();
-			$this->relators['one'] = $this->relators['many'] = new Relator\OneMany;
-			$this->relators['assoc'] = new Relator\Association;
+			$this->relators['one'] = $this->relators['many'] = new Relator\OneMany($this);
+			$this->relators['assoc'] = new Relator\Association($this);
 		}
 		else {
 			$this->relators = $relators;
@@ -188,7 +188,7 @@ class Manager
 			$query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Criteria\Query');
 		}
 		
-		return $this->relators[$relation[0]]->getRelated($this, $source, $relationName, $query);
+		return $this->relators[$relation[0]]->getRelated($source, $relationName, $query);
 	}
 	
 	public function insert()

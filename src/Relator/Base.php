@@ -2,9 +2,16 @@
 
 namespace Amiss\Relator;
 
-abstract class Base
+abstract class Base implements \Amiss\Relator
 {
-	protected function indexSource($manager, $source, $on, $lFields, $rFields)
+	public function __construct($manager)
+	{
+		$this->manager = $manager;
+	}
+	
+	public abstract function getRelated($source, $relationName, $criteria=null);
+	
+	protected function indexSource($source, $on, $lFields, $rFields)
 	{
 		$resultIndex = array();
 		$ids = array();
@@ -17,7 +24,7 @@ abstract class Base
 				$key[] = $lValue;
 				
 				if (!isset($ids[$l])) {
-					$ids[$l] = array('values'=>array(), 'rField'=>$rFields[$r], 'param'=>$manager->sanitiseParam($rFields[$r]['name']));
+					$ids[$l] = array('values'=>array(), 'rField'=>$rFields[$r], 'param'=>$this->manager->sanitiseParam($rFields[$r]['name']));
 				}
 				
 				$ids[$l]['values'][$lValue] = true;

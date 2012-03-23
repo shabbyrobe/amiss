@@ -6,7 +6,7 @@ use Amiss\Criteria;
 
 class OneMany extends Base
 {
-	public function getRelated($manager, $source, $relationName, $criteria)
+	public function getRelated($source, $relationName, $criteria=null)
 	{
 		if (!$source) return;
 		
@@ -15,7 +15,7 @@ class OneMany extends Base
 		
 		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
 		
-		$meta = $manager->getMeta($class);
+		$meta = $this->manager->getMeta($class);
 		if (!isset($meta->relations[$relationName])) {
 			throw new Exception("Unknown relation $relationName on $class");
 		}
@@ -29,7 +29,7 @@ class OneMany extends Base
 		if ($type == 'one' && $criteria)
 			throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
 		
-		$relatedMeta = $manager->getMeta($relation['of']);
+		$relatedMeta = $this->manager->getMeta($relation['of']);
 		
 		// prepare the relation's "on" field
 		$on = null;
@@ -53,7 +53,7 @@ class OneMany extends Base
 		// find query values in source object(s)
 		$fields = $meta->getFields();
 		
-		list($ids, $resultIndex) = $this->indexSource($manager, $source, $on, $fields, $relatedFields);
+		list($ids, $resultIndex) = $this->indexSource($source, $on, $fields, $relatedFields);
 		
 		// build query
 		$query = new Criteria\Select;
@@ -71,7 +71,7 @@ class OneMany extends Base
 			$query->where .= ' AND ('.$cWhere.')';
 		}
 		
-		$list = $manager->getList($relation['of'], $query);
+		$list = $this->manager->getList($relation['of'], $query);
 		
 		// prepare the result
 		$result = null;

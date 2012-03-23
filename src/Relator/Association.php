@@ -24,7 +24,7 @@ use Amiss\Criteria;
  */
 class Association extends Base
 {
-	public function getRelated($manager, $source, $relationName, $criteria)
+	public function getRelated($source, $relationName, $criteria=null)
 	{
 		if (!$source) return;
 		
@@ -36,7 +36,7 @@ class Association extends Base
 		if (!$sourceIsArray) $source = array($source);
 		
 		$class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
-		$meta = $manager->getMeta($class);
+		$meta = $this->manager->getMeta($class);
 		if (!isset($meta->relations[$relationName]))
 			throw new Exception("Unknown relation $relationName on $class");
 		
@@ -48,10 +48,10 @@ class Association extends Base
 		
 		
 		// find all the necessary metadata
-		$relatedMeta = $manager->getMeta($relation['of']);
+		$relatedMeta = $this->manager->getMeta($relation['of']);
 		$relatedFields = $relatedMeta->getFields();
 		
-		$viaMeta = $manager->getMeta($relation['via']);
+		$viaMeta = $this->manager->getMeta($relation['via']);
 		$viaFields = $viaMeta->getFields();
 		$sourceToViaRelationName = isset($relation['rel']) ? $relation['rel'] : null;
 		$sourceToViaRelation = null;
@@ -63,7 +63,7 @@ class Association extends Base
 		
 		foreach ($viaMeta->relations as $k=>$v) {
 			// inefficient. consider requiring this to be specified rather than inferred
-			$of = $manager->getMeta($v['of']);
+			$of = $this->manager->getMeta($v['of']);
 			if ($of->class == $meta->class) {
 				if (!$sourceToViaRelation) {
 					$sourceToViaRelation = $v;
@@ -91,17 +91,17 @@ class Association extends Base
 			$viaToDestOn = array($viaToDestOn=>$viaToDestOn);
 		
 		// get the source ids, prepare an index to link the relationships
-		list($ids, $resultIndex) = $this->indexSource($manager, $source, $sourceToViaOn, $sourceFields, $viaFields);
+		list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
 		
 		list($query, $params, $sourcePkFields) = $this->buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria);
 		
-		$stmt = $manager->execute($query, $params);
+		$stmt = $this->manager->execute($query, $params);
 		
 		$list = array();
 		$ids = array();
 		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			$object = $manager->mapper->createObject($relatedMeta, $row, array());
-			$manager->mapper->populateObject($relatedMeta, $object, $row);
+			$object = $this->manager->mapper->createObject($relatedMeta, $row, array());
+			$this->manager->mapper->populateObject($relatedMeta, $object, $row);
 			
 			$list[] = $object;
 			$id = array();
