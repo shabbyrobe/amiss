@@ -18,8 +18,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 	 * @group unit
 	 * @group manager
 	 * 
-	 * @covers Amiss\Manager::createSelectCriteria
-	 * @covers Amiss\Manager::populateQueryCriteria
+	 * @covers Amiss\Manager::createQueryFromArgs
+	 * @covers Amiss\Manager::populateWhereAndParamsFromArgs
 	 */
 	public function testHandlePositionalShorthandUnrolled()
 	{
@@ -34,8 +34,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 	 * @group unit
 	 * @group manager
 	 * 
-	 * @covers Amiss\Manager::createSelectCriteria
-	 * @covers Amiss\Manager::populateQueryCriteria
+	 * @covers Amiss\Manager::createQueryFromArgs
+	 * @covers Amiss\Manager::populateWhereAndParamsFromArgs
 	 */
 	public function testHandlePositionalShorthandRolled()
 	{
@@ -50,8 +50,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 	 * @group unit
 	 * @group manager
 	 * 
-	 * @covers Amiss\Manager::createSelectCriteria
-	 * @covers Amiss\Manager::populateQueryCriteria
+	 * @covers Amiss\Manager::createQueryFromArgs
+	 * @covers Amiss\Manager::populateWhereAndParamsFromArgs
 	 */
 	public function testHandlePositionalLongform()
 	{
@@ -66,8 +66,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 	 * @group unit
 	 * @group manager
 	 * 
-	 * @covers Amiss\Manager::createSelectCriteria
-	 * @covers Amiss\Manager::populateQueryCriteria
+	 * @covers Amiss\Manager::createQueryFromArgs
+	 * @covers Amiss\Manager::populateWhereAndParamsFromArgs
 	 */
 	public function testHandleNamedShorthand()
 	{
@@ -82,8 +82,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 	 * @group unit
 	 * @group manager
 	 * 
-	 * @covers Amiss\Manager::createSelectCriteria
-	 * @covers Amiss\Manager::populateQueryCriteria
+	 * @covers Amiss\Manager::createQueryFromArgs
+	 * @covers Amiss\Manager::populateWhereAndParamsFromArgs
 	 */
 	public function testHandleNamedLongform()
 	{

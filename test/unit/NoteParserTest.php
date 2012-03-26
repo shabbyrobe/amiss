@@ -12,8 +12,9 @@ class NoteParserTest extends \CustomTestCase
 	/**
 	 * @group unit
 	 * @covers Amiss\Note\Parser::parseClass
+	 * @covers Amiss\Note\Parser::parseReflectors
 	 */
-	public function testParseClass()
+	public function testParseFullClass()
 	{
 		$info = $this->parser->parseClass(new \ReflectionClass(__NAMESPACE__.'\ParserTestClass'));
 		$expected = (object)array(

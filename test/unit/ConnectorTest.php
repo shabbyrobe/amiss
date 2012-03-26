@@ -160,4 +160,59 @@ class ConnectorTest extends \CustomTestCase
 		$c = new Connector('sqlite::memory:');
 		$this->assertNull($c->errorCode());	
 	}
+	
+	/**
+	 * @covers Amiss\Connector::exec
+	 * @covers Amiss\Connector::lastInsertId
+	 * @covers Amiss\Connector::prepare
+	 * @covers Amiss\Connector::query
+	 * @covers Amiss\Connector::quote
+	 * @covers Amiss\Connector::beginTransaction
+	 * @covers Amiss\Connector::commit
+	 * @covers Amiss\Connector::rollback
+	 * @dataProvider dataForProxies
+	 */
+	public function testProxies($method, $args=array())
+	{
+		$connector = $this->getMockBuilder('Amiss\Connector')
+			->setMethods(array('createPDO'))
+			->disableOriginalConstructor()
+			->getMock()
+		;
+		$pdo = $this->getMockBuilder('stdClass')
+			->setMethods(array($method))
+			->getMock()
+		;
+		$connector->expects($this->any())->method('createPDO')->will($this->returnValue($pdo));
+		$expect = $pdo->expects($this->once())->method($method);
+		$connector->connect();
+		
+		if ($args) {
+			$equals = array();
+			foreach ($args as $a) {
+				$equals[] = $this->equalTo($a);
+			}
+			call_user_func_array(array($expect, 'with'), $equals);
+		}
+		
+		call_user_func_array(array($connector, $method), $args);
+	}
+	
+	public function dataForProxies()
+	{
+		return array(
+			array('exec', array('yep')),
+			array('lastInsertId'),
+			array('prepare', array('stmt', array('k'=>'v'))),
+			array('quote', array('q')),
+			array('beginTransaction'),
+			array('commit'),
+			array('rollback'),
+			
+			// query just takes whatever you throw at it
+			array('query'),
+			array('query', array('foo')),
+			array('query', array('stmt', 'foo', 'bar', 'baz', 'qux')),
+		);
+	}
 }

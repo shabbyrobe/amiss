@@ -118,7 +118,7 @@ class Connector
 	
 	public function ensurePDO()
 	{
-		if ($this->pdo == null) throw new PDOException("Not connected");
+		if ($this->pdo == null) throw new \PDOException("Not connected");
 	}
 
 	public function connect()
