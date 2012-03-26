@@ -6,6 +6,7 @@ class Arrays extends Base
 {
 	public $arrayMap;
 	public $inherit = false;
+	public $defaultPrimaryType = 'autoinc';
 	
 	public function __construct($arrayMap=array())
 	{
@@ -31,12 +32,30 @@ class Arrays extends Base
 		else
 			$table = $this->getDefaultTable($class);
 		
+		$fields = array();
 		if (isset($array['fields'])) {
-			foreach ($array['fields'] as $k=>&$v) {
-				if (!isset($v['name'])) $v['name'] = $k;
-				if (!isset($v['type'])) $v['type'] = null;
+			foreach ($array['fields'] as $id=>$field) {
+				if ( !($id == 0 && $id !== 0)) { // it's a numeric index, not a string
+					$id = $field; 
+					$field = array();
+				}
+				if (!isset($field['type'])) $field['type'] = null;
+				$fields[$id] = $field;
 			}
 		}
+		$array['fields'] = $fields;
+		
+		if (isset($array['primary'])) {
+			if (!is_array($array['primary']))
+				$array['primary'] = array($array['primary']);
+			
+			foreach ($array['primary'] as $v) {
+				if (!isset($array['fields'][$v]) || !isset($array['fields'][$v]['type']))
+					$array['fields'][$v] = array('type'=>$this->defaultPrimaryType);
+			}
+		}
+		
+		$array['fields'] = $this->resolveUnnamedFields($array['fields']);
 		
 		$meta = new \Amiss\Meta($class, $table, $array, $parent);
 		

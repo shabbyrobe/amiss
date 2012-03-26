@@ -46,7 +46,7 @@ class Meta
 		$this->relations = isset($info['relations']) ? $info['relations'] : array();
 		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
 	}
-
+	
 	public function getFields()
 	{
 		if ($this->allFields===null) {

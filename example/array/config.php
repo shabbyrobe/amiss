@@ -8,10 +8,10 @@ $mapper = new Amiss\Mapper\Arrays(array(
 		'primary'=>array('artistId'),
 		'fields'=>array(
 			'artistId'=>array('type'=>'autoinc'),
-			'artistTypeId'=>array(),
-			'name'=>array(),
-			'slug'=>array(),
-			'bio'=>array(),
+			'artistTypeId',
+			'name',
+			'slug',
+			'bio',
 		),
 		'relations'=>array(
 			'artistType'=>array('one', 'of'=>'ArtistType', 'on'=>'artistTypeId'),
@@ -20,7 +20,7 @@ $mapper = new Amiss\Mapper\Arrays(array(
 	),
 	$namespace.'\ArtistType'=>array(
 		'table'=>'artist_type',
-		'primary'=>array('artistTypeId'),
+		'primary'=>'artistTypeId',
 		'fields'=>array(
 			'artistTypeId'=>array('type'=>'autoinc'),
 			'type'=>array(),
