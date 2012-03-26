@@ -21,7 +21,7 @@ Once you have declared your object, you can then either tell the ``Amiss\TableBu
     $sql = $builder->buildCreateTableSql();
     $builder->createTable();
 
-See the ``Field Mapping`` section of :doc:`mapping` for details on how Amiss knows what types to use for fields.
+See the ``Field Mapping`` section of :doc:`mapper/mapping` for details on how Amiss knows what types to use for fields.
 
 
 Crappy Command Line Tools

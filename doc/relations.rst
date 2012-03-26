@@ -1,7 +1,9 @@
 Relations
 =========
 
-An object's relations are determined by your mapping configuration. See :doc:`mapping` for more details on how to configure your relations. At a glance, when using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
+An object's relations are determined by your mapping configuration. 
+
+See :doc:`mapper/mapping` for more details on how to configure your relations. At a glance, when using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
 
 .. code-block:: php
 
@@ -13,7 +15,7 @@ An object's relations are determined by your mapping configuration. See :doc:`ma
         /** @field */
         public $artistTypeId;
         
-        /** @has one ArtistType artistTypeId */  
+        /** @has one of=ArtistType; on=artistTypeId */  
         public $artistType;
     }
 
@@ -24,15 +26,140 @@ An object's relations are determined by your mapping configuration. See :doc:`ma
         /** @field */
         public $type;
 
-        /** @has many Artist */
+        /** @has many of=Artist */
         public $artists = array();
     }
 
 
+.. _relators:
+
+Relators
+--------
+
+``Amiss\Manager`` handles retrieving related objects using extensions called "Relators".
+
+Amiss provides three relationship types out of the box: ``one``, ``many`` and ``assoc``. You can add extra relationships if you need them. See :ref:`custom-relators` below. 
+
+
+.. note:: The following describes the way the relations are structured *after* your mapper has done its business converting your mappings into :doc:`mapper/metadata`. Documentation for the specific mapper you have chosen will explain how to declare these structures in the format they expect. See :doc:`mapper/mapping` for more details.
+
+Relation retrieval using these relators is handled using separate queries.
+
+
+.. py:attribute:: one
+
+    The ``one`` relationship specifies a one-to-one object relationship between the mapped object and the object specified in the relation.
+
+    Using the example at the top of this document, we will follow the owning object ``Artist``'s ``artistType`` relation.
+
+    The metadata definition this relation looks like this:
+    
+    .. code-block:: php
+
+        <?php
+        $relation = array('one', 'of'=>'ArtistType', 'on'=>'artistTypeId');
+
+    The ``of`` key defines the destination object of the relation. 
+
+    The ``on`` key defines the property name(s) that define the ID of the related object. This can be a single string if the name is the same on both objects::
+
+        'on'=>'artistTypeId',
+
+    An array of strings if the related object's primary key is composite::
+        
+        'on'=>array('artistTypeIdPartOne', 'artistTypeIdPartTwo')
+    
+    Or an array of key=>value pairs when the related object's primary key has a different name to the owning object's property:
+    
+        'on'=>array('artistTypeId'=>'id')
+    
+
+.. py:attribute:: many
+
+    The ``many`` relationship specifies a one-to-many object relationship between the mapped object and the object specified in the relation.
+
+    Using the example at the top of this document, we will follow the owning object ``ArtistType``'s ``artists`` relation.
+
+    The :doc:`metadata <mapper/metadata>` definition for a one-to-many relation looks like this:
+    
+    .. code-block:: php
+
+        <?php
+        $relation = array('many', 'of'=>'Artist', 'on'=>'artistTypeId');
+
+    The ``of`` key defines the destination object of the relation. 
+
+    The ``on`` key defines the property name(s) that define the ID of the related object. The structure is quite similar to the ``on`` key of the ``one`` relationship, but the primary key belongs to the mapped object rather than the related one. 
+
+    The ``on`` key is *optional* when specifying a ``many`` relation - the primary key of the owning object is inferred if it is omitted.
+
+    ``on`` can be a single string if the name is the same on both objects::
+
+        'on'=>'artistTypeId',
+
+    An array of strings if the related object's primary key is composite and the names are the same on both objects::
+        
+        'on'=>array('artistTypeIdPartOne', 'artistTypeIdPartTwo')
+    
+    Or an array of key=>value pairs when the owning object's primary key has a different name to the related object's property:
+    
+        'on'=>array('id'=>'artistTypeId')
+
+
+.. py:attribute:: assoc
+    
+    The ``assoc`` relationship specifies a many-to-many object relationship between the mapped object and the object specified in the relation.
+
+    This mapping must be performed *via* an object that maps the association table to an object.
+
+    Consider a cut down version of the ``Event`` to ``Venue`` example:
+
+    .. code-block:: php
+
+        <?php
+        class Event
+        {
+            public $id;
+            public $name;
+
+            public $venues;
+        }
+
+        class Venue
+        {
+            public $id;
+            public $name;
+
+            public $events;
+        }
+
+    ``Event`` and ``Venue`` share a many-to-many relationship. This relationship is performed using an association table called ``event_venue``. In order to use the ``assoc`` mapper, ``event_venue`` must also have an object that is mapped:
+
+    .. code-block:: php
+        
+        <?php
+        class EventVenue
+        {
+            public $eventId;
+            public $venueId;
+        }
+
+    
+    The :doc:`metadata <mapper/metadata>` definition for ``Event``'s many-to-many relation to ``Venue`` looks like this:
+    
+    .. code-block:: php
+
+        <?php
+        $event->relations = array(
+            'venues'=>array('assoc', 'of'=>'Venue', 'via'=>'EventVenue'),
+        );
+
+    .. note:: ``EventVenue`` in this example *must itself be mapped*.
+
+
+
 Retrieving
 ----------
-
-Amiss provides relation retrieval for one-to-one relations and one-to-many relations by default. You can add extra relationships if you need them. See *Adding Relators* below. One-to-one and one-to-many relations are handled as separate queries.
 
 Amiss provides two methods for retrieving and populating relations:
 
@@ -40,6 +167,7 @@ Amiss provides two methods for retrieving and populating relations:
 
     :param source: The single object or array of objects for which to retrieve the related values
     :param relationName: The name of the relation through which to retrieve objects
+    :param query: *Optional*. Allows filtering of the related objects.
 
     Retrieves and returns objects related to the ``$source`` through the ``$relationName``:
 
@@ -60,7 +188,21 @@ Amiss provides two methods for retrieving and populating relations:
         
         $artists[0]->artistType = $types[0];
         $artists[1]->artistType = $types[1];
+
     
+    The optional query argument is dynamic much the same as it is when :doc:`selecting`. You can use it with any of the following signatures::
+
+        getRelated ( $source, $relationName, string $positionalWhere, mixed $param1[, mixed $param2...])
+        getRelated ( $source, $relationName, string $namedWhere, array $params )
+        getRelated ( $source, $relationName, array $criteria )
+        getRelated ( $source, $relationName, Amiss\Criteria\Query $criteria )
+
+    .. code-block:: php
+
+        <?php
+        $artistType = $manager->getByPk('ArtistType', 1);
+        $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', '%foo%');
+
 
 .. py:function:: assignRelated($into, $relationName)
 
@@ -86,6 +228,14 @@ Amiss provides two methods for retrieving and populating relations:
         $manager->assignRelated($artists, 'artistType');
         echo $artists[0]->artistType->type;
         echo $artists[1]->artistType->type;
+    
+
+    .. note:: ``assignRelated`` does not support filtering by query as it doesn't make sense. If you disagree, feel free to just do this:
+        
+        .. code-block:: php
+
+            <?php
+            $object->property = $manager->getRelated($object, 'foo', $query);
 
 
 Assigning Nested Relations
@@ -148,7 +298,9 @@ Relation 3 gets kookier still by adding nesting to the ``getChildren`` call. Her
 The second argument to ``getChildren`` in the above example is not just one property, it's a path. It essentially says 'for each event, get each event artist from the eventArtists property, then aggregate each artist from the event artist's artist property and return it. So you end up with a list of every single ``Artist`` attached to an ``Event``. The call to ``getRelated`` then goes and fetches the ``ArtistType`` objects that correspond to each ``Artist`` and assigns it.
 
 
-Adding Relators
+.. _custom-relators:
+
+Custom Relators
 ---------------
 
 You can add your own relationship types to Amiss by creating your own ``Relator`` class and adding it to the ``Amiss\Manager->relators`` array. It must contain the following method:

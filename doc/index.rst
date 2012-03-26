@@ -24,7 +24,7 @@ From Martin Fowler's `Patterns of Enterprise Application Architecture <http://ma
     A [Data Mapper is a] layer of Mappers (473) that moves data between objects 
     and a database while keeping them independent of each other and the mapper itself.
 
-Amiss makes some small concessions to pragmatism that may offend domain model purists when you use any of the :doc:`mapping methods <mapping>` that are in the core distribution, but overall it does a decent job of keeping its grubby mitts off your model considering the small codebase.
+Amiss makes some small concessions to pragmatism that may offend domain model purists when you use any of the :doc:`mapping methods <mapper/mapping>` that are in the core distribution, but overall it does a passable job of keeping its grubby mitts off your model considering the small codebase.
 
 
 .. toctree::
@@ -34,7 +34,7 @@ Amiss makes some small concessions to pragmatism that may offend domain model pu
     quickstart
     
     configuring
-    mapping
+    mapper/mapping
     selecting
     relations
     modifying

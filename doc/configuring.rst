@@ -39,7 +39,7 @@ Creating an ``Amiss\Manager`` is simple:
     $amiss = new Amiss\Manager($db, $mapper);
 
 
-For more information on customising the mapping, please read the :doc:`mapping` section.
+For more information on customising the mapping, please read the :doc:`mapper/mapping` section.
 
 
 Database Connections

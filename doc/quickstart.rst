@@ -4,13 +4,13 @@ Quick Start
 .. contents::
 
 
-This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapping` for more details and alternatives.
+This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapper/mapping` for more details and alternatives.
 
 
 Loading and Configuring
 -----------------------
 
-See :doc:`configuring` and :doc:`mapping` for more info.
+See :doc:`configuring` and :doc:`mapper/mapping` for more info.
 
 .. code-block:: php
 
@@ -34,7 +34,7 @@ See :doc:`configuring` and :doc:`mapping` for more info.
 Defining objects
 ----------------
 
-See :doc:`mapping` for more info and advanced topics.
+See :doc:`mapper/mapping` for more info and advanced topics.
 
 .. code-block:: php
 

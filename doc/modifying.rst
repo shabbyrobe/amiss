@@ -3,8 +3,6 @@ Modifying
 
 Amiss supports very simple create, update and delete operations on objects, as well as update and delete operations on tables.
 
-..note:: Please familiarise yourself with the section on :doc:`mapping` before reading this.
-
 
 Inserting
 ---------

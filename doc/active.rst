@@ -8,17 +8,17 @@ An object that wraps a row in a database table or view, encapsulates the databas
 
 I'm not in love with this pattern, but I have used it in the past with some other libraries. This has been added to facilitate a migration for an old project of mine, but people seem to be quite fond of Active Records so why not include it.
 
-``Amiss\Active\Record`` is an Active Record wrapper around ``Amiss\Manager``. It's not fancy, it's not good, it's not fully-featured, but it does seem to work OK for the quick-n-dirty ports I've done.
+``Amiss\Active\Record`` is an Active Record wrapper around ``Amiss\Manager``.
 
 
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Active\Record class``. Configure everything else just like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Active\Record``. Configure everything else just like you would when using Amiss as a Data Mapper.
 
-This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapping`.
+This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapper/mapping`.
 
-.. code-block: php
+.. code-block:: php
 
     <?php
     class Artist extends Amiss\Active\Record

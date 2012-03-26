@@ -6,7 +6,7 @@ Selecting
     get ( string $modelName, string $positionalWhere, mixed $param1[, mixed $param2...])
     get ( string $modelName, string $namedWhere, array $params )
     get ( string $modelName, array $criteria )
-    get ( string $modelName, Amiss\Criteria $criteria )
+    get ( string $modelName, Amiss\Criteria\Select $criteria )
 
 
 The parameters are as follows:
@@ -23,7 +23,7 @@ The parameters are as follows:
 	
 	.. attribute:: $criteria
 	
-	    An ``Amiss\Criteria`` instance, or an array that can be converted into an Amiss\Criteria instance.
+	    An ``Amiss\Criteria\Select`` instance, or an array that can be converted into an ``Amiss\Criteria\Select`` instance.
 
 
 Single Objects
@@ -326,7 +326,7 @@ You can use this with ``Amiss\Manager`` easily:
 
     Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway):
 
-    .. code-block: php
+    .. code-block:: php
 
         <?php
         $criteria = new Criteria\Query;
