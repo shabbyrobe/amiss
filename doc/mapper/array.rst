@@ -150,21 +150,15 @@ Each object mapping has the following structure:
 
     A dictionary of the mapped object's relations, indexed by property name.
 
-    Each relation value should be an array whose ``0`` element contains the name of the relator to use. The rest of the array should be the set of key/value pairs expected by the relator. See :ref:`relators` for more details.
-
-    Some examples of configuring the ``one``, ``many`` and ``assoc`` relators:
+    Each relation value should be an array whose ``0`` element contains the name of the relator to use. The rest of the array should be the set of key/value pairs expected by the relator. See :ref:`relators` for more details on the structure of the relation configuration.
 
     .. code-block:: php
 
-        <?php
         $mapping = array(
-            'primary'=>'id',
-            'fields'=>array(
-                'fooId'=>
-            ),
             'relations'=>array(
-                
+                'relationProperty'=>array('relatorId', 'key'=>'value', 'nuddakey'=>'nuddavalue'),
             ),
         );
 
+    Some examples of configuring the ``one`` and ``many`` relators are provided in the example at the top of the page.
 
