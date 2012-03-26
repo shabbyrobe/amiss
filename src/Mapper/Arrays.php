@@ -23,7 +23,8 @@ class Arrays extends Base
 		$array = $this->arrayMap[$class];
 		$parent = null;
 		if ($this->inherit) {
-			$parent = $this->getMeta(get_parent_class($class));
+			$parentClass = get_parent_class($class);
+			if ($parentClass) $parent = $this->getMeta($parentClass);
 		}
 		
 		$table = null;
