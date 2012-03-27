@@ -1,9 +1,6 @@
 Quick Start
 ===========
 
-.. contents::
-
-
 This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapper/mapping` for more details and alternatives.
 
 
@@ -18,7 +15,7 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more info.
 
     // Include autoloader. Amiss is PSR-0 compliant, so you can use any loader that supports that standard.
     require_once('/path/to/amiss/src/Loader.php');
-    spl_autoload_register(array(new Amiss\Loader, 'load'));
+    Amiss\Loader::register();
 
     // Amiss requires a class that implements \Amiss\Mapper in order to get information about how 
     // your objects map to tables
@@ -42,7 +39,10 @@ See :doc:`mapper/mapping` for more info and advanced topics.
 
     class Event
     {
-        /** @primary */
+        /** 
+         * @primary 
+         * @type autoinc
+         */
         public $eventId;
 
         /** @field */
@@ -65,7 +65,10 @@ See :doc:`mapper/mapping` for more info and advanced topics.
      */
     class Venue
     {
-        /** @primary */
+        /**
+         * @primary
+         * @type autoinc
+         */
         public $venueId;
 
         /** @field venueName */
@@ -102,41 +105,61 @@ See :doc:`selecting` for more info.
 .. code-block:: php
 
     <?php
-    // get venue by primary key
+    // get an event by primary key
     $event = $manager->getByPk('Event', 1);
 
-    // get an event named foobar
+    // get an event named foobar. clauses are written in raw SQL.
     $event = $manager->get('Event', 'name=?', 'foobar');
 
     // get all events
     $events = $manager->getList('Event');
-
-    // get all venues named foo
-    $events = $manager->getList('Event', 'name=?', 'foo');
+    
+    // get all events named foo that start on the 2nd of June, 2020 using an array
+    $events = $manager->getList('Event', array(
+        'where'=>array('name'=>'foo', 'startDate'=>'2020-06-02')
+    ));
 
     // get all events with 'foo' in the name using positional parameters
-    $events = $manager->getList(array('where'=>'name LIKE ?', 'params'=>array('%foo%')));
-
-    // get all events with 'foo' in the name using named parameters
-    $events = $manager->getList(array('where'=>'name LIKE :foo', 'params'=>array(':foo'=>'%foo%')));
-
+    $events = $manager->getList('Event', array(
+        'where'=>'name LIKE ?', 
+        'params'=>array('%foo%')
+    ));
+    
     // paged list, limit/offset
-    $events = $manager->getList(array('where'=>'name="foo"', 'limit'=>10, 'offset'=>30));
+    $events = $manager->getList(array(
+        'where'=>'name="foo"', 
+        'limit'=>10, 
+        'offset'=>30
+    ));
 
     // paged list, alternate style (number, size)
-    $events = $manager->getList(array('where'=>'name="foo"', 'page'=>array(1, 30)));
+    $events = $manager->getList(array(
+        'where'=>'name="foo"', 
+        'page'=>array(1, 30)
+    ));
 
 
 Relations
 ---------
 
-Amiss supports one-to-one and one-to-many relations, and provides a plugin for adding additional relationship retrieval methods. See :doc:`relations` for more info.
+Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point for adding additional relationship retrieval methods. See :doc:`relations` for more info.
 
-One-to-one relations:
+One-to-one
+~~~~~~~~~~
 
 .. code-block:: php
 
     <?php
+    class Event
+    {
+        // snip
+
+        /**
+         * @has one of=Venue; on=venueId
+         */
+        public $venue;
+    }
+
     // get a one-to-one relation for an event
     $venue = $manager->getRelated($event, 'venue');
 
@@ -152,11 +175,22 @@ One-to-one relations:
     $manager->assignRelated($events, 'venue');
 
 
-One-to-many relations:
+One-to-many
+~~~~~~~~~~~
 
 .. code-block:: php
 
     <?php
+    class Venue
+    {
+        // snip
+
+        /**
+         * @has many of=Event
+         */
+        public $events;
+    }
+
     // get a one-to-many relation for a venue. this will return an array
     $events = $manager->getRelated($venue, 'events');
 
@@ -178,6 +212,54 @@ One-to-many relations:
     foreach ($venues as $idx=>$v) {
         echo "Found ".count($v->events)." events for venue ".$v->venueId."\n";
     }
+
+
+Many-to-many
+~~~~~~~~~~~~
+
+Many-to-many relations require the association table to be mapped to an object, and also require the relation to be specified on both sides:
+
+
+.. code-block:: php
+
+    <?php
+    class Event
+    {
+        // snip
+        
+        /**
+         * @has assoc of=Artist; via=EventArtist
+         */
+        public $artists;
+    }
+
+    class EventArtist
+    {
+        // snip
+
+        /**
+         * @has one of=Event; on=eventId
+         */
+        public $event;
+
+        /**
+         * @has one of=Artist; on=artistId
+         */
+        public $artist;
+    }
+
+    class Artist
+    {
+        // snip
+
+        /**
+         * @has assoc of=Event; via=EventArtist
+         */
+        public $events;
+    }
+
+    $event = $manager->getByPk('Event', 1);
+    $artists = $manager->getRelated($event, 'artists');
 
 
 Modifying

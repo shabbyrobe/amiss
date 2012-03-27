@@ -43,12 +43,18 @@ master_doc = 'index'
 project = u'Amiss PHP Data Mapper'
 copyright = u'2011, Blake Williams'
 
+root_dir = os.path.dirname(__file__)
+
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = open(os.path.dirname(__file__)+'/../VERSION', 'r').read().rstrip()
+version = open(root_dir+'/../VERSION', 'r').read().rstrip()
+
+# hack to prepare the example models
+example = open(root_dir+'/demo/modeldefs.php', 'r').read().replace("\t", "    ")
+out = open(root_dir+'/_build/example.rst', 'w').write(".. code-block:: php\n\n%s" % "\n".join("    %s" % x for x in example.splitlines()))
 
 # The full version, including alpha/beta/rc tags.
 release = version

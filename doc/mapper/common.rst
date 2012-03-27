@@ -3,9 +3,9 @@
 Common Mapper Configuration
 ===========================
 
-``Amiss\Mapper\Note``derives from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
+``Amiss\Mapper\Note`` derives from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
 
-Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality. It is recommended that you use ``Amiss\Mapper\Base`` when rolling your own mapper, as outlined below.
+Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality. It is recommended that you use ``Amiss\Mapper\Base`` when rolling your own mapper, as outlined in :doc:`custom`.
 
 
 .. _name-translation:

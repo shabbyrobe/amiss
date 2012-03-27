@@ -85,7 +85,7 @@ The following class level annotations are available:
 
 .. py:attribute:: @table value
 
-    When declared, this forces the mapper to use this table name. If not provided, the table name will be determined by the mapper. See :ref:`name-resolution` for details on this process.
+    When declared, this forces the mapper to use this table name. If not provided, the table name will be determined by the mapper. See :ref:`name-translation` for details on this process.
 
 
 .. py:attribute:: @fieldType value
@@ -117,7 +117,7 @@ The following annotations are available to define this mapping:
 
     This marks whether a property or a getter method represents a value that should be stored in a column.
 
-    The ``column_name`` value is optional. If it isn't specified, the column name is determined by the base mapper. See :ref:`name-resolution` for more details on this process.
+    The ``column_name`` value is optional. If it isn't specified, the column name is determined by the base mapper. See :ref:`name-translation` for more details on this process.
 
 
 .. py:attribute:: @type field_type
