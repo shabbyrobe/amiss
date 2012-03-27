@@ -8,6 +8,8 @@ abstract class Base implements \Amiss\Mapper
 	
 	public $defaultTableNameTranslator;
 	
+	public $convertUnknownTableNames = true;
+	
 	public $typeHandlers = array();
 	
 	public $objectNamespace;
@@ -144,11 +146,13 @@ abstract class Base implements \Amiss\Mapper
 		if ($table === null) {
 			$table = $class;
 			
-			if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-			
-			$table = '`'.trim(preg_replace_callback('/[A-Z]/', function($match) {
-				return "_".strtolower($match[0]);
-			}, str_replace('_', '', $table)), '_').'`';
+			if ($this->convertUnknownTableNames) {
+				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
+				
+				$table = '`'.trim(preg_replace_callback('/[A-Z]/', function($match) {
+					return "_".strtolower($match[0]);
+				}, str_replace('_', '', $table)), '_').'`';
+			}
 		}
 		
 		return $table;
