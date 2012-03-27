@@ -14,7 +14,9 @@ def doc(clean=False):
 @task
 def pdf():
     with lcd(os.path.join(env.base_path, 'doc')):
-        local('make latexpdf')
+        local('make latexpdf >> /dev/null')
+        print "PDF available at:"
+        print "%s/doc/_build/latex/AmissPHPDataMapper.pdf" % env.base_path
 
 @task
 def test(filter=None):
@@ -33,3 +35,9 @@ def testgrp(group):
 def testall():
     with lcd(os.path.join(env.base_path, 'test')):
         cmd = 'phpunit'
+
+@task
+def archive(outpath):
+    with lcd(env.base_path):
+        version = version = open(env.base_path+'/VERSION', 'r').read().rstrip()
+        local("git archive --prefix=amiss/ HEAD | bzip2 >%s/amiss-%s.tar.bz2" % (outpath, version))
