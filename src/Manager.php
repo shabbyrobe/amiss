@@ -19,6 +19,9 @@ class Manager
 	 */
 	protected $meta = array();
 	
+	/**
+	 * @var Amiss\Mapper
+	 */
 	public $mapper;
 	
 	public $relators;
