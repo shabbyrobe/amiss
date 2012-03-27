@@ -8,7 +8,8 @@ See :doc:`mapper/mapping` for more details on how to configure your relations. A
 .. code-block:: php
 
     <?php
-    class Artist {
+    class Artist
+    {
         /** @primary */
         public $artistId;
         
@@ -19,7 +20,8 @@ See :doc:`mapper/mapping` for more details on how to configure your relations. A
         public $artistType;
     }
 
-    class ArtistType {
+    class ArtistType
+    {
         /** @primary */
         public $artistTypeId;
 
@@ -52,7 +54,7 @@ Relation retrieval using these relators is handled using separate queries.
 
     Using the example at the top of this document, we will follow the owning object ``Artist``'s ``artistType`` relation.
 
-    The metadata definition this relation looks like this:
+    The metadata definition for this relation looks like this:
     
     .. code-block:: php
 
@@ -101,7 +103,7 @@ Relation retrieval using these relators is handled using separate queries.
         
         'on'=>array('artistTypeIdPartOne', 'artistTypeIdPartTwo')
     
-    Or an array of key=>value pairs when the owning object's primary key has a different name to the related object's property:
+    Or an array of key=>value pairs when the owning object's primary key has a different name to the related object's property::
     
         'on'=>array('id'=>'artistTypeId')
 
@@ -158,8 +160,8 @@ Relation retrieval using these relators is handled using separate queries.
 
 
 
-Retrieving
-----------
+Retrieving Related Objects
+--------------------------
 
 Amiss provides two methods for retrieving and populating relations:
 
@@ -239,7 +241,7 @@ Amiss provides two methods for retrieving and populating relations:
 
 
 Assigning Nested Relations
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 What about when we have a list of ``Events``, we have retrieved each related list of ``EventArtist``, and we want to assign the related ``Artist`` to each ``EventArtist``? And what if we want to take it one step further and assign each ``ArtistType`` too?
 
@@ -270,11 +272,11 @@ Woah, what just happened there? We used ``getChildren`` to build us an array of 
 
     $events = $manager->getList('Event');
 
-We populate Relation 1 as described in the previous section on "Selecting"::
+We populate Relation 1 as described in the previous section on retrieving::
 
     $manager->assignRelated($events, 'eventArtists');
 
-And then things get kooky when we populate Relation 2. Unrolled, the Relation 2 call looks like this::
+And then things get kooky when we populate Relation 2. Unrolled, the Relation 2 call looks like this:
 
 .. code-block:: php
 
@@ -284,7 +286,7 @@ And then things get kooky when we populate Relation 2. Unrolled, the Relation 2 
     $manager->assignRelated($eventArtists, 'artist');
 
 
-The first call - to ``getChildren`` - iterates over the ``$events`` array and gathers every child ``EventArtist`` into an array, which it then returns. We can then rely on the fact that PHP `passes all objects by reference <http://php.net/manual/en/language.oop5.references.php>`_ and just use this array as the argument to the next ``assignRelated`` call.
+The first call - to :ref:`getChildren() <helpers-get-children>` - iterates over the ``$events`` array and gathers every child ``EventArtist`` into an array, which it then returns. We can then rely on the fact that PHP `passes all objects by reference <http://php.net/manual/en/language.oop5.references.php>`_ and just use this array as the argument to the next ``assignRelated`` call.
 
 Relation 3 gets kookier still by adding nesting to the ``getChildren`` call. Here it is unrolled:
 
@@ -303,13 +305,17 @@ The second argument to ``getChildren`` in the above example is not just one prop
 Custom Relators
 ---------------
 
-You can add your own relationship types to Amiss by creating your own ``Relator`` class and adding it to the ``Amiss\Manager->relators`` array. It must contain the following method:
+You can add your own relationship types to Amiss by creating a class that extends ``Amiss\Relator\Base`` and adding it to the ``Amiss\Manager->relators`` dictionary. Your Relator must implement the following method:
 
-.. py:method:: getRelated($manager, $source, $relationName)
+.. py:method:: getRelated( $source , $relationName , $criteria = null )
+    
+    Retrieve the objects for the ``$source`` that are related through ``$relationName``. Optionally filter using ``$criteria``, which must be an instance of ``Amiss\Criteria\Query``.
 
-    :param manager: ``Amiss\Manager`` instance calling your relator. You'll need this to do queries.
+    ``Amiss\Relator\Base`` makes an instance of ``Amiss\Manager`` available through ``$this->manager``. You can use this to perform queries.
+
     :param source: The source object(s). This could be either a single object or an array of objects depending on your context. You are free to raise an exception if your ``Relator`` only supports single objects or arrays
     :param relationName: The name of the relation which was passed to ``getRelated``
+    :param criteria: Optional filter criteria. Must be instance of ``Amiss\Criteria\Query``.
 
 
 You can register your relator with Amiss like so:
@@ -317,7 +323,7 @@ You can register your relator with Amiss like so:
 .. code-block:: php
 
     <?php
-    $manager->relators['one-to-foo'] = new My\Custom\OneToFooRelator;
+    $manager->relators['one-to-foo'] = new My\Custom\OneToFooRelator($manager);
 
 
 If you are using ``Amiss\Mapper\Note``, you would define a relation that uses this relator like so:
@@ -333,5 +339,5 @@ If you are using ``Amiss\Mapper\Note``, you would define a relation that uses th
         public $foo;
     }
 
-Calls to ``getRelated`` and ``assignRelated`` referring to ``Bar->foo`` will now use your custom relator to retrieve the related objects.
+Calls to ``getRelated()`` and ``assignRelated()`` referring to ``Bar->foo`` will now use your custom relator to retrieve the related objects.
 

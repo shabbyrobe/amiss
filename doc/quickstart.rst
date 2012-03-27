@@ -13,12 +13,13 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more info.
 
     <?php
 
-    // Include autoloader. Amiss is PSR-0 compliant, so you can use any loader that supports that standard.
+    // Include autoloader. Amiss is PSR-0 compliant, so you can use any loader that
+    // supports that standard.
     require_once('/path/to/amiss/src/Loader.php');
     Amiss\Loader::register();
 
-    // Amiss requires a class that implements \Amiss\Mapper in order to get information about how 
-    // your objects map to tables
+    // Amiss requires a class that implements \Amiss\Mapper in order to get information
+    // about how your objects map to tables
     $mapper = new Amiss\Mapper\Note;
 
     // This is basically a PDO with a bit of extra niceness. Don't use a PDO though.
@@ -113,7 +114,7 @@ See :doc:`selecting` for more info.
 
     // get all events
     $events = $manager->getList('Event');
-    
+
     // get all events named foo that start on the 2nd of June, 2020 using an array
     $events = $manager->getList('Event', array(
         'where'=>array('name'=>'foo', 'startDate'=>'2020-06-02')

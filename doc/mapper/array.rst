@@ -1,6 +1,9 @@
 Array Mapper
 ============
 
+.. note:: The remainder of this guide assumes you are using the :doc:`annotation`. If you have selected this mapper, you may wish to skip this section and continue with the :doc:`common`.
+
+
 The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined using the structure outlined in :doc:`metadata`, though some additional conveniences are added.
 
 Mapping your objects is quite simple:
@@ -120,7 +123,7 @@ Each object mapping has the following structure:
                 'name',
                 'slug'=>array('type'=>'customtype'),
                 'foo',
-                'anotherFoo'=>array('name'=>'another-foo'),
+                'anotherFoo'=>array('name'=>'another_foo_yippee_yay'),
             ),
         );
     
@@ -153,7 +156,8 @@ Each object mapping has the following structure:
     Each relation value should be an array whose ``0`` element contains the name of the relator to use. The rest of the array should be the set of key/value pairs expected by the relator. See :ref:`relators` for more details on the structure of the relation configuration.
 
     .. code-block:: php
-
+        
+        <?php
         $mapping = array(
             'relations'=>array(
                 'relationProperty'=>array('relatorId', 'key'=>'value', 'nuddakey'=>'nuddavalue'),

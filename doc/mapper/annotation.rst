@@ -2,10 +2,10 @@ Annotation Mapper
 =================
 
 .. note:: It is assumed by this mapper that an object and a table are corresponding entities. 
-    More complex mapping should be handled using a custom mapper.
+    More complex mapping should be handled using a :doc:`custom mapper <custom>`.
 
 
-To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to ``Amiss\Manager``:
+To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to ``Amiss\Manager``:
 
 .. code-block:: php
 
@@ -15,6 +15,60 @@ To use an annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`
 
 
 See :ref:`mapper-common` for more information on how to tweak the note mapper's behaviour.
+
+
+Overview
+--------
+
+Amiss provides a javadoc-style key/value mapper called ``Amiss\Mapper\Note``, which derives from ``Amiss\Mapper\Base``. Object/table mappings are defined in this way:
+
+.. code-block:: php
+
+    <?php
+    /**
+     * @table your_table
+     * @fieldType VARCHAR(255)
+     */
+    class Foo
+    {
+        /** @primary */
+        public $id;
+
+        /** @field some_column */
+        public $name;
+
+        /** @field */
+        public $barId;
+
+        /** 
+         * One-to-many relation:
+         * @has many of=Bar 
+         */
+        public $bars;
+
+        /**
+         * One-to-one relation: 
+         * @has one of=Baz; on=bazId
+         */
+        public $baz;
+
+        // field is defined below using getter/setter
+        private $fooDate;
+
+        /**
+         * @field
+         * @type date
+         */
+        public function getFooDate()
+        {
+            return $this->fooDate;
+        }
+
+        public function setFooDate($value)
+        {
+            $this->fooDate = $value;
+        }
+    }
 
 
 Caching
@@ -66,7 +120,7 @@ Annotations are javadoc-style key/values and are formatted like so:
      */
 
 
-The ``Amiss\Note\Parser`` class is used to extract these annotations. Go ahead and use it yourself if you find it useful, but keep in mind the following:
+The ``Amiss\Note\Parser`` class is used to extract these annotations. Go ahead and use it in your own application if you find it useful, but keep in mind the following:
 
  * Everything up to the first space is considered the key. Use whatever symbols 
    you like for the key as long as it isn't whitespace.
@@ -139,16 +193,16 @@ Mapping an object relation is done inside a property or getter method's docblock
 
 The following annotations are available to define this mapping:
 
+.. py:attribute:: @has relation_spec
+
+    Defines a relation against a property or getter method.
+
+
 .. py:attribute:: @setter setterName
 
     If the ``@has`` attribute is set against a getter method as opposed to a property, this defines the method that is used to set the value when loading an object from the database. It is required if the ``@has`` attribute is defined against a property.
 
     See :ref:`annotations-getters-setters` for more details.
-
-
-.. py:attribute:: @has relation_spec
-
-    Defines a relation against a property or getter method.
 
 
 .. _annotations-getters-setters:

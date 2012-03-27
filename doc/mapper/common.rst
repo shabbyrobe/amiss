@@ -75,7 +75,7 @@ There's very little intelligence in how Amiss handles values coming in and out o
 
 This may be fine for 98% of your interaction with the database (trust me - it really will be), but then along come dates and throw a whopping big spanner in the works.
 
-How are you persisting dates? Probably as a YYYY-MM-DD formatted string, yeah? Maybe as a unix timestamp. What about the occasional serialised object?
+How are you persisting dates? Probably as a YYYY-MM-DD formatted string, yeah? Maybe as a unix timestamp? But when you're working on them in PHP, you really want them to be a `DateTime <http://php.net/manual/en/book.datetime.php>`_ instance. No, really, you do.
 
 ``Amiss\Mapper\Base`` provides a facility for handling specific database types arbirtrarily.
 
@@ -85,7 +85,7 @@ Using Type Handlers
 
 Amiss provides the following type handlers out of the box:
 
-.. py:class:: Amiss\Type\Date($withTime=true, $timeZone=null)
+.. py:class:: Amiss\\Type\\Date($withTime=true, $timeZone=null)
 
     Converts database ``DATE`` or ``DATETIME`` into a PHP ``DateTime`` on object creation and PHP DateTime objects into a ``DATE`` or ``DATETIME`` on row export.
 
@@ -93,7 +93,7 @@ Amiss provides the following type handlers out of the box:
     :param timeZone: Use this timezone with all created ``DateTime`` objects. If not passed, will rely on PHP's default timezone (see `date_default_timezone_set <http://php.net/date_default_timezone_set>`_)
 
 
-In order to register this handler with Amiss and allow it to be used, you need to either assign it directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler(s), $id)``:
+In order to register this handler with Amiss and allow it to be used, you need to either assign it directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler, $id(s))``:
 
 .. code-block:: php
 

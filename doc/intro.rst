@@ -1,6 +1,16 @@
 Introduction
 ============
 
+The core of Amiss is the Data Mapper.
+
+From Martin Fowler's `Patterns of Enterprise Application Architecture <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: 
+
+    A [Data Mapper is a] layer of Mappers (473) that moves data between objects 
+    and a database while keeping them independent of each other and the mapper itself.
+
+Amiss makes some small concessions to pragmatism that may offend domain model purists when you use any of the :doc:`mapping methods <mapper/mapping>` that are in the core distribution, but overall it does a passable job of keeping its grubby mitts off your model considering the small codebase.
+
+
 About the examples
 ------------------
 

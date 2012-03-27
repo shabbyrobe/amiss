@@ -22,7 +22,10 @@ Manager
 
 The main class Amiss requires to do it's business is ``Amiss\Manager``. It requires a way to connect to the database and a class that can map your objects to the database and back.
 
-The **mapper** must be an instance of ``Amiss\Mapper``. The standard mapper recommended by Amiss is ``Amiss\Mapper\Note``, which allows the use of simple annotations to declare mappings.
+The **mapper** must implement the ``Amiss\Mapper`` interface. The standard mapper recommended by Amiss is ``Amiss\Mapper\Note``, which allows the use of simple annotations to declare mappings.
+
+.. warning:: Amiss is built to support MySQL and SQLite **only**. It may work with other ANSI-compliant RDBMSssseseses, but it is not tested or supported.
+
 
 Creating an ``Amiss\Manager`` is simple:
 
@@ -30,10 +33,9 @@ Creating an ``Amiss\Manager`` is simple:
 
     <?php
     $db = array(
-        'host'=>'127.0.0.1',
+        'dsn'=>'mysql:host=localhost;dbname=amiss_demo',
         'user'=>'user', 
         'password'=>'password',
-        'db'=>'amiss_demo',
     );
     $mapper = new Amiss\Mapper\Note;
     $amiss = new Amiss\Manager($db, $mapper);
@@ -45,11 +47,7 @@ For more information on customising the mapping, please read the :doc:`mapper/ma
 Database Connections
 --------------------
 
-``Amiss\Connector`` is a PDO_-compatible object with a few enhancements. It takes the same constructor arguments, but it sets the error mode to ``PDO::ERRMODE_EXCEPTION`` by default.
-
-Just be aware that although ``Amiss\Connector`` shares 100% of the interface with PHP 5.3's PDO_, it does not derive from it. If you're using type hints like ``function foo(\PDO $pdo)`` it won't work.
-
-One critical difference between ``PDO`` and ``Amiss\Connector`` is that ``PDO`` will *connect to the database as soon as you instantiate it*. ``Amiss\Connector`` defers creating this connection until it is actually needed.
+In addition to the array shown above, ``Amiss\Manager`` can also be passed an ``Amiss\Connector`` object. ``Amiss\Connector`` is a PDO_-compatible object with a few enhancements. It takes the same constructor arguments, but it sets the error mode to ``PDO::ERRMODE_EXCEPTION`` by default.
 
 Creating an instance of ``Amiss\Connector`` is the same as creating an instance of ``PDO``:
 
@@ -59,23 +57,30 @@ Creating an instance of ``Amiss\Connector`` is the same as creating an instance 
     $connector = new Amiss\Connector('mysql:host=localhost;', 'user', 'password');
 
 
-You can also create an ``Amiss\Connector`` using an array of params like the initial example:
+You can also create an ``Amiss\Connector`` using an array containing the connection details:
 
 .. code-block:: php
 
     <?php
     $amiss = Amiss\Connector::create(array(
-        'host'=>'127.0.0.1',
+        'dsn'=>'mysql:host=localhost;dbname=amiss_demo',
         'user'=>'user', 
         'password'=>'password',
     ));
 
+``create()`` is quite tolerant in what it accepts. You can pass it names that correspond to PDO's constructor arguments ``dsn``, ``user``, ``password`` and ``options``, as well as the non-standard ``host``, ``server`` and ``db``... it'll even assume anything that starts with a ``u`` or a ``p`` corresponds to ``user`` and ``password`` respectively.
 
 ``Amiss\Manager`` will also accept the same array as ``Amiss\Connector::create`` as a connection.
 
-You can also pass ``Amiss\Manager`` an instance of ``PDO``, or anything else that behaves like a ``PDO`` for that matter, though using ``Amiss\Connector`` instead is highly recommended as some features may not work exactly as expected. 
+.. note:: 
 
-.. warning:: ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss instead of an ``Amiss\Connector``.
+    You *can* pass ``Amiss\Manager`` an instance of ``PDO``, or anything else that behaves like a ``PDO`` for that matter, though using ``Amiss\Connector`` instead is highly recommended as some features may not work exactly as expected.
+
+    ``Amiss\Connector`` is PDO_-compatible so you can use it instead of ``PDO`` in your own code, rather than so you can use a ``PDO`` with Amiss instead of an ``Amiss\Connector``.
+
+    Just be aware that although ``Amiss\Connector`` shares 100% of the interface with PHP 5.3's PDO_, it does not derive from it. If you're using type hints like ``function foo(\PDO $pdo)`` it won't work.
+
+    One critical difference between ``PDO`` and ``Amiss\Connector`` is that ``PDO`` will *connect to the database as soon as you instantiate it*. ``Amiss\Connector`` defers creating this connection until it is actually needed.
 
 
 .. _PDO: http://www.php.net/manual/en/book.pdo.php
