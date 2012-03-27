@@ -17,6 +17,9 @@ class Date implements Handler
 	{
 		$out = null;
 		if ($value instanceof \DateTime) {
+			if ($this->timeZone && $value->getTimezone() != $this->timeZone) {
+				$value->setTimezone($this->timeZone);
+			}
 			$out = $value->format('Y-m-d'.($this->withTime ? ' H:i:s' : ''));
 		}
 		return $out;
