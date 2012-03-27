@@ -9,8 +9,6 @@ abstract class Base implements \Amiss\Relator
 		$this->manager = $manager;
 	}
 	
-	public abstract function getRelated($source, $relationName, $criteria=null);
-	
 	protected function indexSource($source, $on, $lFields, $rFields)
 	{
 		$resultIndex = array();
