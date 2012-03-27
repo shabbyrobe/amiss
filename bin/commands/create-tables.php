@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
-spl_autoload_register(array(new Amiss\Loader, 'load'));
+Amiss\Loader::register();
 
 $usage = "amiss create-tables [OPTIONS] INPUT
 
@@ -119,6 +119,10 @@ if (!$notes && !$namespaces) {
 	echo "Please specify some notes and/or namespaces to search for\n\n";
 	echo $usage;
 	exit(1);
+}
+
+if ($prompt) {
+	$password = prompt_silent("Password: ");
 }
 
 $mapper = null;

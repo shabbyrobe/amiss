@@ -1,21 +1,18 @@
-<?php 
-
-throw new Exception("Not updated for 2.0!");
+<?php
 
 require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
-spl_autoload_register(array(new Amiss\Loader, 'load'));
+Amiss\Loader::register();
 
-$usage = "amiss create-tables [OPTIONS] OUTDIR
+$usage = "amiss create-classes [OPTIONS] OUTDIR
 
 Creates tables in the specified database
-
-INPUT:
-  PHP file or folder containing active records to create tables for
 
 Options:
   --namespace     Place all records in this namespace (make sure you quote!)
   --dsn           Database DSN to use.
+  --base          Base class to use for created classes
+  --ars           Equivalent to --base \Amiss\Active\Record
   -u, --user      Database user
   -p              Prompt for database password 
   --password      Database password (don't use this - use -p instead)
@@ -36,6 +33,7 @@ $user = null;
 $password = null;
 $words = null;
 $wfile = null;
+$base = null;
 
 $iter = new ArrayIterator(array_slice($argv, 1));
 foreach ($iter as $v) {
@@ -46,6 +44,17 @@ foreach ($iter as $v) {
 	elseif ($v == '--namespace') {
 		$iter->next();
 		$namespace = $iter->current();
+	}
+	elseif ($v == '--password') {
+		$iter->next();
+		$password = $iter->current();
+	}
+	elseif ($v == '--ars') {
+		$base = '\Amiss\Active\Record'; 
+	}
+	elseif ($v == '--base') {
+		$iter->next();
+		$base = $iter->current();
 	}
 	elseif ($v == '--password') {
 		$iter->next();
@@ -90,6 +99,10 @@ if (!$dsn) {
 	exit(1);
 }
 
+if ($prompt) {
+	$password = prompt_silent("Password: ");
+}
+
 if (is_string($words))
 	$words = explode(',', $words);
 
@@ -100,7 +113,7 @@ if ($wfile) {
 	$words = array_merge($words, explode("\n", trim(file_get_contents($wfile))));
 }
 
-$sep = '-';
+$sep = '_';
 
 $wtmp = $words;
 $words = array();
@@ -123,34 +136,31 @@ while ($table = $stmt->fetchColumn()) {
 	$oname = preg_replace('/\d+/', '$0'.$sep, $oname);
 	$oname = ucfirst(preg_replace_callback('/'.preg_quote($sep, '/').'(.)/', function($match) { return strtoupper($match[1]); }, rtrim($oname, $sep)));
 	
+	
+	$tableFields = $connector->query("SHOW FULL FIELDS FROM $table")->fetchAll(\PDO::FETCH_ASSOC);
+	
+	$fields = array();
+	$primary = array();
+	foreach ($tableFields as $field) {
+		$prop = lcfirst(preg_replace_callback('/_(.)/', function($match) { return strtoupper($match[1]); }, $field['Field']));
+		
+		$fields[$prop] = array('name'=>$field['Field'], 'type'=>$field['Type'], 'default'=>$field['Default']);
+		if ($field['Null'] == 'YES')
+			$fields[$prop]['type'] .= ' NULL';
+		
+		if (strpos($field['Key'], 'PRI')!==false) {
+			$primary[] = $field['Field'];
+			if (strpos($field['Extra'], 'auto_increment')!==false) {
+				$fields[$prop]['type'] = 'autoinc';
+			}
+		}
+	}
+	
+	/*
 	$create = $connector->query("SHOW CREATE TABLE `".$table."`")->fetchColumn(1);
 	$cols = substr($create, strpos($create, '(')+1);
 	$cols = substr($cols, 0, strrpos($cols, ')'));
 	
-	$fields = array();
-	
-	if (preg_match_all("/^\s*`(?P<name>[^`]+)`(\s+(?P<type>.*?),?)?$/m", $cols, $matches, PREG_SET_ORDER)) {
-		foreach ($matches as $match) {
-			$field = lcfirst(preg_replace_callback('/_(.)/', function($match) { return strtoupper($match[1]); }, $match['name']));
-			$fields[$field] = $match['type'];
-		}
-	}
-	
-	$result = $connector->query(sprintf("SHOW INDEX FROM `%s`", $table));
-	
-	$pricols = array();
-	while ($row = $result->fetch( \PDO::FETCH_ASSOC)) {
-		if ($row['Key_name'] == "PRIMARY") {
-			$pricols[] = $row['Column_name'];
-		}
-	}
-	
-	if (count($pricols) > 1) {
-		file_put_contents('php://stderr', 'Skipping multi-column primary on table '.$table.'. You should add an autoinc primary.'.PHP_EOL, FILE_APPEND);
-		$pricols = array();
-	}
-	
-	/*
 	$relations = array();
 	if (\preg_match_all("/CONSTRAINT\s+\`(?P<name>[^\`]+)\`\s+FOREIGN KEY\s+\((?P<fields>[^\)]+)\)\s+REFERENCES\s+\`(?P<reftable>[^\`]+)\`\s+\((?P<reffields>[^\)]+)\)/", $cols, $matches, PREG_SET_ORDER)) {
 		foreach ($matches as $match) {
@@ -178,30 +188,26 @@ while ($table = $stmt->fetchColumn()) {
 	}
 	*/
 	
-	
 	$output = "<?php\n\n";
 	if ($namespace) {
 		$output .= "namespace $namespace;\n\n";
 	}
 	
-	$output .= "class ".$oname." extends \Amiss\Active\Record\n{\n";
+	$output .= "/**\n * @table ".addslashes($table)."\n */\n";
+	$output .= "class ".$oname.($base ? " extends ".$base : '')."\n{\n";
 	
-	$output .= "    public static \$table = '".addslashes($table)."';\n";
-	
-	if ($pricols) {
-		$output .= "    public static \$primary = '{$pricols[0]}';\n";
+	foreach ($fields as $f=>$details) {
+		$output .= "    /**\n";
+		$isPrimary = in_array($details['name'], $primary);
+		
+		$output .= "     * @".($isPrimary ? 'primary' : 'field')."\n";
+		$output .= "     * @type {$details['type']}\n";
+		
+		$output .= "     */\n";
+		$output .= "    public \$$f;\n\n";
 	}
 	
-	
-	$output .= "\n    public static \$fields = array(\n";
-	foreach ($fields as $f=>$type) {
-		$output .= "        '$f'=>'".addslashes($type)."',\n";
-	}
-	$output .= "    );\n\n";
-	
-	$output .= "    public static \$relations = array();\n";
-	
-	$output .= "}\n";
+	$output .= "}\n\n";
 	
 	file_put_contents($outdir.'/'.$oname.'.php', $output);
 }

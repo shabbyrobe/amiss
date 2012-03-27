@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
-spl_autoload_register(array(new Amiss\Loader, 'load'));
+Amiss\Loader::register();
 
 $usage = "amiss create-tables-sql [OPTIONS] INPUT
 
