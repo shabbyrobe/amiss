@@ -13,4 +13,3 @@ The annotation mapper is used throughout this documentation.
     metadata
     common
     custom
-

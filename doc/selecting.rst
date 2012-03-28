@@ -31,7 +31,7 @@ The selection methods are:
         $eventArtist = $manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
-.. py:method:: Amiss\\Manager->get( $model , $criteria... )
+.. py:method:: object Amiss\\Manager->get( $model , $criteria... )
 
     Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an exception if the criteria you specify fails to limit the result to a single object.
 
@@ -43,9 +43,9 @@ The selection methods are:
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
 
-.. py:method:: Amiss\\Manager->getList( $mode , $criteria... )
+.. py:method:: array Amiss\\Manager->getList( $mode , $criteria... )
 
-    Retrieve a list of instances of ``$model``, determined by ``$criteria``. See :ref:`criteria-arguments` for more details on selecting the right object.
+    Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as ``get``, but allows you to find many objects and will always return an array.
 
 
 .. _clauses:
@@ -53,9 +53,9 @@ The selection methods are:
 Clauses
 -------
 
-This represents the "WHERE" part of your query.
+This represents the ``where`` part of your query.
 
-Most "where" clauses in Amiss will be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that hand-written "where" clauses skip field mapping - you have to use the column name rather than the object property names.
+Most ``where`` clauses in Amiss will be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that hand-written ``where`` clauses skip field mapping - you have to use the column name rather than the object property names.
 
 This is a stupid query, but it does illustrate what this aspect will let you get away with:
 
@@ -64,20 +64,23 @@ This is a stupid query, but it does illustrate what this aspect will let you get
     <?php
     $artists = $manager->getList(
         'Artist',
-        'artistTypeId=:foo AND artistId IN (SELECT artistId FROM event_artist WHERE eventId=:event)', 
+        'artistTypeId=:foo AND artistId IN (
+            SELECT artistId FROM event_artist WHERE eventId=:event
+        )', 
         array(':foo'=>1, ':event'=>5)
     );
     
 
-You can also just specify an array for the where clause if you are passing in an ``Amiss\Criteria\Query`` (or a criteria array). This method *will* perform field mapping. Multiple key/value pairs in the 'where' array are treated as an "AND" query:
+You can also just specify an array for the where clause if you are passing in an ``Amiss\Criteria\Query`` (or a criteria array). This method *will* perform field mapping. Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
 
 .. code-block:: php
 
     <?php
     $artists = $manager->getList(
         'Artist',
-        array('where'=>array('artistTypeId'=>1))
+        array('where'=>array('artistTypeId'=>1, 'slug'=>'hello'))
     );
+    // WHERE artistType=1 AND slug='hello'
 
 
 "In" Clauses
@@ -88,12 +91,12 @@ Vanilla PDO statements with parameters don't work with arrays and IN clauses:
 .. code-block:: php
 
     <?php
+    // This won't work.
     $pdo = new PDO(...);
     $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
     $stmt->bindValue(':foo', array(1, 2, 3));
     $stmt->execute(); 
 
-BZZT! Nope.
 
 Amiss handles unrolling non-nested array parameters:
 
@@ -128,7 +131,7 @@ You can use this with ``Amiss\Manager`` easily:
 
 .. warning::
 
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway):
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway). The following example may not work quite like you expect:
 
     .. code-block:: php
 
@@ -143,7 +146,7 @@ You can use this with ``Amiss\Manager`` easily:
         list ($where, $params) = $criteria->buildClause();
         echo $where;
     
-    The output should be::
+    You'd be forgiven for assuming that the output would be::
 
         foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
     
@@ -151,8 +154,7 @@ You can use this with ``Amiss\Manager`` easily:
         
         foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
 
-    It's not pretty, but Amiss does not intend to babysit you so it's unlikely it will be fixed.
-
+    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex substitution that is more than adequate if you heed this warning.
 
 
 .. _criteria-arguments:
@@ -234,42 +236,46 @@ In addition to the "where" clause and parameters, ``getList()`` will also make u
 Pagination
 ~~~~~~~~~~
 
-Retrieve page 1, page size 30:
+Amiss provides two ways to perform pagination. The first is the standard LIMIT/OFFSET combo:
 
 .. code-block:: php
 
     <?php
-    $artists = $manager->getList('Artist', array('page'=>array(1, 30)));
+    // limit to 30 rows
+    $artists = $manager->getList('Artist', array('limit'=>30);
 
-
-Retrieve page 2, page size 30:
-
-.. code-block:: php
-
-    <?php
-    $artists = $manager->getList('Artist', array('page'=>array(2, 30)));
-
-
-Limit to 30 rows, skip 60 (equivalent to "Retrieve page 3, page size 30"):
-
-.. code-block:: php
-
-    <?php
+    // limit to 30 rows, skip 60
     $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
 
 
-Limit to 30 rows:
+The second style is suited to the way your UI typically thinks of pagination: using page number/page size:
 
 .. code-block:: php
 
     <?php
-    $artists = $manager->getList('Artist', array('limit'=>30);
+    // retrieve page 1, page size 30. equivalent to LIMIT 30
+    $artists = $manager->getList('Artist', array('page'=>array(1, 30)));
+
+    // retrieve page 3, page size 30. equivalent to LIMIT 30, OFFSET 60
+    $artists = $manager->getList('Artist', array('page'=>array(3, 30)));
 
 
 Ordering
 ~~~~~~~~
 
-This will order by ``priority`` descending, then by ``sequence`` ascending:
+There are several different ways to order your results. 
+
+You can order ascending on a single column with the following shorthand. Fields will be mapped using this method:
+
+.. code-block:: php
+
+    <?php
+    $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
+
+
+Just like :doc:`clauses`, you can order using an array. The key should be the field name, which *will* be mapped in this case, and the value should be the order direction. The default order direction is ascending, so if you wish to sort ascending you can either specify 'asc' directly, or just omit the key and pass the field name as the value.
+
+This will produce the same order as the previous example:
 
 .. code-block:: php
     
@@ -282,12 +288,14 @@ This will order by ``priority`` descending, then by ``sequence`` ascending:
     ));
 
 
-You can also order ascending on a single column with the following shorthand:
+And also like :ref:`clauses`, you can also write your order expression in raw sql. Using this method, no field mapping is performed:
 
 .. code-block:: php
-
+    
     <?php
-    $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
+    $eventArtists = $manager->getList('EventArtist', array(
+        'order'=>'priority desc, sequence',
+    ));
 
 
 Counting

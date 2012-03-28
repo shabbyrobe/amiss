@@ -197,4 +197,3 @@ To determine the id for the handler to use, it takes everything up to the first 
     $mapper->addTypeHandler(new BlahBlahHandler, 'varchar');
 
 .. note:: Handler ids are case insensitive.
-
