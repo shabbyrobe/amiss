@@ -29,12 +29,12 @@ def test(filter=None):
 @task
 def testgrp(group):
     with lcd(os.path.join(env.base_path, 'test')):
-        cmd = 'phpunit --group %s' % group
+        local('phpunit --group %s' % group)
 
 @task
 def testall():
     with lcd(os.path.join(env.base_path, 'test')):
-        cmd = 'phpunit'
+        local('phpunit')
 
 @task
 def archive(outpath):
