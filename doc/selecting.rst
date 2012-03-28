@@ -179,7 +179,7 @@ This will produce the same order as the previous example:
     ));
 
 
-And also like :ref:`clauses`, you can also write your order expression in raw sql. Using this method, no field mapping is performed:
+And also like :ref:`clauses`, you can write your order expression in raw sql. Using this method, no field mapping is performed:
 
 .. code-block:: php
     
