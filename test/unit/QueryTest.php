@@ -4,7 +4,7 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Criteria;
 
-class BuildClauseTest extends \CustomTestCase
+class QueryTest extends \CustomTestCase
 {
 	/**
 	 * @group unit
@@ -199,6 +199,29 @@ class BuildClauseTest extends \CustomTestCase
 			
 			// with one explicit column and one property
 			array(array('foo_fieldy'=>'foo', 'bar'=>'bar'), '`foo_fieldy`=:foo_fieldy AND `bar_field`=:bar_field'),
+		);
+	}
+	
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Query::paramsAreNamed
+	 * @dataProvider dataForParamsAreNamed
+	 */
+	public function testParamsAreNamed($name, $areNamed, $params)
+	{
+		$criteria = new Criteria\Query;
+		$criteria->params = $params;
+		$this->assertEquals($areNamed, $criteria->paramsAreNamed(), $name.' failed');
+	}
+	
+	public function dataForParamsAreNamed()
+	{
+		return array(
+			array('non-named', false, array('a', 'b', 'c')),
+			array('some named', true, array('a', 'q'=>'b', 'c')),
+			array('all named', true, array('a'=>'a', 'q'=>'b', 'c'=>'d')),
+			array('messy named', true, array('0'=>'a', null=>'b', 1=>'d')),
+			array('messy mixed', true, array('0'=>'a', null=>'b', '1'=>'d')),
 		);
 	}
 }

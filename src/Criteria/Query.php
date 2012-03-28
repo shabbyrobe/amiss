@@ -41,13 +41,8 @@ class Query
 			$namedParams = true;
 		}
 		else {
-			if ($fields && strpos($where, '{')!==false) {
-				$tokens = array();
-				foreach ($fields as $k=>$v)
-					$tokens['{'.$k.'}'] = '`'.$v['name'].'`';
-				
-				$where = strtr($where, $tokens);
-			}
+			if ($fields && strpos($where, '{')!==false)
+				$where = $this->replaceFieldTokens($fields, $where);
 		}
 		
 		if ($namedParams) {
@@ -76,6 +71,19 @@ class Query
 	
 	public function paramsAreNamed()
 	{
-		return !ctype_digit(implode('', array_keys($this->params)));
+		foreach ($this->params as $k=>$v) {
+			if ($k==0 && $k!==0) return true;
+		}
+	}
+	
+	protected function replaceFieldTokens($fields, $clause)
+	{
+		$tokens = array();
+		foreach ($fields as $k=>$v)
+			$tokens['{'.$k.'}'] = '`'.$v['name'].'`';
+		
+		$clause = strtr($clause, $tokens);
+		
+		return $clause;
 	}
 }

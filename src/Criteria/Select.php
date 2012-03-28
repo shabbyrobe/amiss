@@ -66,17 +66,23 @@ class Select extends Query
 		
 		$order = $this->order;
 		
-		if ($order && is_array($order)) {
-			$oClauses = array();
-			foreach ($order as $field=>$dir) {
-				if (is_numeric($field)) {
-					$field = $dir; $dir = 'asc';
+		if ($order) {
+			if (is_array($order)) {
+				$oClauses = array();
+				foreach ($order as $field=>$dir) {
+					if (is_numeric($field)) {
+						$field = $dir; $dir = 'asc';
+					}
+					
+					$name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
+					$oClauses[] = '`'.$name.'`'.($dir == 'asc' ? '' : ' desc');
 				}
-				
-				$name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
-				$oClauses[] = '`'.$name.'`'.($dir == 'asc' ? '' : ' desc');
+				$order = implode(', ', $oClauses);
 			}
-			$order = implode(', ', $oClauses);
+			else {
+				if ($metaFields && strpos($order, '{')!==false)
+					$order = $this->replaceFieldTokens($metaFields, $order);
+			}
 		}
 		
 		return $order;

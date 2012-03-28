@@ -135,7 +135,7 @@ class SelectQueryTest extends \CustomTestCase
 		$fields = $criteria->buildOrder($meta);
 		$this->assertEquals('', $fields);
 	}
-	
+
 	/**
 	 * @group unit
 	 * @covers Amiss\Criteria\Select::buildOrder
@@ -149,7 +149,21 @@ class SelectQueryTest extends \CustomTestCase
 		$fields = $criteria->buildOrder($meta);
 		$this->assertEquals('abc_def, ghi_jkl desc', $fields);
 	}
-
+	
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Select::buildOrder
+	 */
+	public function testBuildOrderFromStringWithMeta()
+	{
+		$criteria = new Criteria\Select;
+		$criteria->order = '{foo}, {bar} desc';
+		
+		$meta = $this->createGenericMeta();
+		$fields = $criteria->buildOrder($meta);
+		$this->assertEquals('`foo_field`, `bar_field` desc', $fields);
+	}
+	
 	/**
 	 * @group unit
 	 * @covers Amiss\Criteria\Select::buildOrder
