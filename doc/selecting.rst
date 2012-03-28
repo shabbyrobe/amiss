@@ -38,7 +38,7 @@ The selection methods are:
     .. code-block:: php
 
         <?php
-        $event = $manager->get('Venue', 'slug=?', $slug);
+        $event = $manager->get('Venue', '{venueSlug}=?', $slug);
 
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
@@ -48,115 +48,6 @@ The selection methods are:
     Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as ``get``, but allows you to find many objects and will always return an array.
 
 
-.. _clauses:
-
-Clauses
--------
-
-This represents the ``where`` part of your query.
-
-Most ``where`` clauses in Amiss will be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that hand-written ``where`` clauses skip field mapping - you have to use the column name rather than the object property names.
-
-This is a stupid query, but it does illustrate what this aspect will let you get away with:
-
-.. code-block:: php
-    
-    <?php
-    $artists = $manager->getList(
-        'Artist',
-        'artistTypeId=:foo AND artistId IN (
-            SELECT artistId FROM event_artist WHERE eventId=:event
-        )', 
-        array(':foo'=>1, ':event'=>5)
-    );
-    
-
-You can also just specify an array for the where clause if you are passing in an ``Amiss\Criteria\Query`` (or a criteria array). This method *will* perform field mapping. Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
-
-.. code-block:: php
-
-    <?php
-    $artists = $manager->getList(
-        'Artist',
-        array('where'=>array('artistTypeId'=>1, 'slug'=>'hello'))
-    );
-    // WHERE artistType=1 AND slug='hello'
-
-
-"In" Clauses
-~~~~~~~~~~~~
-
-Vanilla PDO statements with parameters don't work with arrays and IN clauses:
-
-.. code-block:: php
-
-    <?php
-    // This won't work.
-    $pdo = new PDO(...);
-    $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
-    $stmt->bindValue(':foo', array(1, 2, 3));
-    $stmt->execute(); 
-
-
-Amiss handles unrolling non-nested array parameters:
-
-.. code-block:: php
-
-    <?php 
-    $criteria = new Amiss\Criteria;
-    $criteria->where = 'foo IN (:foo)';
-    $criteria->params = array(':foo'=>array(1, 2));
-    $criteria->namedParams = true;
-    list ($where, $params) = $criteria->buildClause();
-    
-    echo $where;        // foo IN (:foo_0,:foo_1) 
-    var_dump($params);  // array(':foo_0'=>1, ':foo_1'=>2)
-
-
-You can use this with ``Amiss\Manager`` easily:
-
-.. code-block:: php
-
-    <?php
-    $artists = $manager->getList(
-        'Artist', 
-        'artistId IN (:artistIds)', 
-        array(':artistIds'=>array(1, 2, 3))
-    );
-
-
-.. note::
-
-    This does not work with positional parameters (question-mark style).
-
-.. warning::
-
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway). The following example may not work quite like you expect:
-
-    .. code-block:: php
-
-        <?php
-        $criteria = new Criteria\Query;
-        $criteria->params = array(
-            ':foo'=>array(1, 2),
-            ':bar'=>array(3, 4),
-        );
-        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
-        
-        list ($where, $params) = $criteria->buildClause();
-        echo $where;
-    
-    You'd be forgiven for assuming that the output would be::
-
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
-    
-    However, the output will actually be::
-        
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
-
-    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex substitution that is more than adequate if you heed this warning.
-
-
 .. _criteria-arguments:
 
 Criteria Arguments
@@ -164,13 +55,13 @@ Criteria Arguments
 
 Methods that accept query criteria do so at the end of the function signature. Query criteria can be passed in a number of different formats. The ``get()`` and ``getList()`` methods take their criteria after the the ``$modelName`` argument.
 
-Amiss treats hand-written "where" clauses as raw SQL and performs no field mapping.
+Please also familiarise yourself with the section on :ref:`clauses` before diving in.
 
 
 Shorthand
 ~~~~~~~~~
 
-The "where" clause and parameters can be passed using a shorthand format. 
+The "where" clause and parameters can be passed using a shorthand format.
 
 To select using positional placeholders, pass the where clause as the first criteria argument and each positional parameter as a subsequent argument.
 
@@ -296,6 +187,125 @@ And also like :ref:`clauses`, you can also write your order expression in raw sq
     $eventArtists = $manager->getList('EventArtist', array(
         'order'=>'priority desc, sequence',
     ));
+
+
+.. _clauses:
+
+Clauses
+-------
+
+This represents the ``where`` part of your query.
+
+Most ``where`` clauses in Amiss can be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. 
+
+All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria. When passing a clause as a string, you can pass it using the underlying table's column names:
+
+.. code-block:: php
+
+    <?php
+    // The Artist class has a property called 'artistTypeId' that maps to a 
+    // column with the same name:
+    $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
+
+When your column names are exactly the same as your property names, this is the way you should do it - there's no sense in making Amiss do more work than it needs to - but when your column names are different, Amiss will perform a simple token replacement on your clause, converting ``{propertyName}`` into the ``column_name`` in the underlying metadata:
+
+.. code-block:: php
+
+    <?php
+    // The Venue class has a property called 'venueName' that maps to a column
+    // called 'name'
+    $venue = $manager->get('Venue', '{venueName}=?', 'foo');
+
+In the above example, ``{venueName}`` is replaced with the field name.
+
+
+You can also pass an array of values indexed by property name for the where clause if you are using an ``Amiss\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping. Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
+
+.. code-block:: php
+
+    <?php
+    $venues = $manager->getList(
+        'Venue',
+        array('where'=>array('venueName'=>'Foo', 'venueSlug'=>'foo'))
+    );
+    // WHERE name='Foo' AND slug='foo'
+
+
+
+"In" Clauses
+~~~~~~~~~~~~
+
+Vanilla PDO statements with parameters don't work with arrays and IN clauses:
+
+.. code-block:: php
+
+    <?php
+    // This won't work.
+    $pdo = new PDO(...);
+    $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
+    $stmt->bindValue(':foo', array(1, 2, 3));
+    $stmt->execute(); 
+
+
+Amiss handles unrolling non-nested array parameters:
+
+.. code-block:: php
+
+    <?php 
+    $criteria = new Amiss\Criteria;
+    $criteria->where = 'foo IN (:foo)';
+    $criteria->params = array(':foo'=>array(1, 2));
+    $criteria->namedParams = true;
+    list ($where, $params) = $criteria->buildClause();
+    
+    echo $where;        // foo IN (:foo_0,:foo_1) 
+    var_dump($params);  // array(':foo_0'=>1, ':foo_1'=>2)
+
+
+You can use this with ``Amiss\Manager`` easily:
+
+.. code-block:: php
+
+    <?php
+    $artists = $manager->getList(
+        'Artist', 
+        'artistId IN (:artistIds)', 
+        array(':artistIds'=>array(1, 2, 3))
+    );
+
+
+.. note::
+
+    This does not work with positional parameters (question-mark style).
+
+.. warning::
+
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway). The following example may not work quite like you expect:
+
+    .. code-block:: php
+
+        <?php
+        $criteria = new Criteria\Query;
+        $criteria->params = array(
+            ':foo'=>array(1, 2),
+            ':bar'=>array(3, 4),
+        );
+        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
+        
+        list ($where, $params) = $criteria->buildClause();
+        echo $where;
+    
+    You'd be forgiven for assuming that the output would be::
+
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
+    
+    However, the output will actually be::
+        
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
+
+    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex substitution that is more than adequate if you heed this warning.
+
+
 
 
 Counting
