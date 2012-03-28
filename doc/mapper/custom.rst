@@ -18,7 +18,7 @@ Extending ``Amiss\Mapper\Base``
 
 ``Amiss\Mapper\Base`` requires you to implement one method:
 
-.. py:function:: protected createMeta($class)
+.. py:function:: protected createMeta( $class )
 
     Must return an instance of ``Amiss\Meta`` for the ``$class``. See :doc:`metadata` for details on how to structure this object.
 
@@ -27,12 +27,12 @@ Extending ``Amiss\Mapper\Base``
 
 You can also use the following methods to help write your ``createMeta`` method, or extend them to tweak your mapper's behaviour:
 
-.. py:function:: protected resolveObjectName($name)
+.. py:function:: protected resolveObjectName( $name )
 
     Take a name provided to ``Amiss\Manager`` and convert it before it gets passed to ``createMeta``.
 
 
-.. py:function:: protected getDefaultTable($class)
+.. py:function:: protected getDefaultTable( $class )
 
     When no table is specified, you can use this method to generate a table name based on the class name. By default, it will take a ``Class\Name\Like\ThisOne`` and make a table name like ``this_one``.
 
@@ -44,14 +44,14 @@ Taking this route implies that you want to take full control of the object creat
 
 The following functions must be implemented:
 
-.. py:function:: getMeta($class)
+.. py:function:: getMeta( $class )
     
     Must return an instance of ``Amiss\Meta`` that defines the mapping for the class name passed. See :doc:`metadata` for details on how to structure this object.
 
     :param class: A string containing the name used when ``Amiss\Manager`` is called to act on an "object".
 
 
-.. py:function:: createObject($meta, $row, $args)
+.. py:function:: createObject( $meta , $row , $args )
 
     Create the object mapped by the passed ``Amiss\Meta`` object, assign the values from the ``$row``, and return the freshly minted instance.
 
@@ -62,7 +62,7 @@ The following functions must be implemented:
     :param args:  Constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
 
 
-.. py:function:: exportRow($meta, $object)
+.. py:function:: exportRow( $meta , $object )
     
     Creates a row that will be used to insert or update the database. Must return a 1-dimensional associative array (or instance of `ArrayAccess <http://php.net/manual/en/class.arrayaccess.php>`_).
 
@@ -70,7 +70,7 @@ The following functions must be implemented:
     :param object:  The object containing the values which will be used for the row
 
 
-.. py:function:: determineTypeHandler($type)
+.. py:function:: determineTypeHandler( $type )
 
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
 
@@ -84,10 +84,7 @@ The following functions must be implemented:
 Creating your own type handler
 ------------------------------
 
-To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface.
-
-
-This interface provides three methods:
+To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface. This interface requires three methods:
 
 .. py:function:: prepareValueForDb( $value )
     

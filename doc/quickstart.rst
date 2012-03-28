@@ -22,7 +22,8 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more info.
     // about how your objects map to tables
     $mapper = new Amiss\Mapper\Note;
 
-    // This is basically a PDO with a bit of extra niceness. Don't use a PDO though.
+    // This is basically a PDO with a bit of extra niceness. You should use it instead
+    // of PDO in your own code
     $connector = new Amiss\Connector('mysql:host=127.0.0.1', 'user', 'password');
 
     // And this binds the whole mess together

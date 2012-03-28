@@ -1,48 +1,185 @@
 Selecting
 =========
 
-``Amiss\Manager`` has two methods for handling object retrieval: ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways::
+``Amiss\Manager`` has two methods for handling object retrieval: ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways.
 
-    get ( string $modelName, string $positionalWhere, mixed $param1[, mixed $param2...])
-    get ( string $modelName, string $namedWhere, array $params )
-    get ( string $modelName, array $criteria )
-    get ( string $modelName, Amiss\Criteria\Select $criteria )
+The first argument to ``get`` and ``getList`` is always the model name. All the subsequent arguments are used to define criteria for the query.
+
+The selection methods are:
+
+.. py:method:: Amiss\\Manager->getByPk( $model , $primaryKeyValue )
+
+    Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
+
+    .. code-block:: php
+        
+        <?php
+        $event = $manager->getByPk('Event', 5);
+    
+    If the primary key is a multi-column primary key, you can pass an array containing the values in the same order as the metadata defines the primary key's properties:
+
+    .. code-block:: php
+    
+        <?php
+        $eventArtist = $manager->getByPk('EventArtist', array(2, 3));
+    
+    If you find the above example to be a bit unreadable, you can use the property names as keys:
+
+    .. code-block:: php
+    
+        <?php
+        $eventArtist = $manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
-The parameters are as follows:
+.. py:method:: Amiss\\Manager->get( $model , $criteria... )
 
-	.. attribute:: $model
-	
-	    The model to retrieve from the database
-	    
-	
-	.. attribute:: $positionalWhere / $namedWhere
-	
-	    The SQL "where" clause, written in the server's dialect. Positional "where" clauses use ``?`` for parameter substitution while named "where" clauses use ``:param`` style tokens.
-	      
-	
-	.. attribute:: $criteria
-	
-	    An ``Amiss\Criteria\Select`` instance, or an array that can be converted into an ``Amiss\Criteria\Select`` instance.
+    Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an exception if the criteria you specify fails to limit the result to a single object.
+
+    .. code-block:: php
+
+        <?php
+        $event = $manager->get('Venue', 'slug=?', $slug);
+
+    See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
 
-Single Objects
---------------
+.. py:method:: Amiss\\Manager->getList( $mode , $criteria... )
 
-Single objets are retrieved using the ``get`` method. This is designed to retrieve only one object - it will throw an exception if more than one row is found.
+    Retrieve a list of instances of ``$model``, determined by ``$criteria``. See :ref:`criteria-arguments` for more details on selecting the right object.
 
 
-Single object using positional parameters, shorthand
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _clauses:
+
+Clauses
+-------
+
+This represents the "WHERE" part of your query.
+
+Most "where" clauses in Amiss will be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that hand-written "where" clauses skip field mapping - you have to use the column name rather than the object property names.
+
+This is a stupid query, but it does illustrate what this aspect will let you get away with:
+
+.. code-block:: php
+    
+    <?php
+    $artists = $manager->getList(
+        'Artist',
+        'artistTypeId=:foo AND artistId IN (SELECT artistId FROM event_artist WHERE eventId=:event)', 
+        array(':foo'=>1, ':event'=>5)
+    );
+    
+
+You can also just specify an array for the where clause if you are passing in an ``Amiss\Criteria\Query`` (or a criteria array). This method *will* perform field mapping. Multiple key/value pairs in the 'where' array are treated as an "AND" query:
 
 .. code-block:: php
 
     <?php
-    $duke = $manager->get('Artist', 'slug=?', 'duke-nukem');
+    $artists = $manager->getList(
+        'Artist',
+        array('where'=>array('artistTypeId'=>1))
+    );
 
 
-Single object with named parameters, shorthand
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"In" Clauses
+~~~~~~~~~~~~
+
+Vanilla PDO statements with parameters don't work with arrays and IN clauses:
+
+.. code-block:: php
+
+    <?php
+    $pdo = new PDO(...);
+    $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
+    $stmt->bindValue(':foo', array(1, 2, 3));
+    $stmt->execute(); 
+
+BZZT! Nope.
+
+Amiss handles unrolling non-nested array parameters:
+
+.. code-block:: php
+
+    <?php 
+    $criteria = new Amiss\Criteria;
+    $criteria->where = 'foo IN (:foo)';
+    $criteria->params = array(':foo'=>array(1, 2));
+    $criteria->namedParams = true;
+    list ($where, $params) = $criteria->buildClause();
+    
+    echo $where;        // foo IN (:foo_0,:foo_1) 
+    var_dump($params);  // array(':foo_0'=>1, ':foo_1'=>2)
+
+
+You can use this with ``Amiss\Manager`` easily:
+
+.. code-block:: php
+
+    <?php
+    $artists = $manager->getList(
+        'Artist', 
+        'artistId IN (:artistIds)', 
+        array(':artistIds'=>array(1, 2, 3))
+    );
+
+
+.. note::
+
+    This does not work with positional parameters (question-mark style).
+
+.. warning::
+
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway):
+
+    .. code-block:: php
+
+        <?php
+        $criteria = new Criteria\Query;
+        $criteria->params = array(
+            ':foo'=>array(1, 2),
+            ':bar'=>array(3, 4),
+        );
+        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
+        
+        list ($where, $params) = $criteria->buildClause();
+        echo $where;
+    
+    The output should be::
+
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
+    
+    However, the output will actually be::
+        
+        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
+
+    It's not pretty, but Amiss does not intend to babysit you so it's unlikely it will be fixed.
+
+
+
+.. _criteria-arguments:
+
+Criteria Arguments
+------------------
+
+Methods that accept query criteria do so at the end of the function signature. Query criteria can be passed in a number of different formats. The ``get()`` and ``getList()`` methods take their criteria after the the ``$modelName`` argument.
+
+Amiss treats hand-written "where" clauses as raw SQL and performs no field mapping.
+
+
+Shorthand
+~~~~~~~~~
+
+The "where" clause and parameters can be passed using a shorthand format. 
+
+To select using positional placeholders, pass the where clause as the first criteria argument and each positional parameter as a subsequent argument.
+
+.. code-block:: php
+
+    <?php
+    $badNews = $manager->get('Event', 'name=? AND slug=?', 'Bad News', 'bad-news-2');
+    $bands = $manager->getList('Artist', 'artistTypeId=1');
+
+
+To select using named placeholders, pass the where clause as the first criteria argument and an array of parameters the next argument:
 
 .. code-block:: php
 
@@ -50,8 +187,10 @@ Single object with named parameters, shorthand
     $duke = $manager->get('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
 
 
-Single object using named parameters, long form
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Long form
+~~~~~~~~~
+
+The long form of query criteria is either an array representation of the relevant ``Amiss\Criteria\\Query`` derivative, or an actual instance thereof.
 
 .. code-block:: php
 
@@ -64,9 +203,6 @@ Single object using named parameters, long form
         )
     );
 
-
-Single object using an Amiss\Criteria object
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: php
 
@@ -84,7 +220,7 @@ Single object using an Amiss\Criteria object
 Lists
 -----
 
-This will return every row in the Artist table (careful!):
+The ``getList()`` method will return every row in the Artist table if no criteria are passed (be careful!):
 
 .. code-block:: php
 
@@ -92,7 +228,10 @@ This will return every row in the Artist table (careful!):
     $artists = $manager->getList('Artist');
 
 
-Paged List
+In addition to the "where" clause and parameters, ``getList()`` will also make use of additional criteria:
+
+
+Pagination
 ~~~~~~~~~~
 
 Retrieve page 1, page size 30:
@@ -154,56 +293,22 @@ You can also order ascending on a single column with the following shorthand:
 Counting
 --------
 
-You can use all of the same signatures that you use for ``get`` to count rows (excluding LIMITs, of course):
-
-
-Count using positional parameters, shorthand
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You can use all of the same signatures that you use for ``Amiss\Manager->get()`` to count rows:
 
 .. code-block:: php
 
     <?php
+    // positional parameters
     $dukeCount = $manager->count('Artist', 'slug=?', 'duke-nukem');
 
-
-Count using named parameters, shorthand
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: php
-
-    <?php
+    // named parameters, shorthand:
     $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
 
-
-Count using named parameters, long form
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: php
-
-    <?php
-    $artistCount = $manager->count(
-        'Artist', 
-        array(
-            'where'=>'slug=:slug', 
-            'params'=>array(':slug'=>'duke-nukem')
-        )
-    );
-
-
-Count using an Amiss\Criteria object
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: php
-
-    <?php
-    $criteria = new Amiss\Criteria\Select;
+    // long form
+    $criteria = new \Amiss\Criteria\Query();
     $criteria->where = 'slug=:slug';
-    $criteria->params[':slug'] = 'duke-nukem';
-    
-    // this is detected when using other methods
-    $criteria->namedParams = true;
-    
-    $count = $manager->count('Artist', $criteria);
+    $criteria->params = array(':slug'=>'duke-nukem');
+    $dukeCount = $manager->count('Artist', $criteria);
 
 
 Constructor Arguments
@@ -244,108 +349,4 @@ If you are mapping an object that requires constructor arguments, you can pass t
 
 
 .. note:: Amiss does not yet support using row values as constructor arguments.
-
-
-Clauses
--------
-
-The "where" clause is written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. The tradeoff is that your clauses may not necessarily be portable.
-
-Ultimately, this kind of means you don't really save too much code when selecting with Amiss, but have you ever met a developer who didn't go the long way to avoid doing something they hate?
-
-This is a stupid query, but it does illustrate what this aspect will let you get away with:
-
-.. code-block:: php
-    
-    <?php
-    $artists = $manager->getList(
-        'Artist', 
-        'artistTypeId=:foo AND artistId IN (SELECT artistId FROM event_artist WHERE eventId=:event)', 
-        array(':foo'=>1, ':event'=>5)
-    );
-    
-
-You can also just specify an array for the where clause if you are passing in an ``Amiss\Criteria\Query`` (or a criteria array):
-
-.. code-block:: php
-
-    <?php
-    $artists = $manager->getList(
-        'Artist',
-        array('where'=>array('artistTypeId'=>1))
-    );
-
-
-"In" Clauses
-~~~~~~~~~~~~
-
-Vanilla PDO statements with parameters don't work with arrays and IN clauses:
-
-.. code-block:: php
-
-    <?php
-    $pdo = new PDO(...);
-    $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
-    $stmt->bindValue(':foo', array(1, 2, 3));
-    $stmt->execute(); 
-
-BZZT! Nope.
-
-Amiss handles unrolling non-nested array parameters:
-
-.. code-block:: php
-
-    <?php 
-    $criteria = new Amiss\Criteria;
-    $criteria->where = 'foo IN (:foo)';
-    $criteria->params = array(':foo'=>array(1, 2));
-    $criteria->namedParams = true;
-    list ($where, $params) = $criteria->buildClause();
-    
-    echo $where;        // foo IN (:foo_0,:foo_1) 
-    var_dump($params);  // array(':foo_0'=>1, ':foo_1'=>2)
-
-
-You can use this with ``Amiss\Manager`` easily:
-
-.. code-block:: php
-
-    <?php
-    $artists = $manager->getList(
-        'Artist', 
-        'artistId IN (:artistIds)', 
-        array(':artistIds'=>array(1, 2, 3))
-    );
-
-
-.. note::
-
-	This does not work with positional parameters (question-mark style).
-
-.. warning::
-
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway):
-
-    .. code-block:: php
-
-        <?php
-        $criteria = new Criteria\Query;
-        $criteria->params = array(
-            ':foo'=>array(1, 2),
-            ':bar'=>array(3, 4),
-        );
-        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
-        
-        list ($where, $params) = $criteria->buildClause();
-        echo $where;
-    
-    The output should be::
-
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
-    
-    However, the output will actually be::
-        
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
-
-    It's not pretty, but Amiss does not intend to babysit you so it's unlikely it will be fixed.
 

@@ -165,7 +165,7 @@ Retrieving Related Objects
 
 Amiss provides two methods for retrieving and populating relations:
 
-.. py:function:: getRelated($source, $relationName)
+.. py:function:: Amiss\\Manager->getRelated( $source , $relationName )
 
     :param source: The single object or array of objects for which to retrieve the related values
     :param relationName: The name of the relation through which to retrieve objects
@@ -206,7 +206,7 @@ Amiss provides two methods for retrieving and populating relations:
         $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', '%foo%');
 
 
-.. py:function:: assignRelated($into, $relationName)
+.. py:function:: Amiss\\Manager->assignRelated( $into , $relationName )
 
     :param into: The single object or array of objects into which this will set the related values
     :param relationName: The name of the relation through which to retrieve objects
@@ -267,6 +267,9 @@ Before we go any further, let's outline a relation graph present in the ``doc/de
     // Relation 3: populate each Artist object's artistType property
     $manager->assignRelated($manager->getChildren($events, 'eventArtists/artist'), 'artistType');
 
+    // this will show an ArtistType instance
+    var_dump($events->eventArtists[0]->artist->artistType);
+
 
 Woah, what just happened there? We used ``getChildren`` to build us an array of each child object contained in the list of parent objects. The first line shows we have a list of ``Event`` objects::
 
@@ -286,7 +289,7 @@ And then things get kooky when we populate Relation 2. Unrolled, the Relation 2 
     $manager->assignRelated($eventArtists, 'artist');
 
 
-The first call - to :ref:`getChildren() <helpers-get-children>` - iterates over the ``$events`` array and gathers every child ``EventArtist`` into an array, which it then returns. We can then rely on the fact that PHP `passes all objects by reference <http://php.net/manual/en/language.oop5.references.php>`_ and just use this array as the argument to the next ``assignRelated`` call.
+The first call - to :ref:`getChildren() <helpers-get-children>` - iterates over the ``$events`` array and gets every unique ``EventArtist`` assigned to the ``Event->eventArtists`` property. We can then rely on the fact that PHP `passes all objects by reference <http://php.net/manual/en/language.oop5.references.php>`_ and just use this array as the argument to the next ``assignRelated`` call.
 
 Relation 3 gets kookier still by adding nesting to the ``getChildren`` call. Here it is unrolled:
 
@@ -307,7 +310,7 @@ Custom Relators
 
 You can add your own relationship types to Amiss by creating a class that extends ``Amiss\Relator\Base`` and adding it to the ``Amiss\Manager->relators`` dictionary. Your Relator must implement the following method:
 
-.. py:method:: getRelated( $source , $relationName , $criteria = null )
+.. py:method:: Amiss\\Relator->getRelated( $source , $relationName , $criteria... = null )
     
     Retrieve the objects for the ``$source`` that are related through ``$relationName``. Optionally filter using ``$criteria``, which must be an instance of ``Amiss\Criteria\Query``.
 
