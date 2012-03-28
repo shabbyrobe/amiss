@@ -72,7 +72,7 @@ class OneMany extends Base
 		$query->where = implode(' AND ', $where);
 		
 		if ($criteria) {
-			list ($cWhere, $cParams) = $criteria->buildClause();
+			list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
 			$query->params = array_merge($cParams, $query->params);
 			$query->where .= ' AND ('.$cWhere.')';
 		}

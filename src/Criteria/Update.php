@@ -6,32 +6,31 @@ class Update extends Query
 {
 	public $set=array();
 	
-	public function buildSet()
+	public function buildSet($meta)
 	{
 		$params = array();
 		$clause = array();
-		if ($this->paramsAreNamed()) {
-			foreach ($this->set as $k=>$v) {
-				if (is_numeric($k)) {
-					$clause[] = $v;
-				}
-				else {
-					$param = ':set_'.$k;
-					$clause[] = '`'.$k.'`='.$param;
-					$params[$param] = $v;
-				}
+		
+		$fields = $meta ? $meta->getFields() : null;
+		$named = $this->paramsAreNamed();
+		
+		foreach ($this->set as $name=>$value) {
+			if (is_numeric($name)) {
+				// this allows arrays of manual "set"s, i.e. array('foo=foo+10', 'bar=baz')
+				$clause[] = $value;
 			}
-		}
-		else {
-			foreach ($this->set as $k=>$v) {
-				if (is_numeric($k)) {
-					$clause[] = $v;
+			else {
+				$field = (isset($fields[$name]) ? $fields[$name]['name'] : $name);
+				
+				if ($named) {
+					$param = ':set_'.$name;
+					$clause[] = '`'.$field.'`='.$param;
+					$params[$param] = $value;
 				}
 				else {
-					$clause[] = '`'.$k.'`=?';
-					$params[] = $v;
+					$clause[] = '`'.$field.'`=?';
+					$params[] = $value;
 				}
-				
 			}
 		}
 		

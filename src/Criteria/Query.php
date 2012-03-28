@@ -21,20 +21,33 @@ class Query
 		}
 	}
 	
-	public function buildClause()
+	public function buildClause($meta)
 	{
 		$where = $this->where;
 		$params = array();
 		$namedParams = $this->paramsAreNamed(); 
 		
+		$fields = null;
+		if ($meta) $fields = $meta->getFields();
+		
 		if (is_array($where)) {
 			$wh = array();
 			foreach ($where as $k=>$v) {
+				if (isset($fields[$k])) $k = $fields[$k]['name'];
 				$wh[] = '`'.str_replace('`', '', $k).'`=:'.$k;
 				$params[':'.$k] = $v;
 			}
 			$where = implode(' AND ', $wh);
 			$namedParams = true;
+		}
+		else {
+			if ($fields && strpos($where, '{')!==false) {
+				$tokens = array();
+				foreach ($fields as $k=>$v)
+					$tokens['{'.$k.'}'] = '`'.$v['name'].'`';
+				
+				$where = strtr($where, $tokens);
+			}
 		}
 		
 		if ($namedParams) {

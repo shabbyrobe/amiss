@@ -126,7 +126,7 @@ class Manager
 		
 		$table = $meta->table;
 		
-		list ($where, $params) = $criteria->buildClause();
+		list ($where, $params) = $criteria->buildClause($meta);
 		
 		$field = '*';
 		if ($meta->primary && count($meta->primary) == 1) {
@@ -378,8 +378,8 @@ class Manager
 		$meta = $this->getMeta($objectName);
 		$table = $meta->table;
 		
-		list ($setClause,   $setParams)   = $update->buildSet();
-		list ($whereClause, $whereParams) = $update->buildClause();
+		list ($setClause,   $setParams)   = $update->buildSet($meta);
+		list ($whereClause, $whereParams) = $update->buildClause($meta);
 		
 		$params = array_merge($setParams, $whereParams);
 		if (count($params) != count($setParams) + count($whereParams)) {
@@ -401,7 +401,7 @@ class Manager
 		$meta = $this->getMeta($objectName);
 		$table = $meta->table;
 		
-		list ($whereClause, $whereParams) = $criteria->buildClause();
+		list ($whereClause, $whereParams) = $criteria->buildClause($meta);
 		
 		$sql = "DELETE FROM $table WHERE $whereClause";
 		

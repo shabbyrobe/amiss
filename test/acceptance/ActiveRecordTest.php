@@ -56,21 +56,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 		$this->assertTrue($obj instanceof Active\ArtistRecord);
 		$this->assertEquals(1, $obj->artistId);
 	}
-
-	/**
-	 * @group active
-	 * @group acceptance
-	 * @group faulty
-	 */
-	public function testGetPopulatesUndeclaredProperties()
-	{
-		$obj = Active\VenueRecord::get('venueId=:id', array(':id'=>1));
-		$this->assertTrue($obj instanceof Active\VenueRecord);
-		$this->assertEquals(1, $obj->venueId);
-		$this->assertEquals('31.1234', $obj->latitude);
-		$this->assertEquals('124.4444', $obj->longitude);
-	}
-
+	
 	/**
 	 * @group active
 	 * @group acceptance

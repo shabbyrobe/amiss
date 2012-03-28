@@ -24,7 +24,7 @@ class Select extends Query
 	{
 		$table = $meta->table;
 		
-		list ($where, $params) = $this->buildClause();
+		list ($where, $params) = $this->buildClause($meta);
 		$order = $this->buildOrder($meta);
 		list ($limit, $offset) = $this->getLimitOffset();
 		
@@ -40,48 +40,45 @@ class Select extends Query
 	
 	public function buildFields($meta, $prefix=null)
 	{
-		$fields = '*';
+		$metaFields = $meta ? $meta->getFields() : null;
 		
-		if (!$this->fields) {
-			$metaFields = $meta->getFields();
-			if ($metaFields) {
-				$fields = array();
-				foreach ($metaFields as $field) {
-					$fields[] = ($prefix ? $prefix.'.' : '').'`'.$field['name'].'`';
-				}
-				$fields = implode(', ', $fields);
-			}
+		$fields = $this->fields;
+		if (!$fields) {
+			$fields = $metaFields ? array_keys($metaFields) : '*';
 		}
-		else {
-			$fields = is_array($this->fields) ? implode(', ', $this->fields) : $this->fields;
+		
+		if (is_array($fields)) {
+			$fNames = array();
+			foreach ($fields as $f) {
+				$name = (isset($metaFields[$f]) ? $metaFields[$f]['name'] : $f);
+				$fNames[] = ($prefix ? $prefix.'.' : '').'`'.$name.'`';
+			}
+			$fields = implode(', ', $fNames);
 		}
 		
 		return $fields;
 	}
 	
-	public function buildOrder($meta)
+	// damn, this is pretty much identical to the above.
+	public function buildOrder($meta, $prefix=null)
 	{
-		$order = array();
-		if (is_string($this->order)) {
-			return $this->order;
-		}
-		else {
-			$fields = $meta->getFields();
-			foreach ($this->order as $field=>$dir) {
-				if (is_numeric($field)) { 
+		$metaFields = $meta ? $meta->getFields() : null;
+		
+		$order = $this->order;
+		
+		if ($order && is_array($order)) {
+			$oClauses = array();
+			foreach ($order as $field=>$dir) {
+				if (is_numeric($field)) {
 					$field = $dir; $dir = 'asc';
 				}
 				
-				if (!isset($fields[$field]))
-					throw new \Amiss\Exception("Attempted to order by nonexistent property $field for class {$meta->class}");
-				
-				$fieldMeta = $fields[$field];
-				$field = $fieldMeta['name'];
-				
-				$dir = trim(strtolower($dir));
-				$order[] = '`'.str_replace('`', '', $field).'`'.($dir == 'asc' ? '' : ' desc');
+				$name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
+				$oClauses[] = '`'.$name.'`'.($dir == 'asc' ? '' : ' desc');
 			}
-			return implode(', ', $order);
+			$order = implode(', ', $oClauses);
 		}
+		
+		return $order;
 	}
 }

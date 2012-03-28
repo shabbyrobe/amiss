@@ -160,9 +160,9 @@ class Association extends Base
 		}
 		$joinOn = implode(' AND ', $joinOn);
 		
-		list ($where, $params) = $query->buildClause();
+		list ($where, $params) = $query->buildClause(null);
 		if ($criteria) {
-			list ($cWhere, $cParams) = $criteria->buildClause();
+			list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
 			$params = array_merge($cParams, $params);
 			$where .= ' AND ('.$cWhere.')';
 		}
