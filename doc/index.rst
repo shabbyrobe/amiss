@@ -37,9 +37,9 @@ It is unapologetic about being `stupid, simple and fast`, and is completely awar
 Requirements
 ------------
 
- * PHP 5.3.2 or greater
- * MySQL or SQLite
- * PDO/MySQL and/or PDO/SQLite
+- PHP 5.3.2 or greater
+- MySQL or SQLite
+- PDO/MySQL and/or PDO/SQLite
 
 .. note:: Amiss has only been tested with PHP 5.3.2. It may work with 5.3.0 and 5.3.1, but this is not guaranteed.
 

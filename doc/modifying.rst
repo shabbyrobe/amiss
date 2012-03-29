@@ -69,7 +69,7 @@ To update an object's representation in the database, call the ``update`` method
 .. note:: This only works if the object has a primary key.
 
 .. code-block:: php
-    
+
     <?php
     $a = $manager->getByPk('Artist', 1);
     $a->name = 'foo bar';
@@ -93,7 +93,7 @@ The ``class`` parameter should just be the name of a class, otherwise the "Objec
 In the first two signatures, the ``set`` parameter is an array of key=>value pairs containing fields to set. The key should be the object's property name, not the column in the database (though these may be identical). The ``positionalWhere`` or ``namedWhere`` are, like select, just parameterised query clauses.
 
 .. code-block:: php
-    
+
     <?php
     $manager->update('EventArtist', array('priority'=>1), 'artistId=?', 2);
     // equivalent SQL: UPDATE event_artist SET priority=1 WHERE artistId=2
@@ -131,7 +131,7 @@ Saving
 "Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects with an autoincrement column.
 
 .. code-block:: php
-    
+
     <?php
     $obj = new Artist;
     $obj->name = 'foo baz';

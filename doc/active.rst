@@ -6,9 +6,7 @@ An object that wraps a row in a database table or view, encapsulates the databas
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not in love with this pattern, but I have used it in the past with some other libraries. This has been added to facilitate a migration for an old project of mine, but people seem to be quite fond of Active Records so why not include it.
-
-``Amiss\Active\Record`` is an Active Record wrapper around ``Amiss\Manager``.
+I'm not wild about Active Records, but they can be very effective for rapid development and people seem to like them, and Late Static Binding made them extremely simple to implement.
 
 
 Defining
@@ -130,7 +128,7 @@ Lazy Loading
 ``Amiss\Active\Record`` has no support for automatic lazy loading. You can implement it yourself using a wrapper function:
 
 .. code-block:: php
-    
+
     <?php
     namespace Amiss\Demo;
     class Artist extends \Amiss\Active\Record
@@ -158,7 +156,7 @@ Lazy Loading
 You can then simply call the new function to get the related object:
 
 .. code-block:: php
-    
+
     <?php
     $a = Artist::getByPk(1);
     $type = $a->getArtistType();

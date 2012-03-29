@@ -7,7 +7,7 @@ The first argument to ``get`` and ``getList`` is always the model name. All the 
 
 The selection methods are:
 
-.. py:method:: Amiss\\Manager->getByPk( $model , $primaryKeyValue )
+.. py:method:: Amiss\\Manager::getByPk( $model , $primaryKeyValue )
 
     Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
 
@@ -31,7 +31,7 @@ The selection methods are:
         $eventArtist = $manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
-.. py:method:: object Amiss\\Manager->get( $model , $criteria... )
+.. py:method:: object Amiss\\Manager::get( $model , $criteria... )
 
     Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an exception if the criteria you specify fails to limit the result to a single object.
 
@@ -43,7 +43,7 @@ The selection methods are:
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
 
-.. py:method:: array Amiss\\Manager->getList( $mode , $criteria... )
+.. py:method:: array Amiss\\Manager::getList( $mode , $criteria... )
 
     Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as ``get``, but allows you to find many objects and will always return an array.
 
@@ -53,7 +53,7 @@ The selection methods are:
 Criteria Arguments
 ------------------
 
-Methods that accept query criteria do so at the end of the function signature. Query criteria can be passed in a number of different formats. The ``get()`` and ``getList()`` methods take their criteria after the the ``$modelName`` argument.
+Several methods throughout this documentation take a dynamic argument list referred to as ``$criteria...``. This is always accepted at the end of the argument list and can be passed in a number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Manager`` take their criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both the ``$modelName`` and the ``$relationName`` arguments.
 
 Please also familiarise yourself with the section on :ref:`clauses` before diving in.
 
@@ -61,9 +61,9 @@ Please also familiarise yourself with the section on :ref:`clauses` before divin
 Shorthand
 ~~~~~~~~~
 
-The "where" clause and parameters can be passed using a shorthand format.
+The "where" clause and parameters can be passed using a shorthand format that consists of a WHERE clause with positional PDO-style placeholders (question marks) and each corresponding value in subsequent arguments::
 
-To select using positional placeholders, pass the where clause as the first criteria argument and each positional parameter as a subsequent argument.
+    ( $criteria... ) == ( string $positionalWhere, scalar $param1 [, scalar $param2... ] )
 
 .. code-block:: php
 
@@ -72,7 +72,9 @@ To select using positional placeholders, pass the where clause as the first crit
     $bands = $manager->getList('Artist', 'artistTypeId=1');
 
 
-To select using named placeholders, pass the where clause as the first criteria argument and an array of parameters the next argument:
+To select using named placeholders, pass the where clause as the first criteria argument and an array of parameters the next argument::
+
+    ( $criteria... ) == ( string $namedWhere, array $params )
 
 .. code-block:: php
 
@@ -83,7 +85,11 @@ To select using named placeholders, pass the where clause as the first criteria 
 Long form
 ~~~~~~~~~
 
-The long form of query criteria is either an array representation of the relevant ``Amiss\Criteria\\Query`` derivative, or an actual instance thereof.
+The long form of query criteria is either an array representation of the relevant ``Amiss\Criteria\\Query`` derivative, or an actual instance thereof::
+
+    ( $criteria... ) == ( array $criteria )
+    ( $criteria... ) == ( Amiss\Criteria\Query $criteria )
+
 
 .. code-block:: php
 
@@ -95,7 +101,6 @@ The long form of query criteria is either an array representation of the relevan
             'params'=>array(':slug'=>'duke-nukem')
         )
     );
-
 
 .. code-block:: php
 
@@ -164,12 +169,12 @@ You can order ascending on a single column with the following shorthand. Fields 
     $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
 
 
-Just like :doc:`clauses`, you can order using an array. The key should be the field name, which *will* be mapped in this case, and the value should be the order direction. The default order direction is ascending, so if you wish to sort ascending you can either specify 'asc' directly, or just omit the key and pass the field name as the value.
+Just like :ref:`clauses`, you can order using an array. The key should be the field name, which *will* be mapped in this case, and the value should be the order direction. The default order direction is ascending, so if you wish to sort ascending you can either specify 'asc' directly, or just omit the key and pass the field name as the value.
 
 This will produce the same order as the previous example:
 
 .. code-block:: php
-    
+
     <?php
     $eventArtists = $manager->getList('EventArtist', array(
         'order'=>array(
@@ -182,7 +187,7 @@ This will produce the same order as the previous example:
 And also like :ref:`clauses`, you can write your order expression in raw sql. Using this method, no field mapping is performed:
 
 .. code-block:: php
-    
+
     <?php
     $eventArtists = $manager->getList('EventArtist', array(
         'order'=>'priority desc, sequence',
@@ -335,7 +340,7 @@ Constructor Arguments
 If you are mapping an object that requires constructor arguments, you can pass them using criteria.
 
 .. code-block:: php
-    
+
     <?php
     class Foo
     {

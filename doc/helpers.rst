@@ -5,15 +5,78 @@ Helpers
 
 .. _helpers-get-children:
 
-.. py:function:: Amiss\\Manager->getChildren()
+.. py:function:: Amiss\\Manager::getChildren( iterable $objects , $path )
+
+    Retrieve all child values through property ``$path`` from ``$objects``.
+
+    .. code-block:: php
+
+        <?php
+        // (object) cast creates stdClass objects
+        $objects = array(
+            (object)array('foo'=>'a'),
+            (object)array('foo'=>'b'),
+            (object)array('foo'=>'c'),
+        );
+        
+        $children = $manager->getChildren($objects, 'foo');
+        $expected = array('a', 'b', 'c');
+
+        // this will output true
+        var_dump($children == $expected);
 
     
+    ``$path`` can be a single string containing a property name, like the above example, or it can be a path expression allowing you to traverse multiple levels:
+
+    .. code-block:: php
+        
+        <?php
+        $objects = array(
+            (object)array('foo'=>(object)array('bar'=>'a')),
+            (object)array('foo'=>(object)array('bar'=>'b')),
+            (object)array('foo'=>(object)array('bar'=>'c')),
+        );
+        
+        $children = $manager->getChildren($objects, 'foo/bar');
+        $expected = array('a', 'b', 'c');
+
+        // this will output true
+        var_dump($children == $expected);
+
     
+    ``getChildren`` will also work if the result of any path level yields an array:
+
+    .. code-block:: php
+    
+        <?php
+        $objects = array(
+            (object)array('foo'=>array(
+                (object)array('bar'=>'a'),
+                (object)array('bar'=>'b'),
+            ),
+        );
+
+        $children = $manager->getChildren($objects, 'foo/bar');
+        $expected = array('a', 'b');
+
+        // this will output true
+        var_dump($children == $expected);
+
+    
+    ``$path`` will also accept an array:
+
+    .. code-block:: php
+    
+        <?php
+        $children = $manager->getChildren($objects, array('foo', 'bar'));
 
 
-.. py:function:: Amiss\\Manager->indexBy()
+    See :ref:`relations-assigning-nested` for a complete example of using ``getChildren`` with :doc:`relations`.
 
-    ``indexBy()`` iterates over an array of objects and returns an array of objects indexed by a property:
+
+.. py:function:: Amiss\\Manager::indexBy()
+
+    Iterate over an array of objects and returns an array of objects indexed by a property:
 
     .. code-block:: php
 
@@ -50,7 +113,7 @@ Helpers
     BZZT! ``UnexpectedValueException``!
 
 
-.. py:function:: Amiss\Manager->keyValue()
+.. py:function:: Amiss\Manager::keyValue()
 
     ``keyValue`` scans an array of objects or arrays and selects a property for the key and a property for the value.
 
@@ -60,7 +123,8 @@ Helpers
 
         <?php
         $manager = new Amiss\Manager(...);
-        $artists = $manager->keyValue($manager->execute('SELECT artistId, name FROM artist ORDER BY artistName')->fetchAll(\PDO::FETCH_ASSOC));
+        $sql = 'SELECT artistId, name FROM artist ORDER BY artistName';
+        $artists = $manager->keyValue($manager->execute($sql)->fetchAll(\PDO::FETCH_ASSOC));
 
 
     Et voila! Array of key/value pairs from your query.
@@ -71,4 +135,6 @@ Helpers
 
         <?php
         $manager = new Amiss\Manager(...);
-        $artists = $manager->keyValue($manager->getList('Artist', array('order'=>'name')), 'artistId', 'name'); 
+        $result = $manager->getList('Artist', array('order'=>'name'));
+        $artists = $manager->keyValue($result, 'artistId', 'name'); 
+
