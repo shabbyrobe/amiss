@@ -456,7 +456,7 @@ class Manager
 		foreach ($objects as $o) {
 			$value = $o->{$path[0]};
 			
-			if (is_array($value))
+			if (is_array($value) || $value instanceof \Traversable)
 				$array = array_merge($array, $value);
 			elseif ($value !== null)
 				$array[] = $value;
