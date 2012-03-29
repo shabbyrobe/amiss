@@ -60,7 +60,7 @@ class Select extends Query
 	}
 	
 	// damn, this is pretty much identical to the above.
-	public function buildOrder($meta, $prefix=null)
+	public function buildOrder($meta)
 	{
 		$metaFields = $meta ? $meta->getFields() : null;
 		
