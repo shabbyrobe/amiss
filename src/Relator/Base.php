@@ -25,7 +25,11 @@ abstract class Base implements \Amiss\Relator
 					throw new \Exception("Field $r does not exist against relation for ".get_class($object));
 				
 				if (!isset($ids[$l])) {
-					$ids[$l] = array('values'=>array(), 'rField'=>$rFields[$r], 'param'=>$this->manager->sanitiseParam($rFields[$r]['name']));
+					$ids[$l] = array(
+						'values'=>array(), 
+						'rField'=>$rFields[$r], 
+						'param'=>preg_replace('/[^A-z0-9_]/', '', $rFields[$r]['name'])
+					);
 				}
 				
 				$ids[$l]['values'][$lValue] = true;

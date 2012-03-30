@@ -88,7 +88,7 @@ Helpers
         );
         
         $manager = new Amiss\Manager(...);
-        $indexed = $manager->indexBy('foo', $objects);
+        $indexed = $manager->indexBy($objects), 'foo';
         
         // this will output array('a', 'b', 'c')
         var_dump(array_keys($indexed));
@@ -108,7 +108,7 @@ Helpers
             (object)array('foo'=>'b'),
         );
         $manager = new Amiss\Manager(...);
-        $indexed = $manager->indexBy('foo', $objects, Amiss::INDEX_DUPE_FAIL);
+        $indexed = $manager->indexBy($objects, 'foo', Amiss::INDEX_DUPE_FAIL);
 
     BZZT! ``UnexpectedValueException``!
 

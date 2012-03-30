@@ -11,7 +11,10 @@ abstract class Record
 	private static $managers=array();
 	private static $meta=array();
 	
-	// for testing only
+	/**
+	 * For testing only
+	 * @ignore
+	 */
 	public static function _reset()
 	{
 		self::$managers = array();
@@ -100,7 +103,10 @@ abstract class Record
 		
 		return call_user_func_array(array($manager, 'update'), $args);
 	}
-
+	
+	/**
+	 * @ignore
+	 */
 	public function __call($name, $args)
 	{
 		$manager = static::getManager();
@@ -117,6 +123,9 @@ abstract class Record
 			throw new \BadMethodCallException("Unknown method $name on class ".get_class($this));
 	}
 	
+	/**
+	 * @ignore
+	 */
 	public static function __callStatic($name, $args)
 	{
 		$manager = static::getManager();
@@ -134,6 +143,9 @@ abstract class Record
 			throw new \BadMethodCallException("Unknown method $name");
 	}
 	
+	/**
+	 * @ignore
+	 */
 	public function __get($name)
 	{
 		$meta = static::getMeta();

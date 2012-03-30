@@ -14,17 +14,50 @@ namespace Amiss;
  * 
  * It also offers some enhancements - it will tell you when there is an active
  * transaction (unless you grab the internal PDO and start one directly)
- * 
- * @author Blake Williams
  */
 class Connector
 {
+	/**
+	 * Underlying database connection
+	 * Will be null if the Connector has not established a connection.
+	 * @var \PDO|null
+	 */
 	public $pdo;
+	
+	/**
+	 * DSN for the database connection
+	 * @var string
+	 */
 	public $dsn;
+	
+	/**
+	 * Database engine
+	 * @var string
+	 */
 	public $engine;
+	
+	/**
+	 * Database username
+	 * @var string
+	 */
 	public $username;
+	
+	/**
+	 * Database password
+	 * @var string
+	 */
 	public $password;
+	
+	/**
+	 * Database driver options
+	 * @var array
+	 */
 	public $driverOptions;
+	
+	/**
+	 * Transaction depth
+	 * @var int
+	 */
 	public $transactionDepth=0;
 	
 	private $attributes=array();
@@ -43,7 +76,10 @@ class Connector
 		$this->password = $password;
 		$this->driverOptions = $driverOptions;
 	}
-
+	
+	/**
+	 * @ignore
+	 */
 	public function __sleep()
 	{
 		$this->pdo = null;
@@ -54,6 +90,7 @@ class Connector
 	
 	/**
 	 * Creates a Connector from an array of connection parameters.
+	 * @param array Parameters to use to create the connection
 	 * @return Amiss\Connector
 	 */
 	public static function create(array $params)
@@ -134,15 +171,15 @@ class Connector
 	 * This is an alternative to the standard PDO way of nulling all 
 	 * references to the PDO object, which also works with PDOConnector.
 	 * 
-	 * <example>
+	 * <code>
 	 * // Regular PDO way (also works with PDOConnector)
 	 * $pdoConnector = null;
 	 * 
 	 * // using disconnect()
 	 * $pdoConnector->disconnect();
 	 * // creates a new connection before executing 
-	 * $pdoConnector->query("SHOW PROCESSLIST"); 
-	 * </example>
+	 * $pdoConnector->query("SHOW PROCESSLIST");
+	 * </code>
 	 */
 	public function disconnect()
 	{
@@ -167,6 +204,9 @@ class Connector
 			return $this->pdo->getAttribute($attribute);
 	}
 	
+	/**
+	 * @see \PDO::beginTransaction
+	 */
 	public function beginTransaction()
 	{
 		$pdo = $this->getPDO();
@@ -174,6 +214,9 @@ class Connector
 		return $this->getPDO()->beginTransaction();
 	}
 	
+	/**
+	 * @see \PDO::commit
+	 */
 	public function commit()
 	{
 		$this->ensurePDO();
