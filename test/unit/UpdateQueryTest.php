@@ -21,6 +21,22 @@ class UpdateQueryTest extends \CustomTestCase
 		$this->assertEquals('`foo_foo`=:set_foo_foo, `baz_baz`=:set_baz_baz', $clause);
 		$this->assertEquals(array(':set_foo_foo'=>'bar', ':set_baz_baz'=>'qux'), $params);
 	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Update::buildSet
+	 */
+	public function testBuildArraySetWithSomeManualClauses()
+	{
+		$uq = $this->getMock('Amiss\Criteria\Update', array('paramsAreNamed'));
+		$uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(true));
+		
+		$uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux', 'dingdong=dangdung+1');
+		
+		list ($clause, $params) = $uq->buildSet(null);
+		$this->assertEquals('`foo_foo`=:set_foo_foo, `baz_baz`=:set_baz_baz, dingdong=dangdung+1', $clause);
+		$this->assertEquals(array(':set_foo_foo'=>'bar', ':set_baz_baz'=>'qux'), $params);
+	}
 	
 	/**
 	 * @group unit
