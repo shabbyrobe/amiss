@@ -19,7 +19,7 @@ ob_start();
 $startTime = microtime(true);
 $data = require($file);
 $timeTaken = microtime(true) - $startTime;
-dump($data);
+dump_example($data);
 $output = ob_get_clean();
 $source = source(file_get_contents($file), true);
 ?>

@@ -26,7 +26,7 @@ function source($code)
 	return ob_get_clean();
 }
 
-function dump($obj, $depth=10, $highlight=true)
+function dump_example($obj, $depth=10, $highlight=true)
 {
 	$trace = debug_backtrace();
 	$line = $trace[0]['line'];
@@ -34,7 +34,7 @@ function dump($obj, $depth=10, $highlight=true)
 	echo '<div class="dump">';
 	echo '<div class="file">Dump at <a href="#line-'.$line.'">Line '.$line.'</a>:</div>';
 	echo '<div class="code">';
-	VarDumper::dump($obj, $depth, $highlight);
+	echo dump_highlight($obj, $depth);
 	echo "</div>";
 	echo '</div';
 }
@@ -110,134 +110,92 @@ function titleise_slug($slug)
 	return ucfirst(preg_replace('/[_-]/', ' ', $slug));
 }
 
-/**
- * This was borrowed from the Yii framework (yiiframework.com), which
- * is released under the following BSD license:
- * 
- * Copyright Copyright 2008-2011 by Yii Software LLC
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
- * 
- * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
- * Neither the name of Yii Software LLC nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * @author Qiang Xue <qiang.xue@gmail.com>
- */
-class VarDumper
+function dump_highlight($var, $depth=null)
 {
-	private static $_objects;
-	private static $_output;
-	private static $_depth;
+	$out = dump($var);
+	$out = highlight_string('<?php '.$out, true);
+	$out = preg_replace('@<span\s+style="color:\s+#[0-9A-F]+">&lt;\?php&nbsp;</span>@s', '', $out);
+	return $out;
+}
 
-	/**
-	 * Displays a variable.
-	 * This method achieves the similar functionality as var_dump and print_r
-	 * but is more robust when handling complex objects such as Yii controllers.
-	 * @param mixed $var variable to be dumped
-	 * @param integer $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-	 * @param boolean $highlight whether the result should be syntax-highlighted
-	 */
-	public static function dump($var,$depth=10,$highlight=false)
-	{
-		echo self::dumpAsString($var,$depth,$highlight);
-	}
+function dump($var, $depth=null)
+{
+	if ($depth === null) $depth = 3;
 
-	/**
-	 * Dumps a variable in terms of a string.
-	 * This method achieves the similar functionality as var_dump and print_r
-	 * but is more robust when handling complex objects such as Yii controllers.
-	 * @param mixed $var variable to be dumped
-	 * @param integer $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-	 * @param boolean $highlight whether the result should be syntax-highlighted
-	 * @return string the string representation of the variable
-	 */
-	public static function dumpAsString($var,$depth=10,$highlight=false)
-	{
-		self::$_output='';
-		self::$_objects=array();
-		self::$_depth=$depth;
-		self::dumpInternal($var,0);
-		if($highlight)
-		{
-			$result=highlight_string("<?php\n".self::$_output,true);
-			self::$_output=preg_replace('/&lt;\\?php<br \\/>/','',$result,1);
-		}
-		return self::$_output;
-	}
+	static $indent = 0;
+	static $objects = array();
+	static $ocnt = 0;
+	static $spaces = 4;
 
-	/*
-	 * @param mixed $var variable to be dumped
-	 * @param integer $level depth level
-	 */
-	private static function dumpInternal($var,$level)
-	{
-		switch(gettype($var))
-		{
-			case 'boolean':
-				self::$_output.=$var?'true':'false';
-				break;
-			case 'integer':
-				self::$_output.="$var";
-				break;
-			case 'double':
-				self::$_output.="$var";
-				break;
-			case 'string':
-				self::$_output.="'".addslashes($var)."'";
-				break;
-			case 'resource':
-				self::$_output.='{resource}';
-				break;
-			case 'NULL':
-				self::$_output.="null";
-				break;
-			case 'unknown type':
-				self::$_output.='{unknown}';
-				break;
-			case 'array':
-				if(self::$_depth<=$level)
-					self::$_output.='array(...)';
-				else if(empty($var))
-					self::$_output.='array()';
-				else
-				{
-					$keys=array_keys($var);
-					$spaces=str_repeat(' ',$level*4);
-					self::$_output.="array\n".$spaces.'(';
-					foreach($keys as $key)
-					{
-						$key2=str_replace("'","\\'",$key);
-						self::$_output.="\n".$spaces."    '$key2' => ";
-						self::$_output.=self::dumpInternal($var[$key],$level+1);
-					}
-					self::$_output.="\n".$spaces.')';
+	$out = '';
+	$type = gettype($var);
+	switch ($type) {
+		case 'NULL':
+			$out .= 'null';
+		break;
+
+		case 'integer':
+			$out .= $var;
+		break;
+
+		case 'string':
+			$out .= "'".addslashes($var)."'";
+		break;
+
+		case 'double':
+			$out .= $var.'D';
+		break;
+
+		case 'boolean':
+			$out .= $var ? 'true' : 'false';
+		break;
+
+		case 'resource':
+			$out .= '[resource: '.get_resource_type($var).']';
+		break;
+
+		case 'array':
+		case 'object':
+			$obj = $type == 'object';
+			$name = $obj ? get_class($var) : 'array';
+			$hash = $obj ? spl_object_hash($var) : null;
+
+			++ $indent;
+
+			if ($indent >= $depth) {
+				$out .= $name.' (...)';
+			}
+			elseif (!$var) {
+				$out .= $name.' ()';
+			}
+			elseif (isset($objects[$hash])) {
+				$out .= $name.'#'.$objects[$hash].' (...)';
+			}
+			else {
+				if ($obj) {
+					$fmt = '[%s]';
+					$objects[$hash] = ++$ocnt;
+					$name .= '#'.$ocnt;
 				}
-				break;
-			case 'object':
-				if(($id=array_search($var,self::$_objects,true))!==false)
-					self::$_output.=get_class($var).'#'.($id+1).'(...)';
-				else if(self::$_depth<=$level)
-					self::$_output.=get_class($var).'(...)';
-				else
-				{
-					$id=array_push(self::$_objects,$var);
-					$className=get_class($var);
-					$members=(array)$var;
-					$spaces=str_repeat(' ',$level*4);
-					self::$_output.="$className#$id\n".$spaces.'(';
-					foreach($members as $key=>$value)
-					{
-						$keyDisplay=strtr(trim($key),array("\0"=>':'));
-						self::$_output.="\n".$spaces."    [$keyDisplay] => ";
-						self::$_output.=self::dumpInternal($value,$level+1);
-					}
-					self::$_output.="\n".$spaces.')';
+				else $fmt = "'%s'";
+
+				$margin = str_repeat(' ', $indent * $spaces);
+				$out .= $name." (\n";
+				foreach ((array)$var as $k=>$v) {
+					$k = str_replace("\0", ':', trim($k));
+					$out .= $margin.sprintf($fmt, $k)." => ".dump($v, $depth)."\n";
 				}
-				break;
-		}
+				$out .= str_repeat(' ', ($indent - 1) * $spaces).")";
+			}
+			-- $indent;
+		break;
 	}
+
+	if ($indent == 0) {
+		$objects = array();
+		$ocnt = 0;
+		$out .= "\n";
+	}
+
+	return $out;
 }
