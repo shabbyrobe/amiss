@@ -11,7 +11,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaWithDefinedTable()
 	{
@@ -28,7 +28,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaWithDefaultTable()
 	{
@@ -49,7 +49,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaCache()
 	{
@@ -81,7 +81,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaMultiplePrimaries()
 	{
@@ -100,7 +100,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaFieldsFound()
 	{
@@ -120,7 +120,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaSkipsPropertiesWithNoFieldNote()
 	{
@@ -140,7 +140,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaGetterWithDefaultSetter()
 	{
@@ -161,7 +161,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaPrimaryNoteImpliesFieldNote()
 	{
@@ -179,7 +179,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsTypeSet()
 	{
@@ -201,7 +201,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaPrimaryNoteFound()
 	{
@@ -219,7 +219,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaMultiPrimaryNoteFound()
 	{
@@ -238,7 +238,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaFieldTypeFound()
 	{
@@ -261,7 +261,7 @@ class NoteMapperTest extends \CustomTestCase
 	/**
 	 * @group mapper
 	 * @group unit
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaWithParentClass()
 	{
@@ -364,7 +364,7 @@ class NoteMapperTest extends \CustomTestCase
 	 * @group unit
 	 * @group faulty
 	 * 
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
 	public function testGetMetaOneToOnePropertyRelationWithNoOn()
 	{
@@ -400,7 +400,7 @@ class NoteMapperTest extends \CustomTestCase
 	 * @group mapper
 	 * @group unit
 	 * 
-	 * @covers Amiss\Mapper\Note::createMeta
+	 * @covers Amiss\Mapper\Note::loadMeta
 	 * @covers Amiss\Mapper\Note::buildRelations
 	 */
 	public function testGetMetaOneToManyPropertyRelationWithNoOn()
