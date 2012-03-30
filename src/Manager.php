@@ -260,12 +260,17 @@ class Manager
 			
 			$criteria = $this->createTableUpdateCriteria($first, $args);
 			$class = $first;
+			$meta = $this->getMeta($class);
 		}
 		else {
 			throw new \InvalidArgumentException();
 		}
 		
-		return $this->executeUpdate($class, $criteria);
+		list ($sql, $params) = $criteria->buildQuery($meta);
+		
+		$stmt = $this->getConnector()->prepare($sql);
+		++$this->queries;
+		$stmt->execute($params);
 	}
 	
 	public function delete()
@@ -371,29 +376,6 @@ class Manager
 			}
 		}
 		return $criteria;
-	}
-	
-	protected function executeUpdate($objectName, Criteria\Update $update)
-	{
-		$meta = $this->getMeta($objectName);
-		$table = $meta->table;
-		
-		list ($setClause,   $setParams)   = $update->buildSet($meta);
-		list ($whereClause, $whereParams) = $update->buildClause($meta);
-		
-		$params = array_merge($setParams, $whereParams);
-		if (count($params) != count($setParams) + count($whereParams)) {
-			$intersection = array_intersect(array_keys($setParams), array_keys($whereParams));
-			throw new Exception("Param overlap between set and where clause. Duplicated keys: ".implode(', ', $intersection));
-		}
-		
-		if (!$whereClause)
-			throw new \InvalidArgumentException("No where clause specified for table update. Explicitly specify 1=1 as the clause if you meant to do this.");
-		
-		$sql = "UPDATE $table SET $setClause WHERE $whereClause";
-		$stmt = $this->getConnector()->prepare($sql);
-		++$this->queries;
-		$stmt->execute($params);
 	}
 	
 	protected function executeDelete($objectName, Criteria\Query $criteria)
