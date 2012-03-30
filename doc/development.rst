@@ -38,11 +38,6 @@ Once the above dependencies are met, you can run the following commands (Linux o
 
     cd /path/to/amiss/doc/
     make html
-
-
-If you want PDF documentation, just switch the ``-b`` option to ``latex`` and give a different output directory (the last argument), then run a few extra commands::
-
-    cd /path/to/amiss/doc/
     make latexpdf
 
 
