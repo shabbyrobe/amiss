@@ -19,10 +19,12 @@ interface Mapper
 	/**
 	 * Create the object
 	 * 
+	 * The row is made available to this function, but this is so it can be
+	 * used to construct the object, not to populate it. Feel free to ignore it, 
+	 * it will be passed to populateObject as well.
+	 * 
 	 * @param \Amiss\Meta $meta The metadata to use to create the object
-	 * @param array $row The row values to use to populate the object. This is made
-	 *   available to use to construct the object, not to populate it. Feel free to 
-	 *   ignore it, and implement populateObject instead.
+	 * @param array $row The row values, which can be used to construct the object.
 	 * @param array $args Class constructor arguments
 	 * @return void
 	 */

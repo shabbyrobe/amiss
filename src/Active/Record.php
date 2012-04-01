@@ -6,6 +6,9 @@ use	Amiss\Connector,
 	Amiss\Exception
 ;
 
+/**
+ * @package ActiveRecord
+ */
 abstract class Record
 {
 	private static $managers=array();

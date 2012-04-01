@@ -2,6 +2,9 @@
 
 namespace Amiss\Criteria;
 
+/**
+ * @package Criteria
+ */
 class Update extends Query
 {
 	public $set=array();

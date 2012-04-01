@@ -2,6 +2,9 @@
 
 namespace Amiss\Criteria;
 
+/**
+ * @package Criteria
+ */
 class Select extends Query
 {
 	public $args=array();

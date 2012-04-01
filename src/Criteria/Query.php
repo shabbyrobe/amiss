@@ -2,6 +2,9 @@
 
 namespace Amiss\Criteria;
 
+/**
+ * @package Criteria
+ */
 class Query
 {
 	public $where;

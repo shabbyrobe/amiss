@@ -2,6 +2,9 @@
 
 namespace Amiss\Mapper;
 
+/**
+ * @package Mapper
+ */
 class Arrays extends Base
 {
 	public $arrayMap;

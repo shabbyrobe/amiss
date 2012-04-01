@@ -3,7 +3,9 @@
 namespace Amiss;
 
 /**
- * Amiss query manager
+ * Amiss query manager. This is the core of Amiss' functionality.
+ * 
+ * @package Manager
  */
 class Manager
 {
