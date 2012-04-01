@@ -13,6 +13,16 @@
 
 import sys, os
 
+from sphinx.highlighting import PygmentsBridge
+from pygments.formatters.latex import LatexFormatter
+
+class CustomLatexFormatter(LatexFormatter):
+    def __init__(self, **options):
+        super(CustomLatexFormatter, self).__init__(**options)
+        self.verboptions = r"formatcom=\footnotesize"
+
+PygmentsBridge.latex_formatter = CustomLatexFormatter
+ 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -204,9 +214,24 @@ latex_documents = [
 #latex_show_urls = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = """
+latex_preamble = r"""
 \usepackage{upquote}
 """
+
+# \renewcommand{\code}[1]{\texttt{\tiny{#1}}}
+
+# \usepackage{amissstyle}
+# \newcommand{\code}[1]{\texttt{\tiny{#1}}
+
+latex_elements = {
+    'classoptions': ',oneside,openany',
+    'babel': '\\usepackage[english]{babel}',
+    'fontpkg': '\\usepackage{palatino}',
+}
+
+# latex_use_parts = True
+
+latex_additional_files = ['amissstyle.sty']
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
