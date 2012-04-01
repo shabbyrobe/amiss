@@ -38,7 +38,7 @@ Creating an ``Amiss\Manager`` is simple:
         'password'=>'password',
     );
     $mapper = new Amiss\Mapper\Note;
-    $amiss = new Amiss\Manager($db, $mapper);
+    $manager = new Amiss\Manager($db, $mapper);
 
 
 For more information on customising the mapping, please read the :doc:`mapper/mapping` section.
@@ -62,7 +62,7 @@ You can also create an ``Amiss\Connector`` using an array containing the connect
 .. code-block:: php
 
     <?php
-    $amiss = Amiss\Connector::create(array(
+    $connector = Amiss\Connector::create(array(
         'dsn'=>'mysql:host=localhost;dbname=amiss_demo',
         'user'=>'user', 
         'password'=>'password',
@@ -86,3 +86,31 @@ You can also create an ``Amiss\Connector`` using an array containing the connect
 .. _PDO: http://www.php.net/manual/en/book.pdo.php
 
 
+Connection Charset
+~~~~~~~~~~~~~~~~~~
+
+If you are using MySQL and you need to set the connection's charset, you can either use ``PDO::MYSQL_ATTR_INIT_COMMAND`` option or pass the ``connectionStatements`` key through to ``Amiss\Connector::create``.
+
+Using ``PDO`` options:
+
+.. code-block:: php
+
+    <?php
+    $connector = Amiss\Connector::create(array(
+        'dsn'=>...,
+        'options'=>array(
+            \PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES utf8',
+        ),
+    ));
+
+Using ``connectionStatements``:
+
+.. code-block:: php
+
+    <?php
+    $connector = Amiss\Connector::create(array(
+        'dsn'=>...,
+        'connectionStatements'=>array(
+            'SET NAMES utf8',
+        ),
+    ));
