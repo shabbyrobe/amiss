@@ -6,7 +6,7 @@ An object that wraps a row in a database table or view, encapsulates the databas
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not wild about Active Records, but they can be very effective for rapid development and people seem to like them, and Late Static Binding made them extremely simple to implement.
+I'm not wild about Active Records, but they can be very effective for rapid development and people seem to like them, so why not throw them in?
 
 
 Defining
