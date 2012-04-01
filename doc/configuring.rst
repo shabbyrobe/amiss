@@ -14,13 +14,13 @@ Amiss provides a very simple autoloader that should be compatible with well-writ
     Amiss\Loader::register();
 
 
-To use Amiss, simply create an instance of ``Amiss\Manager``, passing your connection parameters:
+Amiss is :term:`PSR-0` compliant, so you can use any loader that supports that standard.
 
 
 Manager
 -------
 
-The main class Amiss requires to do it's business is ``Amiss\Manager``. It requires a way to connect to the database and a class that can map your objects to the database and back.
+The main class Amiss requires to do its business is ``Amiss\Manager``. It requires a way to connect to the database and a class that can map your objects to the database and back.
 
 The **mapper** must implement the ``Amiss\Mapper`` interface. The standard mapper recommended by Amiss is ``Amiss\Mapper\Note``, which allows the use of simple annotations to declare mappings.
 

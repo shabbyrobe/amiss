@@ -22,15 +22,14 @@ Amiss makes some small concessions to pragmatism that may offend domain model pu
 About the examples
 ------------------
 
-Most of the examples contained herein will make use of the schema and model that accompanies the documentation in the ``doc/demo`` subdirectory of the source distribution. It contains a very simple set of related objects representing a set of events for a music festival.
-ears first at that same size.
+Most of the examples contained herein will make use of the schema and model that accompany the documentation in the ``doc/demo`` subdirectory of the source distribution. It contains a very simple set of related objects representing a set of events for a music festival.
 
-There is also an example directory under the ``example`` folder in the source distribution that will allow you to click through some examples that are built on this schema.
+There is also a set of examples in the - you guessed it - ``example`` folder in the source distribution that will allow you to click through some scripts that are built on this schema.
 
 
 Model Classes
 -------------
 
-The model classes referred to in the examples are as follows:
+The model classes referred to in the documentation are as follows:
 
 .. include:: _build/example.rst

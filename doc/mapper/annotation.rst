@@ -134,7 +134,7 @@ The following annotations are available to define this mapping:
 
     This marks whether a property or a getter method represents a value that should be stored in a column.
 
-    The ``column_name`` value is optional. If it isn't specified, the column name is determined by the base mapper. See :ref:`name-translation` for more details on this process.
+    The ``columnName`` value is optional. If it isn't specified, the column name is determined by the base mapper. See :ref:`name-translation` for more details on this process.
 
 
 .. py:attribute:: @type fieldType
@@ -144,7 +144,7 @@ The following annotations are available to define this mapping:
 
 .. py:attribute:: @setter setterName
 
-    If the ``@field`` attribute is set against a getter method as opposed to a property, this defines the method that is used to set the value when loading an object from the database. It is required if the ``@field`` attribute is defined against a property.
+    If the ``@field`` attribute is set against a getter method as opposed to a property, this defines the method that is used to set the value when loading an object from the database. It is required if the ``@field`` attribute is defined against a property that has a getter/setter name pair that doesn't follow the traditional ``getFoo``/``setFoo`` pattern.
 
     See :ref:`annotations-getters-setters` for more details.
 
@@ -160,7 +160,7 @@ The following annotations are available to define this mapping:
 
     Defines a relation against a property or getter method.
 
-    ``relationType`` must be a short string registered with ``Amiss\\Manager->relators``. The ``one``, ``many`` and ``assoc`` relators are available by default.
+    ``relationType`` must be a short string registered with ``Amiss\Manager->relators``. The ``one``, ``many`` and ``assoc`` relators are available by default.
 
     ``relationParams`` allows you to pass an array of key/value pairs to instruct the relator referred to by ``relationType`` how to handle retrieving the related objects.
 
@@ -212,8 +212,8 @@ The following annotations are available to define this mapping:
 
     A one-to-one relationship on a composite key with different field names::
 
-        @has one of=ArtistType; on[typeIdPart1]=artistTypeIdPart1; on[typeIdPart2]=artistTypeIdPart2
-
+        @has one of=ArtistType; on[typeIdPart1]=idPart1; on[typeIdPart2]=idPart2
+    
     
     **One-to-many** (``@has many``) relationships support all the same options as one-to-one relationships, with the added convenience of the ``on`` key being optional. You should read the :ref:`relator-many` documentation for a full description of the data this relator requires. The simplest one-to-many is annotated like so:
 
@@ -252,7 +252,7 @@ The following annotations are available to define this mapping:
 
 .. py:attribute:: @setter setterName
 
-    If the ``@has`` attribute is set against a getter method as opposed to a property, this defines the method that is used to set the value when loading an object from the database. It is required if the ``@has`` attribute is defined against a property.
+    If the ``@has`` attribute is set against a getter method as opposed to a property, this defines the method that is used to set the value when loading an object from the database. It is required if the ``@has`` attribute is defined against a property and the getter/setter method names deviate from the standard ``getFoo``/``setFoo`` pattern.
 
     See :ref:`annotations-getters-setters` for more details.
 
@@ -262,7 +262,7 @@ The following annotations are available to define this mapping:
 Getters and setters
 -------------------
 
-Properties should almost always be defined against your object as class-level fields in PHP. Don't use getters and setters when you are doing no more than getting or setting a private field value - it's a total waste of resources. See my `stackoverflow answer <http://stackoverflow.com/a/813099/15004>`_ for a more thorough explanation of why you shouldn't, and for a brief explanation of how to get all of the benefits anyway.
+Properties should almost always be defined against your object as class-level fields in PHP. Don't use getters and setters when you are doing no more than getting or setting a private field value - it's a total waste of resources. See this `stackoverflow answer <http://stackoverflow.com/a/813099/15004>`_ for a more thorough explanation of why you shouldn't, and for a brief explanation of how to get all of the benefits anyway.
 
 Having said that, getters and setters are essential when you need to do more than just set a private value.
 
@@ -349,7 +349,7 @@ If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you ca
 Caching
 -------
 
-``Amiss\Mapper\Note`` provides a facility to cache reflected metadata. This is not strictly necessary: the mapping process only does a little bit of reflection and is really very fast, but you can get 20-30% more speed out of Amiss by using a cache.
+``Amiss\Mapper\Note`` provides a facility to cache reflected metadata. This is not strictly necessary: the mapping process only does a little bit of reflection and is really very fast, but you can get up to 30% more speed out of Amiss in circumstances where you're doing a high number of metadata lookups per query (say, running one or two queries against one or two objects) by using a cache.
 
 The simplest way to enable caching is to pass the string ``apc`` as the first argument. This will use ``apc_fetch`` and ``apc_store`` with an expiry of 1 day:
 
@@ -361,7 +361,7 @@ The simplest way to enable caching is to pass the string ``apc`` as the first ar
 
 If you don't want to use APC for the cache, or you're not happy with Amiss' default cache lifetime, or you want to allow the mapper to use your own class for caching, you can pass a 2-tuple of closures. The first member should be your "get" method. It should take a single key argument and return the cached value. The second member should be your "set" method and take key and value arguments.
 
-For example, to shove your cached metadata into the temp directory:
+For example, to shove your cached metadata into the system's temp directory:
 
 .. code-block:: php
 
@@ -387,12 +387,15 @@ For example, to shove your cached metadata into the temp directory:
 .. note:: Don't use a cache in your development environment otherwise you'll have to clear the 
     cache every time you change your models! 
 
-    Set an environment variable (see `SetEnv <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>` 
-    for apache ``export`` in bash), then do something like this:
+    Set an environment variable (see `SetEnv <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>`_ 
+    for apache or ``export`` for bash), then do something like this:
 
     .. code-block:: php
         
         <?php
-        $env = getenv('app_environment');
+        // give it a better name than this!
+        $env = getenv('your_app_environment');
+        
         $cache = $env == 'dev' ? null : 'apc';
         $mapper = new \Amiss\Note\Mapper('apc');
+

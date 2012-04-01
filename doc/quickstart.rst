@@ -7,14 +7,13 @@ This quickstart will assume you wish to use an annotation-based mapper. See :doc
 Loading and Configuring
 -----------------------
 
-See :doc:`configuring` and :doc:`mapper/mapping` for more info.
+See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 
 .. code-block:: php
 
     <?php
 
-    // Include autoloader. Amiss is PSR-0 compliant, so you can use any loader that
-    // supports that standard.
+    // Include and register autoloader (optional)
     require_once('/path/to/amiss/src/Loader.php');
     Amiss\Loader::register();
 
@@ -33,7 +32,7 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more info.
 Defining objects
 ----------------
 
-See :doc:`mapper/mapping` for more info and advanced topics.
+See :doc:`mapper/mapping` for more details and alternative mapping options.
 
 .. code-block:: php
 
@@ -82,7 +81,7 @@ See :doc:`mapper/mapping` for more info and advanced topics.
         /** @field */
         public $address;
 
-        /** @has one of=Event */
+        /** @has many of=Event */
         public $events;
     }
 
@@ -90,7 +89,7 @@ See :doc:`mapper/mapping` for more info and advanced topics.
 Creating Tables
 ---------------
 
-See :doc:`schema` for more info.
+See :doc:`schema` for more details.
 
 .. code-block:: php
 
@@ -102,7 +101,7 @@ See :doc:`schema` for more info.
 Selecting
 ---------
 
-See :doc:`selecting` for more info.
+See :doc:`selecting` for more details.
 
 .. code-block:: php
 
@@ -128,14 +127,14 @@ See :doc:`selecting` for more info.
     ));
     
     // paged list, limit/offset
-    $events = $manager->getList(array(
+    $events = $manager->getList('Event', array(
         'where'=>'name="foo"', 
         'limit'=>10, 
         'offset'=>30
     ));
 
     // paged list, alternate style (number, size)
-    $events = $manager->getList(array(
+    $events = $manager->getList('Event', array(
         'where'=>'name="foo"', 
         'page'=>array(1, 30)
     ));
@@ -144,7 +143,7 @@ See :doc:`selecting` for more info.
 Relations
 ---------
 
-Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point for adding additional relationship retrieval methods. See :doc:`relations` for more info.
+Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point for adding additional relationship retrieval methods. See :doc:`relations` for more details.
 
 One-to-one
 ~~~~~~~~~~
@@ -161,7 +160,7 @@ One-to-one
          */
         public $venue;
     }
-
+    
     // get a one-to-one relation for an event
     $venue = $manager->getRelated($event, 'venue');
 
@@ -219,7 +218,7 @@ One-to-many
 Many-to-many
 ~~~~~~~~~~~~
 
-Many-to-many relations require the association table to be mapped to an object, and also require the relation to be specified on both sides:
+Many-to-many relations require the association table to be mapped to an intermediate object, and also require the relation to be specified on both sides:
 
 
 .. code-block:: php
@@ -267,7 +266,7 @@ Many-to-many relations require the association table to be mapped to an object, 
 Modifying
 ---------
 
-See :doc:`modifying` for more info.
+You can modify by object or by table. See :doc:`modifying` for more details.
 
 Modifying by object:
 

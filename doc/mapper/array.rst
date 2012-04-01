@@ -1,7 +1,7 @@
 Array Mapper
 ============
 
-.. note:: The remainder of this guide assumes you are using the :doc:`annotation`. If you have selected this mapper, you may wish to skip this section and continue with the :doc:`common`.
+.. note:: This guide assumes you are using the :doc:`annotation`. If you have decided to use the annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
 
 
 The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined using the structure outlined in :doc:`metadata`, though some additional conveniences are added.
