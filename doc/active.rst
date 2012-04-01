@@ -99,27 +99,38 @@ Consider the following equivalents:
     $active->assignRelated('mappedFriend');
 
 
-``Amiss\Active\Record`` subclasses make the following **static** methods available::
-
-    get ( string $positionalWhere, mixed $param1[, mixed $param2...])
-    get ( string $namedWhere, array $params )
-    get ( array $criteria )
-    get ( Amiss\Criteria $criteria )
-
-    getList ( as with get )
-
-    getByPk ( $primaryKey )
-
-    count ( string $positionalWhere, mixed $param1[, mixed $param2...])
-    count ( string $namedWhere, array $params )
-    count ( array $criteria )
-    count ( Amiss\Criteria $criteria )
+``Amiss\Active\Record`` subclasses make the following **static** methods available:
 
 
-``Amiss\Active\Record`` subclasses make the following **instance** methods available::
+.. code-block:: php
 
-    getRelated ( $source, $relationName )
-    assignRelated ( $into, $relationName )
+    <?php
+    // get a single active record by primary key
+    YourRecord::getByPk ( $primaryKey );
+
+    // get a single active record
+    YourRecord::get ( string $positionalWhere, mixed $param1[, mixed $param2...]);
+    YourRecord::get ( string $namedWhere, array $params );
+    YourRecord::get ( array $criteria );
+    YourRecord::get ( Amiss\Criteria $criteria );
+
+    // get a list of active records
+    YourRecord::getList ( as with get );
+
+    // count active records
+    YourRecord::count ( string $positionalWhere, mixed $param1[, mixed $param2...]);
+    YourRecord::count ( string $namedWhere, array $params );
+    YourRecord::count ( array $criteria );
+    YourRecord::count ( Amiss\Criteria $criteria );
+
+
+``Amiss\Active\Record`` subclasses make the following **instance** methods available:
+
+.. code-block:: php
+
+    <?php
+    $yourRecordInstance->getRelated ( $source, $relationName );
+    $yourRecordInstance->assignRelated ( $into, $relationName );
 
 
 Lazy Loading
