@@ -24,8 +24,8 @@ Once you have declared your object, you can then either tell the ``Amiss\TableBu
 See the ``Field Mapping`` section of :doc:`mapper/mapping` for details on how Amiss knows what types to use for fields.
 
 
-Crappy Command Line Tools
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Crappy Command Line Tool
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is a crappy command line tool available in the Amiss distribution at ``bin/amiss``. The following commands will help turn a set of classes into a sql schema:
 

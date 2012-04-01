@@ -1,9 +1,7 @@
 Selecting
 =========
 
-``Amiss\Manager`` has two methods for handling object retrieval: ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways.
-
-The first argument to ``get`` and ``getList`` is always the model name. All the subsequent arguments are used to define criteria for the query.
+``Amiss\Manager`` has three methods for retrieving objects: ``getByPk``, ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways. The first argument is always the model name. All the subsequent arguments are used to define criteria for the query.
 
 The selection methods are:
 
@@ -61,7 +59,7 @@ Please also familiarise yourself with the section on :ref:`clauses` before divin
 Shorthand
 ~~~~~~~~~
 
-The "where" clause and parameters can be passed using a shorthand format that consists of a WHERE clause with positional PDO-style placeholders (question marks) and each corresponding value in subsequent arguments::
+The "where" clause and parameters can be passed using a shorthand format that consists of a SQL expression with positional PDO-style placeholders (question marks) and each corresponding value in subsequent arguments::
 
     ( $criteria... ) == ( string $positionalWhere, scalar $param1 [, scalar $param2... ] )
 
@@ -108,9 +106,6 @@ The long form of query criteria is either an array representation of the relevan
     $criteria = new Amiss\Criteria\Select;
     $criteria->where = 'slug=:slug';
     $criteria->params[':slug'] = 'duke-nukem';
-    
-    // this is detected when using other methods
-    $criteria->namedParams = true;
     
     $artist = $manager->get('Artist', $criteria);
 
@@ -184,7 +179,7 @@ This will produce the same order as the previous example:
     ));
 
 
-And also like :ref:`clauses`, you can write your order expression in raw sql. Using this method, no field mapping is performed:
+And also like :ref:`clauses`, you can write your order expression in raw sql. Note that you should use the column name instead of the object property name unless you use clause placeholders. See :ref:`clauses`.
 
 .. code-block:: php
 
@@ -212,7 +207,7 @@ All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria
     // column with the same name:
     $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
 
-When your column names are exactly the same as your property names, this is the way you should do it - there's no sense in making Amiss do more work than it needs to - but when your column names are different, Amiss will perform a simple token replacement on your clause, converting ``{propertyName}`` into the ``column_name`` in the underlying metadata:
+When your column names are exactly the same as your property names, this is the way you should do it - there's no sense in making Amiss do more work than it needs to - but when your column names are different, Amiss will perform a simple token replacement on your clause, converting ``{propertyName}`` into the ``column_name`` from the underlying metadata:
 
 .. code-block:: php
 

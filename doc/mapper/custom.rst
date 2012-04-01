@@ -8,7 +8,7 @@ Creating your own mapper
 
 If none of the available mapping options are suitable, you can always roll your own by subclassing ``Amiss\Mapper\Base``, or if you're really hardcore (and don't want to use any of the help provided by the base class), by implementing the ``Amiss\Mapper`` interface.
 
-Both methods require you to build an instance of ``Amiss\Meta``, which defines various object-mapping attributes that ``Amiss\Manager`` will make use of.
+Both methods require you to build up an instance of ``Amiss\Meta``, which defines various object-mapping attributes that ``Amiss\Manager`` will make use of.
 
 .. note:: You should be familiar with the structure of the :doc:`metadata` before reading this guide.
 
@@ -35,6 +35,11 @@ You can also use the following methods to help write your ``createMeta`` method,
 .. py:function:: protected getDefaultTable( $class )
 
     When no table is specified, you can use this method to generate a table name based on the class name. By default, it will take a ``Class\Name\Like\ThisOne`` and make a table name like ``this_one``.
+
+
+.. py:function:: protected resolveUnnamedFields( $fields )
+
+    If you want to make use of the base mapper's facilities for naming fields that are not explicitly named in the mapping configuration, pass an array of field definitions and the name property will be assigned. The updated field list is then returned.
 
 
 Implementing ``Amiss\Mapper``
@@ -74,7 +79,7 @@ The following functions must be implemented:
 
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
 
-    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper unless you make use of it yourself. If you don't intend to use the table builer and don't intend to use this facility to map types yourself, just leave the method body empty.
+    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper unless you make use of it yourself in ``exportRow`` and ``createObject``. If you don't intend to use the table builer and don't intend to use this facility to map types yourself, just leave the method body empty.
 
     :param type:  The ID of the type to return a handler for.
 
@@ -86,7 +91,7 @@ Creating your own type handler
 
 To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface. This interface requires three methods:
 
-.. py:function:: prepareValueForDb( $value )
+.. py:function:: prepareValueForDb( $value , $object , array $fieldInfo)
     
     Take an object value and prepare it for insertion into the database
     

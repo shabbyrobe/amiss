@@ -3,18 +3,15 @@
 Common Mapper Configuration
 ===========================
 
-``Amiss\Mapper\Note`` derives from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration.
-
-Anything that derives from ``Amiss\Mapper\Base`` can inherit this functionality. It is recommended that you use ``Amiss\Mapper\Base`` when rolling your own mapper, as outlined in :doc:`custom`.
+All of the mappers provided with Amiss derive from ``Amiss\Mapper\Base``. ``Amiss\Mapper\Base`` provides some facilities for making educated guesses about what table name or property names to use when they are not explicitly declared in your mapping configuration. It is recommended that you use ``Amiss\Mapper\Base`` when rolling your own mapper, as outlined in :doc:`custom`.
 
 
 .. _name-translation:
 
 Name translation
-^^^^^^^^^^^^^^^^
+----------------
 
-If your property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name translator to do the job for you using the following properties:
-
+If your property/field mappings are not quite able to be managed by the defaults but a simple function would do the trick (for example, you are working with a database that has no underscores in its table names, or you have a bizarre preference for sticking ``m_`` at the start of every one of your object properties), you can use a simple name translator to do the job for you. ``Amiss\Mapper\Base`` provides several facilities to wrangle these names without having to write a fully custom mapper:
 
 .. py:attribute:: Amiss\\Mapper\\Base->objectNamespace
 
@@ -43,12 +40,17 @@ If your property/field mappings are not quite able to be managed by the defaults
     
     Converts an object name to a table name. This property accepts either a PHP :term:`callback` type or an instance of ``Amiss\Name\Translator``, although in the latter case, only the ``to()`` method will ever be used.
 
-    If the value returned by your translator function is equal to (===) ``null``, ``Amiss\Mapper\Base`` will revert to the standard ``TableName`` to ``table_name`` method.
+    If the value returned by your translator function is equal to (===) ``null``, ``Amiss\Mapper\Base`` will revert to the standard ``ObjectName`` to ``table_name`` method.
 
 
 .. py:attribute:: Amiss\\Manager\\Base->unnamedPropertyTranslator
     
     Converts a property name to a database column name and vice-versa. This property *only* accepts an instance of ``Amiss\Name\Translator``. It uses the ``to()`` method to convert a property name to a column name, and the ``from()`` method to convert a column name back to a property name.
+
+
+.. py:attribute:: Amiss\\Manager\\Base->convertUnknownTableNames
+
+    If the mapper is called upon to guess a table name and the ``defaultTableNameTranslator`` returns nothing, this determines whether the ``ObjectName`` to ``table_name`` conversion happens. Defaults to ``true``.
 
 
 You can create your own name translator by implementing ``Amiss\\Name\\Translator`` and defining the following methods::
@@ -63,15 +65,15 @@ Speaking of which, Amiss comes with the following name translators:
 
 .. py:class:: Amiss\\Name\\CamelToUnderscore
 
-    Translates ``TableName`` to ``table_name`` using the ``to()`` method, and back from ``table_name`` to ``TableName`` using the ``from()`` method.
+    Translates ``ObjectName`` to ``table_name`` using the ``to()`` method, and back from ``table_name`` to ``ObjectName`` using the ``from()`` method.
 
 
 .. _type-handling:
 
 Type Handling
-^^^^^^^^^^^^^
+-------------
 
-There's very little intelligence in how Amiss handles values coming in and out of the database. They go in and out of the DB as whatever PDO treats them as by default, which is pretty much always strings or nulls.
+There's very little intelligence in how Amiss handles values coming in and out of the database by default. It just relies on PDO's defaults, which is pretty much always strings or nulls.
 
 This may be fine for 98% of your interaction with the database (trust me - it really will be), but then along come dates and throw a whopping big spanner in the works.
 
@@ -93,7 +95,7 @@ Amiss provides the following type handlers out of the box:
     :param timeZone: Use this timezone with all created ``DateTime`` objects. If not passed, will rely on PHP's default timezone (see `date_default_timezone_set <http://php.net/date_default_timezone_set>`_)
 
 
-In order to register this handler with Amiss and allow it to be used, you need to either assign it directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler, $id(s))``:
+In order to register a handler with Amiss and allow it to be used, you need to either assign it directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler, $id(s))``:
 
 .. code-block:: php
 
@@ -104,5 +106,18 @@ In order to register this handler with Amiss and allow it to be used, you need t
     $mapper->addTypeHandler($dateHandler, array('datetime', 'timestamp'));
 
 
-.. note:: Type handler IDs are always lower case, even if the field type contains uppercase letters
+Type handler IDs are always lower case, even if the field type contains uppercase letters. The base mapper will also ignore everything in your field type definitions following the first space or opening bracket
 
+.. code-block:: php
+
+    <?php
+    class Foo
+    {
+        /**
+         * @field
+         * @type BAZ(QUX)
+        public $bar;
+    }
+
+    // this *will* apply for field $bar
+    $mapper->addTypeHandler($bazHandler, 'baz');
