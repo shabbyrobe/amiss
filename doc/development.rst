@@ -41,7 +41,7 @@ Once the above dependencies are met, you can run the following commands (Linux o
     make latexpdf
 
 
-If you are already reading this in HTML format and feel the urge to smugly remark "well I'm *already* reading it in HTML so nerny nerny nerrrrr", here is a medal::
+If you are already reading this in HTML or PDF format and feel the urge to smugly remark "well I'm *already* reading it in HTML so nerny nerny nerrrrr", here is a medal::
 
            _______________
           |@@@@|     |####|

@@ -1,6 +1,14 @@
 Introduction
 ============
 
+.. only:: latex
+
+    .. include:: preamble.rst.inc
+
+
+About the pattern
+-----------------
+
 The core of Amiss is the Data Mapper.
 
 From Martin Fowler's `Patterns of Enterprise Application Architecture <http://martinfowler.com/eaaCatalog/dataMapper.html>`_: 
