@@ -60,6 +60,13 @@ class Connector
 	 */
 	public $transactionDepth=0;
 	
+	/**
+	 * List of statements to run when the connection is established
+	 * This is mostly here to allow you to set the connection encoding.
+	 * @var array
+	 */
+	public $connectionStatements;
+	
 	private $attributes=array();
 	
 	public function __clone()
@@ -68,13 +75,14 @@ class Connector
 		$this->transactionDepth = 0;
 	}
 	
-	public function __construct($dsn, $username=null, $password=null, array $driverOptions=null)
+	public function __construct($dsn, $username=null, $password=null, array $driverOptions=null, array $connectionStatements=null)
 	{
 		$this->dsn = $dsn;
 		$this->engine = strtolower(substr($dsn, 0, strpos($dsn, ':')));
 		$this->username = $username;
 		$this->password = $password;
-		$this->driverOptions = $driverOptions;
+		$this->driverOptions = $driverOptions ?: array();
+		$this->connectionStatements = $connectionStatements ?: array();
 	}
 	
 	/**
@@ -95,7 +103,7 @@ class Connector
 	 */
 	public static function create(array $params)
 	{
-		$options = $host = $port = $database = $user = $password = null;
+		$options = $host = $port = $database = $user = $password = $connectionStatements = null;
 		
 		foreach ($params as $k=>$v) {
 			$k = strtolower($k);
@@ -109,10 +117,11 @@ class Connector
 				$password = $v;
 			elseif ($k[0] == 'u')
 				$user = $v;
+			elseif ($k=='options' || $k=='driveroptions')
+				$options = $v;
+			elseif ($k=='connectionstatements' || $k=='statements')
+				$connectionStatements = $v;
 		}
-		
-		if (isset($params['options']))
-			$options = $v;
 		
 		if (!isset($params['dsn'])) {
 			$dsn = "mysql:host={$host};";
@@ -121,7 +130,7 @@ class Connector
 		}
 		else $dsn = $params['dsn'];
 		
-		return new static($dsn, $user, $password, $options ?: array());
+		return new static($dsn, $user, $password, $options, $connectionStatements);
 	}
 	
 	public function getPDO()
@@ -144,6 +153,10 @@ class Connector
 				$pdo->setAttribute($k, $v);
 		}
 		$this->attributes = null;
+		
+		foreach ($this->connectionStatements as $sql) {
+			$pdo->exec($sql);
+		}
 		
 		return $pdo;
 	}

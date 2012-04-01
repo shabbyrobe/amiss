@@ -162,6 +162,7 @@ class ConnectorTest extends \CustomTestCase
 	}
 	
 	/**
+	 * @group unit
 	 * @covers Amiss\Connector::exec
 	 * @covers Amiss\Connector::lastInsertId
 	 * @covers Amiss\Connector::prepare
@@ -214,5 +215,134 @@ class ConnectorTest extends \CustomTestCase
 			array('query', array('foo')),
 			array('query', array('stmt', 'foo', 'bar', 'baz', 'qux')),
 		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 * @dataProvider dataForCreateHost
+	 */
+	public function testCreateHost($hostKey)
+	{
+		$conn = \Amiss\Connector::create(array($hostKey=>'dbhost'));
+		$this->assertEquals('mysql:host=dbhost;', $conn->dsn);
+	}
+	
+	public function dataForCreateHost()
+	{
+		return array(
+			array('host'),
+			array('HOst'),
+			array('hostName'),
+			array('hOSTAGe'),
+			array('hOSTAGe'),
+			array('host_name'),
+			array('server'),
+		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 * @dataProvider dataForCreateUser
+	 */
+	public function testCreateUser($key)
+	{
+		$conn = \Amiss\Connector::create(array($key=>'myuser'));
+		$this->assertEquals('myuser', $conn->username);
+	}
+	
+	public function dataForCreateUser()
+	{
+		return array(
+			array('u'),
+			array('UNAME'),
+			array('unagi'),
+			array('user'),
+		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 * @dataProvider dataForCreatePassword
+	 */
+	public function testCreatePassword($key)
+	{
+		$conn = \Amiss\Connector::create(array($key=>'passw0rd'));
+		$this->assertEquals('passw0rd', $conn->password);
+	}
+	
+	public function dataForCreatePassword()
+	{
+		return array(
+			array('p'),
+			array('Pass'),
+			array('paSSword'),
+			array('passwd'),
+			array('plage noire'),
+		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 * @dataProvider dataForCreateOptions
+	 */
+	public function testCreateOptions($key)
+	{
+		$conn = \Amiss\Connector::create(array($key=>array('a'=>'b')));
+		$this->assertEquals(array('a'=>'b'), $conn->driverOptions);
+	}
+	
+	public function dataForCreateOptions()
+	{
+		return array(
+			array('driverOptions'),
+			array('driveroptions'),
+			array('options'),
+		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 * @dataProvider dataForCreateConnectionStatements
+	 */
+	public function testCreateConnectionStatements($key)
+	{
+		$conn = \Amiss\Connector::create(array($key=>array('a', 'b')));
+		$this->assertEquals(array('a', 'b'), $conn->connectionStatements);
+	}
+	
+	public function dataForCreateConnectionStatements()
+	{
+		return array(
+			array('connectionstatements'),
+			array('CONNECTIONstatements'),
+			array('statements'),
+		);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 */
+	public function testCreateDsn()
+	{
+		$value = 'mysql:host=localhost;dbname=foobar';
+		$conn = \Amiss\Connector::create(array('dsn'=>$value));
+		$this->assertEquals($value, $conn->dsn);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Connector::create
+	 */
+	public function testCreateDsnOverridesHost()
+	{
+		$value = 'mysql:host=localhost;dbname=foobar';
+		$conn = \Amiss\Connector::create(array('dsn'=>$value, 'host'=>'whoopee'));
+		$this->assertEquals($value, $conn->dsn);
 	}
 }
