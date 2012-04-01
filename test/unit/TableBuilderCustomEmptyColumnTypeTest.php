@@ -58,12 +58,12 @@ class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Active\Record
 
 class RecordCreateCustomTypeWithEmptyColumnTypeHandler implements \Amiss\Type\Handler
 {
-	function prepareValueForDb($value, $object, $fieldName)
+	function prepareValueForDb($value, $object, array $fieldInfo)
 	{
 		return $value;
 	}
 	
-	function handleValueFromDb($value, $object, $fieldName)
+	function handleValueFromDb($value, $object, array $fieldInfo, $row)
 	{
 		return $value;
 	}

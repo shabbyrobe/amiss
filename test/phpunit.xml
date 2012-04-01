@@ -7,5 +7,8 @@
   <testsuite name="Acceptance">
     <directory>acceptance</directory>
   </testsuite>
+  <testsuite name="Cookbook">
+    <directory>cookbook</directory>
+  </testsuite>
 </testsuites>
 </phpunit>

@@ -13,7 +13,7 @@ class Date implements Handler
 		$this->timeZone = $timeZone;
 	}
 	
-	function prepareValueForDb($value, $object, $fieldName)
+	function prepareValueForDb($value, $object, array $fieldInfo)
 	{
 		$out = null;
 		if ($value instanceof \DateTime) {
@@ -25,7 +25,7 @@ class Date implements Handler
 		return $out;
 	}
 	
-	function handleValueFromDb($value, $object, $fieldName)
+	function handleValueFromDb($value, $object, array $fieldInfo, $row)
 	{
 		$out = null;
 		if ($value) {

@@ -90,12 +90,12 @@ class TestCreateWithCustomType
 
 class TestCreateWithCustomTypeTypeHandler implements \Amiss\Type\Handler
 {
-	function prepareValueForDb($value, $object, $fieldName)
+	function prepareValueForDb($value, $object, array $fieldInfo)
 	{
 		return $value;
 	}
 	
-	function handleValueFromDb($value, $object, $fieldName)
+	function handleValueFromDb($value, $object, array $fieldInfo, $row)
 	{
 		return $value;
 	}
