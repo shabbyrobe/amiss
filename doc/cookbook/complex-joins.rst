@@ -1,5 +1,5 @@
-Using complex joins
-===================
+Complex joins using VIEWs
+=========================
 
 Firstly, create a MySQL view with your joins:
 
