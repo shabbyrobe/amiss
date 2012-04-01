@@ -37,6 +37,13 @@ def testall():
         local('phpunit')
 
 @task
+def testcvg(coverage_path='/tmp/cvg'):
+    with lcd(os.path.join(env.base_path, 'test')):
+        local('phpunit --exclude-group faulty --coverage-html=%s' % coverage_path)
+        print "Coverage available at:"
+        print "%s/index.html" % coverage_path
+
+@task
 def archive(outpath):
     with lcd(env.base_path):
         version = version = open(env.base_path+'/VERSION', 'r').read().rstrip()
