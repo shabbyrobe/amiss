@@ -14,7 +14,7 @@ Defining
 
 To define active records, simply extend the ``Amiss\Active\Record``. Configure everything else just like you would when using Amiss as a Data Mapper.
 
-This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapper/mapping`.
+This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping configuration that works with the data mapper.
 
 .. code-block:: php
 
