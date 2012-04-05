@@ -11,11 +11,19 @@ class Note extends \Amiss\Mapper\Base
 {
 	private $cache;
 	
-	public function __construct($cache=null)
+	/**
+	 * @var Amiss\Note\Parser
+	 */
+	public $parser;
+	
+	public function __construct($cache=null, $parser=null)
 	{
 		parent::__construct();
 		
-		$this->parser = new \Amiss\Note\Parser;
+		if (!$parser)
+			$parser = new \Amiss\Note\Parser;
+		
+		$this->parser = $parser;
 		
 		if ($cache)
 			$this->cache = static::normaliseCache($cache);
@@ -57,6 +65,7 @@ class Note extends \Amiss\Mapper\Base
 			'fields'=>array(),
 			'relations'=>array(),
 			'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
+			'extra'=>$classNotes ? array_diff_key($classNotes, array('fieldType'=>true, 'table'=>true)) : null,
 		);
 		
 		$setters = array();
@@ -80,19 +89,20 @@ class Note extends \Amiss\Mapper\Base
 				}
 				
 				if ($field !== null) {
-					$fieldInfo = array();
+					unset($itemNotes['primary']);
+					unset($itemNotes['field']);
 					
 					if ($type == 'method') {
-						list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
+						list($name, $itemNotes['getter'], $itemNotes['setter']) = $this->findGetterSetter($name, $itemNotes); 
 					}
 					
-					$fieldInfo['name'] = $field;
-					$fieldInfo['type'] = isset($itemNotes['type']) 
+					$itemNotes['name'] = $field;
+					$itemNotes['type'] = isset($itemNotes['type']) 
 						? $itemNotes['type'] 
 						: null
 					;
 					
-					$info['fields'][$name] = $fieldInfo;
+					$info['fields'][$name] = $itemNotes;
 				}
 				
 				if ($relationNote !== null) {
@@ -135,7 +145,7 @@ class Note extends \Amiss\Mapper\Base
 		foreach ($relationNotes as $name=>$info) {
 			$relationNote = preg_split('/\s+/', ltrim($info['has']), 2, PREG_SPLIT_NO_EMPTY);
 			
-			$relation = $this->readRelation($relationNote[1]);
+			$relation = $this->parser->parseComplexValue($relationNote[1]);
 			array_unshift($relation, $relationNote[0]);
 			
 			if (isset($info['getter']))
@@ -144,12 +154,5 @@ class Note extends \Amiss\Mapper\Base
 			$relations[$name] = $relation;
 		}
 		return $relations;
-	}
-	
-	protected function readRelation($noteValue)
-	{
-		$relnote = trim(preg_replace('/\s*([=&])\s*/', '$1', str_replace(';', '&', $noteValue)));
-		parse_str($relnote, $data);
-		return $data;
 	}
 }

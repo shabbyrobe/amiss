@@ -10,6 +10,7 @@ class AutoGuid implements Handler, Identity
 		// are generating one
 	}
 	
+	// FIXME: this class should derive from an IdGenerator base.
 	function prepareValueForDb($value, $object, array $fieldInfo)
 	{
 		$name = $fieldInfo['name'];

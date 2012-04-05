@@ -26,6 +26,11 @@ class Meta
 	 */
 	public $relations;
 	
+	/**
+	 * Additional metadata found but not explicitly handled by the mapper
+	 */
+	public $extra;
+	
 	protected $fields;
 	protected $allFields;
 	protected $parent;
@@ -43,6 +48,7 @@ class Meta
 			$this->primary = array($this->primary);
 		
 		$this->fields = isset($info['fields']) ? $info['fields'] : array();
+		$this->extra = isset($info['extra']) ? $info['extra'] : array();
 		$this->relations = isset($info['relations']) ? $info['relations'] : array();
 		$this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
 	}

@@ -13,6 +13,28 @@ class NoteMapperTest extends \CustomTestCase
 	 * @group unit
 	 * @covers Amiss\Mapper\Note::loadMeta
 	 */
+	public function testGetMetaPutsUnrecognisedClassLevelNotesIntoExtra()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		eval("
+			namespace ".__NAMESPACE__.";
+			/** 
+			 * @bucket foo
+			 * @quack bar
+			 * @table yeah
+			 */
+			class ".__FUNCTION__." {}
+		");
+		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+		$this->assertEquals('yeah', $meta->table);
+		$this->assertEquals(array('bucket'=>'foo', 'quack'=>'bar'), $meta->extra);
+	}
+
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @covers Amiss\Mapper\Note::loadMeta
+	 */
 	public function testGetMetaWithDefinedTable()
 	{
 		$mapper = new \Amiss\Mapper\Note;
@@ -77,7 +99,7 @@ class NoteMapperTest extends \CustomTestCase
 		$this->assertEquals(2, $getCount);
 		$this->assertEquals(1, $setCount);
 	}
-	
+
 	/**
 	 * @group mapper
 	 * @group unit
@@ -95,6 +117,28 @@ class NoteMapperTest extends \CustomTestCase
 		');
 		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
 		$this->assertEquals(array('id1', 'id2'), $meta->primary);
+	}
+
+	/**
+	 * @group mapper
+	 * @group unit
+	 * @covers Amiss\Mapper\Note::loadMeta
+	 */
+	public function testGetMetaExtraFieldLevelNotesAreAvailable()
+	{
+		$mapper = new \Amiss\Mapper\Note;
+		eval('
+			namespace '.__NAMESPACE__.';
+			class '.__FUNCTION__.' {
+				/**
+				 * @field
+				 * @yep yeppo 
+				 */
+				public $id1;
+			}
+		');
+		$meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+		$this->assertEquals(array('name'=>'id1', 'type'=>null, 'yep'=>'yeppo'), $meta->getField('id1'));
 	}
 	
 	/**
@@ -438,6 +482,7 @@ class NoteMapperTest extends \CustomTestCase
 	 */
 	public function testBuildRelations($note, $expected)
 	{
+		// TODO: move this test to NoteParserTest now that readRelation has been changed to parseComplexValue
 		$mapper = new \Amiss\Mapper\Note;
 		$notes = array('myprop'=>array(
 			'has'=>$note

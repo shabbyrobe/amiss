@@ -60,4 +60,11 @@ class Parser
 		}
 		return $notes;
 	}
+	
+	public function parseComplexValue($noteValue)
+	{
+		$qs = trim(preg_replace('/\s*([=&])\s*/', '$1', str_replace(';', '&', $noteValue)));
+		parse_str($qs, $data);
+		return $data;
+	}
 }
