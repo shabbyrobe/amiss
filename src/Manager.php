@@ -309,11 +309,25 @@ class Manager
 		if (($object && $meta->primary) || !$object)
 			$lastInsertId = $this->getConnector()->lastInsertId();
 		
+		// we need to be careful with "lastInsertId": SQLLite generates one even without a PRIMARY
 		if ($object && $meta->primary && $lastInsertId) {
 			if (($count=count($meta->primary)) != 1)
 				throw new Exception("Last insert ID $lastInsertId found for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
 			
-			$this->mapper->populateObject($meta, $object, array($meta->primary[0]=>$lastInsertId));
+			$field = $meta->getField($meta->primary[0]);
+			$handler = $this->mapper->determineTypeHandler($field['type']);
+			
+			if ($handler instanceof Type\Identity) {
+				$generated = $handler->handleDbGeneratedValue($lastInsertId);
+				if ($generated) {
+					// skip using populateObject - we don't need the type handler stack because we 
+					// already used one to handle the value
+					if (isset($field['getter']))
+						$object->{$field['setter']}($generated);
+					else
+						$object->{$field['name']} = $generated;
+				}
+			}
 		}
 		
 		return $lastInsertId;

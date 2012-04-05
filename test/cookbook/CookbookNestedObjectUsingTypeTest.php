@@ -1,6 +1,6 @@
 <?php
 
-namespace Amiss\Test\Unit;
+namespace Amiss\Test\Cookbook;
 
 class CookbookNestedObjectUsingTypeTest extends \CustomTestCase
 {
