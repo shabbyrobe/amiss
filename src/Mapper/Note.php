@@ -65,7 +65,6 @@ class Note extends \Amiss\Mapper\Base
 			'fields'=>array(),
 			'relations'=>array(),
 			'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
-			'extra'=>$classNotes ? array_diff_key($classNotes, array('fieldType'=>true, 'table'=>true)) : null,
 		);
 		
 		$setters = array();
@@ -89,20 +88,19 @@ class Note extends \Amiss\Mapper\Base
 				}
 				
 				if ($field !== null) {
-					unset($itemNotes['primary']);
-					unset($itemNotes['field']);
+					$fieldInfo = array();
 					
 					if ($type == 'method') {
-						list($name, $itemNotes['getter'], $itemNotes['setter']) = $this->findGetterSetter($name, $itemNotes); 
+						list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
 					}
 					
-					$itemNotes['name'] = $field;
-					$itemNotes['type'] = isset($itemNotes['type']) 
+					$fieldInfo['name'] = $field;
+					$fieldInfo['type'] = isset($itemNotes['type']) 
 						? $itemNotes['type'] 
 						: null
 					;
 					
-					$info['fields'][$name] = $itemNotes;
+					$info['fields'][$name] = $fieldInfo;
 				}
 				
 				if ($relationNote !== null) {
