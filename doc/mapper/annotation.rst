@@ -359,7 +359,7 @@ The simplest way to enable caching is to pass the string ``apc`` as the first ar
   $mapper = new \Amiss\Note\Mapper('apc');
 
 
-If you don't want to use APC for the cache, or you're not happy with Amiss' default cache lifetime, or you want to allow the mapper to use your own class for caching, you can pass a 2-tuple of closures. The first member should be your "get" method. It should take a single key argument and return the cached value. The second member should be your "set" method and take key and value arguments.
+If you don't want to use APC for the cache, or you're not happy with Amiss' default cache lifetime, or you want to allow the mapper to use your own class for caching, you can pass a :term:`2-tuple` of closures. The first member should be your "get" method. It should take a single key argument and return the cached value. The second member should be your "set" method and take key and value arguments.
 
 For example, to shove your cached metadata into the system's temp directory:
 

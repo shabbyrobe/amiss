@@ -5,3 +5,4 @@ Cookbook
     :maxdepth: 1
 
     complex-joins
+    table-prefix

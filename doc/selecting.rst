@@ -139,7 +139,7 @@ Amiss provides two ways to perform pagination. The first is the standard LIMIT/O
     $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
 
 
-The second style is suited to the way your UI typically thinks of pagination: using page number/page size:
+The second style is suited to the way your UI typically thinks of pagination: using page number/page size. This is passed as a :term:`2-tuple` using the ``page`` key:
 
 .. code-block:: php
 
