@@ -171,7 +171,7 @@ class MapperTest extends \CustomTestCase
 
 class TestPropertyTranslator implements \Amiss\Name\Translator
 {
-	public function to(array $names)
+	public function translate(array $names)
 	{
 		$trans = array();
 		foreach ($names as $n) {
@@ -180,7 +180,7 @@ class TestPropertyTranslator implements \Amiss\Name\Translator
 		return $trans;
 	}
 	
-	public function from(array $names)
+	public function untranslate(array $names)
 	{
 		$trans = array();
 		foreach ($names as $n) {

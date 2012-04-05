@@ -150,22 +150,30 @@ abstract class Base implements \Amiss\Mapper
 		$table = null;
 		if ($this->defaultTableNameTranslator) {
 			if ($this->defaultTableNameTranslator instanceof \Amiss\Name\Translator) 
-				$table = $this->defaultTableNameTranslator->to($class);
+				$table = $this->defaultTableNameTranslator->translate($class);
 			else
 				$table = call_user_func($this->defaultTableNameTranslator, $class);
 		}
 		
 		if ($table === null) {
 			$table = $class;
-			
 			if ($this->convertUnknownTableNames) {
-				if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-				
-				$table = '`'.trim(preg_replace_callback('/[A-Z]/', function($match) {
-					return "_".strtolower($match[0]);
-				}, str_replace('_', '', $table)), '_').'`';
+				$table = '`'.$this->convertUnknownTableName($class).'`';
 			}
 		}
+		
+		return $table;
+	}
+	
+	public function convertUnknownTableName($class)
+	{
+		$table = $class;
+		
+		if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
+				
+		$table = trim(preg_replace_callback('/[A-Z]/', function($match) {
+			return "_".strtolower($match[0]);
+		}, str_replace('_', '', $table)), '_');
 		
 		return $table;
 	}
@@ -179,7 +187,7 @@ abstract class Base implements \Amiss\Mapper
 		
 		if ($unnamed) {
 			if ($this->unnamedPropertyTranslator)
-				$unnamed = $this->unnamedPropertyTranslator->to($unnamed);
+				$unnamed = $this->unnamedPropertyTranslator->translate($unnamed);
 			
 			foreach ($unnamed as $name=>$field) {
 				$fields[$name]['name'] = $field;

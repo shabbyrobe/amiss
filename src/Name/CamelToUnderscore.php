@@ -6,7 +6,7 @@ class CamelToUnderscore implements Translator
 {
 	public $strict = true;
 	
-	function to(array $names)
+	function translate(array $names)
 	{
 		$trans = array();
 		
@@ -35,7 +35,7 @@ class CamelToUnderscore implements Translator
 		return $trans;
 	}
 	
-	function from(array $names)
+	function untranslate(array $names)
 	{
 		$trans = array();
 		
