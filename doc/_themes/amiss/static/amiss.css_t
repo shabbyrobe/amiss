@@ -305,7 +305,7 @@ div.admonition p.admonition-title {
 	font-family:'FellDWPica';
     font-weight: bold;
     font-size:20px;
-    margin:0px;
+    margin:0px !important;
     padding:0px;
 }
 
