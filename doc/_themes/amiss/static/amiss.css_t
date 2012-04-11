@@ -74,6 +74,7 @@ body {
 	font-family:'CrimsonText';
 	font-size:18px;
 	padding-bottom:15px;
+	line-height:1.2em;
 }
 
 div.document {
@@ -85,7 +86,7 @@ div.documentwrapper {
 	float:left;
 }
 .bodywrapper {
-	margin: 10px 0 0 230px;
+	margin: 25px 0 0 230px;
 }
 div.sphinxsidebar {
 	width:220px;
@@ -152,10 +153,6 @@ h1, h2, h3, h4, h5, h6 {
 .section {
 	margin-bottom:1em;
 }
-.body h1 {
-  margin-top:0px;
-}
-
 p, ul, div.highlight-php {
   margin-top:0.4em;
   margin-bottom:0.8em;
@@ -180,6 +177,7 @@ code, span.pre, tt {
 }
 pre, div.code {
 	font-size:0.8em;
+	line-height:1.1em;
 	background-color:#f3f3f3;
 	padding:5px 10px;
 	border-top:1px dotted #ccc;
@@ -347,7 +345,7 @@ div.sphinxsidebar h1 a {
 }
 div.sphinxsidebar h2 {
     font-size: 1.4em;
-    margin: 0 5px 18px 5px;
+    margin: 0 5px 32px 5px;
     padding: 0;
 }
 

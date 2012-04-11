@@ -1,7 +1,9 @@
 Array Mapper
 ============
 
-.. note:: This guide assumes you are using the :doc:`annotation`. If you have decided to use the annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
+.. note:: 
+
+    The remainder of the guide assumes you are using the :doc:`annotation` rather than the array mapper mentioned here. This mapper is provided as an alternative. If you have decided to use the annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
 
 
 The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined using the structure outlined in :doc:`metadata`, though some additional conveniences are added.
@@ -63,7 +65,7 @@ Mapping
 The mapping definitions are quite straightforward. The key to the ``$mapping`` array in the below examples is the fully-qualified object name. Each object name is mapped to another array containing the mapping definition.
 
 
-Each object mapping has the following structure:
+Object mappings have the following structure:
 
 .. code-block:: php
 
