@@ -39,10 +39,10 @@ Value Insertion
 
 When the default behaviour of Object Insertion just won't do, you can insert a list of values directly.
 
-This is useful when:
+This is useful when
 
- - You want to do a quick and dirty insert of just a few values; or
- - You would like to have finer, explicit control over the fields to be inserted. 
+- You want to do a quick and dirty insert of just a few values; or
+- You would like to have finer, explicit control over the fields to be inserted. 
 
 .. code-block:: php
 
@@ -149,7 +149,7 @@ Deleting
 
 ``Amiss\Manager``'s delete methods work similarly to updating
 
-Deleting by object works the same way as updating by object:
+Deleting by object works the same way as updating by object::
 
     delete( object $object )
 

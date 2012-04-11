@@ -76,15 +76,25 @@ body {
 	padding-bottom:15px;
 }
 
-div.main {
-	width:750px;
+div.document {
+	width:950px;
 	margin:auto;
 }
-
+div.documentwrapper {
+	width:100%;
+	float:left;
+}
+.bodywrapper {
+	margin: 10px 0 0 230px;
+}
+div.sphinxsidebar {
+	width:220px;
+	float:left;
+	margin-left:-100%;
+}
 a, a:active, a:visited {
 	color:#060;
 }
-
 .header h1 {
 	/* text-shadow: #999 0px 0px 5px; */
 	font-family:'FellDWPica';
@@ -124,28 +134,41 @@ ul.menu li {
 	display:inline;
 	margin:0 10px;
 }
-
-
-div.content > p,
-div.content > h1,
-div.content > h2,
-div.content > h3,
-div.content > h4,
-div.content > ol,
-div.content > ul {
+ul {
+  padding-left:30px;
+}
+ul ul {
+  margin-top:0; margin-bottom:0;
+}
+p, h1, h2, h3, h4, h5, h6, ol, ul, dl {
 	margin-left:5px;
 	margin-right:5px;
 }
-div.content > h1,
-div.content > h2,
-div.content > h3,
-div.content > h4 {
+h1, h2, h3, h4, h5, h6 {
 	font-family:'FellDWPica';
 	font-weight:normal;
-	margin-bottom:0.6em;
+    margin-bottom:0.5em;
 }
-div.content p {
+.section {
+	margin-bottom:1em;
 }
+.body h1 {
+  margin-top:0px;
+}
+
+p, ul, div.highlight-php {
+  margin-top:0.4em;
+  margin-bottom:0.8em;
+}
+p:last-child, 
+p.last,
+div.highlight-php.last
+div.highlight-php:last-child
+ul.last
+ul:last-child {
+    margin-bottom: 0px;
+}
+
 pre, code, tt, span.pre {
 	font-family: 'InconsolataMedium';
 }
@@ -218,4 +241,128 @@ div.copy {
 .button {
 	padding-left:20px;
 	padding-right:20px;
+}
+
+.headerlink {
+	visibility:hidden;
+	margin-left:10px;
+	text-decoration:none;
+  font-size:0.7em;
+}
+h1:hover a.headerlink,
+h2:hover a.headerlink,
+h3:hover a.headerlink,
+h4:hover a.headerlink,
+h5:hover a.headerlink,
+h6:hover a.headerlink {
+	visibility:visible;
+}
+
+div.related {
+    display: none;
+}
+
+.clearer {
+	clear:both;
+}
+.footer {
+	margin:auto;
+	width:950px;
+	margin-top:20px;
+	border-top:1px dotted #aaa;
+	text-align:center;
+	padding-top:16px;
+	color:#333;
+}
+
+div.toctree-wrapper > ul > li {
+    padding-top:10px;
+}
+div.toctree-wrapper > ul > li:first-child {
+  padding-top:0px;
+}
+.field-list td > ul {
+  margin-top:0;
+  margin-bottom:0;
+}
+div.admonition {
+    background: #fafafa;
+    padding: 10px 10px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+div.admonition tt.xref, div.admonition a tt {
+    border-bottom: 1px solid #fafafa;
+}
+
+dd div.admonition {
+    margin-left: -60px;
+    padding-left: 60px;
+}
+
+div.admonition p.admonition-title {
+	font-family:'FellDWPica';
+    font-weight: bold;
+    font-size:20px;
+    margin:0px;
+    padding:0px;
+}
+
+div.sphinxsidebar {
+	font-size:0.9em;
+}
+div.sphinxsidebar h3 {
+  margin-top:5px;
+}
+div.sphinxsidebar ul {
+    list-style: none outside none;
+    margin-right:5px;
+    margin-left:5px;
+    padding:0;
+}
+div.sphinxsidebar form {
+    margin-right:5px;
+    margin-left:5px;
+}
+div.sphinxsidebar ul > li {
+  padding:0; margin:0;
+}
+div.sphinxsidebar ul ul {
+  margin-left:20px;
+    list-style: square outside none;
+}
+div.sphinxsidebar h1 {
+    font-family: 'FellDWPica';
+    font-size: 5.5em;
+    font-weight: normal;
+    line-height: 0.8em;
+    margin: 0 5px 0px 5px;
+    padding: 0;
+    text-transform: lowercase;
+}
+div.sphinxsidebar h1 a {
+	color:#000;
+	text-decoration:none;
+}
+div.sphinxsidebar h2 {
+    font-size: 1.4em;
+    margin: 0 5px 18px 5px;
+    padding: 0;
+}
+
+div#amiss-php-data-mapper h1 {
+	display:none;
+}
+div#amiss-php-data-mapper p:first-of-type {
+	margin-top:15px;
+}
+p.searchtip {
+	display:none;
+}
+.sidebarindex {
+	margin-bottom:15px;
+}
+.sidebarindex p:first-child {
+	margin-top:0;
 }

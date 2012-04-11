@@ -1,5 +1,5 @@
-Amiss - Stupid, Simple, Fast!
-=============================
+Amiss PHP Data Mapper
+=====================
 
 .. only:: not latex
 
