@@ -122,6 +122,13 @@ class Meta
 			return $prival;
 	}
 	
+	function getValue($object, $property)
+	{
+		$field = $this->getField($property);
+		$value = !isset($field['getter']) ? $object->{$p} : call_user_func(array($object, $field['getter']));
+		return $value;
+	}
+	
 	function __sleep()
 	{
 		// precache this stuff before serialization
