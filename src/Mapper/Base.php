@@ -109,16 +109,7 @@ abstract class Base implements \Amiss\Mapper
 				}
 			}
 			
-			if (is_array($value)) {
-				foreach ($value as $k=>$v) {
-					if (isset($value[$k]))
-						throw new \Amiss\Exception("Type handler $type stomped on value $k for class {$meta->class}");
-					$value[$k] = $v; 
-				}
-			}
-			else {
-				$row[$field['name']] = $value;
-			}
+			$row[$field['name']] = $value;
 		}
 		
 		return $row;
