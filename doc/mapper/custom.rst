@@ -56,7 +56,7 @@ The following functions must be implemented:
     :param class: A string containing the name used when ``Amiss\Manager`` is called to act on an "object".
 
 
-.. py:function:: createObject( $meta , $row , $args )
+.. py:function:: createObject( $meta , $row , array $args = null )
 
     Create the object mapped by the passed ``Amiss\Meta`` object, assign the values from the ``$row``, and return the freshly minted instance.
 
@@ -64,7 +64,7 @@ The following functions must be implemented:
 
     :param meta:  ``Amiss\Meta`` defining the mapping
     :param row:   Database row to use when populating your instance
-    :param args:  Constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
+    :param args:  Array of constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
 
 
 .. py:function:: exportRow( $meta , $object )

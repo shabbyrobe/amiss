@@ -88,7 +88,7 @@ class TestMapper implements \Amiss\Mapper
 		return isset($this->meta[$class]) ? $this->meta[$class] : null;
 	}
 	
-	function createObject($meta, $row, $args) {}
+	function createObject($meta, $row, $args=null) {}
 	
 	function populateObject($meta, $object, $row) {}
 

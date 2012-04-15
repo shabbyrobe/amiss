@@ -28,7 +28,7 @@ interface Mapper
 	 * @param array $args Class constructor arguments
 	 * @return void
 	 */
-	function createObject($meta, $row, $args);
+	function createObject($meta, $row, $args=null);
 	
 	/**
 	 * Populate an object with row values

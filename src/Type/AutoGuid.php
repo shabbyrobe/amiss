@@ -7,7 +7,7 @@ class AutoGuid implements Handler, Identity
 	function handleDbGeneratedValue($value)
 	{
 		// return nothing - we don't care about a DB generated value if we 
-		// are generating one
+		// are generating one ourselves
 	}
 	
 	// FIXME: this class should derive from an IdGenerator base.

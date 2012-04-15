@@ -42,7 +42,7 @@ abstract class Base implements \Amiss\Mapper
 		}
 	}
 	
-	public function createObject($meta, $row, $args)
+	public function createObject($meta, $row, $args=null)
 	{
 		$object = null;
 		if ($args) {
