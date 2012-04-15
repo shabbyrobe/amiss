@@ -109,6 +109,8 @@ abstract class Base implements \Amiss\Mapper
 				}
 			}
 			
+			// don't allow array_merging. it breaks mongo compatibility and is pretty 
+			// confused anyway.
 			$row[$field['name']] = $value;
 		}
 		
