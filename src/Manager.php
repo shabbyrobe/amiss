@@ -39,12 +39,6 @@ class Manager
 	public $relators;
 	
 	/**
-	 * @ignore
-	 * @var Amiss\Meta
-	 */
-	protected $meta = array();
-	
-	/**
 	 * Constructor
 	 * 
 	 * @param Amiss\Connector|\PDO|array
@@ -94,14 +88,7 @@ class Manager
 	 */
 	public function getMeta($class)
 	{
-		if (isset($this->meta[$class]))
-			return $this->meta[$class];
-		
-		$meta = $this->mapper->getMeta($class);
-		
-		$this->meta[$class] = $meta;
-		
-		return $meta;
+		return $this->mapper->getMeta($class);
 	}
 	
 	/**

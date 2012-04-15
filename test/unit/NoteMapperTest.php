@@ -56,7 +56,7 @@ class NoteMapperTest extends \CustomTestCase
 		$cache = array();
 		$getCount = $setCount = 0;
 		
-		$mapper = new \Amiss\Mapper\Note(array(
+		$cacheFunctions = array(
 			function($key) use (&$cache, &$getCount) {
 				++$getCount;
 				return isset($cache[$key]) ? $cache[$key] : null;
@@ -65,7 +65,8 @@ class NoteMapperTest extends \CustomTestCase
 				++$setCount;
 				$cache[$key] = $value;
 			},
-		));
+		);
+		$mapper = new \Amiss\Mapper\Note($cacheFunctions);
 		
 		$this->assertArrayNotHasKey('stdClass', $cache);
 		$meta = $mapper->getMeta('stdClass');
@@ -73,6 +74,7 @@ class NoteMapperTest extends \CustomTestCase
 		$this->assertEquals(1, $getCount);
 		$this->assertEquals(1, $setCount);
 		
+		$mapper = new \Amiss\Mapper\Note($cacheFunctions);
 		$meta = $mapper->getMeta('stdClass');
 		$this->assertEquals(2, $getCount);
 		$this->assertEquals(1, $setCount);

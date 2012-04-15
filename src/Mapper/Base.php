@@ -26,8 +26,11 @@ abstract class Base implements \Amiss\Mapper
 	
 	public function getMeta($class)
 	{
-		$class = $this->resolveObjectname($class);
-		return $this->createMeta($class);
+		if (!isset($this->meta[$class])) {
+			$resolved = $this->resolveObjectname($class);
+			$this->meta[$class] = $this->createMeta($resolved);
+		}
+		return $this->meta[$class];
 	}
 	
 	abstract protected function createMeta($class);
