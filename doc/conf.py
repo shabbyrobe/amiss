@@ -13,15 +13,8 @@
 
 import sys, os
 
-from sphinx.highlighting import PygmentsBridge
-from pygments.formatters.latex import LatexFormatter
-
-class CustomLatexFormatter(LatexFormatter):
-    def __init__(self, **options):
-        super(CustomLatexFormatter, self).__init__(**options)
-        self.verboptions = r"formatcom=\footnotesize"
-
-PygmentsBridge.latex_formatter = CustomLatexFormatter
+root_dir = os.path.dirname(__file__)
+sys.path.insert(0, os.path.join(root_dir, "_themes"))
  
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -38,7 +31,7 @@ PygmentsBridge.latex_formatter = CustomLatexFormatter
 extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['_themes/amiss/templates', '_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -52,8 +45,6 @@ master_doc = 'index'
 # General information about the project.
 project = u'Amiss PHP Data Mapper'
 copyright = u'2011, Blake Williams'
-
-root_dir = os.path.dirname(__file__)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -147,12 +138,6 @@ html_static_path = ['_static']
 # typographically correct entities.
 #html_use_smartypants = True
 
-# Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
-html_sidebars = {
-    'index': ['sidebarlogo.html', 'sidebarindex.html', 'sourcelink.html', 'searchbox.html'],
-    '**': ['sidebarlogo.html', 'localtoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'],
-}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -191,7 +176,6 @@ htmlhelp_basename = 'AmissPHPDataMapperdoc'
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').
-latex_paper_size = 'a4'
 
 # The font size ('10pt', '11pt' or '12pt').
 #latex_font_size = '10pt'
@@ -218,20 +202,6 @@ latex_documents = [
 #latex_show_urls = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = r"""
-\usepackage{upquote}
-"""
-
-# \renewcommand{\code}[1]{\texttt{\tiny{#1}}}
-
-# \usepackage{amissstyle}
-# \newcommand{\code}[1]{\texttt{\tiny{#1}}
-
-latex_elements = {
-    'classoptions': ',oneside,openany',
-    'babel': '\\usepackage[english]{babel}',
-    'fontpkg': '\\usepackage{palatino}',
-}
 
 # latex_use_parts = True
 
@@ -252,3 +222,5 @@ man_pages = [
     ('index', 'amissphpdatamapper', u'Amiss PHP Data Mapper Documentation',
      [u'Blake Williams'], 1)
 ]
+
+from amiss.conf import *
