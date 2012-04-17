@@ -72,8 +72,8 @@ class SqliteDataTestCase extends CustomTestCase
 		\Amiss\Active\Record::_reset();
 		
 		$this->db = new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
-		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite'));
-		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite'));
+		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite.sql'));
+		$this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite.sql'));
 		
 		$this->mapper = $this->getMapper();
 		$this->manager = $this->getManager();

@@ -6,8 +6,8 @@ $ex = isset($_SERVER['PATH_INFO']) ? trim($_SERVER['PATH_INFO'], '/') : null;
 $files = array(
 	'ar.php',
 	'model.php',
-	'schema.sqlite',
-	'testdata.sqlite',
+	'schema.sqlite.sql',
+	'testdata.sqlite.sql',
 );
 if (in_array($ex, $files)) {
 	$extn = pathinfo($ex, PATHINFO_EXTENSION);
