@@ -10,10 +10,7 @@ To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note
     $manager = new \Amiss\Manager($db, $mapper);
 
 
-See :ref:`mapper-common` for more information on how to tweak the note mapper's behaviour.
-
-.. note:: It is assumed by this mapper that an object and a table are corresponding entities. 
-    More complex mapping should be handled using a :doc:`custom mapper <custom>`.
+This is the bare minimum required to create an instance of this mapper. This will be enough for now, though more configuration options are available. See :ref:`mapper-common` for more information on how to tweak the behaviour of all of Amiss' default mapping options.
 
 
 Overview
@@ -68,6 +65,8 @@ Using the Annotation mapper, object/table mappings are defined in this way:
             $this->fooDate = $value;
         }
     }
+
+It is assumed by this mapper that an object and a table are corresponding entities. More complex mapping should be handled using a :doc:`custom mapper <custom>`.
 
 
 Annotations
