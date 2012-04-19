@@ -1,10 +1,8 @@
 <?php
 
-namespace Amiss\Test\Acceptance;
+namespace Amiss\Test\Cookbook;
 
-use Amiss\Demo\Active;
-
-class MultiSchemaTest extends \CustomTestCase
+class MultiSchemaNoteTest extends \CustomTestCase
 {
 	public function setUp()
 	{
@@ -21,7 +19,7 @@ class MultiSchemaTest extends \CustomTestCase
 	
 	public function testInsert()
 	{
-		$one = new MultiSchemaTestOne();
+		$one = new MultiSchemaNoteTestOne();
 		$one->oneName = 'foo';
 		$this->manager->insert($one);
 		
@@ -34,7 +32,7 @@ class MultiSchemaTest extends \CustomTestCase
 	{
 		$this->connector->query('INSERT INTO schema_one.table_one(id, oneName) VALUES(1, "bleargh")');
 		
-		$obj = $this->manager->getByPk('MultiSchemaTestOne', 1);
+		$obj = $this->manager->getByPk('MultiSchemaNoteTestOne', 1);
 		
 		$this->assertEquals('bleargh', $obj->oneName);
 		$this->assertEquals(1, $obj->id);
@@ -45,10 +43,10 @@ class MultiSchemaTest extends \CustomTestCase
 		$this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(1, "bleargh", 1)');
 		$this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
 		
-		$obj = $this->manager->getByPk('MultiSchemaTestOne', 1);
+		$obj = $this->manager->getByPk('MultiSchemaNoteTestOne', 1);
 		$this->manager->assignRelated($obj, 'two');
 		
-		$this->assertTrue($obj->two instanceof MultiSchemaTestTwo);
+		$this->assertTrue($obj->two instanceof MultiSchemaNoteTestTwo);
 		$this->assertEquals('wahey', $obj->two->twoName);
 	}
 	
@@ -58,11 +56,11 @@ class MultiSchemaTest extends \CustomTestCase
 		$this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(2, "weehaw", 1)');
 		$this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
 		
-		$obj = $this->manager->getByPk('MultiSchemaTestTwo', 1);
+		$obj = $this->manager->getByPk('MultiSchemaNoteTestTwo', 1);
 		$this->manager->assignRelated($obj, 'ones');
 		
 		$this->assertTrue(is_array($obj->ones));
-		$this->assertTrue(current($obj->ones) instanceof MultiSchemaTestOne);
+		$this->assertTrue(current($obj->ones) instanceof MultiSchemaNoteTestOne);
 		$this->assertEquals('bleargh', $obj->ones[0]->oneName);
 		$this->assertEquals('weehaw', $obj->ones[1]->oneName);
 	}
@@ -71,7 +69,7 @@ class MultiSchemaTest extends \CustomTestCase
 /**
  * @table schema_one.table_one
  */
-class MultiSchemaTestOne
+class MultiSchemaNoteTestOne
 {
 	/** 
 	 * @primary
@@ -86,7 +84,7 @@ class MultiSchemaTestOne
 	public $twoId;
 	
 	/**
-	 * @has one of=MultiSchemaTestTwo; on=twoId
+	 * @has one of=MultiSchemaNoteTestTwo; on=twoId
 	 */
 	public $two;
 }
@@ -94,7 +92,7 @@ class MultiSchemaTestOne
 /**
  * @table schema_two.table_two
  */
-class MultiSchemaTestTwo
+class MultiSchemaNoteTestTwo
 {
 	/** 
 	 * @primary
@@ -106,7 +104,7 @@ class MultiSchemaTestTwo
 	public $twoName;
 	
 	/**
-	 * @has many of=MultiSchemaTestOne; on[id]=twoId
+	 * @has many of=MultiSchemaNoteTestOne; on[id]=twoId
 	 */
 	public $ones = array();
 }
