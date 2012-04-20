@@ -2,10 +2,62 @@
 
 namespace Amiss\Test\Unit;
 
+use Amiss\Meta;
+
 use Amiss\Criteria\Update;
 
 class UpdateQueryTest extends \CustomTestCase
 {
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Update::buildQuery
+	 */
+	public function testBuildQueryWithArrayWhere()
+	{
+		$uq = new Update;
+		$uq->where = array('a'=>'b');
+		$uq->set = array('c'=>'d');
+		
+		$meta = new Meta('Foo', 'foo', array());
+		list($sql, $params) = $uq->buildQuery($meta);
+		$this->assertEquals('UPDATE foo SET `c`=:set_c WHERE `a`=:a', $sql);
+		$this->assertEquals(array(':set_c'=>'d', ':a'=>'b'), $params);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Update::buildQuery
+	 */
+	public function testBuildQueryWithStringWhereContainingNamedParams()
+	{
+		$uq = new Update;
+		$uq->where = 'foo=:bar';
+		$uq->params = array('bar'=>'ding');
+		$uq->set = array('c'=>'d');
+		
+		$meta = new Meta('Foo', 'foo', array());
+		list($sql, $params) = $uq->buildQuery($meta);
+		$this->assertEquals('UPDATE foo SET `c`=:set_c WHERE foo=:bar', $sql);
+		$this->assertEquals(array(':set_c'=>'d', ':bar'=>'ding'), $params);
+	}
+
+	/**
+	 * @group unit
+	 * @covers Amiss\Criteria\Update::buildQuery
+	 */
+	public function testBuildQueryWithStringWhereContainingPositionalParams()
+	{
+		$uq = new Update;
+		$uq->where = 'foo=?';
+		$uq->params = array('ding');
+		$uq->set = array('c'=>'d');
+		
+		$meta = new Meta('Foo', 'foo', array());
+		list($sql, $params) = $uq->buildQuery($meta);
+		$this->assertEquals('UPDATE foo SET `c`=? WHERE foo=?', $sql);
+		$this->assertEquals(array('d', 'ding'), $params);
+	}
+	
 	/**
 	 * @group unit
 	 * @covers Amiss\Criteria\Update::buildSet

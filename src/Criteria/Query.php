@@ -74,6 +74,9 @@ class Query
 	
 	public function paramsAreNamed()
 	{
+		if (is_array($this->where))
+			return true;
+		
 		foreach ($this->params as $k=>$v) {
 			if ($k==0 && $k!==0) return true;
 		}
