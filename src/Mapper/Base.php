@@ -45,6 +45,13 @@ abstract class Base implements \Amiss\Mapper
 		}
 	}
 	
+	function buildObject($meta, $row, $args=null)
+	{
+		$object = $this->createObject($meta, $row, $args);
+		$this->populateObject($meta, $object, $row);
+		return $object;
+	}
+
 	public function createObject($meta, $row, $args=null)
 	{
 		$object = null;

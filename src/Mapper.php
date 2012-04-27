@@ -17,6 +17,16 @@ interface Mapper
 	function getMeta($class);
 	
 	/**
+	 * Create and populate an object
+	 */
+	function buildObject($meta, $row, $args=null);
+	//{
+	//	$object = $this->createObject($meta, $row, $args);
+	//	$this->populateObject($meta, $object, $row);
+	//	return $object;
+	//}
+	
+	/**
 	 * Create the object
 	 * 
 	 * The row is made available to this function, but this is so it can be
