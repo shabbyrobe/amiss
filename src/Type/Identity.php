@@ -4,5 +4,5 @@ namespace Amiss\Type;
 
 interface Identity
 {
-	function handleDbGeneratedValue($value);
+    function handleDbGeneratedValue($value);
 }

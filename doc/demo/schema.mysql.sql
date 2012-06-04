@@ -66,8 +66,8 @@ CREATE TABLE `venue` (
 ) ENGINE=InnoDB;
 
 CREATE VIEW event_artist_full AS
-	SELECT ea.*, a.* FROM event_artist ea
-	INNER JOIN artist a ON a.artistId = ea.artistId;
+  SELECT ea.*, a.* FROM event_artist ea
+  INNER JOIN artist a ON a.artistId = ea.artistId;
 
 ALTER TABLE `event`
   ADD CONSTRAINT `FK_event_venue` FOREIGN KEY (`venueId`) REFERENCES `venue` (`venueId`);

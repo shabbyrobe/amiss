@@ -7,6 +7,6 @@ namespace Amiss\Name;
  */
 interface Translator
 {
-	function translate(array $names);
-	function untranslate(array $names); 
+    function translate(array $names);
+    function untranslate(array $names); 
 }
