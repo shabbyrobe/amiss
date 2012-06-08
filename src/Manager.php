@@ -153,12 +153,22 @@ class Manager
      * 
      * @return object
      */
-    public function getByPk($class, $id, $args=null)
+    public function getById($class, $id, $args=null)
     {
-        $criteria = $this->createPkCriteria($class, $id);
+        $criteria = $this->createIdCriteria($class, $id);
         if ($args)
             $criteria['args'] = $args; 
         return $this->get($class, $criteria);
+    }
+    
+    /*
+     * Get a single object from the database by primary key
+     * 
+     * @deprecated Use getById
+     */
+    public function getByPk($class, $id, $args=null)
+    {
+        return $this->getById($class, $id, $args);
     }
     
     /**
@@ -390,15 +400,24 @@ class Manager
     }
     
     /** 
-     * Delete from the database by class name and primary key
+     * Delete from the database by class name and id
      * 
      * @param string The class name to delete
      * @param mixed The primary key
      * @return void
      */
+    public function deleteById($class, $id)
+    {
+        return $this->delete($class, $this->createIdCriteria($class, $id));
+    }
+    
+    /**
+     * Delete from the database by class name and primary key
+     * @deprecated Use deleteById
+     */
     public function deleteByPk($class, $pk)
     {
-        return $this->delete($class, $this->createPkCriteria($class, $pk));
+        return $this->deleteById($class, $pk);
     }
     
     /**
@@ -550,20 +569,20 @@ class Manager
      * @throws \InvalidArgumentException
      * @return array
      */
-    protected function createPkCriteria($class, $pk)
+    protected function createIdCriteria($class, $id)
     {
         $meta = $this->getMeta($class);
         $primary = $meta->primary;
         if (!$primary)
             throw new Exception("Can't delete retrieve {$meta->class} by primary - none defined.");
         
-        if (!is_array($pk)) $pk = array($pk);
+        if (!is_array($id)) $id = array($id);
         $where = array();
         
         foreach ($primary as $idx=>$p) {
-            $idVal = isset($pk[$p]) ? $pk[$p] : (isset($pk[$idx]) ? $pk[$idx] : null);
+            $idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
             if (!$idVal)
-                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by pk");
+                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by id");
             $where[$p] = $idVal;
         }
         

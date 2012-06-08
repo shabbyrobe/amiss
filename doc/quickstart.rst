@@ -107,7 +107,7 @@ See :doc:`selecting` for more details.
 
     <?php
     // get an event by primary key
-    $event = $manager->getByPk('Event', 1);
+    $event = $manager->getById('Event', 1);
 
     // get an event named foobar. clauses are written in raw SQL.
     $event = $manager->get('Event', 'name=?', 'foobar');
@@ -259,7 +259,7 @@ Many-to-many relations require the association table to be mapped to an intermed
         public $events;
     }
 
-    $event = $manager->getByPk('Event', 1);
+    $event = $manager->getById('Event', 1);
     $artists = $manager->getRelated($event, 'artists');
 
 
@@ -280,7 +280,7 @@ Modifying by object:
     $manager->insert($event);
     
     // updating an existing object:
-    $event = $manager->getByPk('Event', 1);
+    $event = $manager->getById('Event', 1);
     $event->startDate = '2020-01-02';
     $manager->update($event);
 
@@ -289,7 +289,7 @@ Modifying by object:
     // ...
     $manager->save($event);
 
-    $event = $manager->getByPk('Event', 1);
+    $event = $manager->getById('Event', 1);
     $event->startDate = '2020-01-02';
     $manager->save($event);
 

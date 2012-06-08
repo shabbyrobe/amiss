@@ -32,7 +32,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
     {
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName) VALUES(1, "bleargh")');
         
-        $obj = $this->manager->getByPk('MultiSchemaNoteTestOne', 1);
+        $obj = $this->manager->getById('MultiSchemaNoteTestOne', 1);
         
         $this->assertEquals('bleargh', $obj->oneName);
         $this->assertEquals(1, $obj->id);
@@ -43,7 +43,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(1, "bleargh", 1)');
         $this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getByPk('MultiSchemaNoteTestOne', 1);
+        $obj = $this->manager->getById('MultiSchemaNoteTestOne', 1);
         $this->manager->assignRelated($obj, 'two');
         
         $this->assertTrue($obj->two instanceof MultiSchemaNoteTestTwo);
@@ -56,7 +56,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(2, "weehaw", 1)');
         $this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getByPk('MultiSchemaNoteTestTwo', 1);
+        $obj = $this->manager->getById('MultiSchemaNoteTestTwo', 1);
         $this->manager->assignRelated($obj, 'ones');
         
         $this->assertTrue(is_array($obj->ones));

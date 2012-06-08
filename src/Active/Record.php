@@ -135,7 +135,7 @@ abstract class Record
         $called = get_called_class();
         
         $exists = null;
-        if ($name == 'get' || $name == 'getByPk' || $name == 'getList' || $name == 'count') { 
+        if ($name == 'get' || $name == 'getByPk' || $name == 'getById' || $name == 'getList' || $name == 'count') { 
             $exists = true; 
             array_unshift($args, $called);
         }

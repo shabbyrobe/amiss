@@ -23,7 +23,7 @@ class ActiveRecordInheritanceTest extends \ActiveRecordDataTestCase
      */
     public function testSelect()
     {
-        $event = Active\PlannedEvent::getByPk(1);
+        $event = Active\PlannedEvent::getById(1);
         $this->assertEquals('AwexxomeFest 2025', $event->name);
         $this->assertEquals(20, $event->completeness);
     }

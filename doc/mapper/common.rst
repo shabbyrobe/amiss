@@ -29,7 +29,7 @@ If your property/field mappings are not quite able to be managed by the defaults
             $mapper = new Your\Own\Mapper;
             $mapper->objectNamespace = 'Foo\Bar';
             $manager = new Amiss\Manager($db, $mapper);
-            $baz = $manager->getByPk('Baz', 1);
+            $baz = $manager->getById('Baz', 1);
             
             var_dump(get_class($baz)); 
             // outputs: Foo\Bar\Baz

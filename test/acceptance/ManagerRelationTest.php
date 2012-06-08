@@ -171,7 +171,7 @@ class ManagerRelationTest extends \SqliteDataTestCase
      */
     public function testAssignRelatedDeepThroughAssocToSingle()
     {
-        $event = $this->manager->getByPk('Event', 1);
+        $event = $this->manager->getById('Event', 1);
         
         // Relation 1: populate each Event object's list of artists through EventArtists
         $this->manager->assignRelated($event, 'artists');

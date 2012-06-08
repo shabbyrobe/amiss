@@ -71,7 +71,7 @@ To update an object's representation in the database, call the ``update`` method
 .. code-block:: php
 
     <?php
-    $a = $manager->getByPk('Artist', 1);
+    $a = $manager->getById('Artist', 1);
     $a->name = 'foo bar';
     $manager->update($a);
     // UPDATE artist SET name='foo bar' WHERE artistId=1

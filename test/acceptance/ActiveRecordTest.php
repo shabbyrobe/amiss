@@ -17,9 +17,9 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      * @group active
      * @group acceptance
      */
-    public function testGetByPk()
+    public function testGetById()
     {
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertTrue($obj instanceof Active\ArtistRecord);
         $this->assertEquals(1, $obj->artistId);
     }
@@ -63,7 +63,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testGetRelatedSingle()
     {
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertTrue($obj==true, "Couldn't retrieve object");
 
         $related = $obj->getRelated('type');
@@ -78,7 +78,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testGetRelatedWithLazyLoad()
     {
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertTrue($obj==true, "Couldn't retrieve object");
         
         $this->assertNull($this->getProtected($obj, 'type'));
@@ -92,7 +92,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testDeleteByPrimary()
     {
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertTrue($obj==true, "Couldn't retrieve object");
 
         $obj->delete();
@@ -109,11 +109,11 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
     public function testUpdateByPrimary()
     {
         $n = uniqid('', true);
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $obj->name = $n;
         $obj->update();
 
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertEquals($n, $obj->name);
     }
 
@@ -133,7 +133,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $obj->insert();
 
         $this->assertGreaterThan(0, $obj->artistId);
-        $obj = Active\ArtistRecord::getByPk($obj->artistId);
+        $obj = Active\ArtistRecord::getById($obj->artistId);
         $this->assertEquals($obj->name, $n);
     }
 
@@ -144,11 +144,11 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
     public function testSaveUpdate()
     {
         $n = uniqid('', true);
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $obj->name = $n;
         $obj->save();
 
-        $obj = Active\ArtistRecord::getByPk(1);
+        $obj = Active\ArtistRecord::getById(1);
         $this->assertEquals($n, $obj->name);
     }
 
@@ -168,7 +168,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $obj->save();
 
         $this->assertGreaterThan(0, $obj->artistId);
-        $obj = Active\ArtistRecord::getByPk($obj->artistId);
+        $obj = Active\ArtistRecord::getById($obj->artistId);
         $this->assertEquals($obj->name, $n);
     }
 }

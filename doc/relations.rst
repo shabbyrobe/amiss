@@ -182,7 +182,7 @@ Amiss provides two methods for retrieving and populating relations:
     .. code-block:: php
 
         <?php
-        $artist = $manager->getByPk('Artist', 1);
+        $artist = $manager->getById('Artist', 1);
         $type = $manager->getRelated($artist, 'artistType');
 
 
@@ -203,7 +203,7 @@ Amiss provides two methods for retrieving and populating relations:
     .. code-block:: php
 
         <?php
-        $artistType = $manager->getByPk('ArtistType', 1);
+        $artistType = $manager->getById('ArtistType', 1);
         $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', '%foo%');
 
 
@@ -217,7 +217,7 @@ Amiss provides two methods for retrieving and populating relations:
     .. code-block:: php
 
         <?php
-        $artist = $manager->getByPk('Artist', 1);
+        $artist = $manager->getById('Artist', 1);
         $manager->assignRelated($artist, 'artistType');
         $type = $artist->artistType;
     

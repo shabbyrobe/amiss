@@ -42,7 +42,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
     {
         $this->connector->query('INSERT INTO schema_one.multi_schema_translator_test_one(id, oneName) VALUES(1, "bleargh")');
         
-        $obj = $this->manager->getByPk('MultiSchemaTranslatorTestOne', 1);
+        $obj = $this->manager->getById('MultiSchemaTranslatorTestOne', 1);
         
         $this->assertEquals('bleargh', $obj->oneName);
         $this->assertEquals(1, $obj->id);
@@ -53,7 +53,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
         $this->connector->query('INSERT INTO schema_one.multi_schema_translator_test_one(id, oneName, twoId) VALUES(1, "bleargh", 1)');
         $this->connector->query('INSERT INTO schema_two.multi_schema_translator_test_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getByPk('MultiSchemaTranslatorTestOne', 1);
+        $obj = $this->manager->getById('MultiSchemaTranslatorTestOne', 1);
         $this->manager->assignRelated($obj, 'two');
         
         $this->assertTrue($obj->two instanceof MultiSchemaTranslatorTestTwo);
@@ -66,7 +66,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
         $this->connector->query('INSERT INTO schema_one.multi_schema_translator_test_one(id, oneName, twoId) VALUES(2, "weehaw", 1)');
         $this->connector->query('INSERT INTO schema_two.multi_schema_translator_test_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getByPk('MultiSchemaTranslatorTestTwo', 1);
+        $obj = $this->manager->getById('MultiSchemaTranslatorTestTwo', 1);
         $this->manager->assignRelated($obj, 'ones');
         
         $this->assertTrue(is_array($obj->ones));

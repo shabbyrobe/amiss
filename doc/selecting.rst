@@ -1,32 +1,32 @@
 Selecting
 =========
 
-``Amiss\Manager`` has three methods for retrieving objects: ``getByPk``, ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways. The first argument is always the model name. All the subsequent arguments are used to define criteria for the query.
+``Amiss\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways. The first argument is always the model name. All the subsequent arguments are used to define criteria for the query.
 
 The selection methods are:
 
-.. py:method:: Amiss\\Manager::getByPk( $model , $primaryKeyValue )
+.. py:method:: Amiss\\Manager::getById( $model , $primaryKeyValue )
 
     Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
 
     .. code-block:: php
         
         <?php
-        $event = $manager->getByPk('Event', 5);
+        $event = $manager->getById('Event', 5);
     
     If the primary key is a multi-column primary key, you can pass an array containing the values in the same order as the metadata defines the primary key's properties:
 
     .. code-block:: php
     
         <?php
-        $eventArtist = $manager->getByPk('EventArtist', array(2, 3));
+        $eventArtist = $manager->getById('EventArtist', array(2, 3));
     
     If you find the above example to be a bit unreadable, you can use the property names as keys:
 
     .. code-block:: php
     
         <?php
-        $eventArtist = $manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>3));
+        $eventArtist = $manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
 .. py:method:: object Amiss\\Manager::get( $model , $criteria... )
@@ -351,7 +351,7 @@ If you are mapping an object that requires constructor arguments, you can pass t
     class Bar {}
 
     // retrieving by primary with args
-    $manager->getByPk('Foo', 1, array(new Bar));
+    $manager->getById('Foo', 1, array(new Bar));
 
     // retrieving single object by criteria with args
     $manager->get('Foo', array(

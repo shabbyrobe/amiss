@@ -17,9 +17,9 @@ class ManagerDeleteObjectTest extends \SqliteDataTestCase
      * @group acceptance
      * @group manager
      */
-    public function testDeleteByPk()
+    public function testDeleteById()
     {
-        $this->manager->deleteByPk('Artist', 1);
+        $this->manager->deleteById('Artist', 1);
         $this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
         
         // sanity check: make sure we didn't delete everything!

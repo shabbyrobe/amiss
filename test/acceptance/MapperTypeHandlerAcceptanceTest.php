@@ -26,7 +26,7 @@ class MapperTypeHandlerAcceptanceTest extends \ActiveRecordDataTestCase
         $r->yep1 = 'foo';
         $r->save();
         
-        $r = TestCustomFieldTypeRecord::getByPk(1);
+        $r = TestCustomFieldTypeRecord::getById(1);
         
         // this will have passed through the prepareValueForDb first, then
         // through the handleValueFromDb method
@@ -40,7 +40,7 @@ class MapperTypeHandlerAcceptanceTest extends \ActiveRecordDataTestCase
     public function testTypeMapperOnRetrieve()
     {
         $this->mapper->addTypeHandler(new TestTypeHandler(), 'datetime');
-        $event = \Amiss\Demo\Active\EventRecord::getByPk(1);
+        $event = \Amiss\Demo\Active\EventRecord::getById(1);
         $this->assertEquals('z1936-01-01z', $event->dateStart);
         $this->assertEquals('z1936-01-02z', $event->dateEnd);
     }
@@ -52,10 +52,10 @@ class MapperTypeHandlerAcceptanceTest extends \ActiveRecordDataTestCase
     public function testTypeMapperOnSave()
     {
         $this->mapper->addTypeHandler(new TestTypeHandler(), 'datetime');
-        $event = \Amiss\Demo\Active\EventRecord::getByPk(1);
+        $event = \Amiss\Demo\Active\EventRecord::getById(1);
         
         $event->save();
-        $event = \Amiss\Demo\Active\EventRecord::getByPk(1);
+        $event = \Amiss\Demo\Active\EventRecord::getById(1);
         $this->assertEquals('zz2001-01-01 15:15:15zz', $event->dateStart);
         $this->assertEquals('zz2001-01-01 15:15:15zz', $event->dateEnd);
     }

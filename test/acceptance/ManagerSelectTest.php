@@ -8,9 +8,9 @@ class ManagerSelectTest extends \SqliteDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testGetByPkSingle()
+    public function testGetByIdSingle()
     {
-        $a = $this->manager->getByPk('Artist', 1);
+        $a = $this->manager->getById('Artist', 1);
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
     }
@@ -19,9 +19,9 @@ class ManagerSelectTest extends \SqliteDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testGetByPkMultiPositional()
+    public function testGetByIdMultiPositional()
     {
-        $a = $this->manager->getByPk('EventArtist', array(2, 1));
+        $a = $this->manager->getById('EventArtist', array(2, 1));
         $this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
         $this->assertEquals(2, $a->eventId);
         $this->assertEquals(1, $a->artistId);
@@ -31,9 +31,9 @@ class ManagerSelectTest extends \SqliteDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testGetByPkMultiNamed()
+    public function testGetByIdMultiNamed()
     {
-        $a = $this->manager->getByPk('EventArtist', array('eventId'=>2, 'artistId'=>2));
+        $a = $this->manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>2));
         $this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
         $this->assertEquals(2, $a->eventId);
         $this->assertEquals(2, $a->artistId);

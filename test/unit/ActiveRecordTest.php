@@ -70,16 +70,16 @@ class ActiveRecordTest extends \CustomTestCase
      * @group active
      * @group unit
      */
-    public function testGetByPk()
+    public function testGetById()
     {
-        $manager = $this->getMock('Amiss\Manager', array('getByPk'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Manager', array('getById'), array($this->db, $this->mapper));
         \Amiss\Active\Record::setManager($manager);
         
-        $manager->expects($this->once())->method('getByPk')->with(
+        $manager->expects($this->once())->method('getById')->with(
             $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
             $this->equalTo(1)
         );
-        TestActiveRecord1::getByPk(1);
+        TestActiveRecord1::getById(1);
     }
     
     /**

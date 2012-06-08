@@ -26,7 +26,7 @@ class CookbookNestedObjectUsingTypeTest extends \CustomTestCase
      */
     public function testRetrieve()
     {
-        $obj = $this->manager->getByPk('CookbookNestedObject', 1);
+        $obj = $this->manager->getById('CookbookNestedObject', 1);
         var_dump($obj);
     }
 }

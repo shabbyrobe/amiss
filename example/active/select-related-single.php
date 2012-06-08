@@ -1,6 +1,6 @@
 <?php
 
 use Amiss\Demo\Active\ArtistRecord;
-$artist = ArtistRecord::getByPk(1);
+$artist = ArtistRecord::getById(1);
 $type = $artist->getType();
 return $artist;

@@ -91,8 +91,8 @@ Consider the following equivalents:
     $active->save();
     
     // getting by primary key
-    $mapped = $manager->getByPk('MappedObject', 1);
-    $active = ActiveObject::getByPk(1);
+    $mapped = $manager->getById('MappedObject', 1);
+    $active = ActiveObject::getById(1);
 
     // assigning relations
     $manager->assignRelated($mapped, 'mappedFriend');
@@ -106,7 +106,7 @@ Consider the following equivalents:
 
     <?php
     // get a single active record by primary key
-    YourRecord::getByPk ( $primaryKey );
+    YourRecord::getById ( $primaryKey );
 
     // get a single active record
     YourRecord::get ( string $positionalWhere, mixed $param1[, mixed $param2...]);
@@ -169,7 +169,7 @@ You can then simply call the new function to get the related object:
 .. code-block:: php
 
     <?php
-    $a = Artist::getByPk(1);
+    $a = Artist::getById(1);
     $type = $a->getArtistType();
 
 

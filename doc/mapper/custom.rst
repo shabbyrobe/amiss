@@ -180,7 +180,7 @@ And when we retrieve the object again (assuming a primary key of ``1``), ``bar``
 .. code-block:: php
 
     <?php
-    $f = $manager->getByPk('Foo', 1);
+    $f = $manager->getById('Foo', 1);
     var_dump($f->bar);
     
 
