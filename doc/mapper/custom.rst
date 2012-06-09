@@ -49,25 +49,14 @@ Taking this route implies that you want to take full control of the object creat
 
 The following functions must be implemented:
 
-.. py:function:: getMeta( $class )
+.. py:function:: getMeta ( $class )
     
     Must return an instance of ``Amiss\Meta`` that defines the mapping for the class name passed. See :doc:`metadata` for details on how to structure this object.
 
     :param class: A string containing the name used when ``Amiss\Manager`` is called to act on an "object".
 
 
-.. py:function:: createObject( $meta , $row , array $args = null )
-
-    Create the object mapped by the passed ``Amiss\Meta`` object, assign the values from the ``$row``, and return the freshly minted instance.
-
-    Constructor arguments are passed using ``$args``, but if you really have to, you can ignore them. Or merge them with an existing array. Or whatever.
-
-    :param meta:  ``Amiss\Meta`` defining the mapping
-    :param row:   Database row to use when populating your instance
-    :param args:  Array of constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
-
-
-.. py:function:: exportRow( $meta , $object )
+.. py:function:: fromObject ( $meta , $object )
     
     Creates a row that will be used to insert or update the database. Must return a 1-dimensional associative array (or instance of `ArrayAccess <http://php.net/manual/en/class.arrayaccess.php>`_).
 
@@ -75,11 +64,38 @@ The following functions must be implemented:
     :param object:  The object containing the values which will be used for the row
 
 
-.. py:function:: determineTypeHandler( $type )
+.. py:function:: toObject ( $meta , $object , $args )
+    
+    Create the object mapped by the passed ``Amiss\Meta`` object, assign the values from the ``$row``, and return the freshly minted instance.
+
+    :param meta:    ``Amiss\Meta`` defining the mapping
+    :param object:  The object containing the values which will be used for the row
+
+
+.. py:function:: createObject ( $meta , $input , array $args = null )
+
+    Create the object mapped by the passed ``Amiss\Meta`` object. It is acceptable to glean 
+    constructor arguments from the ``$row``, but properties should not be assigned from the row:
+    that's ``populateObject``'s job.
+
+    Constructor arguments are passed using ``$args``, but if you really have to, you can ignore them. Or merge them 
+    with an existing array. Or whatever.
+	
+    :param meta:  ``Amiss\Meta`` defining the mapping
+    :param row:   Database row to use when populating your instance
+    :param args:  Array of constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
+
+
+.. py:function:: createObject ( $meta , $object , $input )
+
+	Use the information in ``$meta`` to decide how to assign the values from ``$input`` to ``$object``. 
+
+
+.. py:function:: determineTypeHandler ( $type )
 
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
 
-    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper unless you make use of it yourself in ``exportRow`` and ``createObject``. If you don't intend to use the table builer and don't intend to use this facility to map types yourself, just leave the method body empty.
+    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper unless you make use of it yourself in ``fromObject`` and ``toObject``. If you don't intend to use the table builer and don't intend to use this facility to map types yourself, just leave the method body empty.
 
     :param type:  The ID of the type to return a handler for.
 

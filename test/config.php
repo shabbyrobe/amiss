@@ -88,7 +88,7 @@ class TestMapper implements \Amiss\Mapper
         return isset($this->meta[$class]) ? $this->meta[$class] : null;
     }
 
-    function buildObject($meta, $row, $args=null)
+    function toObject($meta, $row, $args=null)
     {
         $object = $this->createObject($meta, $row, $args);
         $this->populateObject($meta, $object, $row);
@@ -99,7 +99,7 @@ class TestMapper implements \Amiss\Mapper
     
     function populateObject($meta, $object, $row) {}
 
-    function exportRow($meta, $object) {}
+    function fromObject($meta, $object) {}
     
     function determineTypeHandler($type) {}
 }

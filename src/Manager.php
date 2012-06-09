@@ -116,8 +116,7 @@ class Manager
             if ($object)
                 throw new Exception("Query returned more than one row");
             
-            $object = $this->mapper->createObject($meta, $row, $criteria->args);
-            $this->mapper->populateObject($meta, $object, $row);
+            $object = $this->mapper->toObject($meta, $row, $criteria->args);
         }
         return $object;
     }
@@ -140,8 +139,7 @@ class Manager
         $objects = array();
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->mapper->createObject($meta, $row, $criteria->args);
-            $this->mapper->populateObject($meta, $object, $row);
+            $object = $this->mapper->toObject($meta, $row, $criteria->args);
             $objects[] = $object;
         }
         
@@ -281,7 +279,7 @@ class Manager
         if ($count == 1) {
             $object = $args[0];
             $meta = $this->getMeta(get_class($object));
-            $values = $this->mapper->exportRow($meta, $object);
+            $values = $this->mapper->fromObject($meta, $object, 'insert');
         }
         elseif ($count == 2) {
             $meta = $this->getMeta($args[0]);
@@ -346,7 +344,7 @@ class Manager
             $class = get_class($first);
             $meta = $this->getMeta($class);
             $criteria = new Criteria\Update();
-            $criteria->set = $this->mapper->exportRow($meta, $first);
+            $criteria->set = $this->mapper->fromObject($meta, $first);
             $criteria->where = $meta->getPrimaryValue($first);
         }
         elseif (is_string($first)) {
