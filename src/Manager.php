@@ -344,7 +344,7 @@ class Manager
             $class = get_class($first);
             $meta = $this->getMeta($class);
             $criteria = new Criteria\Update();
-            $criteria->set = $this->mapper->fromObject($meta, $first);
+            $criteria->set = $this->mapper->fromObject($meta, $first, 'update');
             $criteria->where = $meta->getPrimaryValue($first);
         }
         elseif (is_string($first)) {

@@ -99,7 +99,7 @@ class TestMapper implements \Amiss\Mapper
     
     function populateObject($meta, $object, $row) {}
 
-    function fromObject($meta, $object) {}
+    function fromObject($meta, $object, $context=null) {}
     
     function determineTypeHandler($type) {}
 }

@@ -45,7 +45,7 @@ abstract class Base implements \Amiss\Mapper
         }
     }
 
-    public function fromObject($meta, $object)
+    public function fromObject($meta, $object, $context=null)
     {
         $output = array();
         
@@ -82,7 +82,7 @@ abstract class Base implements \Amiss\Mapper
         $this->populateObject($meta, $object, $input);
         return $object;
     }
-	
+
     public function createObject($meta, $input, $args=null)
     {
         $object = null;

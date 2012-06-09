@@ -49,9 +49,12 @@ interface Mapper
      * 
      * @param \Amiss\Meta $meta
      * @param object The object to get row values from
+     * @param context Identifies the context in which the export is occurring. Useful
+     *     for distinguishing between inserts and updates when dealing with sql databases.
+     * 
      * @return array
      */
-    function fromObject($meta, $object);
+    function fromObject($meta, $object, $context=null);
     
     /**
      * Create the object
