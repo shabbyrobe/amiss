@@ -80,15 +80,15 @@ The following functions must be implemented:
 
     Constructor arguments are passed using ``$args``, but if you really have to, you can ignore them. Or merge them 
     with an existing array. Or whatever.
-	
+    
     :param meta:  ``Amiss\Meta`` defining the mapping
     :param row:   Database row to use when populating your instance
     :param args:  Array of constructor arguments passed to ``Amiss\Manager``. Will most likely be empty.
 
 
-.. py:function:: createObject ( $meta , $object , $input )
+.. py:function:: populateObject ( $meta , $object , $input )
 
-	Use the information in ``$meta`` to decide how to assign the values from ``$input`` to ``$object``. 
+    Use the information in ``$meta`` to decide how to assign the values from ``$input`` to ``$object``. 
 
 
 .. py:function:: determineTypeHandler ( $type )
