@@ -17,4 +17,8 @@ $command = preg_replace('@[^A-z0-9\-]@', '', $argv[1]);
 // remove the command from argv
 array_splice($argv, 1, 1);
 
-require(__DIR__.'/commands/'.$command.'.php');
+$commandFile = __DIR__.'/commands/'.$command.'.php';
+if (!file_exists($commandFile))
+    die("Unknown command $command\n");
+
+require($commandFile);
