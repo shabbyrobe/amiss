@@ -33,7 +33,10 @@ Requirements
 - MySQL or SQLite
 - PDO/MySQL and/or PDO/SQLite
 
-.. note:: Amiss has only been tested with PHP 5.3.2. It may work with 5.3.0 and 5.3.1, but this is not guaranteed.
+.. note:: 
+
+    Amiss has only been tested with a minimum version of PHP 5.3.2. It may work with 5.3.0 and
+    5.3.1, but this is not guaranteed.
 
 
 License

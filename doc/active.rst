@@ -1,20 +1,24 @@
 Active Records
 ==============
 
-From `P of EAA`_:
-An object that wraps a row in a database table or view, encapsulates the database access, and adds domain logic on that data.
+From `P of EAA`_: An object that wraps a row in a database table or view, encapsulates the database
+access, and adds domain logic on that data.
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not wild about Active Records, but they can be very effective for rapid development and people seem to like them, so why not throw them in?
+I'm not wild about Active Records, but they can be very effective for rapid development and people
+seem to like them, so why not throw them in?
 
 
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Active\Record``. Configure everything else just like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Active\Record``. Configure everything else just
+like you would when using Amiss as a Data Mapper.
 
-This guide will assume you are using the :doc:`mapper/annotation`. For more information on alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping configuration that works with the data mapper.
+This guide will assume you are using the :doc:`mapper/annotation`. For more information on
+alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping
+configuration that works with the data mapper.
 
 .. code-block:: php
 
@@ -37,7 +41,8 @@ This guide will assume you are using the :doc:`mapper/annotation`. For more info
 Connecting
 ----------
 
-As per the :doc:`configuring` section, create an ``Amiss\Connector`` and an ``Amiss\Mapper`` and pass it to an ``Amiss\Manager``. Then, assign the manager to ``Amiss\Active\Record::setManager()``.
+As per the :doc:`configuring` section, create an ``Amiss\Connector`` and an ``Amiss\Mapper`` and
+pass it to an ``Amiss\Manager``. Then, assign the manager to ``Amiss\Active\Record::setManager()``.
 
 .. code-block:: php
 
@@ -52,7 +57,8 @@ As per the :doc:`configuring` section, create an ``Amiss\Connector`` and an ``Am
     var_dump($conn === $manager); // outputs true
 
 
-Multiple connections are possible, but require subclasses. The separate connections are then assigned to their respective base class:
+Multiple connections are possible, but require subclasses. The separate connections are then
+assigned to their respective base class:
 
 .. code-block:: php
 
@@ -74,9 +80,12 @@ Multiple connections are possible, but require subclasses. The separate connecti
 Querying and Modifying
 ----------------------
 
-All of the main storage/retrieval methods in ``Amiss\Manager`` are proxied by ``Amiss\Active\Record``, but for signatures that require the class name or object instance, ``Amiss\Active\Record`` takes care of passing itself.
+All of the main storage/retrieval methods in ``Amiss\Manager`` are proxied by
+``Amiss\Active\Record``, but for signatures that require the class name or object instance,
+``Amiss\Active\Record`` takes care of passing itself.
 
-When an instance is not required, the methods are called statically against your specific active record.
+When an instance is not required, the methods are called statically against your specific active
+record.
 
 Consider the following equivalents:
 
@@ -136,7 +145,8 @@ Consider the following equivalents:
 Lazy Loading
 ------------
 
-``Amiss\Active\Record`` has no support for automatic lazy loading. You can implement it yourself using a wrapper function:
+``Amiss\Active\Record`` has no support for automatic lazy loading. You can implement it yourself 
+using a wrapper function:
 
 .. code-block:: php
 
@@ -176,16 +186,19 @@ You can then simply call the new function to get the related object:
 Hooks
 -----
 
-You can define additional behaviour against your Active Record which will occur when certain events happen inside Amiss.
+You can define additional behaviour against your Active Record which will occur when certain events
+happen inside Amiss.
 
-The ``Amiss\Active\Record`` class defines the following hooks in addition to the ones defined by ``Amiss\Manager``. I sincerely hope these are largely self explanatory:
+The ``Amiss\Active\Record`` class defines the following hooks in addition to the ones defined by
+``Amiss\Manager``. I sincerely hope these are largely self explanatory:
 
 * ``beforeInsert()``
 * ``beforeUpdate()``
 * ``beforeSave()``
 * ``beforeDelete()``
     
-.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition to ``beforeInsert()`` and ``beforeUpdate()``.
+.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition
+.. to ``beforeInsert()`` and ``beforeUpdate()``.
 
 ALWAYS call the parent method of the hook when overriding:
 
