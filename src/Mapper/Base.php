@@ -214,6 +214,12 @@ abstract class Base implements \Amiss\Mapper
                 function($key, $value) use ($cache) { return apc_store($key, $value, 86400); },
             );
         }
+        elseif ($cache == 'xcache') {
+            $cache = array(
+                function($key) use ($cache) { return xcache_get($key); },
+                function($key, $value) use ($cache) { return xcache_set($key, $value, 86400); },
+            );
+        }
         return $cache;
     }
 }
