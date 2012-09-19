@@ -1,6 +1,6 @@
 <?php
 
-namespace Amiss\Test\Acceptance;
+namespace Amiss\Test\Unit;
 
 use Amiss\Demo;
 
