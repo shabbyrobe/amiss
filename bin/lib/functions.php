@@ -2,78 +2,78 @@
 
 function determine_classes($file)
 {
-	$c = get_declared_classes();
-	require_once($file);
-	$diff = array_diff(get_declared_classes(), $c);
-	return $diff;
+    $c = get_declared_classes();
+    require_once($file);
+    $diff = array_diff(get_declared_classes(), $c);
+    return $diff;
 }
 
 function find_classes($input, $recursive=true)
 {
-	$classes = array();
-	if (is_file($input)) {
-		if (preg_match('/\.php$/', $input)) {
-			$classes = determine_classes($input);
-		}
-	}
-	elseif (is_dir($input)) {
-		$iter = null;
-		if ($recursive) {
-			$iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($input), RecursiveIteratorIterator::LEAVES_ONLY);
-		}
-		else {
-			$iter = new DirectoryIterator($input);
-		}
-		foreach ($iter as $i) {
-			if ($i->isFile()) {
-				if (preg_match('/\.php$/', $i)) {
-					$found = determine_classes($i->getPathname());
-					$classes = array_merge($classes, $found);
-				}
-			}
-		}
-	}
-	$classes = array_unique($classes);
-	$found = array();
-	foreach ($classes as $c) {
-		$rc = new \ReflectionClass($c);
-		if ($rc->isInstantiable())
-			$found[] = $c;
-	}
-	return $found;
+    $classes = array();
+    if (is_file($input)) {
+        if (preg_match('/\.php$/', $input)) {
+            $classes = determine_classes($input);
+        }
+    }
+    elseif (is_dir($input)) {
+        $iter = null;
+        if ($recursive) {
+            $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($input), RecursiveIteratorIterator::LEAVES_ONLY);
+        }
+        else {
+            $iter = new DirectoryIterator($input);
+        }
+        foreach ($iter as $i) {
+            if ($i->isFile()) {
+                if (preg_match('/\.php$/', $i)) {
+                    $found = determine_classes($i->getPathname());
+                    $classes = array_merge($classes, $found);
+                }
+            }
+        }
+    }
+    $classes = array_unique($classes);
+    $found = array();
+    foreach ($classes as $c) {
+        $rc = new \ReflectionClass($c);
+        if ($rc->isInstantiable())
+            $found[] = $c;
+    }
+    return $found;
 }
 
 function filter_classes_by_namespaces($classes, $namespaces)
 {
-	if (!is_array($namespaces))
-		$namespaces = array($namespaces);
-	
-	$found = array();
-	foreach ($classes as $c) {
-		$rc = new \ReflectionClass($c);
-		if (in_array($rc->getNamespaceName(), $namespaces)) {
-			$found[] = $c;
-		}
-	}
-	return $found;
+    if (!is_array($namespaces))
+        $namespaces = array($namespaces);
+    
+    $found = array();
+    foreach ($classes as $c) {
+        $rc = new \ReflectionClass($c);
+        if (in_array($rc->getNamespaceName(), $namespaces)) {
+            $found[] = $c;
+        }
+    }
+    return $found;
 }
 
 function filter_classes_by_notes($classes, $notes)
 {
-	if (!is_array($notes))
-		$notes = array($notes);
-	
-	$parser = new \Amiss\Note\Parser();
-	$found = array();
-	foreach ($classes as $c) {
-		$classNotes = $parser->parseClass(new \ReflectionClass($c));
-		foreach ($notes as $k) {
-			if (isset($classNotes->notes[$k])) {
-				$found[] = $c;
-			}
-		}
-	}
-	return $found;
+    if (!is_array($notes))
+        $notes = array($notes);
+    
+    $parser = new \Amiss\Note\Parser();
+    $found = array();
+    foreach ($classes as $c) {
+        $classNotes = $parser->parseClass(new \ReflectionClass($c));
+        foreach ($notes as $k) {
+            if (isset($classNotes->notes[$k])) {
+                $found[] = $c;
+            }
+        }
+    }
+    return $found;
 }
 
 // with thanks to http://stackoverflow.com/questions/187736/command-line-password-prompt-in-php

@@ -58,5 +58,5 @@ CREATE TABLE `venue` (
 );
 
 CREATE VIEW event_artist_full AS
-	SELECT ea.*, a.* FROM event_artist ea
-	INNER JOIN artist a ON a.artistId = ea.artistId;
+  SELECT ea.*, a.* FROM event_artist ea
+  INNER JOIN artist a ON a.artistId = ea.artistId;

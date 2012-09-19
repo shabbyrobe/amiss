@@ -1,5 +1,5 @@
 <phpunit forceCoversAnnotation="true"
-	bootstrap="config.php">
+         bootstrap="config.php">
 <testsuites>
   <testsuite name="Unit">
     <directory>unit</directory>

@@ -5,14 +5,14 @@ $ex = isset($_SERVER['PATH_INFO']) ? trim($_SERVER['PATH_INFO'], '/') : null;
 if (!$ex) exit;
 $ex = str_replace('..', '', $ex);
 if (strpos($ex, '/')===false) {
-	exit;
+    exit;
 }
 $file = __DIR__.'/'.$ex.'.php';
 require(dirname($file).'/config.php');
 
 if (isset($_GET['run'])) {
-	require($file);
-	exit;
+    require($file);
+    exit;
 }
 
 ob_start();
@@ -27,12 +27,12 @@ $source = source(file_get_contents($file), true);
 <head>
 <style type="text/css">
 .lines, .code {
-	font-size:12px;
-	font-family:Courier;
+    font-size:12px;
+    font-family:Courier;
 }
 .lines {
-	width:10px;
-	padding-right:4px;
+    width:10px;
+    padding-right:4px;
 }
 </style>
 </head>

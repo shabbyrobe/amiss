@@ -4,5 +4,5 @@ namespace Amiss;
 
 interface Relator
 {
-	function getRelated($source, $relationName, $criteria=null);
+    function getRelated($source, $relationName, $criteria=null);
 }
