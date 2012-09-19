@@ -28,6 +28,7 @@ class EncoderTest extends \CustomTestCase
         $tests[] = $this->dataForJsonEncode();
         $tests[] = $this->dataForClosureEncode();
         $tests[] = $this->dataForSerialise();
+        $tests[] = $this->dataForNested();
 
         $return = array();
         foreach ($tests as $test) {
@@ -45,7 +46,8 @@ class EncoderTest extends \CustomTestCase
         $inner = new Type\Date();
         
         return array(new Type\Encoder('serialize', 'unserialize', $inner), array(
-            array(
+            array(new \DateTime('2012-01-01'), 's:19:"2012-01-01 00:00:00";'),
+            array(null, null),
         ));
     }
 

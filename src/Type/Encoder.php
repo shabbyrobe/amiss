@@ -20,8 +20,9 @@ class Encoder implements Handler
         if ($value) {
             if ($this->innerHandler)
                 $value = $this->innerHandler->prepareValueForDb($value, $object, $fieldInfo);
-
-            $return = call_user_func($this->serialiser, $value);
+            
+            if ($value)
+                $return = call_user_func($this->serialiser, $value);
         }
         return $return;
     }
@@ -31,7 +32,7 @@ class Encoder implements Handler
         $return = null;
         if ($value) {
             $return = call_user_func($this->deserialiser, $value);
-
+            
             if ($this->innerHandler)
                 $return = $this->innerHandler->handleValueFromDb($return, $object, $fieldInfo, $row);
         }
