@@ -61,6 +61,8 @@ class Loader
         'Amiss\Type\AutoGuid'=>'Type/AutoGuid.php',
         'Amiss\Type\Autoinc'=>'Type/Autoinc.php',
         'Amiss\Type\Date'=>'Type/Date.php',
+        'Amiss\Type\Embed'=>'Type/Embed.php',
+        'Amiss\Type\Encoder'=>'Type/Encoder.php',
         'Amiss\Type\Handler'=>'Type/Handler.php',
         'Amiss\Type\Identity'=>'Type/Identity.php',
     );
