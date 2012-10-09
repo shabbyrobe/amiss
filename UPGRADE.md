@@ -1,8 +1,12 @@
 Upgrading
 =========
 
-v2.0.x to v2.1
+v2.0.x to v3.0
 --------------
+
+New features:
+
+
 
 `Amiss\Manager` renamed methods: 
 
@@ -14,7 +18,7 @@ v2.0.x to v2.1
 - `exportRow` renamed to `fromObject`
 - `buildObject` renamed to `toObject`
 
-Other changes:
+Minor changes:
 
 - Added xcache support to base mapper
-- `Amiss\Loader` is no longer a generic loader. It cannot be used for other PSR-0 jobs.
+- `Amiss\Loader` is no longer a generic loader. It cannot be used for other PSR-0 loading.

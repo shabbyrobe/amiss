@@ -43,6 +43,24 @@ interface Mapper
     //    $this->populateObject($meta, $object, $row);
     //    return $object;
     //}
+
+    /**
+     * Create and populate a list of objects
+     * 
+     * This will almost always have the exact same body. This is provided for
+     * convenience, commented out below the definition.
+     */
+    //function toObjects($meta, $input, $args=null);
+    //{
+    //    $out = array();
+    //    if ($input) {
+    //        foreach ($input as $item) {
+    //            $obj = $this->toObject($meta, $item);
+    //            $out[] = $obj;
+    //        }
+    //    }
+    //    return $out;
+    //}
     
     /**
      * Get row values from an object
@@ -54,7 +72,24 @@ interface Mapper
      * 
      * @return array
      */
-    function fromObject($meta, $object, $context=null);
+    function fromObject($meta, $input, $context=null);
+
+    /**
+     * Get row values from a list of objects
+     * 
+     * This will almost always have the exact same body. This is provided for
+     * convenience, commented out below the definition.
+     */
+    //function fromObjects($meta, $input, $context=null);
+    //{
+    //    $out = array();
+    //    if ($input) {
+    //        foreach ($input as $key=>$item) {
+    //            $out[$key] = $this->fromObject($meta, $item, $context);
+    //        }
+    //    }
+    //    return $out;
+    //}
     
     /**
      * Create the object
