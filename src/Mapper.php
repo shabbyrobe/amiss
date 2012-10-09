@@ -50,7 +50,7 @@ interface Mapper
      * This will almost always have the exact same body. This is provided for
      * convenience, commented out below the definition.
      */
-    //function toObjects($meta, $input, $args=null);
+    function toObjects($meta, $input, $args=null);
     //{
     //    $out = array();
     //    if ($input) {
@@ -80,7 +80,7 @@ interface Mapper
      * This will almost always have the exact same body. This is provided for
      * convenience, commented out below the definition.
      */
-    //function fromObjects($meta, $input, $context=null);
+    function fromObjects($meta, $input, $context=null);
     //{
     //    $out = array();
     //    if ($input) {

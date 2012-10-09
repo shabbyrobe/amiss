@@ -102,6 +102,35 @@ class TestMapper implements \Amiss\Mapper
     function fromObject($meta, $object, $context=null) {}
     
     function determineTypeHandler($type) {}
+    
+    /**
+     * Create and populate a list of objects
+     */
+    function toObjects($meta, $input, $args=null)
+    {
+       $out = array();
+       if ($input) {
+           foreach ($input as $item) {
+               $obj = $this->toObject($meta, $item);
+               $out[] = $obj;
+           }
+       }
+       return $out;
+    }
+
+    /**
+     * Get row values from a list of objects.
+     */
+    function fromObjects($meta, $input, $context=null)
+    {
+       $out = array();
+       if ($input) {
+           foreach ($input as $key=>$item) {
+               $out[$key] = $this->fromObject($meta, $item, $context);
+           }
+       }
+       return $out;
+    }
 }
 
 class TestTypeHandler implements \Amiss\Type\Handler
