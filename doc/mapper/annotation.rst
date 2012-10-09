@@ -397,43 +397,83 @@ can get up to 30% more speed out of Amiss in circumstances where you're doing a 
 metadata lookups per query (say, running one or two queries against one or two objects) by using a
 cache.
 
-The simplest way to enable caching is to pass the string ``apc`` or ``xcache`` as the first
-argument. This will use ``apc_fetch`` and ``apc_store``, or ``xcache_get`` and ``xcache_set``
-respectively, with an expiry of 1 day:
-
-.. code-block:: php
-
-  <?php
-  $mapper = new \Amiss\Note\Mapper('apc');
-
-
-If you don't want to use APC or Xcache for the cache, or you're not happy with Amiss' default cache
-lifetime, or you want to allow the mapper to use your own class for caching, you can pass a
-:term:`2-tuple` of closures. The first member should be your "get" method. It should take a single
-key argument and return the cached value. The second member should be your "set" method and take key
-and value arguments.
-
-For example, to shove your cached metadata into the system's temp directory:
+The simplest way to enable caching is to create an instance of ``Amiss\Cache`` with a callable
+getter and setter as the first two arguments, then pass it as the first constructor argument of
+``Amiss\Maper\Note``. Many of the standard PHP caching libraries can be used in this way:
 
 .. code-block:: php
 
     <?php
-    $path = sys_get_temp_dir();
-    $cache = array(
-        function ($key) use ($path) {
-            $key = md5($key);
-            $file = $path.'/nc-'.$key;
-            if (file_exists($file)) {
-                return unserialize(file_get_contents($file));
-            }
+    $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
+    $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
+    $cache = new \Amiss\Cache('eaccelerator_get', 'eaccelerator_put');
+    
+    $mapper = new \Amiss\Mapper\Note($cache);
+
+
+By default, no TTL or expiration information will be passed by the mapper. In the case of
+``apc_store``, for example, this will mean that once cached, the metadata will never invalidate.
+If you would like an expiration to be passed, you can either pass it as the fourth argument
+to the cache's constructor (the third argument is explained later), or set it against the
+``expiration`` property:
+
+.. code-block:: php
+
+    <?php
+    // Using the constructor
+    $cache = new \Amiss\Cache('apc_fetch', 'apc_store', null, 86400);
+
+    // Or setting by hand
+    $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
+    $cache->expiration = 86400;
+
+
+You can also use closures:
+
+.. code-block:: php
+
+    <?php
+    $cache = new \Amiss\Cache(
+        function ($key) {
+            // get the value from the cache
         },
-        function ($key, $value) use ($path) {
-            $key = md5($key);
-            $file = $path.'/nc-'.$key;
-            file_put_contents($file, serialize($value));
+        function ($key, $value, $expiration) {
+            // set the value in the cache
         }
     );
-    $mapper = new \Amiss\Mapper\Note($cache);
+
+
+If you would rather use your own caching class, you can pass it directly to ``Amiss\Mapper\Note``
+if it has following method signatures:
+
+.. code-block:: php
+
+    <?php
+    class MyCache
+    { 
+        public function get($key) {}
+        public function set($key, $value, $expiration=null) {}
+    }
+    $cache = new MyCache;
+    $mapper = new Amiss\Mapper\Note($cache);
+
+
+The ``$expiration`` parameter to ``set()`` is optional. It will be passed, but you can ignore it.
+
+If your class does not support this interface, you can use ``Amiss\Cache`` to wrap your own class
+by passing the names of the getter and setter methods and your own class:
+
+.. code-block:: php
+
+    <?php
+    class MyCache
+    { 
+        public function fetch($key) {}
+        public function put($key, $value) {}
+    }
+    $cache = new MyCache;
+    $cacheAdapter = new Amiss\Cache('fetch', 'put', $cache);
+    $mapper = new Amiss\Mapper\Note($cacheAdapter);
 
 
 .. note:: Don't use a cache in your development environment otherwise you'll have to clear the 
@@ -449,6 +489,9 @@ For example, to shove your cached metadata into the system's temp directory:
         // give it a better name than this!
         $env = getenv('your_app_environment');
         
-        $cache = $env == 'dev' ? null : 'apc';
-        $mapper = new \Amiss\Note\Mapper('apc');
+        $cache = null;
+        if ($env != 'dev')
+            $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
+        
+        $mapper = new \Amiss\Note\Mapper($cache);
 

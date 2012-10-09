@@ -24,9 +24,7 @@ class Note extends \Amiss\Mapper\Base
             $parser = new \Amiss\Note\Parser;
         
         $this->parser = $parser;
-        
-        if ($cache)
-            $this->cache = static::normaliseCache($cache);
+        $this->cache = $cache;
     }
     
     protected function createMeta($class)
@@ -34,13 +32,13 @@ class Note extends \Amiss\Mapper\Base
         $meta = null;
         
         if ($this->cache) {
-            $meta = $this->cache[0]($class);
+            $meta = $this->cache->get($class);
         }
         
         if (!$meta) {
             $meta = $this->loadMeta($class);
             if ($this->cache) {
-                $this->cache[1]($class, $meta);
+                $this->cache->set($class, $meta);
             }
         }
         

@@ -199,27 +199,4 @@ abstract class Base implements \Amiss\Mapper
         
         return $fields;
     }
-    
-    public static function normaliseCache($cache)
-    {
-        if (is_object($cache)) {
-            $cache = array(
-                function($key) use ($cache) { return $cache->get($key); },
-                function($key, $value) use ($cache) { return $cache->set($key, $value); },
-            );
-        }
-        elseif ($cache == 'apc') {
-            $cache = array(
-                function($key) use ($cache) { return apc_fetch($key); },
-                function($key, $value) use ($cache) { return apc_store($key, $value, 86400); },
-            );
-        }
-        elseif ($cache == 'xcache') {
-            $cache = array(
-                function($key) use ($cache) { $val = xcache_get($key); if ($val) return unserialize($key); },
-                function($key, $value) use ($cache) { return xcache_set($key, serialize($value), 86400); },
-            );
-        }
-        return $cache;
-    }
 }
