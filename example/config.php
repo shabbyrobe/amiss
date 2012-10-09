@@ -98,8 +98,8 @@ function get_note_cache($type, $active=true)
                 }
             );
         }
-        elseif ($type == 'apc') {
-            $cache = 'apc';
+        elseif ($type) {
+            $cache = $type;
         }
     }
     return $cache;
@@ -113,8 +113,8 @@ function titleise_slug($slug)
 function dump_highlight($var, $depth=null)
 {
     $out = dump($var);
-    $out = highlight_string('<?php '.$out, true);
-    $out = preg_replace('@<span\s+style="color:\s+#[0-9A-F]+">&lt;\?php&nbsp;</span>@s', '', $out);
+    $out = highlight_string("<?php\n".$out, true);
+    $out = preg_replace('@&lt;\?php<br />@s', '', $out, 1);
     return $out;
 }
 

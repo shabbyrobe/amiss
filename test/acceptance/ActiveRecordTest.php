@@ -108,7 +108,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testUpdateByPrimary()
     {
-        $n = uniqid('', true);
+        $n = md5(uniqid('', true));
         $obj = Active\ArtistRecord::getById(1);
         $obj->name = $n;
         $obj->update();
@@ -123,7 +123,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testInsert()
     {
-        $n = uniqid('', true);
+        $n = md5(uniqid('', true));
 
         $obj = new Active\ArtistRecord;
         $this->assertNull($obj->artistId);
@@ -143,7 +143,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testSaveUpdate()
     {
-        $n = uniqid('', true);
+        $n = md5(uniqid('', true));
         $obj = Active\ArtistRecord::getById(1);
         $obj->name = $n;
         $obj->save();
@@ -158,7 +158,7 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
      */
     public function testSaveInsert()
     {
-        $n = uniqid('', true);
+        $n = md5(uniqid('', true));
 
         $obj = new Active\ArtistRecord;
         $this->assertNull($obj->artistId);

@@ -1,7 +1,8 @@
 Modifying
 =========
 
-Amiss supports very simple create, update and delete operations on objects, as well as update and delete operations on tables.
+Amiss supports very simple create, update and delete operations on objects, as well as update and
+delete operations on tables.
 
 
 Inserting
@@ -18,7 +19,8 @@ Object Insertion
 
 Inserting by object is easy: just pass it directly to ``Amiss\Manager::insert``.
 
-If you have an autoincrement ID column it is populated into the corresponding object field by default:
+If you have an autoincrement ID column it is populated into the corresponding object field by
+default:
 
 .. code-block:: php
 
@@ -37,7 +39,8 @@ If you have an autoincrement ID column it is populated into the corresponding ob
 Value Insertion
 ~~~~~~~~~~~~~~~
 
-When the default behaviour of Object Insertion just won't do, you can insert a list of values directly.
+When the default behaviour of Object Insertion just won't do, you can insert a list of values
+directly.
 
 This is useful when
 
@@ -64,7 +67,8 @@ Updating can work on a specific object or a whole table.
 Objects
 ~~~~~~~
 
-To update an object's representation in the database, call the ``update`` method of ``Amiss\Manager`` with the object as the argument.
+To update an object's representation in the database, call the ``update`` method of
+``Amiss\Manager`` with the object as the argument.
 
 .. note:: This only works if the object has a primary key.
 
@@ -80,7 +84,8 @@ To update an object's representation in the database, call the ``update`` method
 Tables
 ~~~~~~
 
-To update a table, call the ``update`` method of ``Amiss\Manager`` but pass the object's name as the first parameter instead of an instance. The following signatures are available::
+To update a table, call the ``update`` method of ``Amiss\Manager`` but pass the object's name as the
+first parameter instead of an instance. The following signatures are available::
 
     update( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
     update( string $class, array $set , string $namedWhere, array $params )
@@ -88,9 +93,13 @@ To update a table, call the ``update`` method of ``Amiss\Manager`` but pass the 
     update( string $class, Amiss\Criteria\Update $criteria )
 
 
-The ``class`` parameter should just be the name of a class, otherwise the "Object" updating method described above will kick in.
+The ``class`` parameter should just be the name of a class, otherwise the "Object" updating method
+described above will kick in.
 
-In the first two signatures, the ``set`` parameter is an array of key=>value pairs containing fields to set. The key should be the object's property name, not the column in the database (though these may be identical). The ``positionalWhere`` or ``namedWhere`` are, like select, just parameterised query clauses.
+In the first two signatures, the ``set`` parameter is an array of key=>value pairs containing fields
+to set. The key should be the object's property name, not the column in the database (though these
+may be identical). The ``positionalWhere`` or ``namedWhere`` are, like select, just parameterised
+query clauses.
 
 .. code-block:: php
 
@@ -99,7 +108,8 @@ In the first two signatures, the ``set`` parameter is an array of key=>value pai
     // equivalent SQL: UPDATE event_artist SET priority=1 WHERE artistId=2
 
 
-In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based representation) can be passed:
+In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based representation) can be
+passed:
 
 .. code-block:: php
 
@@ -128,7 +138,8 @@ In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based re
 Saving
 ------
 
-"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects with an autoincrement column.
+"Saving is a shortcut for insert if it's new, update if it isn't, but it only works for objects with
+"an autoincrement column.
 
 .. code-block:: php
 
@@ -162,8 +173,10 @@ Deleting by table::
     delete( string $table, Criteria\Query $criteria )
 
 
-.. note:: Deleting by table cannot be used with an empty "where" clause. If you really want to delete everything in a table, you should either 
-    truncate directly:
+.. note:: 
+
+    Deleting by table cannot be used with an empty "where" clause. If you really want to delete
+    everything in a table, you should either truncate directly:
 
     .. code-block:: php
 

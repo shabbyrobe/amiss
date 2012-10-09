@@ -3,10 +3,13 @@ Array Mapper
 
 .. note:: 
 
-    The remainder of the guide assumes you are using the :doc:`annotation` rather than the array mapper mentioned here. This mapper is provided as an alternative. If you have decided to use the annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
+    The remainder of the guide assumes you are using the :doc:`annotation` rather than the array
+    mapper mentioned here. This mapper is provided as an alternative. If you have decided to use the
+    annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
 
 
-The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined using the structure outlined in :doc:`metadata`, though some additional conveniences are added.
+The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined
+using the structure outlined in :doc:`metadata`, though some additional conveniences are added.
 
 Mapping your objects is quite simple:
 
@@ -50,7 +53,8 @@ Mapping your objects is quite simple:
 
 
 
-Once your objects and mappings are defined, load load them into ``Amiss\Mapper\Arrays`` and assign it to ``Amiss\Manager``: 
+Once your objects and mappings are defined, load load them into ``Amiss\Mapper\Arrays`` and assign
+it to ``Amiss\Manager``:
 
 .. code-block:: php
 
@@ -62,7 +66,9 @@ Once your objects and mappings are defined, load load them into ``Amiss\Mapper\A
 Mapping
 -------
 
-The mapping definitions are quite straightforward. The key to the ``$mapping`` array in the below examples is the fully-qualified object name. Each object name is mapped to another array containing the mapping definition.
+The mapping definitions are quite straightforward. The key to the ``$mapping`` array in the below
+examples is the fully-qualified object name. Each object name is mapped to another array containing
+the mapping definition.
 
 
 Object mappings have the following structure:
@@ -81,21 +87,26 @@ Object mappings have the following structure:
 
 .. py:attribute:: primary
 
-    The primary key can either be a single string containing the primary key's property name or, in the case of a composite primary key, an array listing each property name.
+    The primary key can either be a single string containing the primary key's property name or, in
+    the case of a composite primary key, an array listing each property name.
 
-    The primary key does not have to appear in the field list unless you want to give it a specific type. If not, it will use the value of ``Amiss\Mapper\Arrays->defaultPrimaryType``, which defaults to ``autoinc``.
+    The primary key does not have to appear in the field list unless you want to give it a specific
+    type. If not, it will use the value of ``Amiss\Mapper\Arrays->defaultPrimaryType``, which
+    defaults to ``autoinc``.
 
 
 .. py:attribute:: table
 
     Explicitly specify the table name the object will use.
 
-    This value is *optional*. If it is not supplied, it will be guessed. See :ref:`name-translation` for more details on how this works.
+    This value is *optional*. If it is not supplied, it will be guessed. See :ref:`name-translation`
+    for more details on how this works.
 
 
 .. py:attribute:: defaultFieldType
 
-    All fields that do not specify a type will assume this type. See :ref:`type-handling` for more details.
+    All fields that do not specify a type will assume this type. See :ref:`type-handling` for more
+    details.
 
     This value is *optional*.
 
@@ -113,7 +124,9 @@ Object mappings have the following structure:
             'fields'=>array('name', 'slug', 'foo', 'anotherFoo'),
         );
 
-    In this case, the column name will be guessed from the property name (see :ref:`name-translation`), and the type will either use the ``defaultFieldType`` or, if one is not defined, no type at all.
+    In this case, the column name will be guessed from the property name (see 
+    :ref:`name-translation`), and the type will either use the ``defaultFieldType`` or, if one is 
+    not defined, no type at all.
 
     You can set the column and type yourself if you need to:
 
@@ -155,7 +168,9 @@ Object mappings have the following structure:
 
     A dictionary of the mapped object's relations, indexed by property name.
 
-    Each relation value should be an array whose ``0`` element contains the name of the relator to use. The rest of the array should be the set of key/value pairs expected by the relator. See :ref:`relators` for more details on the structure of the relation configuration.
+    Each relation value should be an array whose ``0`` element contains the name of the relator to
+    use. The rest of the array should be the set of key/value pairs expected by the relator. See
+    :ref:`relators` for more details on the structure of the relation configuration.
 
     .. code-block:: php
         
@@ -166,5 +181,6 @@ Object mappings have the following structure:
             ),
         );
 
-    Some examples of configuring the ``one`` and ``many`` relators are provided in the example at the top of the page.
+    Some examples of configuring the ``one`` and ``many`` relators are provided in the example at
+    the top of the page.
 

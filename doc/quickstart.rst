@@ -1,7 +1,8 @@
 Quick Start
 ===========
 
-This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapper/mapping` for more details and alternatives.
+This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapper/mapping`
+for more details and alternatives.
 
 
 Loading and Configuring
@@ -143,7 +144,8 @@ See :doc:`selecting` for more details.
 Relations
 ---------
 
-Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point for adding additional relationship retrieval methods. See :doc:`relations` for more details.
+Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point
+for adding additional relationship retrieval methods. See :doc:`relations` for more details.
 
 One-to-one
 ~~~~~~~~~~
@@ -218,7 +220,8 @@ One-to-many
 Many-to-many
 ~~~~~~~~~~~~
 
-Many-to-many relations require the association table to be mapped to an intermediate object, and also require the relation to be specified on both sides:
+Many-to-many relations require the association table to be mapped to an intermediate object, and
+also require the relation to be specified on both sides:
 
 
 .. code-block:: php

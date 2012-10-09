@@ -44,61 +44,10 @@ abstract class Base implements \Amiss\Mapper
             $this->typeHandlers[$type] = $handler;
         }
     }
-    
-    function buildObject($meta, $row, $args=null)
-    {
-        $object = $this->createObject($meta, $row, $args);
-        $this->populateObject($meta, $object, $row);
-        return $object;
-    }
 
-    public function createObject($meta, $row, $args=null)
+    public function fromObject($meta, $object, $context=null)
     {
-        $object = null;
-        if ($args) {
-            $rc = new \ReflectionClass($meta->class);
-            $object = $rc->newInstanceArgs($args);
-        }
-        else {
-            $cname = $meta->class;
-            $object = new $cname;
-        }
-        return $object;
-    }
-    
-    public function populateObject($meta, $object, $row)
-    {
-        $defaultType = $meta->getDefaultFieldType();
-        
-        $fields = $meta->getFields();
-        $map = $meta->getColumnToPropertyMap();
-        foreach ($row as $col=>$value) {
-            if (!isset($map[$col]))
-                continue; // throw exception?
-            
-            $prop = $map[$col];
-            $field = $fields[$prop];
-            $type = $field['type'] ?: $defaultType;
-            
-            if ($type) {
-                if (!isset($this->typeHandlerMap[$type])) {
-                    $this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
-                }
-                if ($this->typeHandlerMap[$type]) {
-                    $value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field, $row);
-                }
-            }
-            
-            if (!isset($field['setter']))
-                $object->{$prop} = $value;
-            else
-                call_user_func(array($object, $field['setter']), $value);
-        }
-    }
-    
-    public function exportRow($meta, $object)
-    {
-        $row = array();
+        $output = array();
         
         $defaultType = $meta->getDefaultFieldType();
         
@@ -121,10 +70,61 @@ abstract class Base implements \Amiss\Mapper
             
             // don't allow array_merging. it breaks mongo compatibility and is pretty 
             // confused anyway.
-            $row[$field['name']] = $value;
+            $output[$field['name']] = $value;
         }
         
-        return $row;
+        return $output;
+    }
+    
+    function toObject($meta, $input, $args=null)
+    {
+        $object = $this->createObject($meta, $input, $args);
+        $this->populateObject($meta, $object, $input);
+        return $object;
+    }
+
+    public function createObject($meta, $input, $args=null)
+    {
+        $object = null;
+        if ($args) {
+            $rc = new \ReflectionClass($meta->class);
+            $object = $rc->newInstanceArgs($args);
+        }
+        else {
+            $cname = $meta->class;
+            $object = new $cname;
+        }
+        return $object;
+    }
+    
+    public function populateObject($meta, $object, $input)
+    {
+        $defaultType = $meta->getDefaultFieldType();
+        
+        $fields = $meta->getFields();
+        $map = $meta->getColumnToPropertyMap();
+        foreach ($input as $col=>$value) {
+            if (!isset($map[$col]))
+                continue; // throw exception?
+            
+            $prop = $map[$col];
+            $field = $fields[$prop];
+            $type = $field['type'] ?: $defaultType;
+            
+            if ($type) {
+                if (!isset($this->typeHandlerMap[$type])) {
+                    $this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
+                }
+                if ($this->typeHandlerMap[$type]) {
+                    $value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field, $input);
+                }
+            }
+            
+            if (!isset($field['setter']))
+                $object->{$prop} = $value;
+            else
+                call_user_func(array($object, $field['setter']), $value);
+        }
     }
     
     public function determineTypeHandler($type)
@@ -198,22 +198,5 @@ abstract class Base implements \Amiss\Mapper
         }
         
         return $fields;
-    }
-    
-    public static function normaliseCache($cache)
-    {
-        if (is_object($cache)) {
-            $cache = array(
-                function($key) use ($cache) { return $cache->get($key); },
-                function($key, $value) use ($cache) { return $cache->set($key, $value); },
-            );
-        }
-        elseif ($cache == 'apc') {
-            $cache = array(
-                function($key) use ($cache) { return apc_fetch($key); },
-                function($key, $value) use ($cache) { return apc_store($key, $value, 86400); },
-            );
-        }
-        return $cache;
     }
 }

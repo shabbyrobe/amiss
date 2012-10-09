@@ -1,7 +1,10 @@
 Selecting
 =========
 
-``Amiss\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and ``getList``. Both methods share the same set of signatures, and they can both be used in a number of different ways. The first argument is always the model name. All the subsequent arguments are used to define criteria for the query.
+``Amiss\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and ``getList``.
+Both methods share the same set of signatures, and they can both be used in a number of different
+ways. The first argument is always the model name. All the subsequent arguments are used to define
+criteria for the query.
 
 The selection methods are:
 
@@ -14,7 +17,8 @@ The selection methods are:
         <?php
         $event = $manager->getById('Event', 5);
     
-    If the primary key is a multi-column primary key, you can pass an array containing the values in the same order as the metadata defines the primary key's properties:
+    If the primary key is a multi-column primary key, you can pass an array containing the values in
+    the same order as the metadata defines the primary key's properties:
 
     .. code-block:: php
     
@@ -31,7 +35,8 @@ The selection methods are:
 
 .. py:method:: object Amiss\\Manager::get( $model , $criteria... )
 
-    Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an exception if the criteria you specify fails to limit the result to a single object.
+    Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an
+    exception if the criteria you specify fails to limit the result to a single object.
 
     .. code-block:: php
 
@@ -43,7 +48,8 @@ The selection methods are:
 
 .. py:method:: array Amiss\\Manager::getList( $mode , $criteria... )
 
-    Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as ``get``, but allows you to find many objects and will always return an array.
+    Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as
+    ``get``, but allows you to find many objects and will always return an array.
 
 
 .. _criteria-arguments:
@@ -51,7 +57,11 @@ The selection methods are:
 Criteria Arguments
 ------------------
 
-Several methods throughout this documentation take a dynamic argument list referred to as ``$criteria...``. This is always accepted at the end of the argument list and can be passed in a number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Manager`` take their criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both the ``$modelName`` and the ``$relationName`` arguments.
+Several methods throughout this documentation take a dynamic argument list referred to as
+``$criteria...``. This is always accepted at the end of the argument list and can be passed in a
+number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Manager`` take their
+criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both the
+``$modelName`` and the ``$relationName`` arguments.
 
 Please also familiarise yourself with the section on :ref:`clauses` before diving in.
 
@@ -59,7 +69,9 @@ Please also familiarise yourself with the section on :ref:`clauses` before divin
 Shorthand
 ~~~~~~~~~
 
-The "where" clause and parameters can be passed using a shorthand format that consists of a SQL expression with positional PDO-style placeholders (question marks) and each corresponding value in subsequent arguments::
+The "where" clause and parameters can be passed using a shorthand format that consists of a SQL
+expression with positional PDO-style placeholders (question marks) and each corresponding value in
+subsequent arguments::
 
     ( $criteria... ) == ( string $positionalWhere, scalar $param1 [, scalar $param2... ] )
 
@@ -70,7 +82,8 @@ The "where" clause and parameters can be passed using a shorthand format that co
     $bands = $manager->getList('Artist', 'artistTypeId=1');
 
 
-To select using named placeholders, pass the where clause as the first criteria argument and an array of parameters the next argument::
+To select using named placeholders, pass the where clause as the first criteria argument and an
+array of parameters the next argument::
 
     ( $criteria... ) == ( string $namedWhere, array $params )
 
@@ -83,7 +96,8 @@ To select using named placeholders, pass the where clause as the first criteria 
 Long form
 ~~~~~~~~~
 
-The long form of query criteria is either an array representation of the relevant ``Amiss\Criteria\\Query`` derivative, or an actual instance thereof::
+The long form of query criteria is either an array representation of the relevant
+``Amiss\Criteria\\Query`` derivative, or an actual instance thereof::
 
     ( $criteria... ) == ( array $criteria )
     ( $criteria... ) == ( Amiss\Criteria\Query $criteria )
@@ -113,7 +127,8 @@ The long form of query criteria is either an array representation of the relevan
 Lists
 -----
 
-The ``getList()`` method will return every row in the Artist table if no criteria are passed (be careful!):
+The ``getList()`` method will return every row in the Artist table if no criteria are passed (be
+careful!):
 
 .. code-block:: php
 
@@ -121,7 +136,8 @@ The ``getList()`` method will return every row in the Artist table if no criteri
     $artists = $manager->getList('Artist');
 
 
-In addition to the "where" clause and parameters, ``getList()`` will also make use of additional criteria:
+In addition to the "where" clause and parameters, ``getList()`` will also make use of additional
+criteria:
 
 
 Pagination
@@ -139,7 +155,8 @@ Amiss provides two ways to perform pagination. The first is the standard LIMIT/O
     $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
 
 
-The second style is suited to the way your UI typically thinks of pagination: using page number/page size. This is passed as a :term:`2-tuple` using the ``page`` key:
+The second style is suited to the way your UI typically thinks of pagination: using page number/page
+size. This is passed as a :term:`2-tuple` using the ``page`` key:
 
 .. code-block:: php
 
@@ -156,7 +173,8 @@ Ordering
 
 There are several different ways to order your results. 
 
-You can order ascending on a single column with the following shorthand. Fields will be mapped using this method:
+You can order ascending on a single column with the following shorthand. Fields will be mapped using
+this method:
 
 .. code-block:: php
 
@@ -164,7 +182,10 @@ You can order ascending on a single column with the following shorthand. Fields 
     $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
 
 
-Just like :ref:`clauses`, you can order using an array. The key should be the field name, which *will* be mapped in this case, and the value should be the order direction. The default order direction is ascending, so if you wish to sort ascending you can either specify 'asc' directly, or just omit the key and pass the field name as the value.
+Just like :ref:`clauses`, you can order using an array. The key should be the field name, which
+*will* be mapped in this case, and the value should be the order direction. The default order
+direction is ascending, so if you wish to sort ascending you can either specify 'asc' directly, or
+just omit the key and pass the field name as the value.
 
 This will produce the same order as the previous example:
 
@@ -179,7 +200,9 @@ This will produce the same order as the previous example:
     ));
 
 
-And also like :ref:`clauses`, you can write your order expression in raw sql. Note that you should use the column name instead of the object property name unless you use clause placeholders. See :ref:`clauses`.
+And also like :ref:`clauses`, you can write your order expression in raw sql. Note that you should
+use the column name instead of the object property name unless you use clause placeholders. See
+:ref:`clauses`.
 
 .. code-block:: php
 
@@ -196,9 +219,12 @@ Clauses
 
 This represents the ``where`` part of your query.
 
-Most ``where`` clauses in Amiss can be written by hand in the underlying DB server's dialect. This allows complex expressions with an identical amount of flexibility to using raw SQL - because it *is* raw SQL. 
+Most ``where`` clauses in Amiss can be written by hand in the underlying DB server's dialect. This
+allows complex expressions with an identical amount of flexibility to using raw SQL - because it
+*is* raw SQL.
 
-All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria. When passing a clause as a string, you can pass it using the underlying table's column names:
+All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria. When passing a
+clause as a string, you can pass it using the underlying table's column names:
 
 .. code-block:: php
 
@@ -207,7 +233,11 @@ All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria
     // column with the same name:
     $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
 
-When your column names are exactly the same as your property names, this is the way you should do it - there's no sense in making Amiss do more work than it needs to - but when your column names are different, Amiss will perform a simple token replacement on your clause, converting ``{propertyName}`` into the ``column_name`` from the underlying metadata:
+
+When your column names are exactly the same as your property names, this is the way you should do it
+- there's no sense in making Amiss do more work than it needs to - but when your column names are
+different, Amiss will perform a simple token replacement on your clause, converting
+``{propertyName}`` into the ``column_name`` from the underlying metadata:
 
 .. code-block:: php
 
@@ -219,7 +249,9 @@ When your column names are exactly the same as your property names, this is the 
 In the above example, ``{venueName}`` is replaced with the field name.
 
 
-You can also pass an array of values indexed by property name for the where clause if you are using an ``Amiss\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping. Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
+You can also pass an array of values indexed by property name for the where clause if you are using
+an ``Amiss\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping.
+Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
 
 .. code-block:: php
 
@@ -280,7 +312,8 @@ You can use this with ``Amiss\Manager`` easily:
 
 .. warning::
 
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you should be doing this anyway). The following example may not work quite like you expect:
+    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not that you
+    should be doing this anyway). The following example may not work quite like you expect:
 
     .. code-block:: php
 
@@ -303,7 +336,8 @@ You can use this with ``Amiss\Manager`` easily:
         
         foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
 
-    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex substitution that is more than adequate if you heed this warning.
+    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex
+    substitution that is more than adequate if you heed this warning.
 
 
 

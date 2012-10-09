@@ -53,28 +53,28 @@ class NoteMapperTest extends \CustomTestCase
      */
     public function testGetMetaCache()
     {
-        $cache = array();
+        $cacheData = array();
         $getCount = $setCount = 0;
         
-        $cacheFunctions = array(
-            function($key) use (&$cache, &$getCount) {
+        $cache = new \Amiss\Cache(
+            function($key) use (&$cacheData, &$getCount) {
                 ++$getCount;
-                return isset($cache[$key]) ? $cache[$key] : null;
+                return isset($cacheData[$key]) ? $cacheData[$key] : null;
             },
-            function($key, $value) use (&$cache, &$setCount) {
+            function($key, $value) use (&$cacheData, &$setCount) {
                 ++$setCount;
-                $cache[$key] = $value;
-            },
+                $cacheData[$key] = $value;
+            }
         );
-        $mapper = new \Amiss\Mapper\Note($cacheFunctions);
+        $mapper = new \Amiss\Mapper\Note($cache);
         
-        $this->assertArrayNotHasKey('stdClass', $cache);
+        $this->assertArrayNotHasKey('stdClass', $cacheData);
         $meta = $mapper->getMeta('stdClass');
-        $this->assertArrayHasKey('stdClass', $cache);
+        $this->assertArrayHasKey('stdClass', $cacheData);
         $this->assertEquals(1, $getCount);
         $this->assertEquals(1, $setCount);
         
-        $mapper = new \Amiss\Mapper\Note($cacheFunctions);
+        $mapper = new \Amiss\Mapper\Note($cache);
         $meta = $mapper->getMeta('stdClass');
         $this->assertEquals(2, $getCount);
         $this->assertEquals(1, $setCount);

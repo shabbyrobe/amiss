@@ -100,8 +100,7 @@ class Association extends Base
         $list = array();
         $ids = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->manager->mapper->createObject($relatedMeta, $row, array());
-            $this->manager->mapper->populateObject($relatedMeta, $object, $row);
+            $object = $this->manager->mapper->toObject($relatedMeta, $row, array());
             
             $list[] = $object;
             $id = array();
