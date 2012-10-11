@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 class ManagerSelectTest extends \SqliteDataTestCase
@@ -84,7 +83,7 @@ class ManagerSelectTest extends \SqliteDataTestCase
      */
     public function testSingleObjectUsingCriteria()
     {
-        $criteria = new \Amiss\Criteria\Select;
+        $criteria = new \Amiss\Sql\Criteria\Select;
         $criteria->where = 'slug=:slug';
         $criteria->params[':slug'] = 'limozeen';
         
@@ -290,7 +289,7 @@ class ManagerSelectTest extends \SqliteDataTestCase
      */
     public function testSelectSingleObjectFailsWithoutIssuingQueryWhenLimitSetButNotOne()
     {
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('prepare'), array(''));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('prepare'), array(''));
         $this->manager->connector->expects($this->never())->method('prepare');
         $artist = $this->manager->get('Artist', array('limit'=>2));
     }

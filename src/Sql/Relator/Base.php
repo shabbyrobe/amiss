@@ -1,8 +1,7 @@
 <?php
+namespace Amiss\Sql\Relator;
 
-namespace Amiss\Relator;
-
-abstract class Base implements \Amiss\Relator
+abstract class Base implements \Amiss\Sql\Relator
 {
     public function __construct($manager)
     {

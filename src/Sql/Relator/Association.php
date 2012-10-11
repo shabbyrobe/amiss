@@ -1,10 +1,7 @@
 <?php
+namespace Amiss\Sql\Relator;
 
-namespace Amiss\Relator;
-
-use Amiss\Criteria\Select;
-
-use Amiss\Criteria;
+use Amiss\Sql\Criteria;
 
 /**
  * TODO: Two stage query? Pros: can allow full use of criteria. Cons: two queries (duh).
@@ -136,7 +133,7 @@ class Association extends Base
         $viaFields = $viaMeta->getFields();
         $relatedFields = $relatedMeta->getFields();
         
-        $query = new Select();
+        $query = new Criteria\Select();
         
         $where = array();
         foreach ($ids as $l=>$idInfo) {

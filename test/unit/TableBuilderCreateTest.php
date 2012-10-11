@@ -1,17 +1,13 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\TableBuilder;
+use Amiss\Sql\TableBuilder;
 
 class TableBuilderCreateTest extends \CustomTestCase
 {
     public function setUp()
     {
-        $this->manager = new \Amiss\Manager(
-            new \Amiss\Connector('sqlite::memory:'),
-            new \Amiss\Mapper\Note
-        );
+        $this->manager = new \Amiss\Sql\Manager(new \Amiss\Sql\Connector('sqlite::memory:'));
     }
     
     /**
@@ -31,7 +27,7 @@ class TableBuilderCreateTest extends \CustomTestCase
             )
         ";
         
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('exec'), array('sqlite::memory:'));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
         $this->manager->connector->expects($this->once())->method('exec')
             ->with($this->matchesLoose($pattern));
         
@@ -53,7 +49,7 @@ class TableBuilderCreateTest extends \CustomTestCase
                 `bar` STRING null
             )
         ";
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('exec'), array('sqlite::memory:'));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
         $this->manager->connector->expects($this->once())->method('exec')
             ->with($this->matchesLoose($pattern));
         
@@ -76,7 +72,7 @@ class TableBuilderCreateTest extends \CustomTestCase
                 KEY `idx_foo` (`fooId`)
             )
         ";
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('exec'), array('mysql:xx'));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('mysql:xx'));
         $this->manager->connector->expects($this->once())->method('exec')
             ->with($this->matchesLoose($pattern));
         
@@ -98,7 +94,7 @@ class TableBuilderCreateTest extends \CustomTestCase
                 `quack` STRING null
             )
         ";
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('exec'), array('sqlite::memory:'));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
         $this->manager->connector->expects($this->once())->method('exec')
             ->with($this->matchesLoose($pattern));
         
@@ -122,7 +118,7 @@ class TableBuilderCreateTest extends \CustomTestCase
                 KEY `idx_foo` (`myFooId`, `myOtherFooId`)
             )
         ";
-        $this->manager->connector = $this->getMock('Amiss\Connector', array('exec'), array('mysql:xx'));
+        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('mysql:xx'));
         $this->manager->connector->expects($this->once())->method('exec')
             ->with($this->matchesLoose($pattern));
         

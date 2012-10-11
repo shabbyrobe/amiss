@@ -1,6 +1,5 @@
 <?php
-
-namespace Amiss;
+namespace Amiss\Sql;
 
 interface Relator
 {

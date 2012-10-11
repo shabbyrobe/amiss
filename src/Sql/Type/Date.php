@@ -1,8 +1,7 @@
 <?php
+namespace Amiss\Sql\Type;
 
-namespace Amiss\Type;
-
-class Date implements Handler
+class Date implements \Amiss\Type\Handler
 {
     public $withTime;
     public $timeZone;

@@ -1,14 +1,14 @@
 Selecting
 =========
 
-``Amiss\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and ``getList``.
+``Amiss\Sql\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and ``getList``.
 Both methods share the same set of signatures, and they can both be used in a number of different
 ways. The first argument is always the model name. All the subsequent arguments are used to define
 criteria for the query.
 
 The selection methods are:
 
-.. py:method:: Amiss\\Manager::getById( $model , $primaryKeyValue )
+.. py:method:: Amiss\\Sql\\Manager::getById( $model , $primaryKeyValue )
 
     Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
 
@@ -33,7 +33,7 @@ The selection methods are:
         $eventArtist = $manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
-.. py:method:: object Amiss\\Manager::get( $model , $criteria... )
+.. py:method:: object Amiss\\Sql\\Manager::get( $model , $criteria... )
 
     Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw an
     exception if the criteria you specify fails to limit the result to a single object.
@@ -46,7 +46,7 @@ The selection methods are:
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
 
-.. py:method:: array Amiss\\Manager::getList( $mode , $criteria... )
+.. py:method:: array Amiss\\Sql\\Manager::getList( $mode , $criteria... )
 
     Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the same as
     ``get``, but allows you to find many objects and will always return an array.
@@ -59,7 +59,7 @@ Criteria Arguments
 
 Several methods throughout this documentation take a dynamic argument list referred to as
 ``$criteria...``. This is always accepted at the end of the argument list and can be passed in a
-number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Manager`` take their
+number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Sql\Manager`` take their
 criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both the
 ``$modelName`` and the ``$relationName`` arguments.
 
@@ -97,10 +97,10 @@ Long form
 ~~~~~~~~~
 
 The long form of query criteria is either an array representation of the relevant
-``Amiss\Criteria\\Query`` derivative, or an actual instance thereof::
+``Amiss\Sql\Criteria\\Query`` derivative, or an actual instance thereof::
 
     ( $criteria... ) == ( array $criteria )
-    ( $criteria... ) == ( Amiss\Criteria\Query $criteria )
+    ( $criteria... ) == ( Amiss\Sql\Criteria\Query $criteria )
 
 
 .. code-block:: php
@@ -117,7 +117,7 @@ The long form of query criteria is either an array representation of the relevan
 .. code-block:: php
 
     <?php
-    $criteria = new Amiss\Criteria\Select;
+    $criteria = new Amiss\Sql\Criteria\Select;
     $criteria->where = 'slug=:slug';
     $criteria->params[':slug'] = 'duke-nukem';
     
@@ -223,7 +223,7 @@ Most ``where`` clauses in Amiss can be written by hand in the underlying DB serv
 allows complex expressions with an identical amount of flexibility to using raw SQL - because it
 *is* raw SQL.
 
-All ``Amiss\Manager->get...()`` methods accept clauses as part of their criteria. When passing a
+All ``Amiss\Sql\Manager->get...()`` methods accept clauses as part of their criteria. When passing a
 clause as a string, you can pass it using the underlying table's column names:
 
 .. code-block:: php
@@ -250,7 +250,7 @@ In the above example, ``{venueName}`` is replaced with the field name.
 
 
 You can also pass an array of values indexed by property name for the where clause if you are using
-an ``Amiss\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping.
+an ``Amiss\Sql\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping.
 Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
 
 .. code-block:: php
@@ -284,7 +284,7 @@ Amiss handles unrolling non-nested array parameters:
 .. code-block:: php
 
     <?php 
-    $criteria = new Amiss\Criteria;
+    $criteria = new Amiss\Sql\Criteria;
     $criteria->where = 'foo IN (:foo)';
     $criteria->params = array(':foo'=>array(1, 2));
     $criteria->namedParams = true;
@@ -294,7 +294,7 @@ Amiss handles unrolling non-nested array parameters:
     var_dump($params);  // array(':foo_0'=>1, ':foo_1'=>2)
 
 
-You can use this with ``Amiss\Manager`` easily:
+You can use this with ``Amiss\Sql\Manager`` easily:
 
 .. code-block:: php
 
@@ -345,7 +345,7 @@ You can use this with ``Amiss\Manager`` easily:
 Counting
 --------
 
-You can use all of the same signatures that you use for ``Amiss\Manager->get()`` to count rows:
+You can use all of the same signatures that you use for ``Amiss\Sql\Manager->get()`` to count rows:
 
 .. code-block:: php
 
@@ -357,7 +357,7 @@ You can use all of the same signatures that you use for ``Amiss\Manager->get()``
     $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
 
     // long form
-    $criteria = new \Amiss\Criteria\Query();
+    $criteria = new \Amiss\Sql\Criteria\Query();
     $criteria->where = 'slug=:slug';
     $criteria->params = array(':slug'=>'duke-nukem');
     $dukeCount = $manager->count('Artist', $criteria);

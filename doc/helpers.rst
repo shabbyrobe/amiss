@@ -1,12 +1,12 @@
 Helpers
 =======
 
-``Amiss\Manager`` has several helper methods that can take some of the pain out of complex relation
+``Amiss\Sql\Manager`` has several helper methods that can take some of the pain out of complex relation
 gymnastics.
 
 .. _helpers-get-children:
 
-.. py:function:: Amiss\\Manager::getChildren( iterable $objects , $path )
+.. py:function:: Amiss\\Sql\\Manager::getChildren( iterable $objects , $path )
 
     Retrieve all child values through property ``$path`` from ``$objects``.
 
@@ -77,7 +77,7 @@ gymnastics.
     :doc:`relations`.
 
 
-.. py:function:: Amiss\\Manager::indexBy()
+.. py:function:: Amiss\\Sql\\Manager::indexBy()
 
     Iterate over an array of objects and returns an array of objects indexed by a property:
 
@@ -90,7 +90,7 @@ gymnastics.
             (object)array('foo'=>'c'),
         );
         
-        $manager = new Amiss\Manager(...);
+        $manager = new Amiss\Sql\Manager(...);
         $indexed = $manager->indexBy($objects), 'foo';
         
         // this will output array('a', 'b', 'c')
@@ -112,13 +112,13 @@ gymnastics.
             (object)array('foo'=>'a'),
             (object)array('foo'=>'b'),
         );
-        $manager = new Amiss\Manager(...);
+        $manager = new Amiss\Sql\Manager(...);
         $indexed = $manager->indexBy($objects, 'foo', Amiss::INDEX_DUPE_FAIL);
 
     BZZT! ``UnexpectedValueException``!
 
 
-.. py:function:: Amiss\Manager::keyValue()
+.. py:function:: Amiss\Sql\Manager::keyValue()
 
     ``keyValue`` scans an array of objects or arrays and selects a property for the key and a
     property for the value.
@@ -129,7 +129,7 @@ gymnastics.
     .. code-block:: php
 
         <?php
-        $manager = new Amiss\Manager(...);
+        $manager = new Amiss\Sql\Manager(...);
         $sql = 'SELECT artistId, name FROM artist ORDER BY artistName';
         $artists = $manager->keyValue($manager->execute($sql)->fetchAll(\PDO::FETCH_ASSOC));
 
@@ -142,7 +142,7 @@ gymnastics.
     .. code-block:: php
 
         <?php
-        $manager = new Amiss\Manager(...);
+        $manager = new Amiss\Sql\Manager(...);
         $result = $manager->getList('Artist', array('order'=>'name'));
         $artists = $manager->keyValue($result, 'artistId', 'name'); 
 

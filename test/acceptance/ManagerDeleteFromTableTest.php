@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Criteria\Query;
+use Amiss\Sql\Criteria\Query;
 
 class ManagerDeleteFromTableTest extends \SqliteDataTestCase
 {
@@ -41,7 +40,7 @@ class ManagerDeleteFromTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->delete( string $table, string $positionalWhere, [ $param1, ... ] )
+     *   Amiss\Sql\Manager->delete( string $table, string $positionalWhere, [ $param1, ... ] )
      * 
      * @group acceptance
      * @group manager
@@ -60,7 +59,7 @@ class ManagerDeleteFromTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->delete( string $table, string $namedWhere, array $params )
+     *   Amiss\Sql\Manager->delete( string $table, string $namedWhere, array $params )
      * 
      * @group acceptance
      * @group manager
@@ -79,7 +78,7 @@ class ManagerDeleteFromTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->delete( string $table, array $criteria )
+     *   Amiss\Sql\Manager->delete( string $table, array $criteria )
      * 
      * @group acceptance
      * @group manager
@@ -98,7 +97,7 @@ class ManagerDeleteFromTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->delete( string $table, Criteria\Query $criteria )
+     *   Amiss\Sql\Manager->delete( string $table, Criteria\Query $criteria )
      * 
      * @group acceptance
      * @group manager

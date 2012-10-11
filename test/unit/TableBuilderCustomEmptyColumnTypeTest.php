@@ -1,18 +1,18 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\TableBuilder;
+use Amiss\Sql\TableBuilder;
 
 class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 {
     public function setUp()
     {
-        \Amiss\Active\Record::_reset();
+        \Amiss\Sql\ActiveRecord::_reset();
         $this->connector = new \TestConnector('mysql:xx');
         $this->mapper = new \Amiss\Mapper\Note;
-        $this->manager = new \Amiss\Manager($this->connector, $this->mapper);
-        \Amiss\Active\Record::setManager($this->manager);
+        $this->mapper->addTypeSet(new \Amiss\Sql\TypeSet());
+        $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
+        \Amiss\Sql\ActiveRecord::setManager($this->manager);
         $this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
     }
     
@@ -41,7 +41,7 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 /**
  * @table bar
  */
-class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Active\Record
+class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary

@@ -1,9 +1,8 @@
 <?php
-
-namespace Amiss;
+namespace Amiss\Sql;
 
 use Amiss\Exception,
-    Amiss\Connector
+    Amiss\Sql\Connector
 ;
 
 class TableBuilder
@@ -14,7 +13,7 @@ class TableBuilder
     private $meta;
     
     /**
-     * @var Amiss\Manager
+     * @var Amiss\Sql\Manager
      */
     private $manager;
     
@@ -37,7 +36,7 @@ class TableBuilder
         $connector = $this->manager->getConnector();
         
         if (!($connector instanceof Connector))
-            throw new Exception("Can't create tables if not using Amiss\Connector");
+            throw new Exception("Can't create tables if not using Amiss\Sql\Connector");
         
         $sql = $this->buildCreateTableSql();
         

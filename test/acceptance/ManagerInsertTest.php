@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
@@ -8,7 +7,7 @@ class ManagerInsertObjectTest extends \SqliteDataTestCase
 {
     /**
      * Ensures the signature for object insertion works
-     *   Amiss\Manager->insert( object $object )
+     *   Amiss\Sql\Manager->insert( object $object )
      * 
      * @group acceptance
      * @group manager
@@ -57,7 +56,7 @@ class ManagerInsertObjectTest extends \SqliteDataTestCase
     
     /**
      * Ensures the signature for table insertion works
-     *   Amiss\Manager->insert( string $table , array $values )
+     *   Amiss\Sql\Manager->insert( string $table , array $values )
      * 
      * @group acceptance
      * @group manager

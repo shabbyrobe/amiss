@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Name;
 
 class CamelToUnderscore implements Translator

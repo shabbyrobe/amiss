@@ -1,14 +1,13 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Criteria;
+use Amiss\Sql\Criteria;
 
 class SelectQueryTest extends \CustomTestCase
 {
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithoutMeta()
     {
@@ -22,7 +21,7 @@ class SelectQueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsFromStringWithoutMeta()
     {
@@ -36,7 +35,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithMeta()
     {
@@ -50,7 +49,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithIncompleteMeta()
     {
@@ -68,7 +67,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsWithPrefix()
     {
@@ -82,7 +81,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Criteria\Select::buildFields
      */
     public function testBuildFieldsWithNoFieldsOrMeta()
     {
@@ -96,7 +95,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsOrMeta()
     {
@@ -110,7 +109,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsAndEmptyMeta()
     {
@@ -124,7 +123,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsAndFullMeta()
     {
@@ -138,7 +137,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderFromStringWithoutMeta()
     {
@@ -152,7 +151,7 @@ class SelectQueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderFromStringWithMeta()
     {
@@ -166,7 +165,7 @@ class SelectQueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithoutMeta()
     {
@@ -180,7 +179,7 @@ class SelectQueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithEmptyMeta()
     {
@@ -194,7 +193,7 @@ class SelectQueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      * @dataProvider dataForBuildOrderFromArrayWithMeta
      */
     public function testBuildOrderFromArrayWithMeta($order, $expected)
@@ -218,7 +217,7 @@ class SelectQueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Criteria\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithIncompleteMeta()
     {

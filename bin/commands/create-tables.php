@@ -140,10 +140,10 @@ if (!$mapper) {
 }
 
 if (!$connector)
-    $connector = new Amiss\Connector($dsn, $user, $password);
+    $connector = new Amiss\Sql\Connector($dsn, $user, $password);
 
 if (!$manager)
-    $manager = new Amiss\Manager(new Amiss\Connector($engine.':blahblah'), $mapper);
+    $manager = new Amiss\Sql\Manager(new Amiss\Sql\Connector($engine.':blahblah'), $mapper);
 
 $toCreate = find_classes($input);
 if ($namespaces)
@@ -152,6 +152,6 @@ if ($notes)
     $toCreate = filter_classes_by_notes($toCreate, $notes);
 
 foreach ($toCreate as $class) {
-    $builder = new Amiss\TableBuilder($manager, $class);
+    $builder = new Amiss\Sql\TableBuilder($manager, $class);
     $builder->createTable();
 }

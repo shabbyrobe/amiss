@@ -24,7 +24,7 @@ fully custom mapper:
 .. py:attribute:: Amiss\\Mapper\\Base->objectNamespace
 
     To save you the trouble of having to declare the full object namespace on every single call to
-    ``Amiss\Manager``, you can configure an ``Amiss\Mapper\Base`` mapper to prepend any object name
+    ``Amiss\Sql\Manager``, you can configure an ``Amiss\Mapper\Base`` mapper to prepend any object name
     that is not `fully qualified <http://php.net/namespaces>`_ with one specific namespace by
     setting this property.
 
@@ -39,7 +39,7 @@ fully custom mapper:
         namespace {
             $mapper = new Your\Own\Mapper;
             $mapper->objectNamespace = 'Foo\Bar';
-            $manager = new Amiss\Manager($db, $mapper);
+            $manager = new Amiss\Sql\Manager($db, $mapper);
             $baz = $manager->getById('Baz', 1);
             
             var_dump(get_class($baz)); 
@@ -57,14 +57,14 @@ fully custom mapper:
     ``Amiss\Mapper\Base`` will revert to the standard ``ObjectName`` to ``table_name`` method.
 
 
-.. py:attribute:: Amiss\\Manager\\Base->unnamedPropertyTranslator
+.. py:attribute:: Amiss\\Mapper\\Base->unnamedPropertyTranslator
     
     Converts a property name to a database column name and vice-versa. This property *only* accepts
     an instance of ``Amiss\Name\Translator``. It uses the ``to()`` method to convert a property name
     to a column name, and the ``from()`` method to convert a column name back to a property name.
 
 
-.. py:attribute:: Amiss\\Manager\\Base->convertUnknownTableNames
+.. py:attribute:: Amiss\\Mapper\\Base->convertUnknownTableNames
 
     If the mapper is called upon to guess a table name and the ``defaultTableNameTranslator``
     returns nothing, this determines whether the ``ObjectName`` to ``table_name`` conversion

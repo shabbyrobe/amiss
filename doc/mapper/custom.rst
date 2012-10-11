@@ -11,7 +11,7 @@ If none of the available mapping options are suitable, you can always roll your 
 by the base class), by implementing the ``Amiss\Mapper`` interface.
 
 Both methods require you to build up an instance of ``Amiss\Meta``, which defines various object-
-mapping attributes that ``Amiss\Manager`` will make use of.
+mapping attributes that ``Amiss\Sql\Manager`` will make use of.
 
 .. note:: You should be familiar with the structure of the :doc:`metadata` before reading this
 .. guide.
@@ -36,7 +36,7 @@ tweak your mapper's behaviour:
 
 .. py:function:: protected resolveObjectName( $name )
 
-    Take a name provided to ``Amiss\Manager`` and convert it before it gets passed to ``createMeta``.
+    Take a name provided to ``Amiss\Sql\Manager`` and convert it before it gets passed to ``createMeta``.
 
 
 .. py:function:: protected getDefaultTable( $class )
@@ -66,7 +66,7 @@ The following functions must be implemented:
     Must return an instance of ``Amiss\Meta`` that defines the mapping for the class name passed.
     See :doc:`metadata` for details on how to structure this object.
 
-    :param class: A string containing the name used when ``Amiss\Manager`` is called to act on an 
+    :param class: A string containing the name used when ``Amiss\Sql\Manager`` is called to act on an 
         "object".
 
 
@@ -100,7 +100,7 @@ The following functions must be implemented:
     
     :param meta:  ``Amiss\Meta`` defining the mapping
     :param row:   Database row to use when populating your instance
-    :param args:  Array of constructor arguments passed to ``Amiss\Manager``. Will most likely be 
+    :param args:  Array of constructor arguments passed to ``Amiss\Sql\Manager``. Will most likely be 
         empty.
 
 
@@ -113,7 +113,7 @@ The following functions must be implemented:
 
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
 
-    This is only really used by the ``Amiss\TableBuilder`` class when you roll your own mapper
+    This is only really used by the ``Amiss\Sql\TableBuilder`` class when you roll your own mapper
     unless you make use of it yourself in ``fromObject`` and ``toObject``. If you don't intend to
     use the table builer and don't intend to use this facility to map types yourself, just leave the
     method body empty.

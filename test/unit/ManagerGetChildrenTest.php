@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Manager;
+use Amiss\Sql\Manager;
 
 class ManagerGetChildrenTest extends \CustomTestCase
 {
@@ -15,7 +14,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetFirstLevelScalarChildrenWithStringPath()
     {
@@ -31,7 +30,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetFirstLevelScalarChildrenWithArrayPath()
     {
@@ -47,7 +46,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetSecondLevelScalarChildrenWithStringPath()
     {
@@ -63,7 +62,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetSecondLevelScalarChildrenWithArrayPath()
     {
@@ -79,7 +78,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetFirstLevelArrayChildren()
     {
@@ -95,7 +94,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::getChildren
+     * @covers Amiss\Sql\Manager::getChildren
      */
     public function testGetMultiLevelArrayChildren()
     {

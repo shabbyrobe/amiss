@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;

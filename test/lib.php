@@ -1,6 +1,6 @@
 <?php
 
-use Amiss\TableBuilder;
+use Amiss\Sql\TableBuilder;
 
 abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 {
@@ -51,33 +51,34 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 class SqliteDataTestCase extends CustomTestCase
 {
     /**
-     * @var Amiss\Manager
+     * @var Amiss\Sql\Manager
      */
     public $manager;
 
     public function getMapper()
     {
         $mapper = new \Amiss\Mapper\Note();
+        $mapper->addTypeSet(new \Amiss\Sql\TypeSet());
         $mapper->objectNamespace = 'Amiss\Demo';
         return $mapper;
     }
     
     public function getManager()
     {
-        return new \Amiss\Manager($this->db, $this->mapper);
+        return new \Amiss\Sql\Manager($this->db, $this->mapper);
     }
     
     public function setUp()
     {
-        \Amiss\Active\Record::_reset();
+        \Amiss\Sql\ActiveRecord::_reset();
         
-        $this->db = new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+        $this->db = new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
         $this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite.sql'));
         $this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite.sql'));
         
         $this->mapper = $this->getMapper();
         $this->manager = $this->getManager();
-        \Amiss\Active\Record::setManager($this->manager);
+        \Amiss\Sql\ActiveRecord::setManager($this->manager);
     }
     
     public function createRecordMemoryDb($class)

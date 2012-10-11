@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Mapper;
 
 /**
@@ -21,7 +20,6 @@ abstract class Base implements \Amiss\Mapper
     
     public function __construct()
     {
-        $this->typeHandlers['autoinc'] = new \Amiss\Type\Autoinc;
     }
     
     public function getMeta($class)
@@ -34,7 +32,7 @@ abstract class Base implements \Amiss\Mapper
     }
     
     abstract protected function createMeta($class);
-    
+
     public function addTypeHandler($handler, $types)
     {
         if (!is_array($types)) $types = array($types);
@@ -45,6 +43,14 @@ abstract class Base implements \Amiss\Mapper
         }
     }
 
+    public function addTypeSet($set)
+    {
+        foreach ($set as $typeSpec) {
+            list ($handler, $ids) = $typeSpec;
+            $this->addTypeHandler($handler, $ids);
+        }
+    }
+    
     public function fromObject($meta, $object, $context=null)
     {
         $output = array();

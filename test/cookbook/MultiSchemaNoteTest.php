@@ -1,12 +1,11 @@
 <?php
-
 namespace Amiss\Test\Cookbook;
 
 class MultiSchemaNoteTest extends \CustomTestCase
 {
     public function setUp()
     {
-        $this->connector = new \Amiss\Connector('sqlite::memory:');
+        $this->connector = new \Amiss\Sql\Connector('sqlite::memory:');
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_one;");
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_two;");
         $this->connector->exec("CREATE TABLE schema_one.table_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");
@@ -14,7 +13,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
         
         $this->mapper = new \Amiss\Mapper\Note();
         $this->mapper->objectNamespace = __NAMESPACE__;
-        $this->manager = new \Amiss\Manager($this->connector, $this->mapper);
+        $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
     }
     
     public function testInsert()

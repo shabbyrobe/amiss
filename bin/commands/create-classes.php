@@ -12,7 +12,7 @@ Options:
   --namespace     Place all records in this namespace (make sure you quote!)
   --dsn           Database DSN to use.
   --base          Base class to use for created classes
-  --ars           Equivalent to --base \Amiss\Active\Record
+  --ars           Equivalent to --base \Amiss\Sql\ActiveRecord
   -u, --user      Database user
   -p              Prompt for database password 
   --password      Database password (don't use this - use -p instead)
@@ -50,7 +50,7 @@ foreach ($iter as $v) {
         $password = $iter->current();
     }
     elseif ($v == '--ars') {
-        $base = '\Amiss\Active\Record';
+        $base = '\Amiss\Sql\ActiveRecord';
     }
     elseif ($v == '--base') {
         $iter->next();
@@ -128,7 +128,7 @@ foreach ($wtmp as $w) {
 
 $words = array_unique($words);
 
-$connector = new Amiss\Connector($dsn, $user, $password);
+$connector = new Amiss\Sql\Connector($dsn, $user, $password);
 
 $stmt = $connector->query("SHOW TABLES");
 while ($table = $stmt->fetchColumn()) {

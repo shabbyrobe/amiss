@@ -1,13 +1,12 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
 class ManagerTest extends \CustomTestCase
 {
     public function setUp()
     {
-        $this->manager = new \Amiss\Manager(
-            new \Amiss\Connector('sqlite::memory:'),
+        $this->manager = new \Amiss\Sql\Manager(
+            new \Amiss\Sql\Connector('sqlite::memory:'),
             new \Amiss\Mapper\Note
         );
     }
@@ -16,7 +15,7 @@ class ManagerTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::keyValue
+     * @covers Amiss\Sql\Manager::keyValue
      */
     public function testKeyValueWith2Tuples()
     {
@@ -36,7 +35,7 @@ class ManagerTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::keyValue
+     * @covers Amiss\Sql\Manager::keyValue
      */
     public function testKeyValueWith2TupleKeyOverwriting()
     {
@@ -55,7 +54,7 @@ class ManagerTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::keyValue
+     * @covers Amiss\Sql\Manager::keyValue
      */
     public function testKeyValueFromObjectsWithKeyValueProperties()
     {

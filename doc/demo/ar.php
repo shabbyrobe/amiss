@@ -1,11 +1,10 @@
 <?php
-
 namespace Amiss\Demo\Active;
 
 /**
  * @table artist
  */
-class ArtistRecord extends \Amiss\Active\Record
+class ArtistRecord extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary
@@ -51,7 +50,7 @@ class ArtistRecord extends \Amiss\Active\Record
     }
 }
 
-class ArtistType extends \Amiss\Active\Record
+class ArtistType extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary
@@ -89,7 +88,7 @@ class ArtistType extends \Amiss\Active\Record
 /**
  * @table event
  */
-class EventRecord extends \Amiss\Active\Record
+class EventRecord extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary
@@ -180,7 +179,7 @@ class PlannedEvent extends EventRecord
     }
 }
 
-class EventArtist extends \Amiss\Active\Record
+class EventArtist extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary
@@ -223,7 +222,7 @@ class EventArtist extends \Amiss\Active\Record
 /**
  * @table venue
  */
-class VenueRecord extends \Amiss\Active\Record
+class VenueRecord extends \Amiss\Sql\ActiveRecord
 {
     /**
      * @primary

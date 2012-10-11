@@ -54,13 +54,13 @@ Mapping your objects is quite simple:
 
 
 Once your objects and mappings are defined, load load them into ``Amiss\Mapper\Arrays`` and assign
-it to ``Amiss\Manager``:
+it to ``Amiss\Sql\Manager``:
 
 .. code-block:: php
 
     <?php
     $mapper = new Amiss\Mapper\Arrays($mapping);
-    $manager = new Amiss\Manager($db, $mapper);
+    $manager = new Amiss\Sql\Manager($db, $mapper);
 
 
 Mapping

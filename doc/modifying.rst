@@ -17,7 +17,7 @@ The ``insert`` method has a variable signature::
 Object Insertion
 ~~~~~~~~~~~~~~~~
 
-Inserting by object is easy: just pass it directly to ``Amiss\Manager::insert``.
+Inserting by object is easy: just pass it directly to ``Amiss\Sql\Manager::insert``.
 
 If you have an autoincrement ID column it is populated into the corresponding object field by
 default:
@@ -68,7 +68,7 @@ Objects
 ~~~~~~~
 
 To update an object's representation in the database, call the ``update`` method of
-``Amiss\Manager`` with the object as the argument.
+``Amiss\Sql\Manager`` with the object as the argument.
 
 .. note:: This only works if the object has a primary key.
 
@@ -84,13 +84,13 @@ To update an object's representation in the database, call the ``update`` method
 Tables
 ~~~~~~
 
-To update a table, call the ``update`` method of ``Amiss\Manager`` but pass the object's name as the
+To update a table, call the ``update`` method of ``Amiss\Sql\Manager`` but pass the object's name as the
 first parameter instead of an instance. The following signatures are available::
 
     update( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
     update( string $class, array $set , string $namedWhere, array $params )
     update( string $class, array $criteria )
-    update( string $class, Amiss\Criteria\Update $criteria )
+    update( string $class, Amiss\Sql\Criteria\Update $criteria )
 
 
 The ``class`` parameter should just be the name of a class, otherwise the "Object" updating method
@@ -108,7 +108,7 @@ query clauses.
     // equivalent SQL: UPDATE event_artist SET priority=1 WHERE artistId=2
 
 
-In the second two signatures, an ``Amiss\Criteria\Update`` (or an array-based representation) can be
+In the second two signatures, an ``Amiss\Sql\Criteria\Update`` (or an array-based representation) can be
 passed:
 
 .. code-block:: php
@@ -122,14 +122,14 @@ passed:
     ));
     
     // long-form criteria
-    $criteria = new Amiss\Criteria\Update;
+    $criteria = new Amiss\Sql\Criteria\Update;
     $criteria->set['priority'] = 1;
     $criteria->where = 'artistId=:id';
     $criteria->params = array('id'=>2);
     $manager->update('EventArtist', $criteria);
     
     // short-form 'where' criteria
-    $criteria = new Amiss\Criteria\Update;
+    $criteria = new Amiss\Sql\Criteria\Update;
     $criteria->set = array('priority'=>1);
     $criteria->where = array('artistId'=>':id');
     $manager->update('EventArtist', $criteria);
@@ -158,7 +158,7 @@ Saving
 Deleting
 --------
 
-``Amiss\Manager``'s delete methods work similarly to updating
+``Amiss\Sql\Manager``'s delete methods work similarly to updating
 
 Deleting by object works the same way as updating by object::
 

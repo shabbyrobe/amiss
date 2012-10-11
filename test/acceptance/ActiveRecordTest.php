@@ -9,8 +9,8 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
     public function setUp()
     {
         parent::setUp();
-        \Amiss\Active\Record::_reset();
-        \Amiss\Active\Record::setManager($this->manager);
+        \Amiss\Sql\ActiveRecord::_reset();
+        \Amiss\Sql\ActiveRecord::setManager($this->manager);
     }
 
     /**

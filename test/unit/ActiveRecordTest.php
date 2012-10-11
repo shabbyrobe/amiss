@@ -1,25 +1,24 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
 class ActiveRecordTest extends \CustomTestCase
 {
     public function setUp()
     {
-        \Amiss\Active\Record::_reset();
+        \Amiss\Sql\ActiveRecord::_reset();
         $this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
         $this->mapper = new \Amiss\Mapper\Note;
         $this->mapper->objectNamespace = 'Amiss\Demo\Active';
-        $this->manager = new \Amiss\Manager($this->db, $this->mapper);
+        $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
     }
     
     /**
-     * @covers Amiss\Active\Record::getMeta
+     * @covers Amiss\Sql\ActiveRecord::getMeta
      * @group active
      */
     public function testGetMeta()
     {
-        \Amiss\Active\Record::setManager($this->manager);
+        \Amiss\Sql\ActiveRecord::setManager($this->manager);
         $meta = TestActiveRecord1::getMeta();
         $this->assertInstanceOf('Amiss\Meta', $meta);
         $this->assertEquals(__NAMESPACE__.'\TestActiveRecord1', $meta->class);
@@ -30,12 +29,12 @@ class ActiveRecordTest extends \CustomTestCase
         
     /**
      * @group active
-     * @covers Amiss\Active\Record::getManager
-     * @covers Amiss\Active\Record::setManager
+     * @covers Amiss\Sql\ActiveRecord::getManager
+     * @covers Amiss\Sql\ActiveRecord::setManager
      */
     public function testMultiConnection()
     {
-        \Amiss\Active\Record::setManager($this->manager);
+        \Amiss\Sql\ActiveRecord::setManager($this->manager);
         $manager2 = clone $this->manager;
         $this->assertFalse($this->manager === $manager2);
         OtherConnBase::setManager($manager2);
@@ -49,31 +48,31 @@ class ActiveRecordTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Active\Record::__callStatic
+     * @covers Amiss\Sql\ActiveRecord::__callStatic
      * @group active
      */
     public function testGetForwarded()
     {
-        $manager = $this->getMock('Amiss\Manager', array('get'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('get'), array($this->db, $this->mapper));
         $manager->expects($this->once())->method('get')->with(
             $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
             $this->equalTo('pants=?'), 
             $this->equalTo(1)
         );
-        \Amiss\Active\Record::setManager($manager);
+        \Amiss\Sql\ActiveRecord::setManager($manager);
         $tar = new TestActiveRecord1;
         TestActiveRecord1::get('pants=?', 1);
     }
     
     /**
-     * @covers Amiss\Active\Record::__callStatic
+     * @covers Amiss\Sql\ActiveRecord::__callStatic
      * @group active
      * @group unit
      */
     public function testGetById()
     {
-        $manager = $this->getMock('Amiss\Manager', array('getById'), array($this->db, $this->mapper));
-        \Amiss\Active\Record::setManager($manager);
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getById'), array($this->db, $this->mapper));
+        \Amiss\Sql\ActiveRecord::setManager($manager);
         
         $manager->expects($this->once())->method('getById')->with(
             $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
@@ -83,7 +82,7 @@ class ActiveRecordTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Active\Record::__callStatic
+     * @covers Amiss\Sql\ActiveRecord::__callStatic
      * @group active
      * @group unit
      */
@@ -91,8 +90,8 @@ class ActiveRecordTest extends \CustomTestCase
     {
         $this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
         
-        $manager = $this->getMock('Amiss\Manager', array('getRelated'), array($this->db, $this->mapper));
-        \Amiss\Active\Record::setManager($manager);
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        \Amiss\Sql\ActiveRecord::setManager($manager);
         
         $manager->expects($this->once())->method('getRelated')->with(
             $this->isInstanceOf(__NAMESPACE__.'\TestRelatedChild'),
@@ -110,7 +109,7 @@ class ActiveRecordTest extends \CustomTestCase
      * If a record has not been loaded from the database and the class doesn't
      * define fields, undefined properties should throw
      * 
-     * @covers Amiss\Active\Record::__get
+     * @covers Amiss\Sql\ActiveRecord::__get
      * @group active
      * @group unit
      * @expectedException BadMethodCallException
@@ -125,7 +124,7 @@ class ActiveRecordTest extends \CustomTestCase
     /**
      * If the class defines its fields, undefined properties should always throw. 
      * 
-     * @covers Amiss\Active\Record::__get
+     * @covers Amiss\Sql\ActiveRecord::__get
      * @group active
      * @expectedException BadMethodCallException
      */
@@ -159,7 +158,7 @@ class ActiveRecordTest extends \CustomTestCase
      */
     public function testUpdateTable()
     {
-        $manager = $this->getMock('Amiss\Manager', array('update'), array($this->db, $this->mapper), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
+        $manager = $this->getMock('Amiss\Sql\Manager', array('update'), array($this->db, $this->mapper), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
         $manager->expects($this->once())->method('update')->with(
             $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
             $this->equalTo(array('pants'=>1)),
@@ -173,7 +172,7 @@ class ActiveRecordTest extends \CustomTestCase
 /**
  * @table table_1
  */
-class TestActiveRecord1 extends \Amiss\Active\Record
+class TestActiveRecord1 extends \Amiss\Sql\ActiveRecord
 {
     /** @primary */
     public $fooBar;
@@ -182,25 +181,25 @@ class TestActiveRecord1 extends \Amiss\Active\Record
 /**
  * @table table_2
  */
-class TestActiveRecord2 extends \Amiss\Active\Record
+class TestActiveRecord2 extends \Amiss\Sql\ActiveRecord
 {
     /** @primary */
     public $testActiveRecord2Id;
 }
 
-class TestActiveRecord3 extends \Amiss\Active\Record
+class TestActiveRecord3 extends \Amiss\Sql\ActiveRecord
 {
     /** @primary */
     public $testActiveRecord3Id;
 }
 
-abstract class OtherConnBase extends \Amiss\Active\Record {}
+abstract class OtherConnBase extends \Amiss\Sql\ActiveRecord {}
 
 class TestOtherConnRecord1 extends OtherConnBase {}
 
 class TestOtherConnRecord2 extends OtherConnBase {}
 
-class TestRelatedParent extends \Amiss\Active\Record
+class TestRelatedParent extends \Amiss\Sql\ActiveRecord
 {
     /** @primary */
     public $parentId;
@@ -211,7 +210,7 @@ class TestRelatedParent extends \Amiss\Active\Record
     public $children;
 }
 
-class TestRelatedChild extends \Amiss\Active\Record
+class TestRelatedChild extends \Amiss\Sql\ActiveRecord
 {
     /** @primary */
     public $childId;

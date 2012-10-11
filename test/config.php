@@ -19,7 +19,7 @@ class ActiveRecordDataTestCase extends SqliteDataTestCase
     }
 }
 
-class TestConnector extends \Amiss\Connector
+class TestConnector extends \Amiss\Sql\Connector
 {
     public $calls = array();
     

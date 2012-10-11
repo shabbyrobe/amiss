@@ -1,6 +1,5 @@
 <?php
-
-namespace Amiss\Criteria;
+namespace Amiss\Sql\Criteria;
 
 /**
  * @package Criteria

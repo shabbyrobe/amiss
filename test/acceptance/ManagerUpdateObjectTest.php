@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 class ManagerUpdateObjectTest extends \SqliteDataTestCase
@@ -44,7 +43,7 @@ class ManagerUpdateObjectTest extends \SqliteDataTestCase
     
     /**
      * Ensures the signature for the 'autoincrement primary key' update method works
-     *   Amiss\Manager->update( object $object )
+     *   Amiss\Sql\Manager->update( object $object )
      *   
      * @group acceptance
      * @group manager

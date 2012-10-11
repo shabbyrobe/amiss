@@ -1,6 +1,5 @@
 <?php
-
-namespace Amiss;
+namespace Amiss\Sql;
 
 /**
  * Database connector.
@@ -99,7 +98,7 @@ class Connector
     /**
      * Creates a Connector from an array of connection parameters.
      * @param array Parameters to use to create the connection
-     * @return Amiss\Connector
+     * @return Amiss\Sql\Connector
      */
     public static function create(array $params)
     {

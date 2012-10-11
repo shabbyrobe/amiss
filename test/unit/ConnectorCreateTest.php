@@ -1,13 +1,12 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Connector;
+use Amiss\Sql\Connector;
 
 class ConnectorCreateTest extends \CustomTestCase
 {
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      */
     function testCreateFromArrayWithDsn()
     {
@@ -22,7 +21,7 @@ class ConnectorCreateTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      */
     function testCreateFromArrayWithHost()
     {
@@ -33,7 +32,7 @@ class ConnectorCreateTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      */
     function testCreateFromArrayWithHostAndPort()
     {
@@ -45,7 +44,7 @@ class ConnectorCreateTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dbNameKeysProvider
      */
     function testCreateFromArrayWithHostAndDbName($key)
@@ -70,7 +69,7 @@ class ConnectorCreateTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider userNameKeysProvider
      */
     function testCreateFromArrayUserName($key)
@@ -94,7 +93,7 @@ class ConnectorCreateTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider passwordKeysProvider
      */
     function testCreateFromArrayPassword($key)

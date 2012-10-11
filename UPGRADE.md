@@ -8,7 +8,7 @@ New features:
 
 
 
-`Amiss\Manager` renamed methods: 
+`Amiss\Sql\Manager` renamed methods: 
 
 - `getByPk` has been renamed with `getById`
 - `deleteByPk` has been renamed with `deleteById`

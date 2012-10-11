@@ -17,4 +17,4 @@ This requires your chosen mapper to derive from ``Amiss\Mapper\Base``, such as `
         return 'yep_'.$translator->translate($objectName);
     };
     
-    $manager = new \Amiss\Manager($db, $mapper);
+    $manager = new \Amiss\Sql\Manager($db, $mapper);

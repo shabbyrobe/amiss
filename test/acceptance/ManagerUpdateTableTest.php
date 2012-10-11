@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Criteria\Update;
+use Amiss\Sql\Criteria\Update;
 
 class ManagerUpdateTableTest extends \SqliteDataTestCase
 {
@@ -13,7 +12,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->update( string $table, array $set , array $where )
+     *   Amiss\Sql\Manager->update( string $table, array $set , array $where )
      * 
      * @group acceptance
      * @group manager
@@ -86,7 +85,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->update( string $table, array $set , string $positionalWhere, [ $param1, ... ] )
+     *   Amiss\Sql\Manager->update( string $table, array $set , string $positionalWhere, [ $param1, ... ] )
      * 
       * @group acceptance
      * @group manager
@@ -103,7 +102,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->update( string $table, array $set , string $namedWhere, array $params )
+     *   Amiss\Sql\Manager->update( string $table, array $set , string $namedWhere, array $params )
      * 
       * @group acceptance
      * @group manager
@@ -119,7 +118,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->update( string $table, array $criteria )
+     *   Amiss\Sql\Manager->update( string $table, array $criteria )
      * 
       * @group acceptance
      * @group manager
@@ -135,7 +134,7 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Manager->update( string $table, Criteria\Update $criteria )
+     *   Amiss\Sql\Manager->update( string $table, Criteria\Update $criteria )
      * 
       * @group acceptance
      * @group manager

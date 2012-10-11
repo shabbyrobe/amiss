@@ -26,6 +26,6 @@ class Handler implements \Amiss\Type\Handler
     {}
 }
 
-\Amiss\Active\Record::getManager()->mapper->addTypeHandler(new Handler, 'datetime'); 
+\Amiss\Sql\ActiveRecord::getManager()->mapper->addTypeHandler(new Handler, 'datetime'); 
 $events = EventRecord::getList();
 return $events;

@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Manager;
+use Amiss\Sql\Manager;
 
 class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 {
@@ -18,8 +17,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::createQueryFromArgs
-     * @covers Amiss\Manager::populateWhereAndParamsFromArgs
+     * @covers Amiss\Sql\Manager::createQueryFromArgs
+     * @covers Amiss\Sql\Manager::populateWhereAndParamsFromArgs
      */
     public function testHandlePositionalShorthandUnrolled()
     {
@@ -34,8 +33,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::createQueryFromArgs
-     * @covers Amiss\Manager::populateWhereAndParamsFromArgs
+     * @covers Amiss\Sql\Manager::createQueryFromArgs
+     * @covers Amiss\Sql\Manager::populateWhereAndParamsFromArgs
      */
     public function testHandlePositionalShorthandRolled()
     {
@@ -50,8 +49,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::createQueryFromArgs
-     * @covers Amiss\Manager::populateWhereAndParamsFromArgs
+     * @covers Amiss\Sql\Manager::createQueryFromArgs
+     * @covers Amiss\Sql\Manager::populateWhereAndParamsFromArgs
      */
     public function testHandlePositionalLongform()
     {
@@ -66,8 +65,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::createQueryFromArgs
-     * @covers Amiss\Manager::populateWhereAndParamsFromArgs
+     * @covers Amiss\Sql\Manager::createQueryFromArgs
+     * @covers Amiss\Sql\Manager::populateWhereAndParamsFromArgs
      */
     public function testHandleNamedShorthand()
     {
@@ -82,8 +81,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      * @group unit
      * @group manager
      * 
-     * @covers Amiss\Manager::createQueryFromArgs
-     * @covers Amiss\Manager::populateWhereAndParamsFromArgs
+     * @covers Amiss\Sql\Manager::createQueryFromArgs
+     * @covers Amiss\Sql\Manager::populateWhereAndParamsFromArgs
      */
     public function testHandleNamedLongform()
     {

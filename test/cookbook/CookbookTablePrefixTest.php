@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Cookbook;
 
 class CookbookTablePrefixTest extends \CustomTestCase
@@ -15,7 +14,7 @@ class CookbookTablePrefixTest extends \CustomTestCase
         };
         $this->mapper->objectNamespace = __NAMESPACE__;
         
-        $this->manager = new \Amiss\Manager(array(), $this->mapper);
+        $this->manager = new \Amiss\Sql\Manager(array(), $this->mapper);
     }
     
     /**

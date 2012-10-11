@@ -1,19 +1,18 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Active\Record;
+use Amiss\Sql\ActiveRecord;
 
 class ActiveRecordEventTest extends \CustomTestCase
 {
     public function setUp()
     {
-        $this->connector = $this->getMock('Amiss\Connector', array(), array(), '', !'callOriginalConstructor');
+        $this->connector = $this->getMock('Amiss\Sql\Connector', array(), array(), '', !'callOriginalConstructor');
         
         $this->mapper = new \Amiss\Mapper\Note;
         
         $this->manager = $this->getMock(
-            'Amiss\Manager',
+            'Amiss\Sql\Manager',
             array('insert', 'update', 'delete'),
             array($this->connector, $this->mapper)
         );
@@ -22,7 +21,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Active\Record::beforeUpdate
+     * @covers Amiss\Sql\ActiveRecord::beforeUpdate
      * @group active
      * @group unit
      */
@@ -35,7 +34,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Active\Record::beforeInsert
+     * @covers Amiss\Sql\ActiveRecord::beforeInsert
      * @group active
      * @group unit
      */
@@ -48,7 +47,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Active\Record::delete
+     * @covers Amiss\Sql\ActiveRecord::delete
      * @group active
      * @group unit
      */
@@ -61,7 +60,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Active\Record::beforeSave
+     * @covers Amiss\Sql\ActiveRecord::beforeSave
      * @group active
      * @group unit
      */
@@ -74,7 +73,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Active\Record::beforeSave
+     * @covers Amiss\Sql\ActiveRecord::beforeSave
      * @group active
      */
     public function testBeforeSaveCalledOnUpdate()
@@ -85,7 +84,7 @@ class ActiveRecordEventTest extends \CustomTestCase
         $ret->update();
     }
     /**
-     * @covers Amiss\Active\Record::beforeInsert
+     * @covers Amiss\Sql\ActiveRecord::beforeInsert
      * @group active
      * @group unit
      */
@@ -99,7 +98,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Active\Record::beforeUpdate
+     * @covers Amiss\Sql\ActiveRecord::beforeUpdate
      * @group active
      */
     public function testBeforeUpdateCalledOnSave()
@@ -112,7 +111,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     }
 }
 
-class RecordEventTestRecord extends Record
+class RecordEventTestRecord extends ActiveRecord
 {
     /** 
      * @primary

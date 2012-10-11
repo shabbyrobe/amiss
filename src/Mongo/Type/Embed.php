@@ -1,16 +1,10 @@
 <?php
-namespace Amiss\Type;
+namespace Amiss\Mongo\Type;
 
-class Embed implements Handler
+class Embed implements \Amiss\Type\Handler
 {
-    /**
-     * @var Amiss\Mapper
-     */
     public $mapper;
 
-    /**
-     * @var bool
-     */
     public $many;
 
     public function __construct($mapper, $many=null)
@@ -35,12 +29,12 @@ class Embed implements Handler
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $return[$key] = $this->mapper->exportRow($embedMeta, $item);
+                    $return[$key] = $this->mapper->fromObject($embedMeta, $item);
                 }
             }
         }
         else {
-            $return = $value ? $this->mapper->exportRow($embedMeta, $value) : null;
+            $return = $value ? $this->mapper->fromObject($embedMeta, $value) : null;
         }
         return $return;
     }
@@ -61,15 +55,13 @@ class Embed implements Handler
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $obj = $this->mapper->createObject($embedMeta, $value);
-                    $this->mapper->populateObject($embedMeta, $obj, $item);
+                    $obj = $this->mapper->toObject($embedMeta, $value);
                     $return[$key] = $obj;
                 }
             }
         }
         else {
-            $return = $this->mapper->createObject($embedMeta, $value);
-            $this->mapper->populateObject($embedMeta, $return, $value);
+            $return = $this->mapper->toObject($embedMeta, $value);
         }
         return $return;
     }

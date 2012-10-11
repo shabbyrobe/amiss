@@ -24,10 +24,10 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 
     // This is basically a PDO with a bit of extra niceness. You should use it instead
     // of PDO in your own code
-    $connector = new Amiss\Connector('mysql:host=127.0.0.1', 'user', 'password');
+    $connector = new Amiss\Sql\Connector('mysql:host=127.0.0.1', 'user', 'password');
 
     // And this binds the whole mess together
-    $manager = new Amiss\Manager($connector, $mapper);
+    $manager = new Amiss\Sql\Manager($connector, $mapper);
 
 
 Defining objects
@@ -95,7 +95,7 @@ See :doc:`schema` for more details.
 .. code-block:: php
 
     <?php
-    $tableBuilder = new Amiss\TableBuilder($manager, 'Venue');
+    $tableBuilder = new Amiss\Sql\TableBuilder($manager, 'Venue');
     $tableBuilder->createTable();
 
 

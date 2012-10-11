@@ -1,14 +1,13 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Criteria;
+use Amiss\Sql\Criteria;
 
 class QueryTest extends \CustomTestCase
 {
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testInClauseStraight()
     {
@@ -23,7 +22,7 @@ class QueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testInClauseWithFieldMapping()
     {
@@ -44,7 +43,7 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForInClauseReplacementTolerance
      */
     public function testInClauseReplacementTolerance($clause)
@@ -69,7 +68,7 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testMultipleInClause()
     {
@@ -88,7 +87,7 @@ class QueryTest extends \CustomTestCase
     /**
      * @group unit
      * @group faulty
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForInClauseDoesNotRuinString
      */
     public function testInClauseDoesNotRuinString($where, $result)
@@ -115,7 +114,7 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testBuildClauseWithoutParameterColons()
     {
@@ -130,7 +129,7 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testShorthandWhere()
     {
@@ -144,7 +143,7 @@ class QueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForBuildClauseFieldSubstitutionWithFromRawSql
      */
     public function testBuildClauseFieldSubstitutionWithFromRawSql($query, $expected)
@@ -174,7 +173,7 @@ class QueryTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForBuildClauseFromArrayWithFieldSubstitution
      */
     public function testBuildClauseFieldSubstitutionWithArray($query, $expected)
@@ -204,7 +203,7 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Criteria\Query::paramsAreNamed
+     * @covers Amiss\Sql\Criteria\Query::paramsAreNamed
      * @dataProvider dataForParamsAreNamed
      */
     public function testParamsAreNamed($name, $areNamed, $params)

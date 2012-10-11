@@ -1,8 +1,7 @@
 <?php
+namespace Amiss\Sql\Relator;
 
-namespace Amiss\Relator;
-
-use Amiss\Criteria;
+use Amiss\Sql\Criteria;
 
 class OneMany extends Base
 {

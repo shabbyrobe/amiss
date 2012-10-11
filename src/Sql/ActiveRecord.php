@@ -1,15 +1,9 @@
 <?php
+namespace Amiss\Sql;
 
-namespace Amiss\Active;
+use Amiss\Exception;
 
-use Amiss\Connector,
-    Amiss\Exception
-;
-
-/**
- * @package ActiveRecord
- */
-abstract class Record
+abstract class ActiveRecord
 {
     private static $managers=array();
     private static $meta=array();
@@ -62,7 +56,7 @@ abstract class Record
     }
     
     /**
-     * @return Amiss\Manager
+     * @return Amiss\Sql\Manager
      */
     public static function getManager($class=null)
     {

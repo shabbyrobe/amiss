@@ -39,7 +39,7 @@ using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
 Relators
 --------
 
-``Amiss\Manager`` handles retrieving related objects using extensions called "Relators".
+``Amiss\Sql\Manager`` handles retrieving related objects using extensions called "Relators".
 
 Amiss provides three relationship types out of the box: ``one``, ``many`` and ``assoc``. You can add
 extra relationships if you need them. See :ref:`custom-relators` below.
@@ -193,7 +193,7 @@ Retrieving Related Objects
 
 Amiss provides two methods for retrieving and populating relations:
 
-.. py:function:: Amiss\\Manager::getRelated( $source , $relationName , $criteria ... )
+.. py:function:: Amiss\\Sql\\Manager::getRelated( $source , $relationName , $criteria ... )
 
     :param source: The single object or array of objects for which to retrieve the related values
     :param relationName: The name of the relation through which to retrieve objects
@@ -232,7 +232,7 @@ Amiss provides two methods for retrieving and populating relations:
         $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', '%foo%');
 
 
-.. py:function:: Amiss\\Manager::assignRelated( $into , $relationName )
+.. py:function:: Amiss\\Sql\\Manager::assignRelated( $into , $relationName )
 
     :param into: The single object or array of objects into which this will set the related values
     :param relationName: The name of the relation through which to retrieve objects
@@ -277,7 +277,7 @@ What about when we have a list of ``Events``, we have retrieved each related lis
 ``EventArtist``, and we want to assign the related ``Artist`` to each ``EventArtist``? And what if
 we want to take it one step further and assign each ``ArtistType`` too?
 
-Easy! We can use ``Amiss\Manager->getChildren()``.
+Easy! We can use ``Amiss\Sql\Manager->getChildren()``.
 
 Before we go any further, let's outline a relation graph present in the ``doc/demo/model.php`` file:
 
@@ -356,22 +356,22 @@ Custom Relators
 ---------------
 
 You can add your own relationship types to Amiss by creating a class that extends
-``Amiss\Relator\Base`` and adding it to the ``Amiss\Manager->relators`` dictionary. Your Relator
+``Amiss\Sql\Relator\Base`` and adding it to the ``Amiss\Sql\Manager->relators`` dictionary. Your Relator
 must implement the following method:
 
-.. py:method:: Amiss\\Relator::getRelated( $source , $relationName , $criteria... = null )
+.. py:method:: Amiss\\Sql\\Relator::getRelated( $source , $relationName , $criteria... = null )
     
     Retrieve the objects for the ``$source`` that are related through ``$relationName``. Optionally
-    filter using ``$criteria``, which must be an instance of ``Amiss\Criteria\Query``.
+    filter using ``$criteria``, which must be an instance of ``Amiss\Sql\Criteria\Query``.
 
-    ``Amiss\Relator\Base`` makes an instance of ``Amiss\Manager`` available through
+    ``Amiss\Sql\Relator\Base`` makes an instance of ``Amiss\Sql\Manager`` available through
     ````$this->manager``. You can use this to perform queries.
 
     :param source: The source object(s). This could be either a single object or an array of objects 
         depending on your context. You are free to raise an exception if your ``Relator`` only 
         supports single objects or arrays.
     :param relationName: The name of the relation which was passed to ``getRelated``
-    :param criteria: Optional filter criteria. Must be instance of ``Amiss\Criteria\Query``.
+    :param criteria: Optional filter criteria. Must be instance of ``Amiss\Sql\Criteria\Query``.
 
 
 You can register your relator with Amiss like so:

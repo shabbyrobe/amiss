@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Type;
 
 interface Handler

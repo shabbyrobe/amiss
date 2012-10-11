@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Tests\Unit;
 
 class RelatorOneManyTest extends \CustomTestCase
@@ -8,16 +7,16 @@ class RelatorOneManyTest extends \CustomTestCase
     {
         $this->mapper = new \TestMapper;
         
-        $this->db = $this->getMockBuilder('Amiss\Connector')
+        $this->db = $this->getMockBuilder('Amiss\Sql\Connector')
             ->disableOriginalConstructor()
             ->getMock()
         ;
-        $this->manager = $this->getMockBuilder('Amiss\Manager')
+        $this->manager = $this->getMockBuilder('Amiss\Sql\Manager')
             ->setConstructorArgs(array($this->db, $this->mapper))
             ->setMethods(array('getList', 'get', 'getRelated'))
             ->getMock()
         ;
-        $this->relator = new \Amiss\Relator\OneMany($this->manager);
+        $this->relator = new \Amiss\Sql\Relator\OneMany($this->manager);
         
         if (!class_exists('DummyParent')) {
             eval('class DummyParent { public $id; public $parentId; } class DummyChild { public $id; }');

@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Demo;
 
 abstract class Object

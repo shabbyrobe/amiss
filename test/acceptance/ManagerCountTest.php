@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 class ManagerCountTest extends \SqliteDataTestCase
@@ -66,7 +65,7 @@ class ManagerCountTest extends \SqliteDataTestCase
      */
     public function testCountObjectsUsingCriteria()
     {
-        $criteria = new \Amiss\Criteria\Select;
+        $criteria = new \Amiss\Sql\Criteria\Select;
         $criteria->where = 'artistTypeId=:artistTypeId';
         $criteria->params[':artistTypeId'] = 1;
         

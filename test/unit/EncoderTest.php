@@ -3,6 +3,7 @@
 namespace Amiss\Test\Unit;
 
 use Amiss\Type;
+use Amiss\Sql;
 
 class EncoderTest extends \CustomTestCase
 {
@@ -43,7 +44,7 @@ class EncoderTest extends \CustomTestCase
     
     public function dataForNested()
     {
-        $inner = new Type\Date();
+        $inner = new Sql\Type\Date();
         
         return array(new Type\Encoder('serialize', 'unserialize', $inner), array(
             array(new \DateTime('2012-01-01'), 's:19:"2012-01-01 00:00:00";'),

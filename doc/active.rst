@@ -13,7 +13,7 @@ seem to like them, so why not throw them in?
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Active\Record``. Configure everything else just
+To define active records, simply extend the ``Amiss\Sql\ActiveRecord``. Configure everything else just
 like you would when using Amiss as a Data Mapper.
 
 This guide will assume you are using the :doc:`mapper/annotation`. For more information on
@@ -23,7 +23,7 @@ configuration that works with the data mapper.
 .. code-block:: php
 
     <?php
-    class Artist extends Amiss\Active\Record
+    class Artist extends Amiss\Sql\ActiveRecord
     {
         /** @primary */
         public $artistId;
@@ -41,19 +41,19 @@ configuration that works with the data mapper.
 Connecting
 ----------
 
-As per the :doc:`configuring` section, create an ``Amiss\Connector`` and an ``Amiss\Mapper`` and
-pass it to an ``Amiss\Manager``. Then, assign the manager to ``Amiss\Active\Record::setManager()``.
+As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an ``Amiss\Mapper`` and
+pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to ``Amiss\Sql\ActiveRecord::setManager()``.
 
 .. code-block:: php
 
     <?php
-    $conn = new Amiss\Connector('sqlite::memory:');
+    $conn = new Amiss\Sql\Connector('sqlite::memory:');
     $mapper = new Amiss\Mapper\Note;
-    $manager = new Amiss\Manager($conn, $mapper);
-    Amiss\Active\Record::setManager($manager);
+    $manager = new Amiss\Sql\Manager($conn, $mapper);
+    Amiss\Sql\ActiveRecord::setManager($manager);
     
     // test it out
-    $test = Amiss\Active\Record::getManager();
+    $test = Amiss\Sql\ActiveRecord::getManager();
     var_dump($conn === $manager); // outputs true
 
 
@@ -63,8 +63,8 @@ assigned to their respective base class:
 .. code-block:: php
 
     <?php
-    abstract class Db1Record extends Amiss\Active\Record {}
-    abstract class Db2Record extends Amiss\Active\Record {}
+    abstract class Db1Record extends Amiss\Sql\ActiveRecord {}
+    abstract class Db2Record extends Amiss\Sql\ActiveRecord {}
     
     class Artist extends Db1Record {}
     class Burger extends Db2Record {}
@@ -80,9 +80,9 @@ assigned to their respective base class:
 Querying and Modifying
 ----------------------
 
-All of the main storage/retrieval methods in ``Amiss\Manager`` are proxied by
-``Amiss\Active\Record``, but for signatures that require the class name or object instance,
-``Amiss\Active\Record`` takes care of passing itself.
+All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied by
+``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or object instance,
+``Amiss\Sql\ActiveRecord`` takes care of passing itself.
 
 When an instance is not required, the methods are called statically against your specific active
 record.
@@ -108,7 +108,7 @@ Consider the following equivalents:
     $active->assignRelated('mappedFriend');
 
 
-``Amiss\Active\Record`` subclasses make the following **static** methods available:
+``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods available:
 
 
 .. code-block:: php
@@ -121,7 +121,7 @@ Consider the following equivalents:
     YourRecord::get ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::get ( string $namedWhere, array $params );
     YourRecord::get ( array $criteria );
-    YourRecord::get ( Amiss\Criteria $criteria );
+    YourRecord::get ( Amiss\Sql\Criteria $criteria );
 
     // get a list of active records
     YourRecord::getList ( as with get );
@@ -130,10 +130,10 @@ Consider the following equivalents:
     YourRecord::count ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::count ( string $namedWhere, array $params );
     YourRecord::count ( array $criteria );
-    YourRecord::count ( Amiss\Criteria $criteria );
+    YourRecord::count ( Amiss\Sql\Criteria $criteria );
 
 
-``Amiss\Active\Record`` subclasses make the following **instance** methods available:
+``Amiss\Sql\ActiveRecord`` subclasses make the following **instance** methods available:
 
 .. code-block:: php
 
@@ -145,14 +145,14 @@ Consider the following equivalents:
 Lazy Loading
 ------------
 
-``Amiss\Active\Record`` has no support for automatic lazy loading. You can implement it yourself 
+``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can implement it yourself 
 using a wrapper function:
 
 .. code-block:: php
 
     <?php
     namespace Amiss\Demo;
-    class Artist extends \Amiss\Active\Record
+    class Artist extends \Amiss\Sql\ActiveRecord
     {
         public $artistId;
         public $name;
@@ -189,8 +189,8 @@ Hooks
 You can define additional behaviour against your Active Record which will occur when certain events
 happen inside Amiss.
 
-The ``Amiss\Active\Record`` class defines the following hooks in addition to the ones defined by
-``Amiss\Manager``. I sincerely hope these are largely self explanatory:
+The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to the ones defined by
+``Amiss\Sql\Manager``. I sincerely hope these are largely self explanatory:
 
 * ``beforeInsert()``
 * ``beforeUpdate()``
@@ -205,7 +205,7 @@ ALWAYS call the parent method of the hook when overriding:
 .. code-block:: php
 
     <?php
-    class MyRecord extends \Amiss\Active\Record
+    class MyRecord extends \Amiss\Sql\ActiveRecord
     {
         // snipped fields, etc
 

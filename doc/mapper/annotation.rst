@@ -2,13 +2,13 @@ Annotation Mapper
 =================
 
 To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to
-``Amiss\Manager``:
+``Amiss\Sql\Manager``:
 
 .. code-block:: php
 
     <?php
     $mapper = new \Amiss\Note\Mapper();
-    $manager = new \Amiss\Manager($db, $mapper);
+    $manager = new \Amiss\Sql\Manager($db, $mapper);
 
 
 This is the bare minimum required to create an instance of this mapper. This will be enough for now,
@@ -172,7 +172,7 @@ The following annotations are available to define this mapping:
 
     Defines a relation against a property or getter method.
 
-    ``relationType`` must be a short string registered with ``Amiss\Manager->relators``. The
+    ``relationType`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
     ``one``, ``many`` and ``assoc`` relators are available by default.
 
     ``relationParams`` allows you to pass an array of key/value pairs to instruct the relator

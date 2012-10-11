@@ -1,6 +1,8 @@
 <?php
+namespace Amiss\Sql;
 
-namespace Amiss;
+use Amiss\Exception;
+use Amiss\Mapper;
 
 /**
  * Amiss query manager. This is the core of Amiss' functionality.
@@ -15,7 +17,7 @@ class Manager
     
     /**
      * Database connector
-     * @var Amiss\Connector|\PDO|PDO-esque
+     * @var Amiss\Sql\Connector|\PDO|PDO-esque
      */
     public $connector;
     
@@ -34,46 +36,62 @@ class Manager
     
     /**
      * Relators used by getRelated
-     * @var Amiss\Relator[]
+     * @var Amiss\Sql\Relator[]
      */
     public $relators;
     
     /**
      * Constructor
      * 
-     * @param Amiss\Connector|\PDO|array
+     * @param Amiss\Sql\Connector|\PDO|array
      *     Database connector
      * 
      * @param Amiss\Mapper
      *     Object/table mapper implementation
      * 
-     * @param Amiss\Relator[]|null
+     * @param Amiss\Sql\Relator[]|null
      *     Default set of relators to initialise
      *     the Manager with. If null is passed, the standard set of relators (one, many,
      *     assoc) will be used.
      */
-    public function __construct($connector, Mapper $mapper, $relators=null)
+    public function __construct($connector, $config=array())
     {
         if (is_array($connector)) 
             $connector = Connector::create($connector);
         
         $this->connector = $connector;
-        $this->mapper = $mapper;
         
-        if ($relators===null) {
+        if ($config instanceof Mapper)
+            $config = array('mapper'=>$config);
+        
+        $cache = null;
+        if ($config instanceof Cache) {
+            $cache = $config;
+            $config = array();
+        }
+        
+        if (!isset($config['mapper'])) {
+            $mapper = new Mapper\Note($cache);
+            $mapper->addTypeSet(new TypeSet());
+            $config = array('mapper'=>$mapper);
+        }
+        
+        $this->mapper = $config['mapper'];
+        
+        if (!isset($config['relators'])) {
             $this->relators = array();
             $this->relators['one'] = $this->relators['many'] = new Relator\OneMany($this);
             $this->relators['assoc'] = new Relator\Association($this);
         }
         else {
-            $this->relators = $relators;
+            $this->relators = $config['relators'];
         }
     }
     
     /**
      * Get the database connector
      * 
-     * @return \Amiss\Connector|\PDO
+     * @return \Amiss\Sql\Connector|\PDO
      */
     public function getConnector()
     {
@@ -258,7 +276,7 @@ class Manager
         
         $query = null;
         if ($criteria) {
-            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Criteria\Query');
+            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
         }
         
         return $this->relators[$relation[0]]->getRelated($source, $relationName, $query);
@@ -312,7 +330,7 @@ class Manager
             $field = $meta->getField($meta->primary[0]);
             $handler = $this->mapper->determineTypeHandler($field['type']);
             
-            if ($handler instanceof Type\Identity) {
+            if ($handler instanceof \Amiss\Type\Identity) {
                 $generated = $handler->handleDbGeneratedValue($lastInsertId);
                 if ($generated) {
                     // skip using populateObject - we don't need the type handler stack because we 
@@ -391,7 +409,7 @@ class Manager
             if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
             
             $class = $first;
-            $criteria = $this->createQueryFromArgs($args, 'Amiss\Criteria\Query');
+            $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Criteria\Query');
         }
         
         return $this->executeDelete($class, $criteria);
@@ -590,7 +608,7 @@ class Manager
     /**
      * Create criteria to update a table
      * @param array Arguments to create criteria from
-     * @return \Amiss\Criteria\Update
+     * @return \Amiss\Sql\Criteria\Update
      */
     protected function createTableUpdateCriteria($args)
     {
@@ -640,9 +658,9 @@ class Manager
      * Parses remaining function arguments into a query object
      * @param array Leftover function arguments
      * @param string Class name of query to instantiate
-     * @return \Amiss\Criteria\Query
+     * @return \Amiss\Sql\Criteria\Query
      */
-    protected function createQueryFromArgs($args, $type='Amiss\Criteria\Select')
+    protected function createQueryFromArgs($args, $type='Amiss\Sql\Criteria\Select')
     {
         if (!$args) {
             $criteria = new $type();

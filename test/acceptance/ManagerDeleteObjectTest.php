@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 class ManagerDeleteObjectTest extends \SqliteDataTestCase
@@ -50,7 +49,7 @@ class ManagerDeleteObjectTest extends \SqliteDataTestCase
             'Amiss\Demo\Artist'=>new \Amiss\Meta('Artist', 'artist', array()),
         ));
         
-        $manager = new \Amiss\Manager($this->manager->connector, $mapper);
+        $manager = new \Amiss\Sql\Manager($this->manager->connector, $mapper);
         $manager->delete($this->artist);
     }
 }

@@ -1,8 +1,7 @@
 <?php
+namespace Amiss\Sql\Type;
 
-namespace Amiss\Type;
-
-class Autoinc implements Handler, Identity
+class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
 {
     public $type = 'INTEGER';
     

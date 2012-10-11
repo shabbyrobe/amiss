@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\Connector;
+use Amiss\Sql\Connector;
 
 class ConnectorTest extends \CustomTestCase
 {
@@ -28,7 +27,7 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::disconnect
+     * @covers Amiss\Sql\Connector::disconnect
      */
     public function testDisconnect()
     {
@@ -41,7 +40,7 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::setAttribute
+     * @covers Amiss\Sql\Connector::setAttribute
      */
     public function testDisconnectedSetAttribute()
     {
@@ -55,7 +54,7 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::setAttribute
+     * @covers Amiss\Sql\Connector::setAttribute
      */
     public function testConnectedSetAttribute()
     {
@@ -74,7 +73,7 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::getAttribute
+     * @covers Amiss\Sql\Connector::getAttribute
      */
     public function testDisconnectedGetAttribute()
     {
@@ -89,7 +88,7 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::getAttribute
+     * @covers Amiss\Sql\Connector::getAttribute
      */
     public function testConnectedGetAttribute()
     {
@@ -109,7 +108,7 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::errorInfo
+     * @covers Amiss\Sql\Connector::errorInfo
      */
     public function testErrorInfoConnected()
     {
@@ -126,7 +125,7 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::errorInfo
+     * @covers Amiss\Sql\Connector::errorInfo
      */
     public function testErrorInfoDisconnected()
     {
@@ -136,7 +135,7 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::errorCode
+     * @covers Amiss\Sql\Connector::errorCode
      */
     public function testErrorCodeConnected()
     {
@@ -153,7 +152,7 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::errorCode
+     * @covers Amiss\Sql\Connector::errorCode
      */
     public function testErrorCodeDisconnected()
     {
@@ -163,19 +162,19 @@ class ConnectorTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Connector::exec
-     * @covers Amiss\Connector::lastInsertId
-     * @covers Amiss\Connector::prepare
-     * @covers Amiss\Connector::query
-     * @covers Amiss\Connector::quote
-     * @covers Amiss\Connector::beginTransaction
-     * @covers Amiss\Connector::commit
-     * @covers Amiss\Connector::rollback
+     * @covers Amiss\Sql\Connector::exec
+     * @covers Amiss\Sql\Connector::lastInsertId
+     * @covers Amiss\Sql\Connector::prepare
+     * @covers Amiss\Sql\Connector::query
+     * @covers Amiss\Sql\Connector::quote
+     * @covers Amiss\Sql\Connector::beginTransaction
+     * @covers Amiss\Sql\Connector::commit
+     * @covers Amiss\Sql\Connector::rollback
      * @dataProvider dataForProxies
      */
     public function testProxies($method, $args=array())
     {
-        $connector = $this->getMockBuilder('Amiss\Connector')
+        $connector = $this->getMockBuilder('Amiss\Sql\Connector')
             ->setMethods(array('createPDO'))
             ->disableOriginalConstructor()
             ->getMock()
@@ -219,12 +218,12 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateHost
      */
     public function testCreateHost($hostKey)
     {
-        $conn = \Amiss\Connector::create(array($hostKey=>'dbhost'));
+        $conn = \Amiss\Sql\Connector::create(array($hostKey=>'dbhost'));
         $this->assertEquals('mysql:host=dbhost;', $conn->dsn);
     }
     
@@ -243,12 +242,12 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateUser
      */
     public function testCreateUser($key)
     {
-        $conn = \Amiss\Connector::create(array($key=>'myuser'));
+        $conn = \Amiss\Sql\Connector::create(array($key=>'myuser'));
         $this->assertEquals('myuser', $conn->username);
     }
     
@@ -264,12 +263,12 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreatePassword
      */
     public function testCreatePassword($key)
     {
-        $conn = \Amiss\Connector::create(array($key=>'passw0rd'));
+        $conn = \Amiss\Sql\Connector::create(array($key=>'passw0rd'));
         $this->assertEquals('passw0rd', $conn->password);
     }
     
@@ -286,12 +285,12 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateOptions
      */
     public function testCreateOptions($key)
     {
-        $conn = \Amiss\Connector::create(array($key=>array('a'=>'b')));
+        $conn = \Amiss\Sql\Connector::create(array($key=>array('a'=>'b')));
         $this->assertEquals(array('a'=>'b'), $conn->driverOptions);
     }
     
@@ -306,12 +305,12 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateConnectionStatements
      */
     public function testCreateConnectionStatements($key)
     {
-        $conn = \Amiss\Connector::create(array($key=>array('a', 'b')));
+        $conn = \Amiss\Sql\Connector::create(array($key=>array('a', 'b')));
         $this->assertEquals(array('a', 'b'), $conn->connectionStatements);
     }
     
@@ -326,23 +325,23 @@ class ConnectorTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      */
     public function testCreateDsn()
     {
         $value = 'mysql:host=localhost;dbname=foobar';
-        $conn = \Amiss\Connector::create(array('dsn'=>$value));
+        $conn = \Amiss\Sql\Connector::create(array('dsn'=>$value));
         $this->assertEquals($value, $conn->dsn);
     }
 
     /**
      * @group unit
-     * @covers Amiss\Connector::create
+     * @covers Amiss\Sql\Connector::create
      */
     public function testCreateDsnOverridesHost()
     {
         $value = 'mysql:host=localhost;dbname=foobar';
-        $conn = \Amiss\Connector::create(array('dsn'=>$value, 'host'=>'whoopee'));
+        $conn = \Amiss\Sql\Connector::create(array('dsn'=>$value, 'host'=>'whoopee'));
         $this->assertEquals($value, $conn->dsn);
     }
 }

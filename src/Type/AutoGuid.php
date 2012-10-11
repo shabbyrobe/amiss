@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Type;
 
 class AutoGuid implements Handler, Identity

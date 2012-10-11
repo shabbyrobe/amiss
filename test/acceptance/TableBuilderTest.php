@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
-use Amiss\TableBuilder,
+use Amiss\Sql\TableBuilder,
     Amiss\Demo
 ;
 
@@ -14,12 +13,12 @@ class TableBuilderTest extends \ActiveRecordDataTestCase
      */
     public function testCreateTableSqlite()
     {
-        $db = new \Amiss\Connector('sqlite::memory:');
+        $db = new \Amiss\Sql\Connector('sqlite::memory:');
         
-        $manager = new \Amiss\Manager($db, new \Amiss\Mapper\Note);
+        $manager = new \Amiss\Sql\Manager($db, new \Amiss\Mapper\Note);
         
-        \Amiss\Active\Record::_reset();
-        \Amiss\Active\Record::setManager($manager);
+        \Amiss\Sql\ActiveRecord::_reset();
+        \Amiss\Sql\ActiveRecord::setManager($manager);
         
         $tableBuilder = new TableBuilder($manager, 'Amiss\Demo\Active\EventRecord');
         $tableBuilder->createTable();

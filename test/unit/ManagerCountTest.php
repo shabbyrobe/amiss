@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
 class ManagerCountTest extends \CustomTestCase
@@ -8,13 +7,13 @@ class ManagerCountTest extends \CustomTestCase
     {
         $this->db = new \TestConnector('sqlite::memory:');
         $this->mapper = new \TestMapper();
-        $this->manager = new \Amiss\Manager($this->db, $this->mapper);
+        $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
     }
     
     /**
      * @group unit
      * @group manager
-     * @covers Amiss\Manager::count
+     * @covers Amiss\Sql\Manager::count
      */
     public function testCountQueryWithoutPrimary()
     {
@@ -30,7 +29,7 @@ class ManagerCountTest extends \CustomTestCase
     /**
      * @group unit
      * @group manager
-     * @covers Amiss\Manager::count
+     * @covers Amiss\Sql\Manager::count
      */
     public function testCountQueryWithSingleColumnPrimary()
     {
@@ -55,7 +54,7 @@ class ManagerCountTest extends \CustomTestCase
     /**
      * @group unit
      * @group manager
-     * @covers Amiss\Manager::count
+     * @covers Amiss\Sql\Manager::count
      */
     public function testCountQueryWithMultiColumnPrimary()
     {

@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss;
 
 class Meta
@@ -17,7 +16,7 @@ class Meta
      * 
      * For e.g.
      * $meta->relations = array(
-     *     // the 'of' and 'on' keys are required by Amiss\Relator\OneMany
+     *     // the 'of' and 'on' keys are required by Amiss\Sql\Relator\OneMany
      *     'foo'=>array('one', 'of'=>'Artist', 'on'=>'artistId'),
      *     
      *     // the blahblah relator has different ideas

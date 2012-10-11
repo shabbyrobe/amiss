@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Tests\Unit;
 
 class NoteParserTest extends \CustomTestCase

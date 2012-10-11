@@ -1,8 +1,7 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
-use Amiss\TableBuilder;
+use Amiss\Sql\TableBuilder;
 
 class TableBuilderCustomTypeTest extends \CustomTestCase
 {
@@ -10,7 +9,8 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
     {
         $this->connector = new \TestConnector('mysql:xx');
         $this->mapper = new \Amiss\Mapper\Note();
-        $this->manager = new \Amiss\Manager($this->connector, $this->mapper);
+        $this->mapper->addTypeSet(new \Amiss\Sql\TypeSet);
+        $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
         $this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithCustomType');
     }
     

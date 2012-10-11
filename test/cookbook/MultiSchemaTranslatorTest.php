@@ -1,12 +1,11 @@
 <?php
-
 namespace Amiss\Test\Cookbook;
 
 class MultiSchemaTranslatorTest extends \CustomTestCase
 {
     public function setUp()
     {
-        $this->connector = new \Amiss\Connector('sqlite::memory:');
+        $this->connector = new \Amiss\Sql\Connector('sqlite::memory:');
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_one;");
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_two;");
         $this->connector->exec("CREATE TABLE schema_one.multi_schema_translator_test_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");
@@ -24,7 +23,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
             return $prefix.$table;
         };
         $this->mapper->objectNamespace = __NAMESPACE__;
-        $this->manager = new \Amiss\Manager($this->connector, $this->mapper);
+        $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
     }
     
     public function testInsert()
