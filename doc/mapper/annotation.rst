@@ -12,8 +12,8 @@ To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note
 
 
 This is the bare minimum required to create an instance of this mapper. This will be enough for now,
-though more configuration options are available. See :ref:`mapper-common` for more information on
-how to tweak the behaviour of all of Amiss' default mapping options.
+though more configuration options are available. See :doc:`common` and :doc:`types` for more
+information on how to tweak the behaviour of all of Amiss' default mapping options.
 
 
 Overview
@@ -113,7 +113,8 @@ The following class level annotations are available:
 .. py:attribute:: @fieldType value
 
     This sets a default field type to use for for all of the properties that do not have a field
-    type set against them explicitly. This will inherit from a parent class if one is set.
+    type set against them explicitly. This will inherit from a parent class if one is set. See
+    :doc:`types` for more details.
 
 
 These values must be assigned in the class' docblock:
@@ -148,7 +149,7 @@ The following annotations are available to define this mapping:
 .. py:attribute:: @type fieldType
 
     Optional type for the field. If this is not specified, the ``@fieldType`` class level attribute
-    is used.
+    is used. See :doc:`types` for more details.
 
 
 .. py:attribute:: @setter setterName

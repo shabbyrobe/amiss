@@ -13,5 +13,6 @@ The annotation mapper is used throughout this documentation.
     annotation
     array
     metadata
+    types
     common
     custom
