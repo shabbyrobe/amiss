@@ -8,7 +8,7 @@ New features:
 
 - Added encoder field type. This allows automatic PHP serialization or json_encoding of 
   data in the mapper.
-- Added support for embedding objects
+- Added support for embedding objects.
 
 API changes:
 
@@ -16,4 +16,6 @@ API changes:
 - `Amiss\Manager->deleteByPk` has been renamed `deleteById`
 - `Amiss\Mapper\Note` now only takes a cache object as its first argument, it no longer
   supports a 2-tuple of closures.
+- `\Amiss\Mapper->exportRow` has been renamed `fromObject`
+- `\Amiss\Mapper->buildObject` has been renamed `toObject`
 - `Amiss\Loader` is no longer a generic loader. It cannot be used for other PSR-0 loading.
