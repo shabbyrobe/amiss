@@ -31,13 +31,13 @@ class ManagerUpdateObjectTest extends \SqliteDataTestCase
         
         $original->sequence = 3000;
         
-        $this->manager->update($original);
-        
         $beforeEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
+        $this->manager->update($original);
         $afterEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
         
         $this->assertEquals($beforeEventArtists, $afterEventArtists);
         
+        // ensure all of the objects other than the one we are messing with are untouched
         $found = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
         $this->assertEquals(3000, $found->sequence);
     }
