@@ -4,6 +4,10 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
 
+/**
+ * @group active
+ * @group acceptance
+ */
 class ActiveRecordTest extends \ActiveRecordDataTestCase
 {
     public function setUp()
@@ -13,10 +17,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         \Amiss\Active\Record::setManager($this->manager);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetById()
     {
         $obj = Active\ArtistRecord::getById(1);
@@ -24,10 +24,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals(1, $obj->artistId);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetByPositionalWhere()
     {
         $obj = Active\ArtistRecord::get('artistId=?', 1);
@@ -35,10 +31,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals(1, $obj->artistId);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetByPositionalWhereMulti()
     {
         $obj = Active\ArtistRecord::get('artistId=? AND artistTypeId=?', 1, 1);
@@ -46,10 +38,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals(1, $obj->artistId);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetByNamedWhere()
     {
         $obj = Active\ArtistRecord::get('artistId=:id', array(':id'=>1));
@@ -57,10 +45,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals(1, $obj->artistId);
     }
     
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetRelatedSingle()
     {
         $obj = Active\ArtistRecord::getById(1);
@@ -72,10 +56,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals(1, $related->artistTypeId);
     }
     
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testGetRelatedWithLazyLoad()
     {
         $obj = Active\ArtistRecord::getById(1);
@@ -86,10 +66,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertTrue($this->getProtected($obj, 'type') instanceof Active\ArtistType);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testDeleteByPrimary()
     {
         $obj = Active\ArtistRecord::getById(1);
@@ -102,10 +78,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testUpdateByPrimary()
     {
         $n = md5(uniqid('', true));
@@ -117,10 +89,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals($n, $obj->name);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testInsert()
     {
         $n = md5(uniqid('', true));
@@ -137,10 +105,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals($obj->name, $n);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testSaveUpdate()
     {
         $n = md5(uniqid('', true));
@@ -152,10 +116,6 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertEquals($n, $obj->name);
     }
 
-    /**
-     * @group active
-     * @group acceptance
-     */
     public function testSaveInsert()
     {
         $n = md5(uniqid('', true));
