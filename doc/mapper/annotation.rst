@@ -7,7 +7,7 @@ To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note
 .. code-block:: php
 
     <?php
-    $mapper = new \Amiss\Note\Mapper();
+    $mapper = new \Amiss\Mapper\Note();
     $manager = new \Amiss\Manager($db, $mapper);
 
 
@@ -506,5 +506,5 @@ by passing the names of the getter and setter methods and your own class:
         if ($env != 'dev')
             $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
         
-        $mapper = new \Amiss\Note\Mapper($cache);
+        $mapper = new \Amiss\Mapper\Note($cache);
 
