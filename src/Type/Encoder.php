@@ -7,6 +7,11 @@ class Encoder implements Handler
     public $deserialiser;
     public $innerHandler;
 
+    /**
+     * @var string|callable
+     */
+    public $columnType = 'TEXT';
+
     public function __construct($serialiser, $deserialiser, $innerHandler=null)
     {
         $this->serialiser = $serialiser;
@@ -41,6 +46,9 @@ class Encoder implements Handler
     
     function createColumnType($engine)
     {
-        return 'TEXT';
+        if (is_string($this->columnType))
+            return $this->columnType;
+        else
+            return call_user_func($this->columnType, $engine);
     }
 }

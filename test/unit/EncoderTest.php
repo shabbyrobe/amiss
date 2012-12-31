@@ -4,10 +4,39 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Type;
 
+/**
+ * @group unit
+ */
 class EncoderTest extends \CustomTestCase
 {
     public function setUp()
     {}
+
+    public function testCreateColumnTypeDefault()
+    {
+        $encoder = new Type\Encoder('serialize', 'unserialize');
+        $result = $encoder->createColumnType('sqlite');
+        $this->assertEquals('TEXT', $result);
+    }
+
+    public function testCreateColumnTypeCustomString()
+    {
+        $encoder = new Type\Encoder('serialize', 'unserialize');
+        $encoder->columnType = 'PANTS';
+        $result = $encoder->createColumnType('sqlite');
+        $this->assertEquals('PANTS', $result);
+    }
+
+    public function testCreateColumnTypeClosure()
+    {
+        $encoder = new Type\Encoder('serialize', 'unserialize');
+        $encoder->columnType = function($engine) {
+            $this->assertEquals('sqlite', $engine);
+            return 'PANTS';
+        };
+        $result = $encoder->createColumnType('sqlite');
+        $this->assertEquals('PANTS', $result);
+    }
 
     /**
      * @dataProvider dataForEncodeDecode
