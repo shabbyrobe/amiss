@@ -91,7 +91,7 @@ Amiss provides the following type handlers out of the box:
 Date
 ~~~~
 
-.. py:class:: Amiss\\Type\\Date($withTime=true, $timeZone=null)
+.. py:class:: Amiss\\Type\\Date( $withTime=true, $timeZone=null )
 
     Converts database ``DATE`` or ``DATETIME`` into a PHP ``DateTime`` on object creation and PHP
     DateTime objects into a ``DATE`` or ``DATETIME`` on row export.
@@ -105,7 +105,7 @@ Date
 Encoder
 ~~~~~~~
 
-.. py:class:: Amiss\\Type\\Encoder(callable $serialiser, callable $deserialiser, $innerHandler=null)
+.. py:class:: Amiss\\Type\\Encoder( callable $serialiser, callable $deserialiser, $innerHandler=null )
 
     Allows a value to be encoded/decoded using a pair of callables. This is useful if you want a
     specific type to be passed through PHP's ``serialize``/``unserialize`` function pair, or through
@@ -148,15 +148,16 @@ Encoder
 Embed
 ~~~~~
 
-.. py:class:: Amiss\\Type\\Embed($mapper, bool $many=false)
+.. py:class:: Amiss\\Type\\Embed( $mapper )
     
     Allows one or many objects that are managed by Amiss to be stored as a nested value. This is
     useful when using Amiss with the Mongo extension, or when you are ok with storing a complex
     document as a serialised blob in a relational column (I am, sometimes).
 
     The ``Embed`` type places additional requirements on the type name - it must be followed with
-    the name of the class that is to be embedded. In the following example, we add a type handler
-    for a type called "nest" that will embed one ``ArtistType`` object:
+    the name of the class that is to be embedded, and an optional ``[]`` if the embedded value is  a
+    collection. In the following example, we add a type handler for a type called "nest" that will
+    embed one ``ArtistType`` object:
 
     .. code-block:: php
 
@@ -165,40 +166,20 @@ Embed
         {
             /**
              * @field
-             * @type nest ArtistType
-             */
-            public $artistType;
-        }
-
-        $embed = new \Amiss\Type\Embed($mapper);
-        $mapper->addTypeHandler($embed, 'nest');
-
-
-    The Embed handler can also handle a collection of embedded objects by passing ``true`` as the 
-    second constructor argument. If you wish to use both single instances and collections, you will 
-    need two separate instances of ``Amiss\Type\Embed``. This may be addressed in a future version
-    of Amiss when type handlers can be passed more information about the declaration.
-
-    .. code-block:: php
-
-        <?php
-        class Artist
-        {
-            /**
-             * @field
-             * @type nest ArtistType
+             * @type embed ArtistType
              */
             public $artistType;
 
             /**
              * @field
-             * @type nestmany Member
+             * @type embed Member[]
              */
             public $members;
         }
 
-        $mapper->addTypeHandler(new \Amiss\Type\Embed($mapper), 'nest');
-        $mapper->addTypeHandler(new \Amiss\Type\Embed($mapper, true), 'nestmany');
+        $embed = new \Amiss\Type\Embed($mapper);
+        $mapper->addTypeHandler($embed, 'embed');
+
 
     .. warning::
 
@@ -220,7 +201,7 @@ Custom Type Handlers
 To create your own type handler, you need to implement the ``Amiss\Type\Handler`` interface. This
 interface requires three methods:
 
-.. py:function:: prepareValueForDb( $value , $object , array $fieldInfo)
+.. py:function:: prepareValueForDb( $value , $object , array $fieldInfo )
     
     Take an object value and prepare it for insertion into the database
     
