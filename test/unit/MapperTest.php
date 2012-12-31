@@ -4,11 +4,52 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Demo;
 
+/**
+ * @group unit
+ * @group mapper
+ */
 class MapperTest extends \CustomTestCase
 {
     /**
-     * @group unit
-     * @group mapper
+     * @covers Amiss\Mapper\Base::fromObjects
+     */
+    public function testFromObjects()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
+            ->setMethods(array('fromObject'))
+            ->getMockForAbstractClass()
+        ;
+        $mapper->expects($this->exactly(2))->method('fromObject');
+        $mapper->fromObjects('foo', ['a', 'b'], null);
+    }
+    
+    /**
+     * @covers Amiss\Mapper\Base::fromObjects
+     */
+    public function testFromObjectsWithNullInput()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
+            ->setMethods(array('fromObject'))
+            ->getMockForAbstractClass()
+        ;
+        $mapper->expects($this->never())->method('fromObject');
+        $mapper->fromObjects('foo', null, null);
+    }
+    
+    /**
+     * @covers Amiss\Mapper\Base::toObjects
+     */
+    public function testToObjects()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
+            ->setMethods(array('toObject'))
+            ->getMockForAbstractClass()
+        ;
+        $mapper->expects($this->exactly(2))->method('toObject');
+        $mapper->toObjects('foo', ['a', 'b'], null);
+    }
+    
+    /**
      * @covers Amiss\Mapper\Base::resolveObjectName
      */
     public function testResolveObjectNameWithNonNamespacedName()
