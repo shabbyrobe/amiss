@@ -429,6 +429,16 @@ to the cache's constructor (the third argument is explained later), or set it ag
     $cache->expiration = 86400;
 
 
+You can set a prefix for the cache in case you want to ensure Amiss does not clobber items that
+other areas of your application may be caching::
+
+.. code-block:: php
+
+    <?php
+    $cache = new Amiss\Cache('xcache_get', 'xcache_set');
+    $cache->prefix = 'dont-tread-on-me-';
+    
+
 You can also use closures:
 
 .. code-block:: php
@@ -477,8 +487,10 @@ by passing the names of the getter and setter methods and your own class:
     $mapper = new Amiss\Mapper\Note($cacheAdapter);
 
 
-.. note:: Don't use a cache in your development environment otherwise you'll have to clear the 
-    cache every time you change your models! 
+.. warning:: 
+
+    Don't use a cache in your development environment otherwise you'll have to clear the cache
+    every time you change your models!
 
     Set an environment variable (see `SetEnv
     <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>`_  for apache or ``export`` for
