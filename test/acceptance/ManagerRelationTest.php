@@ -6,6 +6,10 @@ use Amiss\Criteria\Query;
 
 use Amiss\Demo;
 
+/**
+ * @group acceptance
+ * @group manager
+ */
 class ManagerRelationTest extends \SqliteDataTestCase
 {
     /**
@@ -21,10 +25,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals('awexxome-fest-20x6', $event->getSlug());
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testAssignRelatedSingle()
     {
         $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
@@ -33,10 +33,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testAssignRelatedSingleToList()
     {
         $eventArtist = $this->manager->getList('EventArtist', 'eventId=?', 1);
@@ -52,10 +48,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertTrue($current->event === $next->event);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testGetRelatedList()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -67,10 +59,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         // TODO: improve checking
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testGetRelatedAssocForSingle()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -86,10 +74,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals(array(1, 2, 3, 4, 5, 7), $ids);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testGetRelatedAssocForList()
     {
         $events = $this->manager->getList('Event');
@@ -111,10 +95,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals($expected, $ids);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testGetRelatedAssocWithCriteria()
     { 
         $event = $this->manager->get('Event', 'eventId=1');
@@ -132,10 +112,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals(array(1, 2, 3, 7), $ids);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testAssignRelatedList()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -147,10 +123,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertEquals(2, $event->eventArtists[1]->artistId);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testAssignRelatedListToList()
     {
         $types = $this->manager->getList('ArtistType');
@@ -165,10 +137,6 @@ class ManagerRelationTest extends \SqliteDataTestCase
         $this->assertTrue(current(current($types)->artists) instanceof Demo\Artist);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testAssignRelatedDeepThroughAssocToSingle()
     {
         $event = $this->manager->getById('Event', 1);
