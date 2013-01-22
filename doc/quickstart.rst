@@ -107,36 +107,39 @@ See :doc:`selecting` for more details.
 .. code-block:: php
 
     <?php
-    // get an event by primary key
+    // Get an event by primary key
     $event = $manager->getById('Event', 1);
 
-    // get an event named foobar. clauses are written in raw SQL.
-    $event = $manager->get('Event', 'name=?', 'foobar');
+    // Get an event named foobar with a clause written in raw SQL. Property names wrapped in
+    // curly braces get translated to field names by the mapper.
+    $event = $manager->get('Event', '{name}=?', 'foobar');
 
-    // get all events
+    // Get all events
     $events = $manager->getList('Event');
 
-    // get all events named foo that start on the 2nd of June, 2020 using an array
+    // Get all events named foo that start on the 2nd of June, 2020 using an array
     $events = $manager->getList('Event', array(
         'where'=>array('name'=>'foo', 'startDate'=>'2020-06-02')
     ));
 
-    // get all events with 'foo' in the name using positional parameters
+    // Get all events with 'foo' in the name using positional parameters
     $events = $manager->getList('Event', array(
-        'where'=>'name LIKE ?', 
+        'where'=>'{name} LIKE ?', 
         'params'=>array('%foo%')
     ));
     
-    // paged list, limit/offset
+    // Paged list, limit/offset
     $events = $manager->getList('Event', array(
-        'where'=>'name="foo"', 
+        'where'=>'{name}=?',
+        'params'=>array('foo'),
         'limit'=>10, 
         'offset'=>30
     ));
 
-    // paged list, alternate style (number, size)
+    // Paged list, alternate style (number, size)
     $events = $manager->getList('Event', array(
-        'where'=>'name="foo"', 
+        'where'=>'{name}=?',
+        'params'=>array('foo'),
         'page'=>array(1, 30)
     ));
 
@@ -288,18 +291,18 @@ Modifying by object:
 .. code-block:: php
 
     <?php
-    // inserting an object:
+    // Inserting an object:
     $event = new Event;
     $event->setName('Abc Def');
     $event->startDate = '2020-01-01';
     $manager->insert($event);
     
-    // updating an existing object:
+    // Updating an existing object:
     $event = $manager->getById('Event', 1);
     $event->startDate = '2020-01-02';
     $manager->update($event);
 
-    // using the 'save' method if the object contains an autoincrement primary:
+    // Using the 'save' method if the object contains an autoincrement primary:
     $event = new Event;
     // ...
     $manager->save($event);
@@ -314,13 +317,21 @@ Modifying by table:
 .. code-block:: php
 
     <?php
-    // insert a new object
+    // Insert a new row
     $manager->insert('Event', array(
         'name'=>'Abc Def',
         'slug'=>'abc-def',
         'startDate'=>'2020-01-01',
     );
 
-    // update by table. this can work on an arbitrary number of rows, depending on the condition
-    $manager->update('Event', array('name'=>'Abc: Def'), 'startDate>?', '2019-01-01');
+    // Update by table. Set the name field based on the start date.
+    // This can work on an arbitrary number of rows, depending on the condition.
+    // Clauses can be specified the same way as 'selecting'.
+    $manager->update('Event', array('name'=>'Abc: Def'), '{startDate} > ?', '2019-01-01');
+    
+    // Alternative clause syntax
+    $manager->update('Event', array(
+        'set'=>array('name'=>'Abc: Def'), 
+        'where'=>array('startDate'=>'2019-01-01')
+    ));
 

@@ -12,7 +12,7 @@ namespace Amiss\Test\Acceptance;
 class MappedFieldNameTest extends \CustomTestCase
 {
     /**
-     * @var Amiss\Manager
+     * @var Amiss\Sql\Manager
      */
     public $manager;
 
