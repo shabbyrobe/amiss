@@ -6,7 +6,7 @@ Amiss\Loader::register();
 
 $usage = "amiss create-classes [OPTIONS] OUTDIR
 
-Creates tables in the specified database
+Creates classes from an existing database
 
 Options:
   --namespace     Place all records in this namespace (make sure you quote!)
