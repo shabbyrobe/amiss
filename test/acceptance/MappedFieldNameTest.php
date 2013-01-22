@@ -114,12 +114,12 @@ class MappedFieldNameLeft
     /**
      * @has many of=MappedFieldNameAssoc; on[id]=leftId
      */
-    public $assocs = [];
+    public $assocs = array();
 
     /**
      * @has assoc of=MappedFieldNameRight; via=MappedFieldNameAssoc
      */
-    public $rights = [];
+    public $rights = array();
 }
 
 class MappedFieldNameAssoc
@@ -169,12 +169,12 @@ class MappedFieldNameRight
     public $trousers;
 
     /**
-     * @has many of=MappedFieldNameAssoc
+     * @has many of=MappedFieldNameAssoc; inverse=left
      */
-    public $assocs = [];
+    public $assocs = array();
 
     /**
      * @has assoc of=MappedFieldNameLeft; via=MappedFieldNameAssoc
      */
-    public $lefts = [];
+    public $lefts = array();
 }

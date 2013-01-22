@@ -45,7 +45,7 @@ class ArtistType extends Object
     /** @field */
     public $slug;
     
-    /** @has many of=Artist */
+    /** @has many of=Artist; inverse=artistType */
     public $artists = array();
 }
 
@@ -72,7 +72,7 @@ class Event extends Object
     /** @field */
     public $venueId;
     
-    /** @has many of=EventArtist */
+    /** @has many of=EventArtist; inverse=event */
     public $eventArtists;
     
     /** @has one of=Venue; on=venueId */

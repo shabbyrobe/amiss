@@ -364,43 +364,6 @@ class NoteMapperTest extends \CustomTestCase
     /**
      * @group mapper
      * @group unit
-     * @group faulty
-     * 
-     * @covers Amiss\Mapper\Note::loadMeta
-     */
-    public function testGetMetaOneToOnePropertyRelationWithNoOn()
-    {
-        throw new \Exception('not implemented');
-        
-        $mapper = new \Amiss\Mapper\Note;
-        $name = __FUNCTION__;
-        eval("
-            namespace ".__NAMESPACE__.";
-            class {$name}Class1 {
-                /** @primary */ 
-                public \${$name}1id;
-                
-                /** @field */ 
-                public \${$name}2Id;
-                
-                /** @has one of={$name}Class2 */
-                public \${$name}2;
-            }
-            class {$name}Class2 {
-                /** @primary */ 
-                public \${$name}2Id;
-            }
-        ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
-        $expected = array(
-            $name.'2'=>array('one', 'of'=>$name."Class2", 'on'=>null)
-        );
-        $this->assertEquals($expected, $meta->relations);
-    }
-
-    /**
-     * @group mapper
-     * @group unit
      * 
      * @covers Amiss\Mapper\Note::loadMeta
      * @covers Amiss\Mapper\Note::buildRelations

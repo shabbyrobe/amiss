@@ -83,7 +83,7 @@ function get_note_cache($type, $active=true)
     if ($active) {
         if ($type == 'hack') {
             $path = sys_get_temp_dir();
-            $cache = array(
+            $cache = new \Amiss\Cache(
                 function ($key) use ($path) {
                     $key = md5($key);
                     $file = $path.'/nc-'.$key;
@@ -98,8 +98,8 @@ function get_note_cache($type, $active=true)
                 }
             );
         }
-        elseif ($type) {
-            $cache = $type;
+        elseif ($type == 'xcache') {
+            $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
         }
     }
     return $cache;

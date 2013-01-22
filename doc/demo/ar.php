@@ -150,7 +150,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     }
     
     /**
-     * @has many of=EventArtist
+     * @has many of=EventArtist; inverse=event
      */
     public function getEventArtists()
     {

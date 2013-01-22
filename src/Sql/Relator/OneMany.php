@@ -28,21 +28,17 @@ class OneMany extends Base
             throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
-
-        // prepare the relation's "on" field
+        
         $on = null;
         if (isset($relation['on'])) {
             $on = $relation['on'];
         }
-        else {
-            if ('one'==$type)
-                throw new \Amiss\Exception("One-to-one relation {$relationName} on class {$class} does not declare 'on' field");
-            else {
-                $on = array();
-                foreach ($meta->primary as $p) {
-                    $on[$p] = $p;
-                }
-            }
+        elseif (isset($relation['inverse'])) {
+            $on = $this->resolveInverseOn($relation, $relatedMeta);
+        }
+        
+        if (!$on) {
+            throw new \Amiss\Exception("Relation $relationName on class $class did not specify an 'on'");
         }
         
         $relatedFields = $relatedMeta->getFields();
@@ -50,8 +46,8 @@ class OneMany extends Base
         if (!is_array($on)) {
             if ($type == 'one' && count($relatedMeta->primary)==1)
                 $rOn = $relatedMeta->primary[0];
-            else $rOn = $on;
-            
+            else
+                $rOn = $on;
             $on = array($on=>$rOn);
         }
         
@@ -113,5 +109,23 @@ class OneMany extends Base
         }
         
         return $result;
+    }
+    
+    private function resolveInverseOn($relation, $relatedMeta)
+    {
+        if (!isset($relatedMeta->relations[$relation['inverse']]))
+            throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");
+        if (!isset($relatedMeta->relations[$relation['inverse']]['on']))
+            throw new \Amiss\Exception("'on' not found on inverse relation {$relation['inverse']} on class {$relatedMeta->class}");
+        
+        $inverseOn = $relatedMeta->relations[$relation['inverse']]['on'];
+        if (!is_array($inverseOn))
+            $inverseOn = [$inverseOn=>$inverseOn];
+        
+        $on = array();
+        foreach ($inverseOn as $l=>$r)
+            $on[$r] = $l;
+        
+        return $on;
     }
 }
