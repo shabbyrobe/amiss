@@ -7,7 +7,6 @@ class TypeSet extends \ArrayObject
     {
         $this[] = array(new Type\Id, array('id'));
         $this[] = array(new Type\Date, 'date');
-        $this[] = array(new \Amiss\Type\Embed($mapper, false), array('embedone'));
-        $this[] = array(new \Amiss\Type\Embed($mapper, true), array('embedmany'));
+        $this[] = array(new \Amiss\Type\Embed($mapper), array('embed'));
     }
 }
