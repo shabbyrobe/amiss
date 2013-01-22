@@ -63,11 +63,12 @@ class Manager
         if ($config instanceof Mapper)
             $config = array('mapper'=>$config);
         
+        if ($config instanceof Cache)
+            $config = array('cache'=>$config);
+        
         $cache = null;
-        if ($config instanceof Cache) {
-            $cache = $config;
-            $config = array();
-        }
+        if (isset($config['cache']))
+            $cache = $config['cache'];
         
         if (!isset($config['mapper'])) {
             $mapper = new Mapper\Note($cache);
