@@ -41,6 +41,7 @@ abstract class Base implements \Amiss\Mapper
             $type = strtolower($type);
             $this->typeHandlers[$type] = $handler;
         }
+        return $this;
     }
 
     public function addTypeSet($set)
@@ -49,8 +50,9 @@ abstract class Base implements \Amiss\Mapper
             list ($handler, $ids) = $typeSpec;
             $this->addTypeHandler($handler, $ids);
         }
+        return $this;
     }
-    
+
     public function fromObject($meta, $object, $context=null)
     {
         $output = array();
@@ -227,34 +229,5 @@ abstract class Base implements \Amiss\Mapper
         }
         
         return $fields;
-    }
-    
-    /**
-     * Create and populate a list of objects
-     */
-    function toObjects($meta, $input, $args=null)
-    {
-       $out = array();
-       if ($input) {
-           foreach ($input as $item) {
-               $obj = $this->toObject($meta, $item);
-               $out[] = $obj;
-           }
-       }
-       return $out;
-    }
-
-    /**
-     * Get row values from a list of objects.
-     */
-    function fromObjects($meta, $input, $context=null)
-    {
-       $out = array();
-       if ($input) {
-           foreach ($input as $key=>$item) {
-               $out[$key] = $this->fromObject($meta, $item, $context);
-           }
-       }
-       return $out;
     }
 }

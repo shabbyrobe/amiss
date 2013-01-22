@@ -29,7 +29,6 @@ class Manager
     public $queries = 0;
     
     /**
-     * Object/table mapper
      * @var Amiss\Mapper
      */
     public $mapper;
@@ -41,18 +40,18 @@ class Manager
     public $relators;
     
     /**
-     * Constructor
+     * Configuration parameter can contain the following keys:
      * 
-     * @param Amiss\Sql\Connector|\PDO|array
-     *     Database connector
+     *  - `mapper`
+     *      An instance of `Amiss\Mapper`. If not passed, the default
+     *      of `Amiss\Mapper\Note` is used with the `Amiss\Sql\TypeSet` TypeSet.
      * 
-     * @param Amiss\Mapper
-     *     Object/table mapper implementation
+     *  - `relators`: 
+     *      An array of `Amiss\Sql\Relator` instances, keyed by the relator id.
+     *      If not passed, the default set of relators is used.
      * 
-     * @param Amiss\Sql\Relator[]|null
-     *     Default set of relators to initialise
-     *     the Manager with. If null is passed, the standard set of relators (one, many,
-     *     assoc) will be used.
+     * @param Amiss\Sql\Connector|\PDO|array  Database connector
+     * @param array  Configuration
      */
     public function __construct($connector, $config=array())
     {
@@ -415,11 +414,8 @@ class Manager
     }
     
     /** 
-     * Delete from the database by class name and id
-     * 
      * @param string The class name to delete
      * @param mixed The primary key
-     * @return void
      */
     public function deleteById($class, $id)
     {
@@ -427,7 +423,6 @@ class Manager
     }
     
     /**
-     * Delete from the database by class name and primary key
      * @deprecated Use deleteById
      */
     public function deleteByPk($class, $pk)
@@ -436,8 +431,6 @@ class Manager
     }
     
     /**
-     * Whether an object is considered 'new'
-     * 
      * This is a hack to allow active record to intercept saving and fire events.
      * 
      * @param object The object to check
@@ -483,7 +476,6 @@ class Manager
      * @param string The property to index by
      * @param integer Index mode
      * @return array
-     * @throws \UnexpectedValueException
      */
     public function indexBy($list, $property, $mode=self::INDEX_DUPE_CONTINUE)
     {
@@ -503,7 +495,6 @@ class Manager
      * @param string $keyProperty
      * @param string $valueProperty
      * @return array
-     * @throws \InvalidArgumentException
      */
     public function keyValue($list, $keyProperty=null, $valueProperty=null)
     {
@@ -526,6 +517,7 @@ class Manager
     
     /**
      * Retrieve all object child values through a property path.
+     * 
      * @param object[] $objects
      * @param string|array $path
      * @return array
@@ -555,8 +547,6 @@ class Manager
     }
     
     /**
-     * Execute a query
-     * 
      * @param string|\PDOStatement $stmt
      * @param array $params
      * @return \PDOStatement

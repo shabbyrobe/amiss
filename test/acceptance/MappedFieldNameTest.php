@@ -23,11 +23,12 @@ class MappedFieldNameTest extends \CustomTestCase
 
     public function setUp()
     {
-        $this->db = new \Amiss\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+        $this->db = new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
         
-        $this->mapper = new \Amiss\Mapper\Note();
+        $this->manager = new \Amiss\Sql\Manager($this->db);
+        $this->mapper = $this->manager->mapper;
+        
         $this->mapper->objectNamespace = __NAMESPACE__;
-        $this->manager = new \Amiss\Manager($this->db, $this->mapper);
 
         $this->createRecordMemoryDb('MappedFieldNameLeft');
         $this->createRecordMemoryDb('MappedFieldNameAssoc');

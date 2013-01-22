@@ -260,6 +260,14 @@ class Connector
         return $this->getPDO()->exec($statement);
     }
     
+    /**
+     * PDO calls it 'exec'. PDOStatement calls it 'execute'. Crazy!
+     */
+    public function execute($statement)
+    {
+        return $this->exec($statement);
+    }
+    
     public function lastInsertId()
     {
         $this->ensurePDO();
