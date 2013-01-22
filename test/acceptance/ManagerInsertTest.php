@@ -26,7 +26,7 @@ class ManagerInsertObjectTest extends \SqliteDataTestCase
         
         $this->assertEquals(1, $this->manager->count('Artist', 'slug="insert-test"'));
     }
-
+    
     /**
      * Ensures object insertion works with a complex mapping (Venue
      * defines explicit field mappings)

@@ -105,7 +105,7 @@ Object mappings have the following structure:
 
 .. py:attribute:: defaultFieldType
 
-    All fields that do not specify a type will assume this type. See :ref:`type-handling` for more
+    All fields that do not specify a type will assume this type. See :doc:`types` for more
     details.
 
     This value is *optional*.

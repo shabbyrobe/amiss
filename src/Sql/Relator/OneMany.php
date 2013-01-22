@@ -28,7 +28,7 @@ class OneMany extends Base
             throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
-        
+
         // prepare the relation's "on" field
         $on = null;
         if (isset($relation['on'])) {
@@ -95,8 +95,7 @@ class OneMany extends Base
                 
                 foreach ($on as $l=>$r) {
                     $rField = $relatedFields[$r];
-                    $name = $rField['name'];
-                    $rValue = !isset($rField['getter']) ? $related->$name : call_user_func(array($related, $rField['getter']));
+                    $rValue = !isset($rField['getter']) ? $related->$r : call_user_func(array($related, $rField['getter']));
                     $key[] = $rValue;
                 }
                 $key = !isset($key[1]) ? $key[0] : implode('|', $key);

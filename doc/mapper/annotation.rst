@@ -2,7 +2,7 @@ Annotation Mapper
 =================
 
 To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to
-``Amiss\Sql\Manager``:
+``Amiss\Manager``:
 
 .. code-block:: php
 
@@ -12,8 +12,8 @@ To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note
 
 
 This is the bare minimum required to create an instance of this mapper. This will be enough for now,
-though more configuration options are available. See :ref:`mapper-common` for more information on
-how to tweak the behaviour of all of Amiss' default mapping options.
+though more configuration options are available. See :doc:`common` and :doc:`types` for more
+information on how to tweak the behaviour of all of Amiss' default mapping options.
 
 
 Overview
@@ -113,7 +113,8 @@ The following class level annotations are available:
 .. py:attribute:: @fieldType value
 
     This sets a default field type to use for for all of the properties that do not have a field
-    type set against them explicitly. This will inherit from a parent class if one is set.
+    type set against them explicitly. This will inherit from a parent class if one is set. See
+    :doc:`types` for more details.
 
 
 These values must be assigned in the class' docblock:
@@ -148,7 +149,7 @@ The following annotations are available to define this mapping:
 .. py:attribute:: @type fieldType
 
     Optional type for the field. If this is not specified, the ``@fieldType`` class level attribute
-    is used.
+    is used. See :doc:`types` for more details.
 
 
 .. py:attribute:: @setter setterName
@@ -428,6 +429,16 @@ to the cache's constructor (the third argument is explained later), or set it ag
     $cache->expiration = 86400;
 
 
+You can set a prefix for the cache in case you want to ensure Amiss does not clobber items that
+other areas of your application may be caching::
+
+.. code-block:: php
+
+    <?php
+    $cache = new Amiss\Cache('xcache_get', 'xcache_set');
+    $cache->prefix = 'dont-tread-on-me-';
+    
+
 You can also use closures:
 
 .. code-block:: php
@@ -476,8 +487,10 @@ by passing the names of the getter and setter methods and your own class:
     $mapper = new Amiss\Mapper\Note($cacheAdapter);
 
 
-.. note:: Don't use a cache in your development environment otherwise you'll have to clear the 
-    cache every time you change your models! 
+.. warning:: 
+
+    Don't use a cache in your development environment otherwise you'll have to clear the cache
+    every time you change your models!
 
     Set an environment variable (see `SetEnv
     <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>`_  for apache or ``export`` for
@@ -493,5 +506,5 @@ by passing the names of the getter and setter methods and your own class:
         if ($env != 'dev')
             $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
         
-        $mapper = new \Amiss\Note\Mapper($cache);
+        $mapper = new \Amiss\Mapper\Note($cache);
 

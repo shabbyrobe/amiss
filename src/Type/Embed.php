@@ -8,15 +8,8 @@ class Embed implements Handler
      */
     public $mapper;
 
-    /**
-     * @var bool
-     */
-    public $many;
-
-    public function __construct($mapper, $many=null)
+    public function __construct($mapper)
     {
-        if ($many === null) $many = false;
-        $this->many = $many;
         $this->mapper = $mapper;
     }
 
@@ -26,21 +19,21 @@ class Embed implements Handler
         if (!isset($this->typeCache[$fieldType])) {
             $this->typeCache[$fieldType] = $this->extractClass($fieldType);
         }
-        $type = $this->typeCache[$fieldType];
+        list($type, $many) = $this->typeCache[$fieldType];
 
         $embedMeta = $this->mapper->getMeta($type);
 
         $return = null;
-        if ($this->many) {
+        if ($many) {
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $return[$key] = $this->mapper->exportRow($embedMeta, $item);
+                    $return[$key] = $this->mapper->fromObject($embedMeta, $item);
                 }
             }
         }
         else {
-            $return = $value ? $this->mapper->exportRow($embedMeta, $value) : null;
+            $return = $value ? $this->mapper->fromObject($embedMeta, $value) : null;
         }
         return $return;
     }
@@ -51,25 +44,23 @@ class Embed implements Handler
         if (!isset($this->typeCache[$fieldType])) {
             $this->typeCache[$fieldType] = $this->extractClass($fieldType);
         }
-        $type = $this->typeCache[$fieldType];
+        list($type, $many) = $this->typeCache[$fieldType];
         
         $embedMeta = $this->mapper->getMeta($type);
 
         $return = null;
 
-        if ($this->many) {
+        if ($many) {
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $obj = $this->mapper->createObject($embedMeta, $value);
-                    $this->mapper->populateObject($embedMeta, $obj, $item);
+                    $obj = $this->mapper->toObject($embedMeta, $item);
                     $return[$key] = $obj;
                 }
             }
         }
         else {
-            $return = $this->mapper->createObject($embedMeta, $value);
-            $this->mapper->populateObject($embedMeta, $return, $value);
+            $return = $this->mapper->toObject($embedMeta, $value);
         }
         return $return;
     }
@@ -80,7 +71,14 @@ class Embed implements Handler
         if (!isset($split[1]))
             throw new \Exception('misconfigured type - must specify class name after type name');
         
-        return trim($split[1]);
+        $class = trim($split[1]);
+        $many = false;
+        if (preg_match('/^(.*)\[\]$/', $class, $match)) {
+            $class = $match[1];
+            $many = true;
+        }
+
+        return [$class, $many];
     }
     
     function createColumnType($engine)

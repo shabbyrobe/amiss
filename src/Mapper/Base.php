@@ -81,12 +81,35 @@ abstract class Base implements \Amiss\Mapper
         
         return $output;
     }
+
+    function fromObjects($meta, $input, $context=null)
+    {
+        $out = array();
+        if ($input) {
+            foreach ($input as $key=>$item) {
+                $out[$key] = $this->fromObject($meta, $item, $context);
+            }
+        }
+        return $out;
+    }
     
     function toObject($meta, $input, $args=null)
     {
         $object = $this->createObject($meta, $input, $args);
         $this->populateObject($meta, $object, $input);
         return $object;
+    }
+    
+    function toObjects($meta, $input, $args=null)
+    {
+        $out = array();
+        if ($input) {
+            foreach ($input as $item) {
+                $obj = $this->toObject($meta, $item);
+                $out[] = $obj;
+            }
+        }
+        return $out;
     }
 
     public function createObject($meta, $input, $args=null)

@@ -94,12 +94,16 @@ class TestMapper implements \Amiss\Mapper
         $this->populateObject($meta, $object, $row);
         return $object;
     }
+
+    function toObjects($meta, $input, $args=null) {}
     
     function createObject($meta, $row, $args=null) {}
     
     function populateObject($meta, $object, $row) {}
 
     function fromObject($meta, $object, $context=null) {}
+
+    function fromObjects($meta, $input, $context=null) {}
     
     function determineTypeHandler($type) {}
     

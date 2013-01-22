@@ -16,17 +16,18 @@ class ManagerUpdateTableTest extends \SqliteDataTestCase
      * 
      * @group acceptance
      * @group manager
-    // TOO TRICKY - confused signature with criteria array.
-
-    public function testUpdateTableWithArraySetAndArrayWhere()
-    {
-        $this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
-        
-        $this->manager->update('Artist', array('artistTypeId'=>1), array('artistTypeId'=>2));
-        
-        $this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
-    }
-    
+     *
+     * // TOO TRICKY - confused signature with criteria array.
+     *     
+     *     public function testUpdateTableWithArraySetAndArrayWhere()
+     *     {
+     *         $this->assertEquals(4, $this->manager->count('Artist', 'artistTypeId=?', 1));
+     *         
+     *         $this->manager->update('Artist', array('artistTypeId'=>1), array('artistTypeId'=>2));
+     *         
+     *         $this->assertEquals(6, $this->manager->count('Artist', 'artistTypeId=?', 1));
+     *     }
+     *     
      */
 
     /**
