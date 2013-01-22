@@ -1,6 +1,10 @@
 Complex joins using VIEWs
 =========================
 
+Amiss doesn't do any joins at all internally, but sometimes you may want to represent a complex join
+without writing a huge repository class full of SQL and still use Amiss' interface. In that
+circumstance, you can use a SQL view.
+
 Firstly, create a MySQL view with your joins:
 
 .. code-block:: sql

@@ -52,6 +52,61 @@ The selection methods are:
     ``get``, but allows you to find many objects and will always return an array.
 
 
+.. _clauses:
+
+Clauses
+-------
+
+This represents the ``where`` part of your query.
+
+Most ``where`` clauses in Amiss can be written by hand in the underlying DB server's dialect. This
+allows complex expressions with an identical amount of flexibility to using raw SQL - because it
+*is* raw SQL.
+
+All ``Amiss\Sql\Manager->get...()`` methods can accept clauses as part of their criteria. When
+passing a clause as a string, you can pass it using the underlying table's column names:
+
+.. code-block:: php
+
+    <?php
+    // The Artist class has a property called 'artistTypeId' that maps to a 
+    // column with the same name:
+    $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
+
+
+When your table's column names are exactly the same as your property names, this is the way you
+should do it - there's no sense in making Amiss do more work than it needs to - but when your column
+names are different, Amiss will perform a simple token replacement on your clause, converting
+``{propertyName}`` into the ``column_name`` from the underlying metadata:
+
+.. code-block:: php
+
+    <?php
+    // The Venue class has a property called 'venueName' that maps to a column
+    // called 'venue_name'
+    $venue = $manager->get('Venue', '{venueName}=?', 'foo');
+
+In the above example, ``{venueName}`` is replaced with the field ``venue_name``, resulting in the
+following query::
+
+    SELECT * FROM venue WHERE venue_name='foo'
+
+
+You can also pass an array of values indexed by property name for the where clause if you are using
+an ``Amiss\Sql\Criteria\Query`` (or a criteria array). This type of clause will perform field
+mapping without the need for curly braces. Multiple key/value pairs in the 'where' array are treated
+as an ``AND`` query:
+
+.. code-block:: php
+
+    <?php
+    $venues = $manager->getList(
+        'Venue',
+        array('where'=>array('venueName'=>'Foo', 'venueSlug'=>'foo'))
+    );
+    // WHERE venue_name='Foo' AND venue_slug='foo'
+
+
 .. _criteria-arguments:
 
 Criteria Arguments
@@ -59,9 +114,9 @@ Criteria Arguments
 
 Several methods throughout this documentation take a dynamic argument list referred to as
 ``$criteria...``. This is always accepted at the end of the argument list and can be passed in a
-number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Sql\Manager`` take their
-criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both the
-``$modelName`` and the ``$relationName`` arguments.
+number of different formats. The ``get()`` and ``getList()`` methods of ``Amiss\Sql\Manager`` take
+their criteria after the the ``$modelName`` argument, whereas ``getRelated()`` takes it after both
+the ``$modelName`` and the ``$relationName`` arguments.
 
 Please also familiarise yourself with the section on :ref:`clauses` before diving in.
 
@@ -200,72 +255,40 @@ This will produce the same order as the previous example:
     ));
 
 
-And also like :ref:`clauses`, you can write your order expression in raw sql. Note that you should
-use the column name instead of the object property name unless you use clause placeholders. See
-:ref:`clauses`.
+And also like :ref:`clauses`, you can write your order expression in raw sql. You can use column
+names directly, or you can use property name placeholders:
 
 .. code-block:: php
 
     <?php
     $eventArtists = $manager->getList('EventArtist', array(
-        'order'=>'priority desc, sequence',
+        'order'=>'{propertyName} desc, column_name',
     ));
 
 
-.. _clauses:
+Counting
+--------
 
-Clauses
--------
-
-This represents the ``where`` part of your query.
-
-Most ``where`` clauses in Amiss can be written by hand in the underlying DB server's dialect. This
-allows complex expressions with an identical amount of flexibility to using raw SQL - because it
-*is* raw SQL.
-
-All ``Amiss\Sql\Manager->get...()`` methods accept clauses as part of their criteria. When passing a
-clause as a string, you can pass it using the underlying table's column names:
+You can use all of the same signatures that you use for ``Amiss\Sql\Manager->get()`` to count rows:
 
 .. code-block:: php
 
     <?php
-    // The Artist class has a property called 'artistTypeId' that maps to a 
-    // column with the same name:
-    $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
+    // positional parameters
+    $dukeCount = $manager->count('Artist', 'slug=?', 'duke-nukem');
 
+    // named parameters, shorthand:
+    $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
 
-When your column names are exactly the same as your property names, this is the way you should do it
-- there's no sense in making Amiss do more work than it needs to - but when your column names are
-different, Amiss will perform a simple token replacement on your clause, converting
-``{propertyName}`` into the ``column_name`` from the underlying metadata:
-
-.. code-block:: php
-
-    <?php
-    // The Venue class has a property called 'venueName' that maps to a column
-    // called 'name'
-    $venue = $manager->get('Venue', '{venueName}=?', 'foo');
-
-In the above example, ``{venueName}`` is replaced with the field name.
-
-
-You can also pass an array of values indexed by property name for the where clause if you are using
-an ``Amiss\Sql\Criteria\Query`` (or a criteria array). This type of clause will perform field mapping.
-Multiple key/value pairs in the 'where' array are treated as an ``AND`` query:
-
-.. code-block:: php
-
-    <?php
-    $venues = $manager->getList(
-        'Venue',
-        array('where'=>array('venueName'=>'Foo', 'venueSlug'=>'foo'))
-    );
-    // WHERE name='Foo' AND slug='foo'
-
+    // long form
+    $criteria = new \Amiss\Sql\Criteria\Query();
+    $criteria->where = 'slug=:slug';
+    $criteria->params = array(':slug'=>'duke-nukem');
+    $dukeCount = $manager->count('Artist', $criteria);
 
 
 "In" Clauses
-~~~~~~~~~~~~
+------------
 
 Vanilla PDO statements with parameters don't work with arrays and IN clauses:
 
@@ -338,29 +361,6 @@ You can use this with ``Amiss\Sql\Manager`` easily:
 
     This is because Amiss does no parsing of your WHERE clause. It does a fairly naive regex
     substitution that is more than adequate if you heed this warning.
-
-
-
-
-Counting
---------
-
-You can use all of the same signatures that you use for ``Amiss\Sql\Manager->get()`` to count rows:
-
-.. code-block:: php
-
-    <?php
-    // positional parameters
-    $dukeCount = $manager->count('Artist', 'slug=?', 'duke-nukem');
-
-    // named parameters, shorthand:
-    $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
-
-    // long form
-    $criteria = new \Amiss\Sql\Criteria\Query();
-    $criteria->where = 'slug=:slug';
-    $criteria->params = array(':slug'=>'duke-nukem');
-    $dukeCount = $manager->count('Artist', $criteria);
 
 
 Constructor Arguments

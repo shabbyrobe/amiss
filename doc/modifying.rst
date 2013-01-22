@@ -84,8 +84,8 @@ To update an object's representation in the database, call the ``update`` method
 Tables
 ~~~~~~
 
-To update a table, call the ``update`` method of ``Amiss\Sql\Manager`` but pass the object's name as the
-first parameter instead of an instance. The following signatures are available::
+To update a table, call the ``update`` method of ``Amiss\Sql\Manager`` but pass the object's name as
+the first parameter instead of an instance. The following signatures are available::
 
     update( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
     update( string $class, array $set , string $namedWhere, array $params )
@@ -99,17 +99,17 @@ described above will kick in.
 In the first two signatures, the ``set`` parameter is an array of key=>value pairs containing fields
 to set. The key should be the object's property name, not the column in the database (though these
 may be identical). The ``positionalWhere`` or ``namedWhere`` are, like select, just parameterised
-query clauses.
+query clauses. See :ref:`clauses` for more information.
 
 .. code-block:: php
 
     <?php
-    $manager->update('EventArtist', array('priority'=>1), 'artistId=?', 2);
+    $manager->update('EventArtist', array('priority'=>1), '{artistId}=?', 2);
     // equivalent SQL: UPDATE event_artist SET priority=1 WHERE artistId=2
 
 
-In the second two signatures, an ``Amiss\Sql\Criteria\Update`` (or an array-based representation) can be
-passed:
+In the second two signatures, an ``Amiss\Sql\Criteria\Update`` (or an array-based representation)
+can be passed:
 
 .. code-block:: php
 
@@ -117,14 +117,14 @@ passed:
     // array notation
     $manager->update('EventArtist', array(
         'set'=>array('priority'=>1), 
-        'where'=>'artistId=:id', 
+        'where'=>'{artistId}=:id', 
         'params'=>array('id'=>2)
     ));
     
     // long-form criteria
     $criteria = new Amiss\Sql\Criteria\Update;
     $criteria->set['priority'] = 1;
-    $criteria->where = 'artistId=:id';
+    $criteria->where = '{artistId}=:id';
     $criteria->params = array('id'=>2);
     $manager->update('EventArtist', $criteria);
     
@@ -138,8 +138,8 @@ passed:
 Saving
 ------
 
-"Saving is a shortcut for insert if it's new, update if it isn't, but it only works for objects with
-"an autoincrement column.
+"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects 
+with an autoincrement column.
 
 .. code-block:: php
 
@@ -149,7 +149,7 @@ Saving
     $amiss->save($obj, 'artistId');
     // INSERT INTO artist (name) VALUES ('foo baz')
     
-    $obj = $amiss->get('Artist', 'artistId=?', 1);
+    $obj = $amiss->get('Artist', '{artistId}=?', 1);
     $obj->name = 'foo baz';
     $amiss->save($obj, 'artistId');
     // UPDATE artist SET name='foo baz' WHERE artistId=1

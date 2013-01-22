@@ -33,7 +33,7 @@ Amiss is ``Amiss\Mapper\Note``, which allows the use of simple annotations to de
     RDBMSssseseses, but it is not tested or supported.
 
 
-Creating an ``Amiss\Sql\Manager`` is simple:
+Creating an ``Amiss\Sql\Manager`` with the default mapping options is simple:
 
 .. code-block:: php
 
@@ -43,8 +43,7 @@ Creating an ``Amiss\Sql\Manager`` is simple:
         'user'=>'user', 
         'password'=>'password',
     );
-    $mapper = new Amiss\Mapper\Note;
-    $manager = new Amiss\Sql\Manager($db, $mapper);
+    $manager = new Amiss\Sql\Manager($db);
 
 
 For more information on customising the mapping, please read the :doc:`mapper/mapping` section.

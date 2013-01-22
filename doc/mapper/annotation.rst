@@ -1,19 +1,29 @@
 Annotation Mapper
 =================
 
-To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note`` to
-``Amiss\Manager``:
+`Amiss\Sql\Manager` uses ``Amiss\Mapper\Note`` with certain :doc:`types` preconfigured by default.
+This should be used as a default starting point. You can access the mapper for further configuration
+after you create the manager like so:
 
 .. code-block:: php
 
     <?php
-    $mapper = new \Amiss\Mapper\Note();
+    $manager = new \Amiss\Sql\Manager($db, $cache);
+    $mapper = $manager->mapper;
+
+
+This is the equivalent of the following:
+
+.. code-block:: php
+
+    <?php
+    $mapper = new \Amiss\Mapper\Note($cache);
+    $mapper->addTypeSet(new \Amiss\Sql\TypeSet);
     $manager = new \Amiss\Sql\Manager($db, $mapper);
 
 
-This is the bare minimum required to create an instance of this mapper. This will be enough for now,
-though more configuration options are available. See :doc:`common` and :doc:`types` for more
-information on how to tweak the behaviour of all of Amiss' default mapping options.
+See :doc:`common` and :doc:`types` for more information on how to tweak Amiss' default mapping
+behaviour.
 
 
 Overview
@@ -106,8 +116,9 @@ The following class level annotations are available:
 
 .. py:attribute:: @table value
 
-    When declared, this forces the mapper to use this table name. If not provided, the table name
-    will be determined by the mapper. See :ref:`name-translation` for details on this process.
+    When declared, this forces the mapper to use this table name. It may include a schema name as
+    well. If not provided, the table name will be determined by the mapper. See :ref:`name-
+    translation` for details on this process.
 
 
 .. py:attribute:: @fieldType value
@@ -235,12 +246,17 @@ The following annotations are available to define this mapping:
     A one-to-one relationship on a composite key with different field names::
 
         @has one of=ArtistType; on[typeIdPart1]=idPart1; on[typeIdPart2]=idPart2
+        
+    
+    A one-to-one relationship with a matching one-to-many on the related object, where the ``on``
+    values are to be determined from the related object::
+        
+        @has one of=ArtistType; inverse=artist
     
     
     **One-to-many** (``@has many``) relationships support all the same options as one-to-one
-    relationships, with the added convenience of the ``on`` key being optional. You should read the
-    :ref:`relator-many` documentation for a full description of the data this relator requires. The
-    simplest one-to-many is annotated like so:
+    relationships. You should read the :ref:`relator-many` documentation for a full description of 
+    the data this relator requires. The simplest one-to-many is annotated like so:
 
     .. code-block:: php
 
@@ -250,7 +266,7 @@ The following annotations are available to define this mapping:
             /** @primary */
             public $artistTypeId;
 
-            /** @has many of=Artist */
+            /** @has many of=Artist; on=artistTypeId */
             public $artists;
         }
 
@@ -267,7 +283,7 @@ The following annotations are available to define this mapping:
             /** @primary */
             public $eventId;
 
-            /** @has many of=EventArtist */
+            /** @has many of=EventArtist; on=eventId */
             public $eventArtists;
 
             /** @has assoc of=Artist; via=EventArtist */
@@ -294,7 +310,7 @@ Getters and setters
 
 Properties should almost always be defined against your object as class-level fields in PHP. Don't
 use getters and setters when you are doing no more than getting or setting a private field value -
-it's a total waste of resources. See this `stackoverflow answer
+it's a total waste of resources. See my `stackoverflow answer
 <http://stackoverflow.com/a/813099/15004>`_ for a more thorough explanation of why you shouldn't,
 and for a brief explanation of how to get all of the benefits anyway.
 
@@ -314,12 +330,14 @@ property:
         private $qux;
 
         /** @field */
-        public function getBaz() {
+        public function getBaz()
+        {
             return $this->baz;
         }
 
         /** @has one of=Qux; on=baz */
-        public function getQux() {
+        public function getQux()
+        {
             return $this->qux;
         }
     }
@@ -327,7 +345,7 @@ property:
 There is a problem with the above example: we have provided a way to get the values, but not to set
 them. This will make it impossible to retrieve the object from the database. If you provide matching
 ``setBaz`` and ``setQux`` methods, Amiss will guess that these are paired with ``getBaz`` and
-``getQux`` respectively:
+``getQux`` respectively and don't require any special annotations:
 
 .. code-block:: php
 
@@ -336,12 +354,14 @@ them. This will make it impossible to retrieve the object from the database. If 
     {
         // snip
 
-        public function setBaz($value) {
+        public function setBaz($value)
+        {
             $value->thingy = $this;
             $this->baz = $value;
         }
 
-        public function setQux($value) {
+        public function setQux($value)
+        {
             $value->thingy = $this;
             $this->qux = $value;
         }
@@ -365,11 +385,13 @@ opinionated so you can go ahead and make your names whatever you please:
          * @field
          * @setter assignAValueToBaz
          */
-        public function getBaz() {
+        public function getBaz()
+        {
             return $this->baz;
         }
 
-        public function assignAValueToBaz($value) {
+        public function assignAValueToBaz($value)
+        {
             $value->thingy = $this;
             $this->baz = $value;
         }
@@ -378,11 +400,13 @@ opinionated so you can go ahead and make your names whatever you please:
          * @has one of=Qux; on=baz
          * @setter makeQuxEqualTo
          */
-        public function pleaseGrabThatQuxForMe() {
+        public function pleaseGrabThatQuxForMe() 
+        
             return $this->qux;
         }
 
-        public function makeQuxEqualTo($value) {
+        public function makeQuxEqualTo($value)
+        {
             $value->thingy = $this;
             $this->qux = $value;
         }
@@ -394,8 +418,8 @@ Caching
 
 ``Amiss\Mapper\Note`` provides a facility to cache reflected metadata. This is not strictly
 necessary: the mapping process only does a little bit of reflection and is really very fast, but you
-can get up to 30% more speed out of Amiss in circumstances where you're doing a high number of
-metadata lookups per query (say, running one or two queries against one or two objects) by using a
+can get up to 30% more speed out of Amiss in circumstances where you're doing even just a few
+metadata lookups per request (say, running one or two queries against one or two objects) by using a
 cache.
 
 The simplest way to enable caching is to create an instance of ``Amiss\Cache`` with a callable
@@ -409,6 +433,10 @@ getter and setter as the first two arguments, then pass it as the first construc
     $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
     $cache = new \Amiss\Cache('eaccelerator_get', 'eaccelerator_put');
     
+    // when using the SQL manager's default note mapper:
+    $manager = new \Amiss\Sql\Manager($db, $cache);
+    
+    // when creating the mapper by hand
     $mapper = new \Amiss\Mapper\Note($cache);
 
 
@@ -469,7 +497,8 @@ if it has following method signatures:
     $mapper = new Amiss\Mapper\Note($cache);
 
 
-The ``$expiration`` parameter to ``set()`` is optional. It will be passed, but you can ignore it.
+The ``$expiration`` parameter to ``set()`` is optional. It will be passed, but you can ignore it
+and PHP doesn't require that it be present in your method signature.
 
 If your class does not support this interface, you can use ``Amiss\Cache`` to wrap your own class
 by passing the names of the getter and setter methods and your own class:

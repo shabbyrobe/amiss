@@ -82,7 +82,7 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         /** @field */
         public $address;
 
-        /** @has many of=Event */
+        /** @has many of=Event; inverse=venue */
         public $events;
     }
 
@@ -155,6 +155,12 @@ One-to-one
     <?php
     class Event
     {
+        /**
+         * @primary
+         * @field
+         */
+        public $eventId;
+        
         // snip
 
         /**
@@ -186,10 +192,16 @@ One-to-many
     <?php
     class Venue
     {
+        /**
+         * @primary
+         * @field
+         */
+        public $venueId;
+        
         // snip
 
         /**
-         * @has many of=Event
+         * @has many of=Event; on=venueId
          */
         public $events;
     }

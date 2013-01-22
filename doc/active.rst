@@ -13,8 +13,8 @@ seem to like them, so why not throw them in?
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Sql\ActiveRecord``. Configure everything else just
-like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class. Configure everything
+else just like you would when using Amiss as a Data Mapper.
 
 This guide will assume you are using the :doc:`mapper/annotation`. For more information on
 alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping
@@ -35,6 +35,7 @@ configuration that works with the data mapper.
         public $artistTypeId;
 
         /** @has one of=ArtistType; on=artistTypeId */
+        public $artistType;
     }
 
 
@@ -42,7 +43,8 @@ Connecting
 ----------
 
 As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an ``Amiss\Mapper`` and
-pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to ``Amiss\Sql\ActiveRecord::setManager()``.
+pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
+``Amiss\Sql\ActiveRecord::setManager()``.
 
 .. code-block:: php
 
@@ -72,8 +74,7 @@ assigned to their respective base class:
     Db1Record::setManager($amiss1);
     Db2Record::setManager($amiss2);
     
-    // will show 'false' to prove that the record types are not 
-    // sharing a manager
+    // will show 'false' to prove that the record types are not sharing a manager
     var_dump(Artist::getManager() === Burger::getManager());
 
 
@@ -95,8 +96,10 @@ Consider the following equivalents:
     // inserting
     $mapped = new MappedObject;
     $manager->insert($mapped);
+    $manager->save($mapped);
     
     $active = new ActiveObject;
+    $active->insert();
     $active->save();
     
     // getting by primary key
@@ -138,6 +141,11 @@ Consider the following equivalents:
 .. code-block:: php
 
     <?php
+    $yourRecordInstance->insert ();
+    $yourRecordInstance->update ();
+    $yourRecordInstance->delete ();
+    $yourRecordInstance->save ();
+    $yourRecordInstance->assignRelated ( $into, $relationName );
     $yourRecordInstance->getRelated ( $source, $relationName );
     $yourRecordInstance->assignRelated ( $into, $relationName );
 
@@ -197,8 +205,10 @@ The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to 
 * ``beforeSave()``
 * ``beforeDelete()``
     
-.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition
-.. to ``beforeInsert()`` and ``beforeUpdate()``.
+.. note:: 
+
+    ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition to 
+    ``beforeInsert()`` and ``beforeUpdate()``.
 
 ALWAYS call the parent method of the hook when overriding:
 

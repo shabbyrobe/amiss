@@ -29,7 +29,7 @@ using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
         /** @field */
         public $type;g16
 
-        /** @has many of=Artist */
+        /** @has many of=Artist; inverse=artistType */
         public $artists = array();
     }
 
@@ -86,11 +86,17 @@ Or an array of key=>value pairs when the related object's primary key has a diff
 owning object's property::
 
     'on'=>array('artistTypeId'=>'id')
-    
+
+Instead of ``on``, if there is a corresponding one-to-many relationship on the related object, you
+can specify ``inverse``, where the value is the name of the corresponding relationship on the 
+related object::
+
+    'inverse'=>'artistType',
+
 
 .. _relator-many:
 
-Many-to-many Relator
+One-to-many Relator
 ~~~~~~~~~~~~~~~~~~~~
 
 The ``many`` relationship specifies a one-to-many object relationship between the mapped object and
@@ -112,9 +118,6 @@ The ``on`` key defines the property name(s) that define the ID of the related ob
 is quite similar to the ``on`` key of the ``one`` relationship, but the primary key belongs to the
 mapped object rather than the related one.
 
-The ``on`` key is *optional* when specifying a ``many`` relation - the primary key of the owning
-object is inferred if it is omitted.
-
 ``on`` can be a single string if the name is the same on both objects::
 
     'on'=>'artistTypeId',
@@ -128,6 +131,12 @@ Or an array of key=>value pairs when the owning object's primary key has a diffe
 related object's property::
 
     'on'=>array('id'=>'artistTypeId')
+
+Instead of ``on``, if there is a corresponding one-to-one relationship on the related object, you
+can specify ``inverse``, where the value is the name of the corresponding relationship on the 
+related object::
+
+    'inverse'=>'artist',
 
 
 .. _relator-assoc:
@@ -259,8 +268,10 @@ Amiss provides two methods for retrieving and populating relations:
         echo $artists[1]->artistType->type;
     
 
-    .. note:: ``assignRelated`` does not support filtering by query as it doesn't make sense. If you
-    .. disagree, feel free to just do this:
+    .. note:: 
+        
+        ``assignRelated`` does not support filtering by query as it doesn't make sense. If you
+        disagree, feel free to just do this:
         
         .. code-block:: php
 

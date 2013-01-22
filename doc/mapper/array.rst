@@ -4,8 +4,9 @@ Array Mapper
 .. note:: 
 
     The remainder of the guide assumes you are using the :doc:`annotation` rather than the array
-    mapper mentioned here. This mapper is provided as an alternative. If you have decided to use the
-    annotation mapper, you may wish to skip this section and continue with the :doc:`common`.
+    mapper mentioned here. This mapper is provided as an alternative, but isn't really recommended.
+    If you have decided to use the annotation mapper, you may wish to skip this section and continue
+    with the :doc:`common`.
 
 
 The array mapper allows you to define your mappings as a PHP array. Fields and relations are defined
@@ -38,7 +39,7 @@ Mapping your objects is quite simple:
             'primary'=>'id',
             'fields'=>array('id', 'name', 'barId'),
             'relations'=>array(
-                'bar'=>array('one', 'of'=>'Bar', 'on'=>'barId'),
+                'bar'=>array('one', 'of'=>'Bar', 'on'=>array('barId'=>'id')),
             ),
         ),
 
@@ -46,7 +47,7 @@ Mapping your objects is quite simple:
             'primary'=>'id',
             'fields'=>array('id', 'name'),
             'relations'=>array(
-                'foo'=>array('many', 'of'=>'Foo')
+                'foo'=>array('many', 'of'=>'Foo', 'on'=>array('id'=>'barId'))
             ),
         ),
     );
