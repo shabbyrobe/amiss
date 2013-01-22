@@ -30,12 +30,10 @@ class OneMany extends Base
         $relatedMeta = $this->manager->getMeta($relation['of']);
         
         $on = null;
-        if (isset($relation['on'])) {
+        if (isset($relation['on']))
             $on = $relation['on'];
-        }
-        elseif (isset($relation['inverse'])) {
+        elseif (isset($relation['inverse']))
             $on = $this->resolveInverseOn($relation, $relatedMeta);
-        }
         
         if (!$on) {
             throw new \Amiss\Exception("Relation $relationName on class $class did not specify an 'on'");
@@ -52,27 +50,9 @@ class OneMany extends Base
         }
         
         // find query values in source object(s)
-        $fields = $meta->getFields();
+        list($ids, $resultIndex) = $this->indexSource($source, $on, $meta->getFields(), $relatedFields);
         
-        list($ids, $resultIndex) = $this->indexSource($source, $on, $fields, $relatedFields);
-        
-        // build query
-        $query = new Criteria\Select;
-        $where = array();
-        foreach ($ids as $l=>$idInfo) {
-            $rName = $idInfo['rField']['name'];
-            $query->params['r_'.$rName] = array_keys($idInfo['values']);
-            $where[] = '`'.str_replace('`', '', $rName).'` IN(:r_'.$idInfo['param'].')';
-        }
-        $query->where = implode(' AND ', $where);
-        
-        if ($criteria) {
-            list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
-            $query->params = array_merge($cParams, $query->params);
-            $query->where .= ' AND ('.$cWhere.')';
-        }
-        
-        $list = $this->manager->getList($relation['of'], $query);
+        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria);
         
         // prepare the result
         $result = null;
@@ -127,5 +107,27 @@ class OneMany extends Base
             $on[$r] = $l;
         
         return $on;
+    }
+    
+    private function runQuery($ids, $relation, $relatedMeta, $criteria)
+    {
+        $query = new Criteria\Select;
+        $where = array();
+        foreach ($ids as $l=>$idInfo) {
+            $rName = $idInfo['rField']['name'];
+            $query->params['r_'.$rName] = array_keys($idInfo['values']);
+            $where[] = '`'.str_replace('`', '', $rName).'` IN(:r_'.$idInfo['param'].')';
+        }
+        $query->where = implode(' AND ', $where);
+        
+        if ($criteria) {
+            list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
+            $query->params = array_merge($cParams, $query->params);
+            $query->where .= ' AND ('.$cWhere.')';
+        }
+        
+        $list = $this->manager->getList($relation['of'], $query);
+        
+        return $list;
     }
 }
