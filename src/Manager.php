@@ -132,7 +132,6 @@ class Manager
         $meta = $this->getMeta($class);
         
         list ($query, $params) = $criteria->buildQuery($meta);
-        
         $stmt = $this->getConnector()->prepare($query);
         $this->execute($stmt, $params);
         
@@ -320,7 +319,7 @@ class Manager
                     if (isset($field['getter']))
                         $object->{$field['setter']}($generated);
                     else
-                        $object->{$field['name']} = $generated;
+                        $object->{$meta->primary[0]} = $generated;
                 }
             }
         }

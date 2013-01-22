@@ -29,7 +29,7 @@ class OneMany extends Base
             throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
-        
+
         // prepare the relation's "on" field
         $on = null;
         if (isset($relation['on'])) {

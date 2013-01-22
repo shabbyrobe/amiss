@@ -46,6 +46,16 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
         
         self::assertThat($value, $constraint, $message);
     }
+    
+    public function createRecordMemoryDb($class)
+    {
+        $tb = new TableBuilder($this->manager, $class);
+
+        if ($class instanceof \Amiss\Active\Record)
+            forward_static_call(array($class, 'setManager'), $this->manager);
+        
+        $tb->createTable();
+    }
 }
 
 class SqliteDataTestCase extends CustomTestCase
@@ -78,13 +88,6 @@ class SqliteDataTestCase extends CustomTestCase
         $this->mapper = $this->getMapper();
         $this->manager = $this->getManager();
         \Amiss\Active\Record::setManager($this->manager);
-    }
-    
-    public function createRecordMemoryDb($class)
-    {
-        $tb = new TableBuilder($this->manager, $class);
-        forward_static_call(array($class, 'setManager'), $this->manager);
-        $tb->createTable();
     }
 }
 
