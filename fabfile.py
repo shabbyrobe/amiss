@@ -12,6 +12,11 @@ def doc(clean=False):
         local('make html')
 
 @task
+def cloc():
+    local('cloc src')
+    local('cloc test')
+
+@task
 def pdf():
     with lcd(os.path.join(env.base_path, 'doc')):
         local('make latexpdf >> /dev/null')
