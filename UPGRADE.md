@@ -13,6 +13,8 @@ New features:
 
 Breaking changes:
 
+- One-to-many relations no longer guess "on" fields - this tended to violate the principle of least
+  astonishment. "inverse=relationName" must now be specified to establish bi-directional mapping.
 - `Amiss\Mapper\Note` no longer adds any types by default - to get the default set from previous
   versions, create it like so: `$mapper = (new Amiss\Mapper\Note())->addTypeSet(new Amiss\Sql\TypeSet);`
 - `Amiss\Manager` has been renamed `Amiss\Sql\Manager`
