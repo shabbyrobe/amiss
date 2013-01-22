@@ -13,8 +13,7 @@ by the base class), by implementing the ``Amiss\Mapper`` interface.
 Both methods require you to build up an instance of ``Amiss\Meta``, which defines various object-
 mapping attributes that ``Amiss\Sql\Manager`` will make use of.
 
-.. note:: You should be familiar with the structure of the :doc:`metadata` before reading this
-.. guide.
+.. note:: You should be familiar with the structure of the :doc:`metadata` before reading this guide
 
 
 Extending ``Amiss\Mapper\Base``

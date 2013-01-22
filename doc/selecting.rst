@@ -71,7 +71,7 @@ passing a clause as a string, you can pass it using the underlying table's colum
     <?php
     // The Artist class has a property called 'artistTypeId' that maps to a 
     // column with the same name:
-    $artists = $manager->getList('Artist', 'name LIKE ?', 'foo%');
+    $artists = $manager->getList('Artist', 'artistTypeId=?', 1);
 
 
 When your table's column names are exactly the same as your property names, this is the way you

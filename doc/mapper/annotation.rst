@@ -117,8 +117,8 @@ The following class level annotations are available:
 .. py:attribute:: @table value
 
     When declared, this forces the mapper to use this table name. It may include a schema name as
-    well. If not provided, the table name will be determined by the mapper. See :ref:`name-
-    translation` for details on this process.
+    well. If not provided, the table name will be determined by the mapper. See 
+    :ref:`name-translation` for details on this process.
 
 
 .. py:attribute:: @fieldType value

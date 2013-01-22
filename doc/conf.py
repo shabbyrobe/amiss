@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Amiss PHP Data Mapper'
-copyright = u'2011, Blake Williams'
+copyright = u'2013, Blake Williams'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

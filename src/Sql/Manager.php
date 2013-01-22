@@ -441,14 +441,16 @@ class Manager
     {
         $meta = $this->getMeta(get_class($object));
         $nope = false;
-        if (!$meta->primary || count($meta->primary) > 1)
+        if (!$meta->primary || count($meta->primary) > 1) {
             $nope = true;
+        }
         else {
             $field = $meta->getField($meta->primary[0]);
             if ($field['type'] != 'autoinc')
                 $nope = true;
         }
-        if ($nope) throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
+        if ($nope)
+            throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
         
         $prival = $meta->getPrimaryValue($object);
         return $prival == false;

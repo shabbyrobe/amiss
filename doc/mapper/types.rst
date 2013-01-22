@@ -145,6 +145,8 @@ Encoder
     in conjunction with other handlers.
 
 
+.. _embed:
+
 Embed
 ~~~~~
 

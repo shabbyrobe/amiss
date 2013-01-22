@@ -12,5 +12,4 @@ premier ORM behemoth `Doctrine <http://doctrine-project.org>`_, the dated
 interface of `Propel <http://www.propelorm.org/>`_, or the tight coupling of
 your favourite framework's own model layer.
 
-It is unapologetic about being `stupid, simple and fast`, and is completely
-aware that something is **Amiss**.
+It is unapologetic about being `stupid, simple and fast`.
