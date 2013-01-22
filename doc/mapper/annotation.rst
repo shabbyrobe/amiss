@@ -7,7 +7,7 @@ To use the annotation mapper with Amiss, pass an instance of ``Amiss\Mapper\Note
 .. code-block:: php
 
     <?php
-    $mapper = new \Amiss\Note\Mapper();
+    $mapper = new \Amiss\Mapper\Note();
     $manager = new \Amiss\Sql\Manager($db, $mapper);
 
 
