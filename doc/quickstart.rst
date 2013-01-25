@@ -36,6 +36,13 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 Defining objects
 ----------------
 
+Table names are guessed from the object name. Object names are converted from ``CamelCase`` to
+``under_scores`` by default.
+
+Table field names are guessed from the property name. No name mapping is performed by default, but
+you can pass an explicit field name via the ``@field`` annotation, or pass your own automatic
+translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator``.
+
 See :doc:`mapper/mapping` for more details and alternative mapping options.
 
 .. code-block:: php
@@ -64,8 +71,7 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
     }
 
     /**
-     * Explicit table name annotation. Leave this out and the table will be assumed
-     * to be 'venue'
+     * Explicit table name annotation. Leave this out and the table will default to 'venue'
      * @table venues
      */
     class Venue
@@ -76,7 +82,9 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
          */
         public $venueId;
 
-        /** @field venueName */
+        /**
+         * @field venueName
+         */
         public $name;
 
         /** @field */
@@ -85,7 +93,10 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         /** @field */
         public $address;
 
-        /** @has many of=Event; inverse=venue */
+        /** 
+         * Inverse relationship of Event->venue
+         * @has many of=Event; inverse=venue
+         */
         public $events;
     }
 
