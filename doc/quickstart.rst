@@ -18,15 +18,18 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     require_once('/path/to/amiss/src/Loader.php');
     Amiss\Loader::register();
 
-    // Amiss requires a class that implements \Amiss\Mapper in order to get information
-    // about how your objects map to tables
-    $mapper = new Amiss\Mapper\Note;
-
     // This is basically a PDO with a bit of extra niceness. You should use it instead
     // of PDO in your own code
     $connector = new Amiss\Sql\Connector('mysql:host=127.0.0.1', 'user', 'password');
-
-    // And this binds the whole mess together
+    
+    // This will create a SQL manager using the default annotation mapper configuration
+    $manager = new Amiss\Sql\Manager($connector);
+    
+    // Configure the default mapper
+    $manager->mapper->objectNamespace = 'Your\Model';
+    
+    // Or use your own mapper:
+    $mapper = new \Amiss\Mapper\Note();
     $manager = new Amiss\Sql\Manager($connector, $mapper);
 
 
