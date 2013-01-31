@@ -3,6 +3,10 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\Connector;
 
+/**
+ * This test doesn't make any real connections, so it should not be necessary to
+ * extend from DataTestCase
+ */
 class ConnectorTest extends \CustomTestCase
 {
     /**

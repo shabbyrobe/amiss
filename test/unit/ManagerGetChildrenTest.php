@@ -7,6 +7,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
         $this->manager = new Manager(array(), new \Amiss\Mapper\Note);
     }
     

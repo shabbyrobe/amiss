@@ -11,9 +11,9 @@ class TableBuilderTest extends \ActiveRecordDataTestCase
      * @group tablebuilder
      * @group acceptance
      */
-    public function testCreateTableSqlite()
+    public function testCreateTable()
     {
-        $db = new \Amiss\Sql\Connector('sqlite::memory:');
+        $db = $this->getConnector();
         
         $manager = new \Amiss\Sql\Manager($db, new \Amiss\Mapper\Note);
         

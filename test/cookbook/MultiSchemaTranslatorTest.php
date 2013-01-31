@@ -1,10 +1,16 @@
 <?php
 namespace Amiss\Test\Cookbook;
 
+/**
+ * This test doesn't need to run against MySQL - enough is proven by running
+ * against sqlite only.
+ */
 class MultiSchemaTranslatorTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->connector = new \Amiss\Sql\Connector('sqlite::memory:');
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_one;");
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_two;");

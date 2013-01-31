@@ -7,6 +7,8 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         \Amiss\Sql\ActiveRecord::_reset();
         $this->connector = new \TestConnector('mysql:xx');
         $this->mapper = new \Amiss\Mapper\Note;

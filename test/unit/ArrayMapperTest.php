@@ -5,10 +5,6 @@ use Amiss\Mapper\Arrays;
 
 class ArrayMapperTest extends \CustomTestCase
 {
-    public function setUp()
-    {
-    }
-    
     /**
      * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta

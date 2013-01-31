@@ -9,7 +9,7 @@ namespace Amiss\Test\Acceptance;
  * @group acceptance
  * @group manager
  */
-class MappedFieldNameTest extends \CustomTestCase
+class MappedFieldNameTest extends \DataTestCase
 {
     /**
      * @var Amiss\Sql\Manager
@@ -23,7 +23,9 @@ class MappedFieldNameTest extends \CustomTestCase
 
     public function setUp()
     {
-        $this->db = new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+        parent::setUp();
+        
+        $this->db = $this->getConnector();
         
         $this->manager = new \Amiss\Sql\Manager($this->db);
         $this->mapper = $this->manager->mapper;

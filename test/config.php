@@ -9,16 +9,6 @@ require_once(__DIR__.'/../doc/demo/model.php');
 require_once(__DIR__.'/../doc/demo/ar.php');
 require_once(__DIR__.'/lib.php');
 
-class ActiveRecordDataTestCase extends SqliteDataTestCase
-{
-    public function getMapper()
-    {
-        $mapper = parent::getMapper();
-        $mapper->objectNamespace = 'Amiss\Demo\Active';
-        return $mapper;
-    }
-}
-
 class TestConnector extends \Amiss\Sql\Connector
 {
     public $calls = array();

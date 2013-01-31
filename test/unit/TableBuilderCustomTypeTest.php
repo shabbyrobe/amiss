@@ -7,6 +7,8 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->connector = new \TestConnector('mysql:xx');
         $this->mapper = new \Amiss\Mapper\Note();
         $this->mapper->addTypeSet(new \Amiss\Sql\TypeSet);

@@ -2,7 +2,7 @@
 
 $webBase = '/test/code/amiss/example';
 
-$iter = 50;
+$iter = isset($_GET['cnt']) ? (int) $_GET['cnt'] : 1;
 
 $result = array();
 

@@ -5,6 +5,8 @@ class RelatorOneManyTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->mapper = new \TestMapper;
         
         $this->db = $this->getMockBuilder('Amiss\Sql\Connector')

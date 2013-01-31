@@ -7,6 +7,8 @@ class TypeAutoGuidTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->mapper = new \Amiss\Mapper\Arrays(array(
             'Amiss\Test\Acceptance\TypeAutoGuidFoo'=>array(
                 'primary'=>'guid',

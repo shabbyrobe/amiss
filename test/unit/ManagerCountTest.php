@@ -5,6 +5,8 @@ class ManagerCountTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->db = new \TestConnector('sqlite::memory:');
         $this->mapper = new \TestMapper();
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);

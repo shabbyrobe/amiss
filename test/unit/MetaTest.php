@@ -3,10 +3,6 @@ namespace Amiss\Test\Acceptance;
 
 class MetaTest extends \CustomTestCase
 {
-    public function setUp()
-    {
-    }
-    
     /**
      * @covers Amiss\Meta::__construct
      * @group unit

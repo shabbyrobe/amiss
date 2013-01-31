@@ -7,6 +7,7 @@ class TableBuilderCreateTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
         $this->manager = new \Amiss\Sql\Manager(new \Amiss\Sql\Connector('sqlite::memory:'));
     }
     

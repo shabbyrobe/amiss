@@ -4,6 +4,35 @@ use Amiss\Sql\TableBuilder;
 
 abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 {
+    protected static $parentSetupCalled = false;
+    protected static $parentTearDownCalled = false;
+    
+    public static function setUpBeforeClass()
+    {
+        self::$parentSetupCalled = false;
+        self::$parentTearDownCalled = false;
+    }
+    
+    public function setUp()
+    {
+        parent::setUp();
+        self::$parentSetupCalled = true;
+    }
+    
+    public function tearDown()
+    {
+        parent::setUp();
+        self::$parentTearDownCalled = true;
+    }
+    
+    public static function tearDownAfterClass()
+    {
+        if (!self::$parentSetupCalled)
+            throw new \RuntimeException("Your test case ".get_called_class()." did not call parent::setup()");
+        if (!self::$parentTearDownCalled)
+            throw new \RuntimeException("Your test case ".get_called_class()." did not call parent::tearDown()");
+    }
+    
     protected function callProtected($class, $name)
     {
         $ref = new ReflectionClass($class);
@@ -58,13 +87,39 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
     }
 }
 
-class SqliteDataTestCase extends CustomTestCase
+class DataTestCase extends CustomTestCase
+{
+    public function setUp()
+    {
+        parent::setUp();
+    }
+    
+    public function getConnector()
+    {
+        return new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+    }
+    
+    public function getEngine()
+    {
+        return 'sqlite';
+    }
+    
+    public function readSqlFile($name)
+    {
+        $name = strtr($name, [
+            '{engine}'=>$this->getEngine(),
+        ]);
+        return file_get_contents($name);
+    }
+}
+
+class SqliteDataTestCase extends DataTestCase
 {
     /**
      * @var Amiss\Sql\Manager
      */
     public $manager;
-
+    
     public function getMapper()
     {
         $mapper = new \Amiss\Mapper\Note();
@@ -80,15 +135,27 @@ class SqliteDataTestCase extends CustomTestCase
     
     public function setUp()
     {
+        parent::setUp();
+        
         \Amiss\Sql\ActiveRecord::_reset();
         
-        $this->db = new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
-        $this->db->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite.sql'));
-        $this->db->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sqlite.sql'));
+        $this->db = $this->getConnector();
+        $this->db->exec($this->readSqlFile(__DIR__.'/../doc/demo/schema.{engine}.sql'));
+        $this->db->exec($this->readSqlFile(__DIR__.'/../doc/demo/testdata.{engine}.sql'));
         
         $this->mapper = $this->getMapper();
         $this->manager = $this->getManager();
         \Amiss\Sql\ActiveRecord::setManager($this->manager);
+    }
+}
+
+class ActiveRecordDataTestCase extends SqliteDataTestCase
+{
+    public function getMapper()
+    {
+        $mapper = parent::getMapper();
+        $mapper->objectNamespace = 'Amiss\Demo\Active';
+        return $mapper;
     }
 }
 

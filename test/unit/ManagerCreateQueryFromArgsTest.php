@@ -7,6 +7,8 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->manager = new Manager(
             array('dsn'=>'sqlite::memory:'),
             new \Amiss\Mapper\Note

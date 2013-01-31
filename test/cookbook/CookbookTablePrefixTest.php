@@ -5,6 +5,8 @@ class CookbookTablePrefixTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $mapper = $this->mapper = new \Amiss\Mapper\Note();
         
         $translator = new \Amiss\Name\CamelToUnderscore();

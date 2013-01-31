@@ -10,9 +10,6 @@ use Amiss\Sql;
  */
 class EncoderTest extends \CustomTestCase
 {
-    public function setUp()
-    {}
-
     public function testCreateColumnTypeDefault()
     {
         $encoder = new Type\Encoder('serialize', 'unserialize');

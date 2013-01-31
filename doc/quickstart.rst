@@ -157,6 +157,9 @@ See :doc:`selecting` for more details.
         'page'=>array(1, 30)
     ));
 
+    // Amiss will unroll and properly parameterise IN() clauses
+    $events = $manager->getList('Event', 'IN (:foo)', array('foo'=>array(1, 2, 3)));
+
 
 Relations
 ---------

@@ -5,6 +5,7 @@ class NoteParserTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
         $this->parser = new \Amiss\Note\Parser;
     }
     

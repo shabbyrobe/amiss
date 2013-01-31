@@ -1,12 +1,14 @@
 <?php
 namespace Amiss\Test\Unit;
 
-class ActiveRecordTest extends \CustomTestCase
+class ActiveRecordTest extends \DataTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         \Amiss\Sql\ActiveRecord::_reset();
-        $this->db = new \PDO('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+        $this->db = $this->getConnector();
         $this->mapper = new \Amiss\Mapper\Note;
         $this->mapper->objectNamespace = 'Amiss\Demo\Active';
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);

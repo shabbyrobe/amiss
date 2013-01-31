@@ -7,6 +7,8 @@ class MapperTypeHandlerTest extends \CustomTestCase
 {
     public function setUp()
     {
+        parent::setUp();
+        
         $this->mapper = $this->getMockBuilder('Amiss\Mapper\Base')
             ->disableOriginalConstructor()
             ->getMockForAbstractClass()

@@ -3,11 +3,7 @@
 namespace Amiss\Test\Acceptance;
 
 class NoteMapperTest extends \CustomTestCase
-{
-    public function setUp()
-    {
-    }
-    
+{   
     /**
      * @group mapper
      * @group unit
