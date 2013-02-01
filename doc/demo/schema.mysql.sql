@@ -1,8 +1,8 @@
 CREATE TABLE `artist` (
   `artistId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `artistTypeId` int(10) unsigned NOT NULL,
-  `name` varchar(200) DEFAULT NOT NULL,
-  `slug` varchar(80) DEFAULT NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `slug` varchar(80) NOT NULL,
   `bio` TEXT NULL,
   PRIMARY KEY (`artistId`),
   KEY `FK_artist_type` (`artistTypeId`),
@@ -13,7 +13,7 @@ CREATE TABLE `artist_type` (
   `artistTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `type` varchar(80) not null,
   `slug` varchar(80) not null,
-  PRIMARY KEY (`artistId`),
+  PRIMARY KEY (`artistTypeId`),
   UNIQUE KEY `FK_artist_type_slug` (`slug`)
 ) ENGINE=InnoDB;
 

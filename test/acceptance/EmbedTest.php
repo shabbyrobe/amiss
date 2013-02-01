@@ -12,9 +12,15 @@ class EmbedTest extends \SqliteDataTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->db->exec("CREATE TABLE test_embed_one_parent(id INTEGER PRIMARY KEY AUTOINCREMENT, child TEXT)");
-        $this->db->exec("CREATE TABLE test_embed_many_parent(id INTEGER PRIMARY KEY AUTOINCREMENT, children TEXT)");
-
+        
+        if ($this->getEngine() == 'sqlite') {
+            $this->db->exec("CREATE TABLE test_embed_one_parent(id INTEGER PRIMARY KEY AUTOINCREMENT, child TEXT)");
+            $this->db->exec("CREATE TABLE test_embed_many_parent(id INTEGER PRIMARY KEY AUTOINCREMENT, children TEXT)");
+        }
+        elseif ($this->getEngine() == 'mysql') {
+            $this->db->exec("CREATE TABLE test_embed_one_parent(id INT PRIMARY KEY AUTO_INCREMENT, child TEXT)");
+            $this->db->exec("CREATE TABLE test_embed_many_parent(id INT PRIMARY KEY AUTO_INCREMENT, children TEXT)");   
+        }
         // To test against either mysql or sqlite, we need to encode as well.
         $embed = new Type\Embed($this->mapper);
         $encoder = new Type\Encoder('serialize', 'unserialize', $embed);

@@ -4,6 +4,7 @@ use Amiss\Sql\TableBuilder;
 
 abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 {
+    /*
     protected static $parentSetupCalled = false;
     protected static $parentTearDownCalled = false;
     
@@ -32,6 +33,7 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
         if (!self::$parentTearDownCalled)
             throw new \RuntimeException("Your test case ".get_called_class()." did not call parent::tearDown()");
     }
+    */
     
     protected function callProtected($class, $name)
     {
@@ -89,19 +91,85 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 
 class DataTestCase extends CustomTestCase
 {
+    private static $connectionInfo;
+    
     public function setUp()
     {
         parent::setUp();
+        
+        $info = $this->getConnectionInfo();
+        if ($info['engine'] == 'mysql') {
+            $result = $this->getConnector()->exec("CREATE DATABASE IF NOT EXISTS `{$info['dbName']}`");
+            self::$connectionInfo['statements'] = [
+                "USE `{$info['dbName']}`"
+            ];
+        }
+    }
+    
+    public function tearDown()
+    {
+        parent::tearDown();
+        
+        $info = $this->getConnectionInfo();
+        if ($info['engine'] == 'mysql') {
+            $this->getConnector()->exec("DROP DATABASE IF EXISTS `{$info['dbName']}`");
+            self::$connectionInfo['statements'] = [];
+        }
     }
     
     public function getConnector()
     {
-        return new \Amiss\Sql\Connector('sqlite::memory:', null, null, array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+        $connection = $this->getConnectionInfo();
+        $statements = isset($connection['statements']) ? $connection['statements'] : [];
+        return new \Amiss\Sql\Connector($connection['dsn'], $connection['user'], $connection['password'], [], $statements);
+    }
+    
+    public function getConnectionInfo()
+    {
+        if (!self::$connectionInfo) {
+            $testEngine = getenv('AMISS_TEST_DB_ENGINE') ?: 'sqlite';
+            
+            if ($testEngine == 'sqlite') {
+                self::$connectionInfo = [
+                    'engine'=>'sqlite',
+                    'dsn'=>'sqlite::memory:',
+                    'user'=>null,
+                    'password'=>null,
+                ];
+            }
+            elseif ($testEngine == 'mysql') {
+                $dbName = getenv('AMISS_TEST_DB_NAME') ?: 'amiss_test_'.md5(time());
+                $host = getenv('AMISS_TEST_DB_HOST');
+                $user = getenv('AMISS_TEST_DB_USER');
+                $password = getenv('AMISS_TEST_DB_PASSWORD');
+                
+                if (!$host) {
+                    echo "Please export AMISS_TEST_DB_HOST if you want to test using the mysql engine\n";
+                    exit(1);
+                }
+                
+                $dbName = str_replace('`', '', $dbName);
+                
+                self::$connectionInfo = [
+                    'engine'=>'mysql',
+                    'dsn'=>"mysql:host=$host",
+                    'host'=>$host,
+                    'user'=>$user,
+                    'password'=>$password,
+                    'dbName'=>$dbName,
+                ];
+            }
+            else {
+                echo "Unknown test engine $testEngine\n";
+                exit(1);
+            }
+        }
+        return self::$connectionInfo;
     }
     
     public function getEngine()
     {
-        return 'sqlite';
+        return $this->getConnectionInfo()['engine'];
     }
     
     public function readSqlFile($name)
