@@ -17,7 +17,7 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\TableBuilder::buildFields
+     * @covers Amiss\Sql\TableBuilder::buildFields
      * @group tablebuilder
      * @group unit
      */
@@ -37,7 +37,7 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\TableBuilder::buildFields
+     * @covers Amiss\Sql\TableBuilder::buildFields
      * @group tablebuilder
      * @group unit
      */

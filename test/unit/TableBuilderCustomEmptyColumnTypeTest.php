@@ -19,7 +19,7 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\TableBuilder::buildFields
+     * @covers Amiss\Sql\TableBuilder::buildFields
      * @group tablebuilder
      * @group unit
      */
