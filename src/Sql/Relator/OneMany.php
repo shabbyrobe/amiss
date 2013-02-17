@@ -100,7 +100,7 @@ class OneMany extends Base
         
         $inverseOn = $relatedMeta->relations[$relation['inverse']]['on'];
         if (!is_array($inverseOn))
-            $inverseOn = [$inverseOn=>$inverseOn];
+            $inverseOn = array($inverseOn=>$inverseOn);
         
         $on = array();
         foreach ($inverseOn as $l=>$r)

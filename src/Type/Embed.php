@@ -78,7 +78,7 @@ class Embed implements Handler
             $many = true;
         }
 
-        return [$class, $many];
+        return array($class, $many);
     }
     
     function createColumnType($engine)

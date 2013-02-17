@@ -19,7 +19,7 @@ if (strpos($ex, '/')===false) {
 $file = __DIR__.'/'.$ex.'.php';
 require(dirname($file).'/config.php');
 
-if (!in_array($fmt, ['html', 'json']))
+if (!in_array($fmt, array('html', 'json')))
 	$fmt = 'html';
 
 if (isset($_GET['run'])) {
