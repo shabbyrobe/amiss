@@ -22,25 +22,29 @@ class Date implements \Amiss\Type\Handler
         else
             $this->format = $format;
         
-        if ($this->format == 'U' && !$timeZone)
-            $timeZone = 'UTC';
-        
         if ($appTimeZone && is_string($appTimeZone))
             $appTimeZone = new \DateTimeZone($appTimeZone);
         if ($dbTimeZone && is_string($dbTimeZone))
             $dbTimeZone = new \DateTimeZone($dbTimeZone);
         
-        $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
         $this->dbTimeZone = $dbTimeZone;
+        $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
+        // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
+    }
+    
+    public static function unixTime($appTimeZone=null)
+    {
+        return new static('U', 'UTC', $appTimeZone);
     }
     
     function prepareValueForDb($value, $object, array $fieldInfo)
     {
         $out = null;
         if ($value instanceof \DateTime) {
-            if ($this->timeZone && $value->getTimezone() != $this->timeZone) {
-                $value->setTimezone($this->timeZone);
-            }
+            if ($value->getTimeZone() != $this->appTimeZone)
+                throw new \UnexpectedValueException();
+            
+            $value->setTimeZone($this->dbTimeZone);
             $out = $value->format($this->format);
         }
         return $out;
@@ -50,8 +54,8 @@ class Date implements \Amiss\Type\Handler
     {
         $out = null;
         if ($value !== null) {
-            $out = \DateTime::createFromFormat($this->format, $value, new \DateTimeZone('UTC'));
-            $out->setTimeZone($this->timeZone);
+            $out = \DateTime::createFromFormat($this->format, $value, $this->dbTimeZone);
+            $out->setTimeZone($this->appTimeZone);
         }
         return $out;
     }
