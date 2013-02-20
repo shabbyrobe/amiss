@@ -63,6 +63,7 @@ class Loader
         'Amiss\Sql\Relator\OneMany'=>'Sql/Relator/OneMany.php',
         'Amiss\Sql\TableBuilder'=>'Sql/TableBuilder.php',
         'Amiss\Sql\Type\Autoinc'=>'Sql/Type/Autoinc.php',
+        'Amiss\Sql\Type\Bool'=>'Sql/Type/Bool.php',
         'Amiss\Sql\Type\Date'=>'Sql/Type/Date.php',
         'Amiss\Sql\TypeSet'=>'Sql/TypeSet.php',
         'Amiss\Type\AutoGuid'=>'Type/AutoGuid.php',
