@@ -175,7 +175,7 @@ using a wrapper function:
         public function getArtistType()
         {
             if ($this->artistType===null && $this->artistTypeId) {
-                $this->artistType = $this->fetchRelated('artistType');
+                $this->artistType = $this->getRelated('artistType');
             }
             return $this->artistType;
         }

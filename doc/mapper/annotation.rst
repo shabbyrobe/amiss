@@ -458,7 +458,7 @@ to the cache's constructor (the third argument is explained later), or set it ag
 
 
 You can set a prefix for the cache in case you want to ensure Amiss does not clobber items that
-other areas of your application may be caching::
+other areas of your application may be caching:
 
 .. code-block:: php
 
