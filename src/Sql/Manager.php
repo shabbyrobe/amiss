@@ -35,11 +35,9 @@ class Manager
     
     /**
      * Relators used by getRelated
-     * @var Amiss\Sql\Relator[]
+     * @var (Amiss\Sql\Relator|callable)[]
      */
     public $relators;
-    
-    public $relatorSet;
     
     /**
      * Configuration parameter can contain the following keys:
@@ -51,22 +49,41 @@ class Manager
      * @param Amiss\Sql\Connector|\PDO|array  Database connector
      * @param array  Configuration
      */
-    public function __construct($connector, $mapper, $relatorSet=null)
+    public function __construct($connector, $mapper)
     {
         if (is_array($connector)) 
             $connector = Connector::create($connector);
         
         $this->connector = $connector;
         $this->mapper = $mapper;
-        $this->relatorSet = $relatorSet;
     }
     
     public static function createDefault($connector, $cache=null)
     {
         $mapper = new \Amiss\Mapper\Note($cache);
-        $mapper->typeSet = new TypeSet;
-        $manager = new static($connector, $mapper, new RelatorSet);
+        $manager = new static($connector, $mapper);
+        $manager->relators = static::createDefaultRelators();
         return $manager;
+    }
+    
+    public static function createDefaultMapper()
+    {
+        
+    }
+    
+    public static function createDefaultRelators()
+    {
+        return array(
+            'one'=>function($manager) {
+                return new Relator\OneMany($manager);
+            },
+            'many'=>function($manager) {
+                return new Relator\OneMany($manager);
+            },
+            'assoc'=>function($manager) {
+                return new Relator\Assoc($manager);
+            }
+        );
     }
     
     /**
@@ -252,11 +269,12 @@ class Manager
         $relation = $meta->relations[$relationName];
         
         if (!isset($this->relators[$relation[0]])) {
-            $method = 'get'.$relation[0];
-            if ($this->relatorSet && method_exists($this->relatorSet, $method))
-                $this->relators[$relation[0]] = $this->relatorSet->$method($this);
-            else
-                throw new Exception("Relator {$relation[0]} not found");
+            throw new Exception("Relator {$relation[0]} not found");
+        }
+        
+        $relator = $this->relators[$relation[0]];
+        if (is_callable($relator)) {
+            $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
         
         $query = null;
@@ -264,7 +282,7 @@ class Manager
             $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
         }
         
-        return $this->relators[$relation[0]]->getRelated($source, $relationName, $query);
+        return $relator->getRelated($source, $relationName, $query);
     }
     
     /**
