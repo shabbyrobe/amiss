@@ -15,6 +15,6 @@ class Bool implements \Amiss\Type\Handler
 
 	function createColumnType($engine)
     {
-        return 'tinyint(1)';
+        return 'tinyint(1) unsigned';
     }
 }

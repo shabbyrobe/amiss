@@ -2,9 +2,9 @@
 
 $amissPath = __DIR__.'/../src';
 
-require_once($amissPath.'/Loader.php');
+require_once($amissPath.'/Amiss.php');
 
-Amiss\Loader::register();
+Amiss::register();
 
 function e($val) {
     return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');

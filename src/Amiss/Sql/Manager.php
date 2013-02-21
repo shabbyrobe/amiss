@@ -58,34 +58,6 @@ class Manager
         $this->mapper = $mapper;
     }
     
-    public static function createDefault($connector, $cache=null)
-    {
-        $mapper = new \Amiss\Mapper\Note($cache);
-        $manager = new static($connector, $mapper);
-        $manager->relators = static::createDefaultRelators();
-        return $manager;
-    }
-    
-    public static function createDefaultMapper()
-    {
-        
-    }
-    
-    public static function createDefaultRelators()
-    {
-        return array(
-            'one'=>function($manager) {
-                return new Relator\OneMany($manager);
-            },
-            'many'=>function($manager) {
-                return new Relator\OneMany($manager);
-            },
-            'assoc'=>function($manager) {
-                return new Relator\Assoc($manager);
-            }
-        );
-    }
-    
     /**
      * Get the database connector
      * 
