@@ -2,11 +2,9 @@
 
 require_once($amissPath.'/../doc/demo/ar.php');
 
-$cache = get_note_cache('xcache', !isset($_GET['nocache']));
-
 $connector = new Amiss\Sql\Connector('sqlite::memory:');
 $manager = Amiss::createManager($connector, array(
-    'cache'=>$cache,
+    'cache'=>get_note_cache(),
 ));
 
 $manager->mapper->objectNamespace = 'Amiss\Demo\Active';

@@ -2,7 +2,8 @@
 
 $webBase = '/test/code/amiss/example';
 
-$iter = isset($_GET['cnt']) ? (int) $_GET['cnt'] : 1;
+$iter = isset($_GET['cnt']) ? $_GET['cnt'] : 1;
+$cache = isset($_GET['cache']) ? $_GET['cache'] : '';
 
 $result = array();
 
@@ -16,7 +17,7 @@ for ($i = 0; $i < $iter; $i++) {
 			
 			
 			$name = $folder.'/'.pathinfo($item, PATHINFO_FILENAME);
-			$out = file_get_contents("http://localhost{$webBase}/show.php/{$name}?fmt=json");
+            $out = file_get_contents("http://localhost{$webBase}/show.php/{$name}?fmt=json&cache={$cache}");
 			$json = json_decode($out, true);
 			
 			if (!isset($result[$json['id']])) {

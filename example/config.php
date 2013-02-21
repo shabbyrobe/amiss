@@ -77,9 +77,13 @@ function extract_file_metadata($file)
     return $meta;
 }
 
-function get_note_cache($type, $active=true)
+function get_note_cache()
 {
+    $type = isset($_GET['cache']) ? $_GET['cache'] : null;
+    $active = $type == true;
+    
     $cache = null;
+    
     if ($active) {
         if ($type == 'hack') {
             $path = sys_get_temp_dir();
