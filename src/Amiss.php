@@ -40,6 +40,8 @@ class Amiss
     
     public static function createManager($connector, $config=null)
     {
+        if ($config instanceof \Amiss\Mapper)
+            $config = array('mapper'=>$config);
         if ($config === null)
             $config = array();
         
@@ -48,8 +50,11 @@ class Amiss
         return $manager;
     }
     
-    public static function createMapper($config)
+    public static function createMapper($config=null)
     {
+        if ($config === null)
+            $config = array();
+        
         $mapper = new \Amiss\Mapper\Note(isset($config['cache']) ? $config['cache'] : null);
         $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createTypeHandlers($config);
         return $mapper;
@@ -65,7 +70,7 @@ class Amiss
                 return new \Amiss\Sql\Relator\OneMany($manager);
             },
             'assoc'=>function($manager) {
-                return new \Amiss\Sql\Relator\Assoc($manager);
+                return new \Amiss\Sql\Relator\Association($manager);
             }
         );
     }

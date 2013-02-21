@@ -19,9 +19,6 @@ class Note extends \Amiss\Mapper\Base
     {
         parent::__construct();
         
-        if (!$parser)
-            $parser = new \Amiss\Note\Parser;
-        
         $this->parser = $parser;
         $this->cache = $cache;
     }
@@ -47,6 +44,10 @@ class Note extends \Amiss\Mapper\Base
     protected function loadMeta($class)
     {
         $ref = new \ReflectionClass($class);
+        
+        if (!$this->parser)
+            $this->parser = new \Amiss\Note\Parser;
+        
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
         $table = isset($classNotes['table']) ? $classNotes['table'] : $this->getDefaultTable($class);
@@ -136,6 +137,9 @@ class Note extends \Amiss\Mapper\Base
     protected function buildRelations($relationNotes)
     {
         $relations = array();
+        
+        if (!$this->parser)
+            $this->parser = new \Amiss\Note\Parser;
         
         foreach ($relationNotes as $name=>$info) {
             $relationNote = preg_split('/\s+/', ltrim($info['has']), 2, PREG_SPLIT_NO_EMPTY);

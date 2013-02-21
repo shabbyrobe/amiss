@@ -166,7 +166,8 @@ abstract class Base implements \Amiss\Mapper
         $x = preg_split('@[^A-z0-9\-\_]@', trim($type), 2);
         $id = strtolower($x[0]);
         
-        $h = null;
+        // must be false not null for isset tests
+        $h = false;
         if (isset($this->typeHandlers[$id])) {
             $h = $this->typeHandlers[$id];
             if (is_callable($h)) {

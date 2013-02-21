@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__.'/../src/Loader.php');
-Amiss\Loader::register();
+require_once(__DIR__.'/../src/Amiss.php');
+Amiss::register();
 
 date_default_timezone_set('Australia/Melbourne');
 

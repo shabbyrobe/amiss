@@ -190,15 +190,16 @@ class SqliteDataTestCase extends DataTestCase
     
     public function getMapper()
     {
-        $mapper = new \Amiss\Mapper\Note();
-        $mapper->typeSet = new \Amiss\Sql\TypeSet();
+        $mapper = \Amiss::createMapper(array(
+            'dbTimeZone'=>'UTC',
+        ));
         $mapper->objectNamespace = 'Amiss\Demo';
         return $mapper;
     }
     
     public function getManager()
     {
-        return new \Amiss\Sql\Manager($this->db, $this->mapper);
+        return \Amiss::createManager($this->db, $this->mapper);
     }
     
     public function setUp()

@@ -21,7 +21,7 @@ for ($i = 0; $i < $iter; $i++) {
 			$json = json_decode($out, true);
 			
 			if (!isset($result[$json['id']])) {
-				$result[$json['id']] = array(
+				$result[$json['id']] = (object)array(
 					'count'=>0,
 					'queries'=>0,
 					'timeTakenMs'=>0,
@@ -33,25 +33,25 @@ for ($i = 0; $i < $iter; $i++) {
 			}
 			
 			$current = &$result[$json['id']];
-			$current['count']++;
-			$current['queries'] = $json['queries'];
-			$current['timeTakenMs'] += $json['timeTakenMs'];
+			$current->count++;
+			$current->queries = $json['queries'];
+			$current->timeTakenMs += $json['timeTakenMs'];
 			
-			if ($current['timeTakenMsMin'] === null || $json['timeTakenMs'] < $current['timeTakenMsMin'])
-				$current['timeTakenMsMin'] = $json['timeTakenMs'];
-			if ($json['timeTakenMs'] > $current['timeTakenMsMax'])
-				$current['timeTakenMsMax'] = $json['timeTakenMs'];
+			if ($current->timeTakenMsMin === null || $json['timeTakenMs'] < $current->timeTakenMsMin)
+				$current->timeTakenMsMin = $json['timeTakenMs'];
+			if ($json['timeTakenMs'] > $current->timeTakenMsMax)
+				$current->timeTakenMsMax = $json['timeTakenMs'];
 			
-			$current['memUsed'] += $json['memUsed'];
-			$current['memPeak'] += $json['memPeak'];
+			$current->memUsed += $json['memUsed'];
+			$current->memPeak += $json['memPeak'];
 		}
 	}
 }
 
-foreach ($result as $id=>&$data) {
-	$data['timeTakenMs'] = $data['timeTakenMs'] / $data['count'];
-	$data['memUsed'] = $data['memUsed'] / $data['count'];
-	$data['memPeak'] = $data['memPeak'] / $data['count'];
+foreach ($result as $id=>$data) {
+	$data->timeTakenMs = $data->timeTakenMs / $data->count;
+	$data->memUsed = $data->memUsed / $data->count;
+	$data->memPeak = $data->memPeak / $data->count;
 }
 
 ?>

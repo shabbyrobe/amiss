@@ -27,7 +27,7 @@ class MappedFieldNameTest extends \DataTestCase
         
         $this->db = $this->getConnector();
         
-        $this->manager = new \Amiss\Sql\Manager($this->db);
+        $this->manager = \Amiss::createManager($this->db);
         $this->mapper = $this->manager->mapper;
         
         $this->mapper->objectNamespace = __NAMESPACE__;

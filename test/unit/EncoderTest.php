@@ -70,10 +70,10 @@ class EncoderTest extends \CustomTestCase
     
     public function dataForNested()
     {
-        $inner = new Sql\Type\Date();
+        $inner = new Sql\Type\Date('datetime', 'UTC', 'UTC');
         
         return array(new Type\Encoder('serialize', 'unserialize', $inner), array(
-            array(new \DateTime('2012-01-01'), 's:19:"2012-01-01 00:00:00";'),
+            array(new \DateTime('2012-01-01', new \DateTimeZone('UTC')), 's:19:"2012-01-01 00:00:00";'),
             array(null, null),
         ));
     }

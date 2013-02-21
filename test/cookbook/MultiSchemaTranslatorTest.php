@@ -17,7 +17,8 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
         $this->connector->exec("CREATE TABLE schema_one.multi_schema_translator_test_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");
         $this->connector->exec("CREATE TABLE schema_two.multi_schema_translator_test_two(id INTEGER PRIMARY KEY AUTOINCREMENT, twoName STRING)");
         
-        $mapper = $this->mapper = new \Amiss\Mapper\Note();
+        $this->manager = \Amiss::createManager($this->connector);
+        $mapper = $this->mapper = $this->manager->mapper;
         $this->mapper->defaultTableNameTranslator = function($name) use ($mapper) {
             if (preg_match('/One$/', $name)) {
                 $prefix = 'schema_one.';
@@ -29,7 +30,6 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
             return $prefix.$table;
         };
         $this->mapper->objectNamespace = __NAMESPACE__;
-        $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
     }
     
     public function testInsert()
