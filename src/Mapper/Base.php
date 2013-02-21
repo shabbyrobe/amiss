@@ -16,6 +16,8 @@ abstract class Base implements \Amiss\Mapper
     
     public $objectNamespace;
     
+    public $typeSet;
+    
     private $typeHandlerMap = array();
     
     public function __construct()
@@ -40,15 +42,6 @@ abstract class Base implements \Amiss\Mapper
         foreach ($types as $type) {
             $type = strtolower($type);
             $this->typeHandlers[$type] = $handler;
-        }
-        return $this;
-    }
-
-    public function addTypeSet($set)
-    {
-        foreach ($set as $typeSpec) {
-            list ($handler, $ids) = $typeSpec;
-            $this->addTypeHandler($handler, $ids);
         }
         return $this;
     }
@@ -166,7 +159,17 @@ abstract class Base implements \Amiss\Mapper
         $x = preg_split('@[^A-z0-9\-\_]@', trim($type), 2);
         $id = strtolower($x[0]);
         
-        return isset($this->typeHandlers[$id]) ? $this->typeHandlers[$id] : false;
+        $h = null;
+        if (!isset($this->typeHandlers[$id])) {
+            $method = 'get'.$id;
+            if ($this->typeSet && method_exists($this->typeSet, $method)) {
+                $h = $this->typeSet->$method($this);
+            }
+        }
+        else {
+            $h = $this->typeHandlers[$id];
+        }
+        return $h;
     }
     
     /**

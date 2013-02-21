@@ -39,6 +39,8 @@ class Manager
      */
     public $relators;
     
+    public $relatorSet;
+    
     /**
      * Configuration parameter can contain the following keys:
      * 
@@ -46,46 +48,25 @@ class Manager
      *      An instance of `Amiss\Mapper`. If not passed, the default
      *      of `Amiss\Mapper\Note` is used with the `Amiss\Sql\TypeSet` TypeSet.
      * 
-     *  - `relators`: 
-     *      An array of `Amiss\Sql\Relator` instances, keyed by the relator id.
-     *      If not passed, the default set of relators is used.
-     * 
      * @param Amiss\Sql\Connector|\PDO|array  Database connector
      * @param array  Configuration
      */
-    public function __construct($connector, $config=array())
+    public function __construct($connector, $mapper, $relatorSet=null)
     {
         if (is_array($connector)) 
             $connector = Connector::create($connector);
         
         $this->connector = $connector;
-        
-        if ($config instanceof Mapper)
-            $config = array('mapper'=>$config);
-        
-        if ($config instanceof Cache)
-            $config = array('cache'=>$config);
-        
-        $cache = null;
-        if (isset($config['cache']))
-            $cache = $config['cache'];
-        
-        if (!isset($config['mapper'])) {
-            $mapper = new Mapper\Note($cache);
-            $mapper->addTypeSet(new TypeSet());
-            $config = array('mapper'=>$mapper);
-        }
-        
-        $this->mapper = $config['mapper'];
-        
-        if (!isset($config['relators'])) {
-            $this->relators = array();
-            $this->relators['one'] = $this->relators['many'] = new Relator\OneMany($this);
-            $this->relators['assoc'] = new Relator\Association($this);
-        }
-        else {
-            $this->relators = $config['relators'];
-        }
+        $this->mapper = $mapper;
+        $this->relatorSet = $relatorSet;
+    }
+    
+    public static function createDefault($connector, $cache=null)
+    {
+        $mapper = new \Amiss\Mapper\Note($cache);
+        $mapper->typeSet = new TypeSet;
+        $manager = new static($connector, $mapper, new RelatorSet);
+        return $manager;
     }
     
     /**
@@ -270,8 +251,13 @@ class Manager
         
         $relation = $meta->relations[$relationName];
         
-        if (!isset($this->relators[$relation[0]]))
-            throw new Exception("Relator {$relation[0]} not found");
+        if (!isset($this->relators[$relation[0]])) {
+            $method = 'get'.$relation[0];
+            if ($this->relatorSet && method_exists($this->relatorSet, $method))
+                $this->relators[$relation[0]] = $this->relatorSet->$method($this);
+            else
+                throw new Exception("Relator {$relation[0]} not found");
+        }
         
         $query = null;
         if ($criteria) {

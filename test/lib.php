@@ -191,7 +191,7 @@ class SqliteDataTestCase extends DataTestCase
     public function getMapper()
     {
         $mapper = new \Amiss\Mapper\Note();
-        $mapper->addTypeSet(new \Amiss\Sql\TypeSet());
+        $mapper->typeSet = new \Amiss\Sql\TypeSet();
         $mapper->objectNamespace = 'Amiss\Demo';
         return $mapper;
     }
