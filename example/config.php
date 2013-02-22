@@ -6,6 +6,10 @@ require_once($amissPath.'/Amiss.php');
 
 Amiss::register();
 
+// temporary: preload classes to avoid autoloads distorting performance numbers
+Amiss::load('Amiss\Sql\Relator\OneMany');
+Amiss::load('Amiss\Sql\Relator\Association');
+
 function e($val) {
     return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
 }
