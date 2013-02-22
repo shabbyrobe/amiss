@@ -245,7 +245,7 @@ class Manager
         }
         
         $relator = $this->relators[$relation[0]];
-        if (is_callable($relator)) {
+        if (!$relator instanceof Relator) {
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
         
