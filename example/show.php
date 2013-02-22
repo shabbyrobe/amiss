@@ -27,6 +27,12 @@ if (isset($_GET['run'])) {
     exit;
 }
 
+if (isset($_GET['loop'])) {
+    for ($i=0; $i<$_GET['loop']-1; $i++) {
+        require($file);
+    }
+}
+
 ob_start();
 $startTime = microtime(true);
 $data = require($file);
