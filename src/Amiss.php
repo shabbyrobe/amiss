@@ -62,17 +62,16 @@ class Amiss
     
     public static function createRelators($config)
     {
-        return array(
-            'one'=>function($manager) {
-                return new \Amiss\Sql\Relator\OneMany($manager);
-            },
-            'many'=>function($manager) {
-                return new \Amiss\Sql\Relator\OneMany($manager);
-            },
-            'assoc'=>function($manager) {
-                return new \Amiss\Sql\Relator\Association($manager);
-            }
-        );
+        $relators = array();
+        $oneMany = function($manager) use (&$oneMany) {
+            return $oneMany = new \Amiss\Sql\Relator\OneMany($manager);
+        };
+        $relators['one'] = &$oneMany;
+        $relators['many'] = &$oneMany;
+        $relators['assoc'] = function($manager) {
+            return new \Amiss\Sql\Relator\Association($manager);
+        };
+        return $relators;
     }
     
     public static function createTypeHandlers($config)
