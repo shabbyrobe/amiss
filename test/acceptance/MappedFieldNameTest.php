@@ -87,10 +87,7 @@ class MappedFieldNameTest extends \DataTestCase
         $this->assertCount(2, $assocs);
     }
 
-    /**
-     * @group faulty
-     */
-    public function testGetManyRelatedWithImplicitOn()
+    public function testGetManyRelatedWithInverseOn()
     {
         $this->loadTestData();
         $obj = $this->manager->getById('MappedFieldNameRight', 5);
@@ -171,7 +168,7 @@ class MappedFieldNameRight
     public $trousers;
 
     /**
-     * @has many of=MappedFieldNameAssoc; inverse=left
+     * @has many of=MappedFieldNameAssoc; inverse=right
      */
     public $assocs = array();
 
