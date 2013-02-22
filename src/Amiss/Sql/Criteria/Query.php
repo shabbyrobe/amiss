@@ -49,7 +49,7 @@ class Query
         
         if ($namedParams) {
             foreach ($this->params as $k=>$v) {
-                if (!is_numeric($k) && strpos($k, ':')!==0) $k = ':'.$k;
+                if (!is_numeric($k) && $k[0] != ':') $k = ':'.$k;
                 if (is_array($v)) {
                     $inparms = array();
                     $cnt = 0;
