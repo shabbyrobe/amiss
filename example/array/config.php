@@ -34,7 +34,7 @@ $mapper = new Amiss\Mapper\Arrays(array(
 $mapper->objectNamespace = $namespace;
 
 $connector = new Amiss\Sql\Connector('sqlite::memory:');
-$manager = Amiss::createManager($connector, [
+$manager = Amiss::createSqlManager($connector, [
     'mapper'=>$mapper,
 ]);
 $connector->exec(file_get_contents($amissPath.'/../doc/demo/schema.sqlite.sql'));
