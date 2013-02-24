@@ -3,12 +3,15 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\TableBuilder;
 
-class TableBuilderCreateTest extends \CustomTestCase
+class TableBuilderCreateTest extends \DataTestCase
 {
     public function setUp()
     {
+        if ($this->getConnector()->engine != 'sqlite')
+            return $this->markTestSkipped();
+        
         parent::setUp();
-        $this->manager = \Amiss::createManager(new \Amiss\Sql\Connector('sqlite::memory:'));
+        $this->manager = \Amiss::createSqlManager(new \Amiss\Sql\Connector('sqlite::memory:'));
     }
     
     /**

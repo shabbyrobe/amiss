@@ -18,8 +18,8 @@ class MapperTypeHandlerAcceptanceTest extends \ActiveRecordDataTestCase
      */
     public function testCustomType()
     {
-        $this->createRecordMemoryDb(__NAMESPACE__.'\TestCustomFieldTypeRecord');
         $this->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
+        $this->createRecordMemoryDb(__NAMESPACE__.'\TestCustomFieldTypeRecord');
         
         $r = new TestCustomFieldTypeRecord;
         $r->yep1 = 'foo';
@@ -80,7 +80,9 @@ class TestTypeHandler implements \Amiss\Type\Handler
     }
     
     function createColumnType($engine)
-    {}
+    {
+        return "TEXT";
+    }
 }
 
 class TestCustomFieldTypeRecord extends \Amiss\Sql\ActiveRecord
@@ -111,5 +113,7 @@ class TestCustomFieldTypeHandler implements \Amiss\Type\Handler
     }
     
     function createColumnType($engine)
-    {}
+    {
+        return "TEXT";
+    }
 }

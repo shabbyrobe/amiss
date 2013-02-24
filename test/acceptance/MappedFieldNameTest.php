@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Acceptance;
 
 /**
@@ -27,7 +26,7 @@ class MappedFieldNameTest extends \DataTestCase
         
         $this->db = $this->getConnector();
         
-        $this->manager = \Amiss::createManager($this->db);
+        $this->manager = \Amiss::createSqlManager($this->db);
         $this->mapper = $this->manager->mapper;
         
         $this->mapper->objectNamespace = __NAMESPACE__;

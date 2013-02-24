@@ -5,7 +5,7 @@ use Amiss\Sql\TableBuilder,
     Amiss\Demo
 ;
 
-class TableBuilderTest extends \ActiveRecordDataTestCase
+class TableBuilderTest extends \DataTestCase
 {
     /**
      * @group tablebuilder
@@ -16,6 +16,11 @@ class TableBuilderTest extends \ActiveRecordDataTestCase
         $db = $this->getConnector();
         
         $manager = new \Amiss\Sql\Manager($db, new \Amiss\Mapper\Note);
+        $manager->mapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
+        $manager->mapper->objectNamespace = 'Amiss\Demo\Active';
+        $manager->mapper->defaultTableNameTranslator = function($name) {
+            return 'test_'.$name;
+        };
         
         \Amiss\Sql\ActiveRecord::_reset();
         \Amiss\Sql\ActiveRecord::setManager($manager);

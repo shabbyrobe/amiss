@@ -95,11 +95,22 @@ class TableBuilder
     {
         $engine = $this->manager->getConnector()->engine;
         
+        $fields = $this->meta->getFields();
+        
         $idx = array();
         if ($engine == 'mysql') {
             foreach ($this->meta->relations as $k=>$details) {
                 if ($details[0] == 'one' || $details[0] == 'many') {
+                    $relatedMeta = $this->manager->getMeta($details['of']);
+                    
                     $cols = array();
+                    if (isset($details['inverse'])) {
+                        $inverse = $relatedMeta->relations[$details['inverse']];
+                        $details['on'] = $inverse['on'];
+                        if (is_array($details['on']))
+                            $details['on'] = array_combine(array_values($inverse['on']), array_keys($inverse['on']));
+                    }
+                    
                     if (is_string($details['on'])) {
                         $cols[] = $details['on'];
                     }
@@ -109,6 +120,12 @@ class TableBuilder
                             $cols[] = $l;
                         }
                     }
+                    
+                    foreach ($cols as &$col) {
+                        $col = $fields[$col]['name'];
+                    }
+                    unset($col);
+                    
                     if ($details[0] == 'one')
                         $idx[] = "KEY `idx_$k` (`".implode('`, `', $cols).'`)';
                 }

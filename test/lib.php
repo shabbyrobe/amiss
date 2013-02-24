@@ -139,7 +139,7 @@ class DataTestCase extends CustomTestCase
             }
             elseif ($testEngine == 'mysql') {
                 $dbName = getenv('AMISS_TEST_DB_NAME') ?: 'amiss_test_'.md5(time());
-                $host = getenv('AMISS_TEST_DB_HOST');
+                $host = getenv('AMISS_TEST_DB_HOST') ?: '127.0.0.1';
                 $user = getenv('AMISS_TEST_DB_USER');
                 $password = getenv('AMISS_TEST_DB_PASSWORD');
                 
@@ -190,7 +190,7 @@ class SqliteDataTestCase extends DataTestCase
     
     public function getMapper()
     {
-        $mapper = \Amiss::createMapper(array(
+        $mapper = \Amiss::createSqlMapper(array(
             'dbTimeZone'=>'UTC',
         ));
         $mapper->objectNamespace = 'Amiss\Demo';
@@ -199,7 +199,7 @@ class SqliteDataTestCase extends DataTestCase
     
     public function getManager()
     {
-        return \Amiss::createManager($this->db, $this->mapper);
+        return \Amiss::createSqlManager($this->db, $this->mapper);
     }
     
     public function setUp()
