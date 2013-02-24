@@ -2,65 +2,79 @@
 class Amiss
 {
     public static $classes = array(
-        'Amiss\Cache'=>'Cache.php',
-        'Amiss\Exception'=>'Exception.php',
-        'Amiss\Loader'=>'Loader.php',
-        'Amiss\Mapper'=>'Mapper.php',
-        'Amiss\Mapper\Arrays'=>'Mapper/Arrays.php',
-        'Amiss\Mapper\Base'=>'Mapper/Base.php',
-        'Amiss\Mapper\Note'=>'Mapper/Note.php',
-        'Amiss\Meta'=>'Meta.php',
-        'Amiss\Mongo\Connector'=>'Mongo/Connector.php',
-        'Amiss\Mongo\Type\Date'=>'Mongo/Type/Date.php',
-        'Amiss\Mongo\Type\Embed'=>'Mongo/Type/Embed.php',
-        'Amiss\Mongo\Type\Id'=>'Mongo/Type/Id.php',
-        'Amiss\Name\CamelToUnderscore'=>'Name/CamelToUnderscore.php',
-        'Amiss\Name\Translator'=>'Name/Translator.php',
-        'Amiss\Note\Parser'=>'Note/Parser.php',
-        'Amiss\Sql\ActiveRecord'=>'Sql/ActiveRecord.php',
-        'Amiss\Sql\Connector'=>'Sql/Connector.php',
-        'Amiss\Sql\Criteria\Query'=>'Sql/Criteria/Query.php',
-        'Amiss\Sql\Criteria\Select'=>'Sql/Criteria/Select.php',
-        'Amiss\Sql\Criteria\Update'=>'Sql/Criteria/Update.php',
-        'Amiss\Sql\Manager'=>'Sql/Manager.php',
-        'Amiss\Sql\Relator'=>'Sql/Relator.php',
-        'Amiss\Sql\Relator\Association'=>'Sql/Relator/Association.php',
-        'Amiss\Sql\Relator\Base'=>'Sql/Relator/Base.php',
-        'Amiss\Sql\Relator\OneMany'=>'Sql/Relator/OneMany.php',
-        'Amiss\Sql\TableBuilder'=>'Sql/TableBuilder.php',
-        'Amiss\Sql\Type\Autoinc'=>'Sql/Type/Autoinc.php',
-        'Amiss\Sql\Type\Bool'=>'Sql/Type/Bool.php',
-        'Amiss\Sql\Type\Date'=>'Sql/Type/Date.php',
-        'Amiss\Type\AutoGuid'=>'Type/AutoGuid.php',
-        'Amiss\Type\Embed'=>'Type/Embed.php',
-        'Amiss\Type\Encoder'=>'Type/Encoder.php',
-        'Amiss\Type\Handler'=>'Type/Handler.php',
-        'Amiss\Type\Identity'=>'Type/Identity.php',
+        'Amiss\Cache'=>'Amiss/Cache.php',
+        'Amiss\Exception'=>'Amiss/Exception.php',
+        'Amiss\Extension'=>'Amiss/Extension.php',
+        'Amiss\Mapper'=>'Amiss/Mapper.php',
+        'Amiss\Mapper\Arrays'=>'Amiss/Mapper/Arrays.php',
+        'Amiss\Mapper\Base'=>'Amiss/Mapper/Base.php',
+        'Amiss\Mapper\Note'=>'Amiss/Mapper/Note.php',
+        'Amiss\Meta'=>'Amiss/Meta.php',
+        'Amiss\Mongo\Connector'=>'Amiss/Mongo/Connector.php',
+        'Amiss\Mongo\TypeSet'=>'Amiss/Mongo/TypeSet.php',
+        'Amiss\Mongo\Type\Date'=>'Amiss/Mongo/Type/Date.php',
+        'Amiss\Mongo\Type\Id'=>'Amiss/Mongo/Type/Id.php',
+        'Amiss\Name\CamelToUnderscore'=>'Amiss/Name/CamelToUnderscore.php',
+        'Amiss\Name\Translator'=>'Amiss/Name/Translator.php',
+        'Amiss\Note\Parser'=>'Amiss/Note/Parser.php',
+        'Amiss\Sql\ActiveRecord'=>'Amiss/Sql/ActiveRecord.php',
+        'Amiss\Sql\Connector'=>'Amiss/Sql/Connector.php',
+        'Amiss\Sql\Criteria\Query'=>'Amiss/Sql/Criteria/Query.php',
+        'Amiss\Sql\Criteria\Select'=>'Amiss/Sql/Criteria/Select.php',
+        'Amiss\Sql\Criteria\Update'=>'Amiss/Sql/Criteria/Update.php',
+        'Amiss\Sql\Manager'=>'Amiss/Sql/Manager.php',
+        'Amiss\Sql\Relator'=>'Amiss/Sql/Relator.php',
+        'Amiss\Sql\Relator\Association'=>'Amiss/Sql/Relator/Association.php',
+        'Amiss\Sql\Relator\Base'=>'Amiss/Sql/Relator/Base.php',
+        'Amiss\Sql\Relator\OneMany'=>'Amiss/Sql/Relator/OneMany.php',
+        'Amiss\Sql\TableBuilder'=>'Amiss/Sql/TableBuilder.php',
+        'Amiss\Sql\TypeSet'=>'Amiss/Sql/TypeSet.php',
+        'Amiss\Sql\Type\Autoinc'=>'Amiss/Sql/Type/Autoinc.php',
+        'Amiss\Sql\Type\Bool'=>'Amiss/Sql/Type/Bool.php',
+        'Amiss\Sql\Type\Date'=>'Amiss/Sql/Type/Date.php',
+        'Amiss\Type\AutoGuid'=>'Amiss/Type/AutoGuid.php',
+        'Amiss\Type\Embed'=>'Amiss/Type/Embed.php',
+        'Amiss\Type\Encoder'=>'Amiss/Type/Encoder.php',
+        'Amiss\Type\Handler'=>'Amiss/Type/Handler.php',
+        'Amiss\Type\Identity'=>'Amiss/Type/Identity.php',
     );
     
-    public static function createManager($connector, $config=null)
+    public static function register()
+    {
+        spl_autoload_register(array(__CLASS__, 'load'));
+    }
+
+    public static function load($class)
+    {
+        if (isset(static::$classes[$class])) {
+            require __DIR__.'/'.static::$classes[$class];
+            return true;
+        }
+    }
+    
+    public static function createSqlManager($connector, $config=null)
     {
         if ($config instanceof \Amiss\Mapper)
             $config = array('mapper'=>$config);
         if ($config === null)
             $config = array();
         
-        $manager = new \Amiss\Sql\Manager($connector, isset($config['mapper']) ? $config['mapper'] : static::createMapper($config));
-        $manager->relators = isset($config['relators']) ? $config['relators'] : static::createRelators($config);
+        $manager = new \Amiss\Sql\Manager($connector, isset($config['mapper']) ? $config['mapper'] : static::createSqlMapper($config));
+        $manager->relators = isset($config['relators']) ? $config['relators'] : static::createSqlRelators($config);
         return $manager;
     }
     
-    public static function createMapper($config=null)
+    public static function createSqlMapper($config=null)
     {
         if ($config === null)
             $config = array();
         
         $mapper = new \Amiss\Mapper\Note(isset($config['cache']) ? $config['cache'] : null);
-        $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createTypeHandlers($config);
+        $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createSqlTypeHandlers($config);
         return $mapper;
     }
     
-    public static function createRelators($config)
+    public static function createSqlRelators($config)
     {
         $relators = array();
         $oneMany = function($manager) use (&$oneMany) {
@@ -74,7 +88,7 @@ class Amiss
         return $relators;
     }
     
-    public static function createTypeHandlers($config)
+    public static function createSqlTypeHandlers($config)
     {
         $handlers = array();
         
@@ -91,7 +105,7 @@ class Amiss
         }
         else {
             $handlers['date'] = $handlers['datetime'] = $handlers['timestamp'] = $handlers['unixtime'] = function() {
-                throw new \UnexpectedValueException("Please pass dbTimeZone (and optionally appTimeZone) with your \$config when using Amiss::createManager(), Amiss::createMapper() or Amiss::createTypeHandlers()");
+                throw new \UnexpectedValueException("Please pass dbTimeZone (and optionally appTimeZone) with your \$config when using Amiss::createSqlManager(), Amiss::createSqlMapper() or Amiss::createSqlTypeHandlers()");
             };
         }
         
@@ -102,18 +116,5 @@ class Amiss
         $handlers['autoinc'] = new \Amiss\Sql\Type\Autoinc();
         
         return $handlers;
-    }
-    
-    public static function register()
-    {
-        spl_autoload_register(array(__CLASS__, 'load'));
-    }
-
-    public static function load($class)
-    {
-        if (isset(static::$classes[$class])) {
-            require __DIR__.'/Amiss/'.static::$classes[$class];
-            return true;
-        }
     }
 }
