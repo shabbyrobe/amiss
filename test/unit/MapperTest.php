@@ -20,7 +20,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('fromObject');
-        $mapper->fromObjects('foo', ['a', 'b'], null);
+        $mapper->fromObjects('foo', array('a', 'b'), null);
     }
     
     /**
@@ -46,7 +46,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('toObject');
-        $mapper->toObjects('foo', ['a', 'b'], null);
+        $mapper->toObjects('foo', array('a', 'b'), null);
     }
     
     /**

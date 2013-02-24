@@ -39,7 +39,7 @@ class EmbedTest extends \SqliteDataTestCase
         $meta = $this->mapper->getMeta('TestEmbedOneParent');
         $field = $meta->getField('child');
         $result = $embed->prepareValueForDb($parent->child, $parent, $field);
-        $expected = ['pants'=>'yep'];
+        $expected = array('pants'=>'yep');
 
         $this->assertEquals($expected, $result);
     }
@@ -59,7 +59,7 @@ class EmbedTest extends \SqliteDataTestCase
         $meta = $this->mapper->getMeta('TestEmbedManyParent');
         $field = $meta->getField('children');
         $result = $embed->prepareValueForDb($parent->children, $parent, $field);
-        $expected = [['pants'=>'yep'], ['pants'=>'yep2']];
+        $expected = array(array('pants'=>'yep'), array('pants'=>'yep2'));
 
         $this->assertEquals($expected, $result);
     }
@@ -74,8 +74,8 @@ class EmbedTest extends \SqliteDataTestCase
 
         $meta = $this->mapper->getMeta('TestEmbedOneParent');
         $field = $meta->getField('child');
-        $value = ['pants'=>'yep'];
-        $result = $embed->handleValueFromDb($value, $parent, $field, []);
+        $value = array('pants'=>'yep');
+        $result = $embed->handleValueFromDb($value, $parent, $field, array());
 
         $this->assertEquals($expected, $result);
     }
@@ -94,8 +94,8 @@ class EmbedTest extends \SqliteDataTestCase
 
         $meta = $this->mapper->getMeta('TestEmbedManyParent');
         $field = $meta->getField('children');
-        $value = [['pants'=>'yep'], ['pants'=>'yep2']];
-        $result = $embed->handleValueFromDb($value, $parent, $field, []);
+        $value = array(array('pants'=>'yep'), array('pants'=>'yep2'));
+        $result = $embed->handleValueFromDb($value, $parent, $field, array());
 
         $this->assertEquals($parent->children, $result);
     }
@@ -154,7 +154,7 @@ class TestEmbedManyParent
      * @field
      * @type embed TestEmbedChild[]
      */
-    public $children = [];
+    public $children = array();
 }
 
 class TestEmbedChild

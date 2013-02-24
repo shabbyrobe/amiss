@@ -160,6 +160,7 @@ using a wrapper function:
 
     <?php
     namespace Amiss\Demo;
+    
     class Artist extends \Amiss\Sql\ActiveRecord
     {
         public $artistId;
@@ -167,11 +168,10 @@ using a wrapper function:
         public $artistTypeId;
         
         private $artistType;
-
-        public static $relations = array(
-            'artistType'=>array('one'=>'ArtistType', 'on'=>'artistTypeId'),
-        );
         
+        /**
+         * @has one of=ArtistType; on=artistTypeId
+         */
         public function getArtistType()
         {
             if ($this->artistType===null && $this->artistTypeId) {

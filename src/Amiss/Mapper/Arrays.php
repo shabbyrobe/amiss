@@ -53,8 +53,12 @@ class Arrays extends Base
                 $array['primary'] = array($array['primary']);
             
             foreach ($array['primary'] as $v) {
-                if (!isset($array['fields'][$v]) || !isset($array['fields'][$v]['type']))
-                    $array['fields'][$v] = array('type'=>$this->defaultPrimaryType);
+                if (!isset($array['fields'][$v])) {
+                    $array['fields'][$v] = array();
+                }
+                if (!isset($array['fields'][$v]['type'])) {
+                    $array['fields'][$v]['type'] = $this->defaultPrimaryType;
+                }
             }
         }
         
