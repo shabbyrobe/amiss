@@ -1,13 +1,13 @@
-<phpunit bootstrap="config.php">
+<phpunit bootstrap="test/config.php">
 <testsuites>
   <testsuite name="Unit">
-    <directory>unit</directory>
+    <directory>test/unit</directory>
   </testsuite>
   <testsuite name="Acceptance">
-    <directory>acceptance</directory>
+    <directory>test/acceptance</directory>
   </testsuite>
   <testsuite name="Cookbook">
-    <directory>cookbook</directory>
+    <directory>test/cookbook</directory>
   </testsuite>
 </testsuites>
 </phpunit>
