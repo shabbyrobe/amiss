@@ -2,7 +2,7 @@
 
 require_once(__DIR__.'/../../src/Loader.php');
 require_once(__DIR__.'/../lib/functions.php');
-Amiss\Loader::register();
+Amiss::register();
 
 $usage = "amiss create-classes [OPTIONS] OUTDIR
 
