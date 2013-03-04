@@ -1,8 +1,8 @@
 Helpers
 =======
 
-``Amiss\Sql\Manager`` has several helper methods that can take some of the pain out of complex relation
-gymnastics.
+``Amiss\Sql\Manager`` has several helper methods that can take some of the pain out of complex 
+relation gymnastics.
 
 .. _helpers-get-children:
 

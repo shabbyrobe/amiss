@@ -1,25 +1,6 @@
 Amiss PHP Data Mapper
 =====================
 
-.. phptestsetup::
-    
-    <?php
-    $hello = "yep";
-
-.. phptestcode::
-
-    <?php
-    echo $hello;
-
-.. phptestoutput::
-
-    yep
-    
-.. phptestcleanup::
-
-    <?php
-    touch("/tmp/foo");
-
 .. only:: not latex
 
     .. include:: preamble.rst.inc

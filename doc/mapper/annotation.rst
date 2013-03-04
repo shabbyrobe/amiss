@@ -1,26 +1,28 @@
 Annotation Mapper
 =================
 
-`Amiss\Sql\Manager` uses ``Amiss\Mapper\Note`` with certain :doc:`types` preconfigured by default.
-This should be used as a default starting point. You can access the mapper for further configuration
-after you create the manager like so:
+``Amiss::createSqlManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types` preconfigured by 
+default. This should be used as a default starting point. You can access the mapper for further 
+configuration after you create the manager like so:
 
 .. code-block:: php
 
     <?php
-    $manager = new \Amiss\Sql\Manager($db, $cache);
+    $manager = \Amiss::createSqlManager($db, array('cache'=>$cache));
     $mapper = $manager->mapper;
 
+This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance already
+assigned. The mapper will have the following :doc:`types` pre-configured:
 
-This is the equivalent of the following:
+- autoinc
+- bool
 
-.. code-block:: php
+If you set the ``dbTimeZone`` and ``appTimeZone`` keys in the config array, you will also get type
+handlers for:
 
-    <?php
-    $mapper = new \Amiss\Mapper\Note($cache);
-    $mapper->addTypeSet(new \Amiss\Sql\TypeSet);
-    $manager = new \Amiss\Sql\Manager($db, $mapper);
-
+- datetime
+- date
+- unixtime
 
 See :doc:`common` and :doc:`types` for more information on how to tweak Amiss' default mapping
 behaviour.

@@ -4,28 +4,23 @@ Configuring
 Autoloading
 -----------
 
-Amiss provides a very simple autoloader that should be compatible with well-written autoloaders from
-other projects:
+Amiss follows the :term:`PSR-0` standard and should work with any :term:`PSR-0` compatible
+autoloader, but it also comes with its own classmap-based autoloader which you can use if you'd
+prefer:
 
 .. code-block:: php
 
     <?php
-    $amissPath = '/path/to/amiss';
-    require_once($amissPath.'/Loader.php');
-    Amiss\Loader::register();
+    $amissPath = '/path/to/amiss/src';
+    require_once $amissPath.'/Amiss.php';
+    Amiss::register();
 
 
-Amiss is :term:`PSR-0` compliant, so you can use any loader that supports that standard.
-
-
-Manager
--------
+Basics
+------
 
 The main class Amiss requires to do its business is ``Amiss\Sql\Manager``. It requires a way to
 connect to the database and a class that can map your objects to the database and back.
-
-The **mapper** must implement the ``Amiss\Mapper`` interface. The standard mapper recommended by
-Amiss is ``Amiss\Mapper\Note``, which allows the use of simple annotations to declare mappings.
 
 .. warning:: 
 
@@ -43,10 +38,75 @@ Creating an ``Amiss\Sql\Manager`` with the default mapping options is simple:
         'user'=>'user', 
         'password'=>'password',
     );
-    $manager = new Amiss\Sql\Manager($db);
+    $manager = new \Amiss::createSqlManager($db);
+
+
+This will also create an instance of ``Amiss\Mapper\Note`` with a default set of :doc:`mapper/types`
+and assign it to the manager. If you wish to use your own mapper, you can pass it as the second
+argument to ``createSqlManager()``. The  mapper must implement the ``Amiss\Mapper`` interface.
+
+.. code-block:: php
+
+    <?php
+    $mapper = new \Amiss\Mapper\Arrays();
+    $manager = \Amiss::createSqlManager($db, $mapper);
+
+
+If the default options are not desirable, you can create an instance of ``Amiss\Sql\Manager``
+yourself by hand, though it will not come with any :ref:`relators` unless you add them:
+
+.. code-block:: php
+
+    <?php
+    $manager = new \Amiss\Sql\Manager($db);
+    $manager->relators = Amiss::createSqlRelators();
 
 
 For more information on customising the mapping, please read the :doc:`mapper/mapping` section.
+
+
+Options
+-------
+
+``Amiss::createSqlManager()`` accepts either an instance of ``Amiss\Mapper`` or an array of 
+configuration options as the second parameter. The following options are supported:
+
+.. py:attribute:: mapper
+
+    An instance of ``Amiss\Mapper`` to use instead of the default mapper.
+    
+.. py:attribute:: cache
+
+    An instance of ``Amiss\Cache`` to be used if the default ``mapper`` is used.
+
+.. py:attribute:: typeHandlers
+
+    If the default ``mapper`` is used, this can contain an array of ``Amiss\Type\Handler`` instances
+    indexed by a string indicating the type name. Used instead of the default set of type handlers
+    produced by ``Amiss::createSqlTypeHandlers``.
+
+.. py:attribute:: relators
+
+    An array of ``Amiss\Sql\Relator`` instances indexed by a string indicating the relation type.
+    Used instead of the default set of relators produced by ``Amiss::createSqlRelators``.
+
+
+``Amiss::createSqlTypeHandlers`` can returns handlers for converting database dates to PHP
+``DateTime`` objects. For these conversions to happen consistently and reliably, both the
+database timezone and the application timezone need to be specified in the config otherwise the
+handlers will not be created:
+
+.. py:attribute:: dbTimeZone
+
+    The timezone used by the database. Can be a string or an instance of ``DateTimeZone``.
+    
+    See ``SELECT @@global.time_zone, @@session.time_zone;`` and
+    <https://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html>.
+
+.. py:attribute:: appTimeZone
+
+    The timezone used by the application. Can be a string or an instance of ``DateTimeZone``. To
+    pass the default, assign the value of ``date_default_timezone_get()``.
 
 
 Database Connections
