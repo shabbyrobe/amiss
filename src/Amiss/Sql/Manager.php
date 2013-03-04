@@ -40,14 +40,8 @@ class Manager
     public $relators;
     
     /**
-     * Configuration parameter can contain the following keys:
-     * 
-     *  - `mapper`
-     *      An instance of `Amiss\Mapper`. If not passed, the default
-     *      of `Amiss\Mapper\Note` is used with the `Amiss\Sql\TypeSet` TypeSet.
-     * 
      * @param Amiss\Sql\Connector|\PDO|array  Database connector
-     * @param array  Configuration
+     * @param Amiss\Mapper
      */
     public function __construct($connector, $mapper)
     {

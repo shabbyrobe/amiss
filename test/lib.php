@@ -100,9 +100,9 @@ class DataTestCase extends CustomTestCase
         $info = $this->getConnectionInfo();
         if ($info['engine'] == 'mysql') {
             $result = $this->getConnector()->exec("CREATE DATABASE IF NOT EXISTS `{$info['dbName']}`");
-            self::$connectionInfo['statements'] = [
+            self::$connectionInfo['statements'] = (
                 "USE `{$info['dbName']}`"
-            ];
+            );
         }
     }
     
@@ -113,15 +113,15 @@ class DataTestCase extends CustomTestCase
         $info = $this->getConnectionInfo();
         if ($info['engine'] == 'mysql') {
             $this->getConnector()->exec("DROP DATABASE IF EXISTS `{$info['dbName']}`");
-            self::$connectionInfo['statements'] = [];
+            self::$connectionInfo['statements'] = array();
         }
     }
     
     public function getConnector()
     {
         $connection = $this->getConnectionInfo();
-        $statements = isset($connection['statements']) ? $connection['statements'] : [];
-        return new \Amiss\Sql\Connector($connection['dsn'], $connection['user'], $connection['password'], [], $statements);
+        $statements = isset($connection['statements']) ? $connection['statements'] : array();
+        return new \Amiss\Sql\Connector($connection['dsn'], $connection['user'], $connection['password'], array(), $statements);
     }
     
     public function getConnectionInfo()
@@ -130,12 +130,12 @@ class DataTestCase extends CustomTestCase
             $testEngine = getenv('AMISS_TEST_DB_ENGINE') ?: 'sqlite';
             
             if ($testEngine == 'sqlite') {
-                self::$connectionInfo = [
+                self::$connectionInfo = array(
                     'engine'=>'sqlite',
                     'dsn'=>'sqlite::memory:',
                     'user'=>null,
                     'password'=>null,
-                ];
+                );
             }
             elseif ($testEngine == 'mysql') {
                 $dbName = getenv('AMISS_TEST_DB_NAME') ?: 'amiss_test_'.md5(time());
@@ -150,14 +150,14 @@ class DataTestCase extends CustomTestCase
                 
                 $dbName = str_replace('`', '', $dbName);
                 
-                self::$connectionInfo = [
+                self::$connectionInfo = array(
                     'engine'=>'mysql',
                     'dsn'=>"mysql:host=$host",
                     'host'=>$host,
                     'user'=>$user,
                     'password'=>$password,
                     'dbName'=>$dbName,
-                ];
+                );
             }
             else {
                 echo "Unknown test engine $testEngine\n";
@@ -169,14 +169,15 @@ class DataTestCase extends CustomTestCase
     
     public function getEngine()
     {
-        return $this->getConnectionInfo()['engine'];
+        $info = $this->getConnectionInfo();
+        return $info['engine'];
     }
     
     public function readSqlFile($name)
     {
-        $name = strtr($name, [
+        $name = strtr($name, array(
             '{engine}'=>$this->getEngine(),
-        ]);
+        ));
         return file_get_contents($name);
     }
 }
