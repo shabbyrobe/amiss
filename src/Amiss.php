@@ -28,7 +28,6 @@ class Amiss
         'Amiss\Sql\Relator\Base'=>'Amiss/Sql/Relator/Base.php',
         'Amiss\Sql\Relator\OneMany'=>'Amiss/Sql/Relator/OneMany.php',
         'Amiss\Sql\TableBuilder'=>'Amiss/Sql/TableBuilder.php',
-        'Amiss\Sql\TypeSet'=>'Amiss/Sql/TypeSet.php',
         'Amiss\Sql\Type\Autoinc'=>'Amiss/Sql/Type/Autoinc.php',
         'Amiss\Sql\Type\Bool'=>'Amiss/Sql/Type/Bool.php',
         'Amiss\Sql\Type\Date'=>'Amiss/Sql/Type/Date.php',
@@ -74,8 +73,11 @@ class Amiss
         return $mapper;
     }
     
-    public static function createSqlRelators($config)
+    public static function createSqlRelators($config=null)
     {
+        if ($config == null)
+            $config = array();
+        
         $relators = array();
         $oneMany = function($manager) use (&$oneMany) {
             return $oneMany = new \Amiss\Sql\Relator\OneMany($manager);
@@ -88,8 +90,11 @@ class Amiss
         return $relators;
     }
     
-    public static function createSqlTypeHandlers($config)
+    public static function createSqlTypeHandlers($config=null)
     {
+        if ($config == null)
+            $config = array();
+        
         $handlers = array();
         
         if (isset($config['dbTimeZone'])) {
