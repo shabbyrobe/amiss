@@ -144,7 +144,11 @@ class Note extends \Amiss\Mapper\Base
         foreach ($relationNotes as $name=>$info) {
             $relationNote = preg_split('/\s+/', ltrim($info['has']), 2, PREG_SPLIT_NO_EMPTY);
             
-            $relation = $this->parser->parseComplexValue($relationNote[1]);
+            $relation = isset($relationNote[1]) 
+            	? $this->parser->parseComplexValue($relationNote[1])
+            	: array()
+            ;
+            
             array_unshift($relation, $relationNote[0]);
             
             if (isset($info['getter']))
