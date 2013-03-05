@@ -130,7 +130,7 @@ abstract class Base implements \Amiss\Mapper
     
     public function populateObject($meta, $object, $input)
     {
-        $defaultType = $meta->getDefaultFieldType();
+        $defaultType = null;
         
         $fields = $meta->getFields();
         $map = $meta->getColumnToPropertyMap();
@@ -140,7 +140,13 @@ abstract class Base implements \Amiss\Mapper
             
             $prop = $map[$col];
             $field = $fields[$prop];
-            $type = $field['type'] ?: $defaultType;
+            $type = $field['type'];
+            if (!$type) {
+            	if (!$defaultType)
+            		$defaultType = $meta->getDefaultFieldType();
+            	
+            	$type = $defaultType;
+            }	
             
             if ($type) {
                 if (!isset($this->typeHandlerMap[$type])) {
