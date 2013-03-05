@@ -156,4 +156,21 @@ abstract class ActiveRecord
             $this->$name = null;
         }
     }
+    
+    /**
+     * @ignore
+     */
+    public function __set($name, $value)
+    {
+        $meta = static::getMeta();
+        
+        $fields = $meta->getFields();
+        if (!isset($fields[$name])) {
+            throw new \BadMethodCallException("Unknown property $name on class ".get_class($this));
+        }
+        else {
+            // add the property to stop this from being called again
+            $this->$name = $value;
+        }
+    }    	
 }
