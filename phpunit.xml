@@ -1,4 +1,11 @@
-<phpunit bootstrap="test/config.php">
+<phpunit bootstrap="test/config.php"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         strict="true" 
+         verbose="true">
 <testsuites>
   <testsuite name="Unit">
     <directory>test/unit</directory>
