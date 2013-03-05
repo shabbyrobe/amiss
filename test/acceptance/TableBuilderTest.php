@@ -32,5 +32,7 @@ class TableBuilderTest extends \DataTestCase
         $er->name = 'foo bar';
         $er->slug = 'foobar';
         $er->save();
+        
+        $this->assertTrue(true);
     }
 }

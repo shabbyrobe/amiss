@@ -238,13 +238,4 @@ class ArrayMapperTest extends \CustomTestCase
         
         $this->assertEquals($expected, $meta->getFields());
     }
-    
-    /**
-     * @group unit
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function test()
-    {
-        
-    }
 }

@@ -1,11 +1,13 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+/**
+ * @group unit
+ */
 class MetaTest extends \CustomTestCase
 {
     /**
      * @covers Amiss\Meta::__construct
-     * @group unit
      */
     public function testCreateMeta()
     {
@@ -28,7 +30,6 @@ class MetaTest extends \CustomTestCase
     
     /**
      * @covers Amiss\Meta::getFields
-     * @group unit
      */
     public function testGetFieldInheritance()
     {
@@ -62,7 +63,6 @@ class MetaTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueSingleCol()
@@ -76,7 +76,6 @@ class MetaTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueMultiCol()
@@ -90,7 +89,6 @@ class MetaTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueMultiReturnsNullWhenNoValues()
@@ -104,7 +102,6 @@ class MetaTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueMultiWhenOneValueIsNull()
@@ -115,5 +112,151 @@ class MetaTest extends \CustomTestCase
         
         $obj = (object)array('a'=>null, 'b'=>2, 'c'=>3);
         $this->assertEquals(array('a'=>null, 'b'=>2), $meta->getPrimaryValue($obj));
+    }
+
+    /**
+     * @covers Amiss\Meta::getValue
+     */
+    public function testGetPropertyValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array(),
+    		),
+    	));
+    	
+    	$obj = (object)array('a'=>'foo');
+    	$result = $meta->getValue($obj, 'a');
+    	$this->assertEquals('foo', $result);
+    }
+    
+    /**
+     * @covers Amiss\Meta::getValue
+     */
+    public function testGetUnknownPropertyValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array(),
+    		),
+    	));
+    	
+    	$obj = (object)array('a'=>'foo');
+    	
+    	$this->setExpectedException('PHPUnit_Framework_Error_Notice');
+    	$result = $meta->getValue($obj, 'b');
+    }
+    
+    /**
+     * @covers Amiss\Meta::getValue
+     */
+    public function testGetGetterValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array('getter'=>'getTest'),
+    		),
+    	));
+    	
+    	$mock = $this->getMockBuilder('stdClass')
+    		->setMethods(array('getTest'))
+    		->getMock()
+    	;
+    	$mock->expects($this->once())->method('getTest');
+    	
+    	$result = $meta->getValue($mock, 'a');
+    }
+    
+    /**
+     * @covers Amiss\Meta::getValue
+     */
+    public function testGetUnknownGetterValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array('getter'=>'getDoesntExist'),
+    		),
+    	));
+    	
+    	$mock = $this->getMockBuilder('stdClass')
+    		->setMethods(array('getTest'))
+    		->getMock()
+    	;
+    	$mock->expects($this->never())->method('getTest');
+    	
+    	$this->setExpectedException('PHPUnit_Framework_Error_Warning');
+    	$result = $meta->getValue($mock, 'a');
+    }
+    
+    /**
+     * @covers Amiss\Meta::setValue
+     */
+    public function testSetValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array(),
+    		),
+    	));
+    	
+    	$object = (object) array('a'=>null);
+    	$meta->setValue($object, 'a', 'foo');
+    	$this->assertEquals($object->a, 'foo');
+    }
+    
+    /**
+     * @covers Amiss\Meta::setValue
+     */
+    public function testSetUnknownValue()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array(),
+    		),
+    	));
+    	
+    	$object = (object) array('a'=>null);
+    	$meta->setValue($object, 'doesntExist', 'foo');
+    	$this->assertEquals($object->doesntExist, 'foo');
+    }
+
+    /**
+     * @covers Amiss\Meta::setValue
+     */
+    public function testSetValueWithSetter()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array('setter'=>'setValue'),
+    		),
+    	));
+    	
+    	$object = $this->getMockBuilder('stdClass')
+    		->setMethods(array('setValue'))
+    		->getMock()
+    	;
+    	$object->expects($this->once())->method('setValue');
+    	$meta->setValue($object, 'a', 'foo');
+    }
+    
+    /**
+     * @covers Amiss\Meta::setValue
+     */
+    public function testSetValueWithUnknownSetter()
+    {
+    	$meta = new \Amiss\Meta('stdClass', 'std_class', array(
+    		'fields'=>array(
+    			'a'=>array('setter'=>'setDoesntExist'),
+    		),
+    	));
+    	
+    	$object = $this->getMockBuilder('stdClass')
+    		->setMethods(array('setValue'))
+    		->getMock()
+    	;
+    	$object->expects($this->never())->method('setValue');
+    	
+    	$this->setExpectedException('PHPUnit_Framework_Error_Warning');
+    	$meta->setValue($object, 'a', 'foo');
     }
 }

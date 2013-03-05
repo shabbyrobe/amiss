@@ -124,8 +124,18 @@ class Meta
     function getValue($object, $property)
     {
         $field = $this->getField($property);
-        $value = !isset($field['getter']) ? $object->{$p} : call_user_func(array($object, $field['getter']));
+        $value = !isset($field['getter']) ? $object->{$property} : call_user_func(array($object, $field['getter']));
         return $value;
+    }
+    
+    function setValue($object, $property, $value)
+    {
+    	$field = $this->getField($property);
+    	if (!isset($field['setter']))
+			$object->{$property} = $value;
+		else
+			call_user_func(array($object, $field['setter']), $value);
+		return $this;
     }
     
     function __sleep()
