@@ -552,7 +552,7 @@ class Manager
         $meta = $this->getMeta($class);
         $primary = $meta->primary;
         if (!$primary)
-            throw new Exception("Can't delete retrieve {$meta->class} by primary - none defined.");
+            throw new Exception("Can't use {$meta->class} by primary - none defined.");
         
         if (!is_array($id)) $id = array($id);
         $where = array();
