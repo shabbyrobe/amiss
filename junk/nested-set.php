@@ -6,6 +6,7 @@ create_classes();
 
 $manager = Amiss::createSqlManager(array(
 	'host'=>'127.0.0.1',
+	'db'=>'atp_v2_import_9',
 	'user'=>'root',
 	'password'=>'qwerty',
 ));
@@ -37,9 +38,61 @@ function create_classes()
 {
 	class NestedSetManager
 	{
+		/**
+		 * @var Amiss\Sql\Manager
+		 */
+		public $manager;
+		
 		public function __construct($manager)
 		{
 			$this->manager = $manager;
+		}
+		
+		public function renumber($node)
+		{
+			$conn = clone $this->manager->connector;
+			
+			if ($conn->engine == 'mysql')
+				$conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+			
+			$rootId = $this->getRootId($class);
+			$conn->beginTransaction();
+			
+			if ($conn->engine == 'mysql')
+				$conn->exec("SELECT * FROM `{$meta->table}` FOR UPDATE");
+			
+			$field = $meta->getField($meta->primary[0])->name;
+			
+			$rebuildTree = function($node, $left=1) use (&$rebuildTree) {
+				$right = $left+1;
+				
+				$childIds = $this->getChildIds($node);
+				
+				foreach ($childIds as $child) {
+					$right = $this->rebuildTree($child, $right);
+				}
+				if ($this->{$this->getIdField()} == null && $this->{$this->getParentIdField()} == $node) {
+					$this->{$this->getTreeLeftField()} = $right;
+					$this->{$this->getTreeRightField()} = $right + 1;
+					$right += 2;
+				}
+				
+				if ($this->{$this->getIdField()} != null && $this->{$this->getIdField()} == $node) {
+					$this->{$this->getTreeLeftField()} = $left;
+					$this->{$this->getTreeRightField()} = $right;
+					//echo $this->{$this->getIdField()}."|".$node."|".$left;
+				}
+				else {
+					$this->updateNode($node, $left, $right);
+				}
+				return $right+1;
+			};
+			
+			
+			
+			$conn->commit();
+			
+			$conn = null;
 		}
 		
 		/*
@@ -247,7 +300,7 @@ function create_classes()
 	        }
 	        
 			$children = $this->manager->getList($meta->class, $query);
-			var_dump(count($children));
+			
 			if ($children)
 				return $this->buildTree($treeMeta, $source, $children);
 		}
@@ -266,9 +319,12 @@ function create_classes()
 				'children'=>array(),
 			);
 			
+			$parentIndex = array();
+			
 			foreach ($objects as $node) {
 	      		$id = $meta->getValue($node, $primaryField);
 	      		$parentId = $meta->getValue($node, $treeMeta['parentId']);
+	      		$parentIndex[$id] = $parentId;
 	      		
 	      		$index->nodes[$id] = $node;
 	      		if (!isset($index->children[$parentId])) {
@@ -279,7 +335,7 @@ function create_classes()
 			
 			foreach ($objects as $node) {
 	      		$id = $meta->getValue($node, $primaryField);
-	      		$parentId = $meta->getValue($node, $treeMeta['parentId']);
+	      		$parentId = $parentIndex[$id];
 	      		
 	      		if (isset($index->children[$id]))
 		      		$meta->setValue($node, $treeMeta['relationName'], $index->children[$id]);
