@@ -20,12 +20,66 @@ class MetaTest extends \CustomTestCase
         );
         $meta = new \Amiss\Meta('stdClass', 'std_class', $info, $parent);
         
-        $this->assertEquals('stdClass', $meta->class);
-        $this->assertEquals('std_class', $meta->table);
+        $this->assertEquals('stdClass',   $meta->class);
+        $this->assertEquals('std_class',  $meta->table);
         $this->assertEquals(array('pri'), $meta->primary);
+        
         $this->assertEquals(array('f'=>array()), $this->getProtected($meta, 'fields'));
         $this->assertEquals(array('r'=>array()), $this->getProtected($meta, 'relations'));
-        $this->assertEquals('def', $this->getProtected($meta, 'defaultFieldType'));
+        $this->assertEquals(array('id'=>'def'),  $this->getProtected($meta, 'defaultFieldType'));
+    }
+    
+    /**
+     * @covers Amiss\Meta::getDefaultFieldType
+     */
+    public function testGetDefaultFieldTypeInheritsFromDirectParent()
+    {
+        $parent = new \Amiss\Meta('parent', 'parent', array(
+            'defaultFieldType'=>'def',
+        ));
+        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
+    }
+    
+    /**
+     * @covers Amiss\Meta::getDefaultFieldType
+     */
+    public function testGetDefaultFieldTypeInheritsFromGrandparent()
+    {
+        $grandParent = new \Amiss\Meta('grandparent', 'grandparent', array(
+            'defaultFieldType'=>'def',
+        ));
+        $parent = new \Amiss\Meta('parent', 'parent', array(), $grandParent);
+        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
+    }
+    
+    /**
+     * @covers Amiss\Meta::getDefaultFieldType
+     * @dataProvider dataForGetDefaultFieldTypeFromParentOnlyCallsParentOnce
+     */
+    public function testGetDefaultFieldTypeFromParentOnlyCallsParentOnce($defaultType)
+    {
+        $parent = $this->getMockBuilder('Amiss\Meta')
+            ->disableOriginalConstructor()
+            ->setMethods(array('getDefaultFieldType'))
+            ->getMock()
+        ;
+        $parent->expects($this->once())->method('getDefaultFieldType')->will($this->returnValue($defaultType));
+        
+        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $meta->getDefaultFieldType();
+        $meta->getDefaultFieldType();
+    }
+    
+    public function dataForGetDefaultFieldTypeFromParentOnlyCallsParentOnce()
+    {
+        return array(
+            array('yep'),
+            array(array('id'=>'yep')),
+            array(null),
+            array(false),
+        );
     }
     
     /**

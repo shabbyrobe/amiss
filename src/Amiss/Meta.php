@@ -121,7 +121,7 @@ class Meta
     function getDefaultFieldType()
     {
         if ($this->defaultFieldType===null && $this->parent) {
-            $this->defaultFieldType = $this->parent->getDefaultFieldType();
+            $this->defaultFieldType = $this->parent->getDefaultFieldType() ?: false;
         }
         return $this->defaultFieldType;
     }
