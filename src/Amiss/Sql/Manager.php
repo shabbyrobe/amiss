@@ -297,7 +297,7 @@ class Manager
                 throw new Exception("Last insert ID $lastInsertId found for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
             
             $field = $meta->getField($meta->primary[0]);
-            $handler = $this->mapper->determineTypeHandler($field['type']);
+            $handler = $this->mapper->determineTypeHandler($field['type']['id']);
             
             if ($handler instanceof \Amiss\Type\Identity) {
                 $generated = $handler->handleDbGeneratedValue($lastInsertId);
@@ -416,7 +416,7 @@ class Manager
         }
         else {
             $field = $meta->getField($meta->primary[0]);
-            if ($field['type'] != 'autoinc')
+            if ($field['type']['id'] != 'autoinc')
                 $nope = true;
         }
         if ($nope)

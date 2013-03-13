@@ -96,7 +96,8 @@ class MultiSchemaTranslatorTestOne
     public $twoId;
     
     /**
-     * @has one of=MultiSchemaTranslatorTestTwo; on=twoId
+     * @has.one.of MultiSchemaTranslatorTestTwo
+     * @has.one.on twoId
      */
     public $two;
 }
@@ -113,7 +114,8 @@ class MultiSchemaTranslatorTestTwo
     public $twoName;
     
     /**
-     * @has many of=MultiSchemaTranslatorTestOne; on[id]=twoId
+     * @has.many.of MultiSchemaTranslatorTestOne
+     * @has.many.on.id twoId
      */
     public $ones = array();
 }

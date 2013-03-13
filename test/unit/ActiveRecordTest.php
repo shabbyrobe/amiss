@@ -207,7 +207,7 @@ class TestRelatedParent extends \Amiss\Sql\ActiveRecord
     public $parentId;
     
     /**
-     * @has many of=TestRelatedChild
+     * @has.many.of TestRelatedChild
      */
     public $children;
 }
@@ -220,6 +220,9 @@ class TestRelatedChild extends \Amiss\Sql\ActiveRecord
     /** @field */
     public $parentId;
     
-    /** @has one of=TestRelatedParent; on=parentId */
+    /**
+     * @has.one.of TestRelatedParent
+     * @has.one.on parentId
+     */
     public $parent;
 }

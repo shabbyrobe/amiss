@@ -24,10 +24,16 @@ class Artist extends Object
      */
     public $bio;
     
-    /** @has one of=ArtistType; on=artistTypeId */
+    /** 
+     * @has.one.of ArtistType
+     * @has.one.on artistTypeId
+     */
     public $artistType;
     
-    /** @has assoc of=Event; via=EventArtist */
+    /**
+     * @has.assoc.of Event
+     * @has.assoc.via EventArtist
+     */
     public $events;
 }
 
@@ -45,7 +51,10 @@ class ArtistType extends Object
     /** @field */
     public $slug;
     
-    /** @has many of=Artist; inverse=artistType */
+    /**
+     * @has.many.of Artist
+     * @has.many.inverse artistType
+     */
     public $artists = array();
 }
 
@@ -72,13 +81,22 @@ class Event extends Object
     /** @field */
     public $venueId;
     
-    /** @has many of=EventArtist; inverse=event */
+    /**
+     * @has.many.of EventArtist
+     * @has.many.inverse event
+     */
     public $eventArtists;
     
-    /** @has one of=Venue; on=venueId */
+    /**
+     * @has.one.of Venue
+     * @has.one.on venueId
+     */
     public $venue;
     
-    /** @has assoc of=Artist; via=EventArtist */
+    /** 
+     * @has.assoc.of Artist
+     * @has.assoc.via EventArtist
+     */
     public $artists;
     
     /** @field */
@@ -142,13 +160,15 @@ class EventArtist
     public $eventArtistName;
     
     /**
-     * @has one of=Event; on=eventId
+     * @has.one.of Event
+     * @has.one.on eventId
      * @var Amiss\Demo\Event
      */
     public $event;
     
     /**
-     * @has one of=Artist; on=artistId
+     * @has.one.of Artist
+     * @has.one.on artistId
      * @var Amiss\Demo\Artist
      */
     public $artist;

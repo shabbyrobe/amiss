@@ -110,12 +110,14 @@ class MappedFieldNameLeft
     public $pants;
 
     /**
-     * @has many of=MappedFieldNameAssoc; on[id]=leftId
+     * @has.many.of MappedFieldNameAssoc
+     * @has.many.on.id leftId
      */
     public $assocs = array();
 
     /**
-     * @has assoc of=MappedFieldNameRight; via=MappedFieldNameAssoc
+     * @has.assoc.of MappedFieldNameRight
+     * @has.assoc.via MappedFieldNameAssoc
      */
     public $rights = array();
 }
@@ -142,12 +144,14 @@ class MappedFieldNameAssoc
     public $rightId;
 
     /**
-     * @has one of=MappedFieldNameLeft; on[leftId]=id
+     * @has.one.of MappedFieldNameLeft
+     * @has.one.on.leftId id
      */
     public $left;
 
     /**
-     * @has one of=MappedFieldNameRight; on[rightId]=id
+     * @has.one.of MappedFieldNameRight
+     * @has.one.on.rightId id
      */
     public $right;
 }
@@ -167,12 +171,14 @@ class MappedFieldNameRight
     public $trousers;
 
     /**
-     * @has many of=MappedFieldNameAssoc; inverse=right
+     * @has.many.of MappedFieldNameAssoc
+     * @has.many.inverse right
      */
     public $assocs = array();
 
     /**
-     * @has assoc of=MappedFieldNameLeft; via=MappedFieldNameAssoc
+     * @has.assoc.of MappedFieldNameLeft
+     * @has.assoc.via MappedFieldNameAssoc
      */
     public $lefts = array();
 }

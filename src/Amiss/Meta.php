@@ -28,13 +28,21 @@ class Meta
     /**
      * Additional metadata found but not explicitly handled by the mapper
      */
-    public $extra;
+    public $ext;
     
+    /**
+     * Array of fields, hashed by property name
+     */
     protected $fields;
     protected $allFields;
     protected $parent;
-    protected $defaultFieldType;
     protected $columnToPropertyMap;
+    
+    /**
+     * @var array|false|null  Array of type if found, false if checked and none found, 
+     *                        null if not yet checked
+     */
+    protected $defaultFieldType;
     
     public function __construct($class, $table, array $info, Meta $parent=null)
     {
@@ -46,10 +54,28 @@ class Meta
         if ($this->primary && !is_array($this->primary))
             $this->primary = array($this->primary);
         
-        $this->fields = isset($info['fields']) ? $info['fields'] : array();
-        $this->extra = isset($info['extra']) ? $info['extra'] : array();
+        $this->setFields(isset($info['fields']) ? $info['fields'] : array());
         $this->relations = isset($info['relations']) ? $info['relations'] : array();
-        $this->defaultFieldType = isset($info['defaultFieldType']) ? $info['defaultFieldType'] : null;
+        $this->ext = isset($info['ext']) ? $info['ext'] : array();
+        
+        $this->defaultFieldType = null;
+        if (isset($info['defaultFieldType'])) {
+            $ft = $info['defaultFieldType'];
+            if (!is_array($ft))
+                $ft = array('id'=>$ft);
+            $this->defaultFieldType = $ft;
+        }
+    }
+    
+    private function setFields($fields)
+    {
+        foreach ($fields as &$field) {
+            if (isset($field['type']) && !is_array($field['type'])) {
+                $field['type'] = array('id'=>$field['type']);
+            }
+        }
+        $this->fields = $fields;
+        return $this;
     }
     
     public function getFields()

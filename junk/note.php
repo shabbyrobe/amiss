@@ -59,7 +59,8 @@ class Foo
 
     /**
      * @field
-     * @type date
+     * @type.id date
+     * @type.timeZone UTC
      */
     public function getFooDate()
     {

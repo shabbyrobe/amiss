@@ -142,18 +142,14 @@ class Note extends \Amiss\Mapper\Base
             $this->parser = new \Amiss\Note\Parser;
         
         foreach ($relationNotes as $name=>$info) {
-            $relationNote = preg_split('/\s+/', ltrim($info['has']), 2, PREG_SPLIT_NO_EMPTY);
-            
-            $relation = isset($relationNote[1]) 
-            	? $this->parser->parseComplexValue($relationNote[1])
-            	: array()
-            ;
-            
-            array_unshift($relation, $relationNote[0]);
+            $relation = $info['has'];
+            $id = key($relation);
+            $relation = current($relation);
+            array_unshift($relation, $id);
             
             if (isset($info['getter']))
                 list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
-                
+            
             $relations[$name] = $relation;
         }
         return $relations;

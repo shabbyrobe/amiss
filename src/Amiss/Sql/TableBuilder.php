@@ -50,7 +50,7 @@ class TableBuilder
         
         $default = $this->meta->getDefaultFieldType();
         if (!$default) {
-            $default = $engine == 'sqlite' ? 'STRING NULL' : 'VARCHAR(255) NULL';
+            $default = array('id'=>$engine == 'sqlite' ? 'STRING NULL' : 'VARCHAR(255) NULL');
         } 
         $f = array();
         $found = array();
@@ -71,19 +71,16 @@ class TableBuilder
         foreach ($fields as $id=>$info) {
             $current = "`{$info['name']}` ";
             
-            $type = null;
-            if ($info['type'])
-                $type = $info['type'];
-            else
-                $type = $default;
+            $type = isset($info['type']) ? $info['type'] : $default;
+            $typeId = $type['id'];
             
-            $handler = $this->manager->mapper->determineTypeHandler($type);
+            $handler = $this->manager->mapper->determineTypeHandler($typeId);
             if ($handler) {
                 $new = $handler->createColumnType($engine);
-                if ($new) $type = $new;
+                if ($new) $typeId = $new;
             }
             
-            $current .= $type;
+            $current .= $typeId;
             $f[] = $current;
             $found[] = $id;
         }

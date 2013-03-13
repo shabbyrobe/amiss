@@ -3,6 +3,27 @@ namespace Amiss\Note;
 
 class Parser
 {
+    const SEP_ARRAY = '/(\]\[|\[|\])/';
+    const SEP_DOT = '/\./';
+    
+    public $defaultValue;
+    public $keySeparatorPattern;
+    public $keyPrefix;
+    
+    public function __construct(array $config=null)
+    {
+        $defaultConfig = array(
+            'keySeparatorPattern'=>static::SEP_DOT,
+            'defaultValue'=>true,
+            'keyPrefix'=>null,
+        );
+        $config = $config ? array_merge($defaultConfig, $config) : $defaultConfig;
+        
+        $this->defaultValue = $config['defaultValue'];
+        $this->keySeparatorPattern = $config['keySeparatorPattern'];
+        $this->keyPrefix = $config['keyPrefix'];
+    }
+    
     public function parseClass(\ReflectionClass $class)
     {
         $info = new \stdClass;
@@ -10,7 +31,7 @@ class Parser
         
         $doc = $class->getDocComment();
         if ($doc) {
-            $info->notes = $this->parseComment($doc);
+            $info->notes = $this->parseDocComment($doc);
         }
         
         $info->methods = $this->parseReflectors($class->getMethods());
@@ -26,14 +47,16 @@ class Parser
             $comment = $r->getDocComment();
             $name = $r->name;
             if ($comment) {
-                $notes[$name] = $this->parseComment($comment);
+                $notes[$name] = $this->parseDocComment($comment);
             }
         }
         return $notes;
     }
     
-    public function parseComment($docComment)
+    public function parseDocComment($docComment)
     {
+        $keyPrefixLen = $this->keyPrefix ? strlen($this->keyPrefix) : 0;
+        
         // docblock start
         $docComment = preg_replace('@\s*/\*+@', '', $docComment);
         
@@ -43,27 +66,47 @@ class Parser
         // docblock margin
         $docComment = preg_replace('@^\s*\*\s*@mx', '', $docComment);
         
-        $notes = array();
+        $data = array();
         $lines = preg_split('@\n@', $docComment, null, PREG_SPLIT_NO_EMPTY);
         foreach ($lines as $l) {
             $l = trim($l);
             if ($l && $l[0] == '@') {
                 $l = substr($l, 1);
-                $d = explode(' ', $l, 2);
+                $d = preg_split('/\s+/', $l, 2);
                 
-                if (isset($d[1]))
-                    $notes[$d[0]] = $d[1];
+                $key = $d[0];
+                if ($this->keyPrefix) {
+                    if (strpos($key, $this->keyPrefix)!==0)
+                        continue;
+                    $key = substr($key, $keyPrefixLen);
+                }   
+                
+                $key = $this->keySeparatorPattern 
+                    ? preg_split($this->keySeparatorPattern, $key, null, PREG_SPLIT_NO_EMPTY)
+                    : array($key)
+                ;
+                
+                $value = isset($d[1]) ? $d[1] : $this->defaultValue;
+                
+                $current = &$data;
+                $found = array();
+                foreach ($key as $part) {
+                    if ($current && !is_array($current))
+                        throw new \UnexpectedValueException("Key at path ".implode('.', $found)." already had non-array value, tried to set key $part");
+                    
+                    $found[] = $part;
+                    $current = &$current[$part];
+                }
+                if ($current === null)
+                    $current = $value;
+                elseif (!is_array($current))
+                    $current = array($current, $value);
                 else
-                    $notes[$d[0]] = true;
+                    $current[] = $value;
+                
+                unset($current);
             }
         }
-        return $notes;
-    }
-    
-    public function parseComplexValue($noteValue)
-    {
-        $qs = trim(preg_replace('/\s*([=&])\s*/', '$1', str_replace(';', '&', $noteValue)));
-        parse_str($qs, $data);
         return $data;
     }
 }

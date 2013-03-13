@@ -66,13 +66,14 @@ abstract class Base implements \Amiss\Mapper
                 $value = call_user_func(array($object, $field['getter']));
             
             $type = $field['type'] ?: $defaultType;
+            $typeId = $type['id'];
             
             if ($type) {
-                if (!isset($this->typeHandlerMap[$type])) {
-                    $this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
-                if ($this->typeHandlerMap[$type]) {
-                    $value = $this->typeHandlerMap[$type]->prepareValueForDb($value, $object, $field);
+                if ($this->typeHandlerMap[$typeId]) {
+                    $value = $this->typeHandlerMap[$typeId]->prepareValueForDb($value, $object, $field);
                 }
             }
             
@@ -142,18 +143,19 @@ abstract class Base implements \Amiss\Mapper
             $field = $fields[$prop];
             $type = $field['type'];
             if (!$type) {
-            	if (!$defaultType)
-            		$defaultType = $meta->getDefaultFieldType();
+            	if ($defaultType === null)
+            		$defaultType = $meta->getDefaultFieldType() ?: false;
             	
             	$type = $defaultType;
             }	
             
             if ($type) {
-                if (!isset($this->typeHandlerMap[$type])) {
-                    $this->typeHandlerMap[$type] = $this->determineTypeHandler($type);
+                $typeId = $type['id'];
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
-                if ($this->typeHandlerMap[$type]) {
-                    $value = $this->typeHandlerMap[$type]->handleValueFromDb($value, $object, $field, $input);
+                if ($this->typeHandlerMap[$typeId]) {
+                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $object, $field, $input);
                 }
             }
             

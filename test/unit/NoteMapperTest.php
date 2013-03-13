@@ -193,7 +193,7 @@ class NoteMapperTest extends \CustomTestCase
             }
         ');
         $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
-        $this->assertEquals(array('id'=>array('name'=>'id', 'type'=>'autoinc')), $meta->getFields());
+        $this->assertEquals(array('id'=>array('name'=>'id', 'type'=>array('id'=>'autoinc'))), $meta->getFields());
     }
     
     /**
@@ -253,7 +253,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
         $field = $meta->getField('id');
-        $this->assertEquals('foobar', $field['type']);
+        $this->assertEquals(array('id'=>'foobar'), $field['type']);
     }
 
     /**
@@ -300,7 +300,8 @@ class NoteMapperTest extends \CustomTestCase
                 private \$bar;
                 
                 /** 
-                 * @has one of={$name}Bar; on=barId
+                 * @has.one.of {$name}Bar
+                 * @has.one.on barId
                  */
                 public function getBar()
                 {
@@ -336,7 +337,8 @@ class NoteMapperTest extends \CustomTestCase
                 private \$bar;
                 
                 /** 
-                 * @has one of={$name}Bar; on=barId
+                 * @has.one.of {$name}Bar
+                 * @has.one.on barId
                  * @setter setLaDiDaBar
                  */
                 public function getBar()
@@ -377,7 +379,7 @@ class NoteMapperTest extends \CustomTestCase
                 /** @field */ 
                 public \${$name}2Id;
                 
-                /** @has many of={$name}Class2 */
+                /** @has.many.of {$name}Class2 */
                 public \${$name}2;
             }
             class {$name}Class2 {
@@ -392,53 +394,4 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals($expected, $meta->relations);
     }
     
-    /**
-     * @group unit
-     * @covers Amiss\Mapper\Note::buildRelations
-     * @dataProvider dataForBuildRelations
-     */
-    public function testBuildRelations($note, $expected)
-    {
-        // TODO: move this test to NoteParserTest now that readRelation has been changed to parseComplexValue
-        $mapper = new \Amiss\Mapper\Note;
-        $notes = array('myprop'=>array(
-            'has'=>$note
-        ));
-        $result = $this->callProtected($mapper, 'buildRelations', $notes);
-        $this->assertEquals($expected, $result['myprop']);
-    }
-    
-    public function dataForBuildRelations()
-    {
-        return array(
-            array('one of=Foobar', array('one', 'of'=>'Foobar')),
-            
-            // straight query string
-            array('one of=Foobar&on[foo]=bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
-            
-            // some whitespace around the equals
-            array('one of = Foobar&on[foo] = bar', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar'))),
-            
-            // straight multi-column on
-            array('one of=Foobar&on[foo]=bar&on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
-            
-            // multi-column on with whitespace 
-            array('one of = Foobar & on[foo] = bar & on[baz] = qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
-            
-            // multi-column on with no whitespace and semicolon 
-            array('one of=Foobar;on[foo]=bar;on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
-            
-            // multi-column on with a little bit of whitespace and semicolon 
-            array('one of=Foobar; on[foo]=bar; on[baz]=qux', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
-            
-            // multi-column on with heaps of whitespace, semicolon and ampersand mix-n-match
-            array('   one of=Foobar    ;  on[foo] =    bar  &     on[baz]    =   qux   ', array('one', 'of'=>'Foobar', 'on'=>array('foo'=>'bar', 'baz'=>'qux'))),
-            
-            // crazy characters in values
-            array('one of=Foo\Bar; on[foo]=`bar`', array('one', 'of'=>'Foo\Bar', 'on'=>array('foo'=>'`bar`'))),
-            
-            // URL encoding
-            array('one of=%20%26%3B%3D%20', array('one', 'of'=>' &;= ')),
-        );
-    }
 }

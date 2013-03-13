@@ -125,7 +125,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>'autoinc'),
+            'id'=>array('name'=>'id', 'type'=>array('id'=>'autoinc')),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -144,7 +144,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>'flobadoo'),
+            'id'=>array('name'=>'id', 'type'=>array('id'=>'flobadoo')),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -163,7 +163,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>'flobadoo'),
+            'id'=>array('name'=>'id', 'type'=>array('id'=>'flobadoo')),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -175,14 +175,14 @@ class ArrayMapperTest extends \CustomTestCase
     public function testArrayPrimaryExplicitFieldType()
     {
         $mappings = array(
-            'foo'=>array('primary'=>'id', 'fields'=>array('id'=>array('type'=>'foobar'))),
+            'foo'=>array('primary'=>'id', 'fields'=>array('id'=>array('type'=>array('id'=>'foobar')))),
         );
         $mapper = new Arrays($mappings);
         $mapper->defaultPrimaryType = 'flobadoo';
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>'foobar'),
+            'id'=>array('name'=>'id', 'type'=>array('id'=>'foobar')),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -198,7 +198,7 @@ class ArrayMapperTest extends \CustomTestCase
             'foo'=>array(
                 'primary'=>'id', 
                 'fields'=>array(
-                    'id'=>array('name'=>'pants', 'type'=>'foobar')
+                    'id'=>array('name'=>'pants', 'type'=>array('id'=>'foobar'))
                 )
             ),
         );
@@ -207,7 +207,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'pants', 'type'=>'foobar'),
+            'id'=>array('name'=>'pants', 'type'=>array('id'=>'foobar')),
         );
         
         $this->assertEquals($expected, $meta->getFields());
@@ -233,7 +233,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'pants', 'type'=>'flobadoo'),
+            'id'=>array('name'=>'pants', 'type'=>array('id'=>'flobadoo')),
         );
         
         $this->assertEquals($expected, $meta->getFields());

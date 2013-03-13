@@ -137,7 +137,8 @@ class TestEmbedOneParent
 
     /**
      * @field
-     * @type embed TestEmbedChild
+     * @type.id embed
+     * @type.class TestEmbedChild
      */
     public $child;
 }
@@ -152,7 +153,9 @@ class TestEmbedManyParent
     
     /**
      * @field
-     * @type embed TestEmbedChild[]
+     * @type.id embed
+     * @type.class TestEmbedChild
+     * @type.many
      */
     public $children = array();
 }

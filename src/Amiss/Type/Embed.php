@@ -15,13 +15,10 @@ class Embed implements Handler
 
     function prepareValueForDb($value, $object, array $fieldInfo)
     {
-        $fieldType = trim($fieldInfo['type']);
-        if (!isset($this->typeCache[$fieldType])) {
-            $this->typeCache[$fieldType] = $this->extractClass($fieldType);
-        }
-        list($type, $many) = $this->typeCache[$fieldType];
+        $class = $fieldInfo['type']['class'];
+        $many = isset($fieldInfo['type']['many']) ? $fieldInfo['type']['many'] : false;
 
-        $embedMeta = $this->mapper->getMeta($type);
+        $embedMeta = $this->mapper->getMeta($class);
 
         $return = null;
         if ($many) {
@@ -40,13 +37,10 @@ class Embed implements Handler
     
     function handleValueFromDb($value, $object, array $fieldInfo, $row)
     {
-        $fieldType = trim($fieldInfo['type']);
-        if (!isset($this->typeCache[$fieldType])) {
-            $this->typeCache[$fieldType] = $this->extractClass($fieldType);
-        }
-        list($type, $many) = $this->typeCache[$fieldType];
+        $class = $fieldInfo['type']['class'];
+        $many = isset($fieldInfo['type']['many']) ? $fieldInfo['type']['many'] : false;
         
-        $embedMeta = $this->mapper->getMeta($type);
+        $embedMeta = $this->mapper->getMeta($class);
 
         $return = null;
 
@@ -63,22 +57,6 @@ class Embed implements Handler
             $return = $this->mapper->toObject($embedMeta, $value);
         }
         return $return;
-    }
-
-    private function extractClass($type)
-    {
-        $split = explode(' ', $type, 2);
-        if (!isset($split[1]))
-            throw new \Exception('misconfigured type - must specify class name after type name');
-        
-        $class = trim($split[1]);
-        $many = false;
-        if (preg_match('/^(.*)\[\]$/', $class, $match)) {
-            $class = $match[1];
-            $many = true;
-        }
-
-        return array($class, $many);
     }
     
     function createColumnType($engine)

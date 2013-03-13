@@ -33,31 +33,31 @@ class NoteParserTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseCondensedValuelessNote()
     {
-        $parsed = $this->parser->parseComment('/** @ab */');
+        $parsed = $this->parser->parseDocComment('/** @ab */');
         $this->assertEquals(array('ab'=>true), $parsed);
     }
     
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseCondensedValueNote()
     {
-        $parsed = $this->parser->parseComment('/** @ab yep */');
+        $parsed = $this->parser->parseDocComment('/** @ab yep */');
         $this->assertEquals(array('ab'=>'yep'), $parsed);
     }
     
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseSingleValuelessNote()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             '/**'.PHP_EOL.' * @ab'.PHP_EOL.' */'
         );
         $this->assertEquals(array('ab'=>true), $parsed);
@@ -65,11 +65,11 @@ class NoteParserTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseManyValuelessNotes()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             '/**'.PHP_EOL.' * @ab'.PHP_EOL.' * @bc'.PHP_EOL.' * @cd'.PHP_EOL.' */'
         );
         $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
@@ -77,11 +77,11 @@ class NoteParserTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseManyNotesWithIrregularMargin()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             '/**'.PHP_EOL.'     * @ab'.PHP_EOL.'*    @bc'.PHP_EOL.' @cd'.PHP_EOL.' */'
         );
         $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
@@ -89,11 +89,11 @@ class NoteParserTest extends \CustomTestCase
 
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParsingWorksWhenCommentIsNotDocblock()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             '/*'.PHP_EOL.'     * @ab'.PHP_EOL.'*    @bc'.PHP_EOL.' @cd'.PHP_EOL.' */'
         );
         $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
@@ -101,11 +101,11 @@ class NoteParserTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParsingWorksWhenInputIsNotComment()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             '@ab'.PHP_EOL.'@bc'.PHP_EOL.'@cd'.PHP_EOL
         );
         $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
@@ -113,11 +113,11 @@ class NoteParserTest extends \CustomTestCase
     
     /**
      * @group unit
-     * @covers Amiss\Note\Parser::parseComment
+     * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParsingIgnoresEmailAddresses()
     {
-        $parsed = $this->parser->parseComment(
+        $parsed = $this->parser->parseDocComment(
             'If you have problems with this jazz, contact foo@bar.com'.PHP_EOL.
             '@ab'.PHP_EOL.'@bc'.PHP_EOL.'@cd'.PHP_EOL
         );

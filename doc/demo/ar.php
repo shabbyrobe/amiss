@@ -39,7 +39,8 @@ class ArtistRecord extends \Amiss\Sql\ActiveRecord
     private $type;
     
     /**
-     * @has one of=ArtistType; on=artistTypeId
+     * @has.one.of ArtistType
+     * @has.one.on artistTypeId
      */
     public function getType()
     {
@@ -74,7 +75,7 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
     private $artists = null;
     
     /**
-     * @has many of=Artist
+     * @has.many.of Artist
      */
     public function getArtists()
     {
@@ -139,7 +140,8 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     private $venue;
     
     /**
-     * @has one of=Venue; on=venueId
+     * @has.one.of Venue
+     * @has.one.on venueId
      */
     public function getVenue()
     {
@@ -150,7 +152,8 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     }
     
     /**
-     * @has many of=EventArtist; inverse=event
+     * @has.many.of EventArtist
+     * @has.many.inverse event
      */
     public function getEventArtists()
     {
@@ -170,7 +173,8 @@ class PlannedEvent extends EventRecord
     public $completeness;
     
     /**
-     * @has one of=VenueRecord; on=venueId
+     * @has.one.of VenueRecord
+     * @has.one.on venueId
      * Note: relations are not inherited by the note mapper
      */
     public function getVenue()
@@ -207,13 +211,15 @@ class EventArtist extends \Amiss\Sql\ActiveRecord
     public $eventArtistName;
     
     /**
-     * @has one of=EventRecord; on=eventId
+     * @has.one.of EventRecord
+     * @has.one.on eventId
      * @var Amiss\Demo\Active\EventRecord
      */
     public $event;
     
     /**
-     * @has one of=ArtistRecord; on=artistId
+     * @has.one.of ArtistRecord
+     * @has.one.on artistId
      * @var Amiss\Demo\Active\ArtistRecord
      */
     public $artist;
