@@ -5,15 +5,15 @@ class Bool implements \Amiss\Type\Handler
 {
     function handleValueFromDb($value, $object, array $fieldInfo, $row)
     {
-    	return $value >= 1;
+        return $value >= 1;
     }
     
     function prepareValueForDb($value, $object, array $fieldInfo)
     {
-    	return $value == true;
+        return $value == true;
     }
 
-	function createColumnType($engine)
+    function createColumnType($engine)
     {
         return 'tinyint(1) unsigned';
     }

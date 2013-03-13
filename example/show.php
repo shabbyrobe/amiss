@@ -20,7 +20,7 @@ $file = __DIR__.'/'.$ex.'.php';
 require(dirname($file).'/config.php');
 
 if (!in_array($fmt, array('html', 'json')))
-	$fmt = 'html';
+    $fmt = 'html';
 
 if (isset($_GET['run'])) {
     require($file);
@@ -89,10 +89,10 @@ $source = source(file_get_contents($file), true);
 </html>
 <?php elseif ($fmt == 'json'):
 echo json_encode(array(
-	'id'=>$ex,
+    'id'=>$ex,
     'timeTakenMs'=>$timeTaken,
-	'queries'=>$manager->queries,
-	'memUsed'=>$memUsed,
-	'memPeak'=>$memPeak,
+    'queries'=>$manager->queries,
+    'memUsed'=>$memUsed,
+    'memPeak'=>$memPeak,
 ));
 endif;

@@ -172,5 +172,5 @@ abstract class ActiveRecord
             // add the property to stop this from being called again
             $this->$name = $value;
         }
-    }    	
+    }
 }

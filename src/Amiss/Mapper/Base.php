@@ -143,11 +143,11 @@ abstract class Base implements \Amiss\Mapper
             $field = $fields[$prop];
             $type = $field['type'];
             if (!$type) {
-            	if ($defaultType === null)
-            		$defaultType = $meta->getDefaultFieldType() ?: false;
-            	
-            	$type = $defaultType;
-            }	
+                if ($defaultType === null)
+                    $defaultType = $meta->getDefaultFieldType() ?: false;
+                
+                $type = $defaultType;
+            }
             
             if ($type) {
                 $typeId = $type['id'];
