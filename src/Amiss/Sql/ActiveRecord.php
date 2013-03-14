@@ -5,7 +5,7 @@ use Amiss\Exception;
 
 abstract class ActiveRecord
 {
-    private static $managers=array();
+    private static $services=array();
     private static $meta=array();
     
     /**
@@ -14,7 +14,7 @@ abstract class ActiveRecord
      */
     public static function _reset()
     {
-        self::$managers = array();
+        self::$services = array();
         self::$meta = array();
     }
     
@@ -28,7 +28,7 @@ abstract class ActiveRecord
     
     public function save()
     {
-        $manager = static::getManager();
+        $manager = static::getDependency('manager');
         if ($manager->shouldInsert($this))
             $this->insert();
         else
@@ -39,60 +39,70 @@ abstract class ActiveRecord
     {
         $this->beforeInsert();
         $this->beforeSave();
-        $return = static::getManager()->insert($this);
+        return static::getDependency('manager')->insert($this);
     }
     
     public function update()
     {
         $this->beforeUpdate();
         $this->beforeSave();
-        $return = static::getManager()->update($this);
+        return static::getDependency('manager')->update($this);
     }
     
     public function delete()
     {
         $this->beforeDelete();
-        static::getManager()->delete($this);
+        return static::getDependency('manager')->delete($this);
     }
     
     /**
      * @return Amiss\Sql\Manager
      */
-    public static function getManager($class=null)
+    public static function getDependency($id, $class=null)
     {
         if (!$class)
             $class = get_called_class();
         
-        if (!isset(self::$managers[$class])) {
+        if (!isset(self::$services[$id][$class])) {
             $parent = get_parent_class($class);
             if ($parent)
-                self::$managers[$class] = static::getManager($parent);
+                self::$services[$id][$class] = static::getDependency($id, $parent);
         }
         
-        if (!isset(self::$managers[$class]))
+        if (!isset(self::$services[$id][$class]))
             throw new Exception("No manager defined against $class or any parent thereof");
         
-        return self::$managers[$class];
+        return self::$services[$id][$class];
     }
     
-    public static function setManager($manager)
+    public static function setDependency($id, $service)
     {
         $class = get_called_class();
-        self::$managers[$class] = $manager;
+        self::$services[$id][$class] = $service;
     }
-
+    
+    public static function getManager($class=null)
+    {
+        return static::getDependency('manager', $class);
+    }
+    
+    public static function setManager(Manager $manager=null)
+    {
+        return static::setDependency('manager', $manager);
+    }
+    
     public static function getMeta($class=null)
     {
         $class = $class ?: get_called_class();
         if (!isset(self::$meta[$class]))
-            self::$meta[$class] = static::getManager()->getMeta($class);
+            self::$meta[$class] = static::getDependency('manager')->getMeta($class);
         
         return self::$meta[$class];
     }
     
     public static function updateTable()
     {
-        $manager = static::getManager();
+        $manager = static::getDependency('manager');
         $meta = static::getMeta();
         
         $args = func_get_args();
@@ -106,7 +116,7 @@ abstract class ActiveRecord
      */
     public function __call($name, $args)
     {
-        $manager = static::getManager();
+        $manager = static::getDependency('manager');
         
         $exists = null;
         if ($name == 'getRelated' || $name == 'assignRelated') { 
@@ -125,7 +135,7 @@ abstract class ActiveRecord
      */
     public static function __callStatic($name, $args)
     {
-        $manager = static::getManager();
+        $manager = static::getDependency('manager');
         $called = get_called_class();
         
         $exists = null;
