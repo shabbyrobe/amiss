@@ -4,7 +4,11 @@ class Amiss
     public static $classes = array(
         'Amiss\Cache'=>'Amiss/Cache.php',
         'Amiss\Exception'=>'Amiss/Exception.php',
-        'Amiss\Extension'=>'Amiss/Extension.php',
+        'Amiss\Ext\NestedSet\ActiveRecord'=>'Amiss/Ext/NestedSet/ActiveRecord.php',
+        'Amiss\Ext\NestedSet\Manager'=>'Amiss/Ext/NestedSet/Manager.php',
+        'Amiss\Ext\NestedSet\ParentRelator'=>'Amiss/Ext/NestedSet/ParentRelator.php',
+        'Amiss\Ext\NestedSet\ParentsRelator'=>'Amiss/Ext/NestedSet/ParentsRelator.php',
+        'Amiss\Ext\NestedSet\TreeRelator'=>'Amiss/Ext/NestedSet/TreeRelator.php',
         'Amiss\Mapper'=>'Amiss/Mapper.php',
         'Amiss\Mapper\Arrays'=>'Amiss/Mapper/Arrays.php',
         'Amiss\Mapper\Base'=>'Amiss/Mapper/Base.php',

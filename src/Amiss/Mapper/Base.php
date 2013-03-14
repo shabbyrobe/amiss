@@ -19,8 +19,7 @@ abstract class Base implements \Amiss\Mapper
     private $typeHandlerMap = array();
     
     public function __construct()
-    {
-    }
+    {}
     
     public function getMeta($class)
     {
@@ -49,7 +48,6 @@ abstract class Base implements \Amiss\Mapper
         foreach ($handlers as $type=>$handler) {
             $this->typeHandlers[strtolower($type)] = $handler;
         }
-        
         return $this;
     }
 

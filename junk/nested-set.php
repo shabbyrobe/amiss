@@ -6,376 +6,37 @@ create_classes();
 
 $manager = Amiss::createSqlManager(array(
     'host'=>'127.0.0.1',
-    'db'=>'atp_v2_import_9',
+    'db'=>'test',
     'user'=>'root',
     'password'=>'qwerty',
 ));
 
+$meta = $manager->getMeta('Region');
+$nestedSetManager = Amiss\Ext\NestedSet\Manager::createWithDefaults($manager);
+
 Amiss\Sql\ActiveRecord::setManager($manager);
+Amiss\Ext\NestedSet\ActiveRecord::setNestedSetManager($nestedSetManager);
 
-$ext = new NestedSetExtension();
+$region = Region::getById(1);
+$q = new Region();
+$q->parentId = 1;
+$q->regionTypeId = 1;
+$q->regionName = 'Boogers';
+$q->regionDisplayName = 'Boogers';
+$q->regionShortCode = 'yep';
+$q->isPublic = true;
+$q->insert();
 
-$manager->mapper->extensions[] = $ext;
-
-$nestedSetManager = new NestedSetManager($manager);
-$manager->relators['parents'] = new NestedSetParentsRelator($manager);
-$manager->relators['parent'] = new NestedSetParentRelator($manager);
-$manager->relators['tree'] = new NestedSetTreeRelator($manager);
-
-$regionMeta = $manager->getMeta('Region');
-$region = $manager->getById('Region', 1);
-
-$s = microtime(true);
-//$tree = $manager->getRelated($region, 'childTree', array('order'=>array('regionShortCode'=>'DESC')));
-$manager->assignRelated($region, 'childTree', array('order'=>array('regionShortCode'=>'DESC')));
-var_dump(microtime(true)-$s);
-
-$s = microtime(true);
-$parents = $manager->getRelated($region, 'parents');
-var_dump(microtime(true)-$s);
-
-print_r($parents);
-//print_r($region);
-
+var_dump(memory_get_usage());
 var_dump(memory_get_peak_usage());
 
 function create_classes()
 {
-    class NestedSetExtension
-    {
-        public function handleMeta($meta)
-        {
-            var_dump($meta);
-        }
-    }
-    
-    class NestedSetManager
-    {
-        /**
-         * @var Amiss\Sql\Manager
-         */
-        public $manager;
-        
-        public function __construct($manager)
-        {
-            $this->manager = $manager;
-        }
-        
-        public function renumber($node)
-        {
-            $conn = clone $this->manager->connector;
-            
-            if ($conn->engine == 'mysql')
-                $conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-            
-            $rootId = $this->getRootId($class);
-            $conn->beginTransaction();
-            
-            if ($conn->engine == 'mysql')
-                $conn->exec("SELECT * FROM `{$meta->table}` FOR UPDATE");
-            
-            $field = $meta->getField($meta->primary[0])->name;
-            
-            $rebuildTree = function($node, $left=1) use (&$rebuildTree) {
-                $right = $left+1;
-                
-                $childIds = $this->getChildIds($node);
-                
-                foreach ($childIds as $child) {
-                    $right = $this->rebuildTree($child, $right);
-                }
-                if ($this->{$this->getIdField()} == null && $this->{$this->getParentIdField()} == $node) {
-                    $this->{$this->getTreeLeftField()} = $right;
-                    $this->{$this->getTreeRightField()} = $right + 1;
-                    $right += 2;
-                }
-                
-                if ($this->{$this->getIdField()} != null && $this->{$this->getIdField()} == $node) {
-                    $this->{$this->getTreeLeftField()} = $left;
-                    $this->{$this->getTreeRightField()} = $right;
-                    //echo $this->{$this->getIdField()}."|".$node."|".$left;
-                }
-                else {
-                    $this->updateNode($node, $left, $right);
-                }
-                return $right+1;
-            };
-            
-            
-            
-            $conn->commit();
-            
-            $conn = null;
-        }
-        
-        /*
-        public function renumber()
-        {
-            $sql = "SELECT ".$this->getIdField()." FROM ".$this->getTableName()." WHERE (".$this->getParentIdField()." IS NULL OR ".$this->getParentIdField()." = 0)";
-            $treeIdField = $this->getTreeIdField();
-            if ($treeIdField != null) {
-                $sql .= "AND ".$treeIdField."=:treeId ";
-            }
-            $sql .= "LIMIT 1";
-            $cmd = $this->getDbConnection()->createCommand($sql);
-            if ($treeIdField != null) $cmd->bindValue(":treeId", $this->{$this->getTreeIdField()});
-            
-            $parentId = $cmd->queryScalar();
-            
-            if ($parentId <= 0)
-                throw new Exception();
-            
-            $trans = $this->getDbConnection()->beginTransaction();
-            try {
-                $this->rebuildTree($parentId);
-                $trans->commit();
-            }
-            catch (Exception $ex) {
-                $trans->rollBack();
-                throw $ex;
-            }
-        }
-    
-        protected function updateNode($id, $left, $right)
-        {
-            $sql = sprintf(
-                "UPDATE %s SET %s = :left, %s = :right WHERE %s = :id", 
-                $this->getTableName(), 
-                $this->getTreeLeftField(), 
-                $this->getTreeRightField(), 
-                $this->getIdField()
-            );
-            
-            $cmd = $this->getDbConnection()->createCommand($sql);
-            $cmd->bindValue(":id", $id);
-            $cmd->bindValue(":left", $left);
-            $cmd->bindValue(":right", $right);
-            
-            $result = $cmd->execute();
-        }
-        
-        private function rebuildTree($node, $left=1)
-        {
-            $right = $left+1;
-            $childIds = $this->getChildIds($node);
-            
-            foreach ($childIds as $child) {
-                $right = $this->rebuildTree($child, $right);
-            }
-            if ($this->{$this->getIdField()} == null && $this->{$this->getParentIdField()} == $node) {
-                $this->{$this->getTreeLeftField()} = $right;
-                $this->{$this->getTreeRightField()} = $right + 1;
-                $right += 2;
-            }
-            
-            if ($this->{$this->getIdField()} != null && $this->{$this->getIdField()} == $node) {
-                $this->{$this->getTreeLeftField()} = $left;
-                $this->{$this->getTreeRightField()} = $right;
-                //echo $this->{$this->getIdField()}."|".$node."|".$left;
-            }
-            else {
-                $this->updateNode($node, $left, $right);
-            }
-            return $right+1;
-        }
-        
-        */
-    }
-    
-    abstract class NestedSetRelator implements \Amiss\Sql\Relator
-    {
-        public $manager;
-        
-        public $leftType = 'treeleft';
-        public $rightType = 'treeright';
-        
-        public function __construct($manager)
-        {
-            $this->manager = $manager;
-        }
-        
-        protected function findTreeMeta($class, $relationName)
-        {
-            $meta = $this->manager->getMeta($class);
-            list ($left, $right) = $this->findLeftRight($meta);
-            
-            if (!$meta->primary || isset($meta->primary[2]))
-                throw new \UnexpectedValueException("Class $class must have a one-column primary for use with nested sets");
-            
-            return array(
-                'meta'=>$meta,
-                'leftField'=>$left,
-                'rightField'=>$right,
-                'relationName'=>$relationName,
-            );
-        }
-        
-        protected function getTreeMeta($object, $relationName)
-        {
-            $class = get_class($object);
-            if (!isset($this->metaCache[$class])) {
-                $meta = $this->findTreeMeta($class, $relationName);
-                $this->metaCache[$class] = $meta;
-            }
-            return $this->metaCache[$class];
-        }
-        
-        protected function findLeftRight($meta)
-        {
-            $leftField = null;
-            $rightField = null;
-            foreach ($meta->getFields() as $key=>$field) {
-                if ($field['type'] == $this->leftType) {
-                    if ($leftField)
-                        throw new \UnexpectedValueException();
-                    $leftField = $field;
-                }
-                elseif ($field['type'] == $this->rightType) {
-                    if ($rightField)
-                        throw new \UnexpectedValueException();
-                    $rightField = $field;
-                }
-            }
-            
-            if (!$leftField || !$rightField)
-                throw new \UnexpectedValueException();
-            
-            return array($leftField, $rightField);
-        }
-    }
-    
-    class NestedSetParentsRelator extends NestedSetRelator
-    {   
-        function getRelated($source, $relationName, $criteria=null)
-        {
-            if ($criteria)
-                throw new \InvalidArgumentException("Can't use criteria with parents relator");
-            
-            $treeMeta = $this->getTreeMeta($source, $relationName);
-            $meta = $treeMeta['meta'];
-            $relation = $meta->relations[$relationName];
-            
-            $leftName = $treeMeta['leftField']['name'];
-            $rightName = $treeMeta['rightField']['name'];
-            $leftValue = $meta->getValue($source, $leftName);
-            $rightValue = $meta->getValue($source, $rightName);
-            
-            $parents = $this->manager->getList($meta->class, array(
-                'where'=>"{".$leftName."} < ? AND {".$rightName."} > ?",
-                'params'=>array($leftValue, $rightValue),
-                'order'=>array($leftName=>'desc'),
-            ));
-            
-            if ($parents && isset($relation['includeRoot']) && !$relation['includeRoot'])
-                array_pop($parents);
-            
-            return $parents;
-        }
-    }
-    
-    class NestedSetParentRelator extends NestedSetRelator
-    {   
-        function getRelated($source, $relationName, $criteria=null)
-        {
-            if ($criteria)
-                throw new \InvalidArgumentException("Can't use criteria with parent relator");
-            
-            throw new \Exception("Not implemented");
-        }
-    }
-    
-    class NestedSetTreeRelator extends NestedSetRelator
-    {
-        protected function findTreeMeta($class, $relationName)
-        {
-            $treeMeta = parent::findTreeMeta($class, $relationName);
-            
-            $relation = $treeMeta['meta']->relations[$relationName];
-            
-            $treeMeta['parentId'] = isset($relation['parentId']) ? $relation['parentId'] : 'parentId';
-            $treeMeta['parentRel'] = isset($relation['parentRel']) ? $relation['parentRel'] : 'parent';
-            
-            return $treeMeta;
-        }
-        
-        function getRelated($source, $relationName, $criteria=null)
-        {
-            $treeMeta = $this->getTreeMeta($source, $relationName);
-            $meta = $treeMeta['meta'];
-            
-            $relation = $meta->relations[$relationName];
-            
-            $leftName = $treeMeta['leftField']['name'];
-            $rightName = $treeMeta['rightField']['name'];
-            $leftValue = $meta->getValue($source, $leftName);
-            $rightValue = $meta->getValue($source, $rightName);
-            
-            $query = new \Amiss\Sql\Criteria\Select;
-            $query->where = "{".$leftName."} > ? AND {".$rightName."} < ?";
-            $query->params = array($leftValue, $rightValue);
-            
-            if ($criteria) {
-                if ($criteria->where) {
-                    list ($cWhere, $cParams) = $criteria->buildClause($meta);
-                    $query->params = array_merge($cParams, $query->params);
-                    $query->where .= ' AND ('.$cWhere.')';
-                }
-                $query->order = $criteria->order;
-            }
-            
-            $children = $this->manager->getList($meta->class, $query);
-            
-            if ($children)
-                return $this->buildTree($treeMeta, $source, $children);
-        }
-        
-        private function buildTree($treeMeta, $rootNode, $objects)
-        {
-            $meta = $treeMeta['meta'];
-            
-            // primary is ensured to have one column in getTreeMeta
-            $primaryField = $meta->primary[0];
-            
-            $rootNodeId = $meta->getValue($rootNode, $primaryField);
-            
-            $index = (object)array(
-                'nodes'=>array($rootNodeId=>$rootNode),
-                'children'=>array(),
-            );
-            
-            $parentIndex = array();
-            
-            foreach ($objects as $node) {
-                  $id = $meta->getValue($node, $primaryField);
-                  $parentId = $meta->getValue($node, $treeMeta['parentId']);
-                  $parentIndex[$id] = $parentId;
-                  
-                  $index->nodes[$id] = $node;
-                  if (!isset($index->children[$parentId])) {
-                      $index->children[$parentId] = array();
-                  }
-                  $index->children[$parentId][] = $node;
-            }
-            
-            foreach ($objects as $node) {
-                  $id = $meta->getValue($node, $primaryField);
-                  $parentId = $parentIndex[$id];
-                  
-                  if (isset($index->children[$id]))
-                      $meta->setValue($node, $treeMeta['relationName'], $index->children[$id]);
-                  
-                  $meta->setValue($node, $treeMeta['parentRel'], $index->nodes[$parentId]);
-            }
-            
-            return $index->children[$rootNodeId];
-        }
-    }
-    
     /**
      * @table region
-     * @ext nestedSet parentId
+     * @ext.nestedSet
      */
-    class Region extends \Amiss\Sql\ActiveRecord
+    class Region extends \Amiss\Ext\NestedSet\ActiveRecord
     {
         /**
          * @primary
@@ -421,13 +82,11 @@ function create_classes()
     
         /**
          * @field
-         * @type treeleft
          */
         public $treeLeft;
     
         /**
          * @field
-         * @type treeright
          */
         public $treeRight;
     
@@ -449,12 +108,13 @@ function create_classes()
         public $parent;
         
         /**
-         * @has parents includeRoot=0
+         * @has.parents.includeRoot 0
          */
         public $parents;
         
         /**
-         * @has many of=Region; on[regionId]=parentRegionId
+         * @has.many.of Region
+         * @has.many.on.regionId parentRegionId
          */
         public $directChildren;
         
@@ -466,7 +126,6 @@ function create_classes()
 }
 
 /*
-
     protected function moveRelatedChild($relation, $sequenceColumn, $from, $to, $groupBy=null)
     {
         $relationData = $this->getRecordRelation($relation);

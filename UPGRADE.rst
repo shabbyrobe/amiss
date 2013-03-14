@@ -9,6 +9,7 @@ New features:
 - Type definitions can pass additional structured metadata
 - ``Amiss`` base class added with factory methods for quickly creating managers and mappers with
   all of the prescribed default handlers and relators
+- Nested Set extension for SQL manager
 
 
 ``Amiss\Sql\Manager::__construct()`` default handlers/relators removed
