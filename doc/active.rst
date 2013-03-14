@@ -34,7 +34,10 @@ configuration that works with the data mapper.
         /** @field */
         public $artistTypeId;
 
-        /** @has one of=ArtistType; on=artistTypeId */
+        /** 
+         * @has.one.of ArtistType
+         * @has.one.on artistTypeId
+         */
         public $artistType;
     }
 
@@ -170,7 +173,8 @@ using a wrapper function:
         private $artistType;
         
         /**
-         * @has one of=ArtistType; on=artistTypeId
+         * @has.one.of ArtistType
+         * @has.one.on artistTypeId
          */
         public function getArtistType()
         {

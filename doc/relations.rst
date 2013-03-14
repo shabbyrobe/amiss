@@ -17,7 +17,10 @@ using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
         /** @field */
         public $artistTypeId;
         
-        /** @has one of=ArtistType; on=artistTypeId */  
+        /**
+         * @has.one.of ArtistType
+         * @has.one.on artistTypeId
+         */
         public $artistType;
     }
 
@@ -29,7 +32,10 @@ using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
         /** @field */
         public $type;g16
 
-        /** @has many of=Artist; inverse=artistType */
+        /**
+         * @has.many.of Artist
+         * @has.many.inverse artistType
+         */
         public $artists = array();
     }
 
@@ -390,7 +396,7 @@ You can register your relator with Amiss like so:
 .. code-block:: php
 
     <?php
-    $manager->relators['one-to-foo'] = new My\Custom\OneToFooRelator($manager);
+    $manager->relators['somethingElse'] = new My\Custom\OneToFooRelator($manager);
 
 
 If you are using ``Amiss\Mapper\Note``, you would define a relation that uses this relator like so:
@@ -403,7 +409,9 @@ If you are using ``Amiss\Mapper\Note``, you would define a relation that uses th
         /** @primary */
         public $id
 
-        /** @has one-to-foo blah blah */
+        /**
+         * @has somethingElse
+         */
         public $foo;
     }
 
@@ -411,3 +419,23 @@ If you are using ``Amiss\Mapper\Note``, you would define a relation that uses th
 Calls to ``getRelated()`` and ``assignRelated()`` referring to ``Bar->foo`` will now use your custom
 relator to retrieve the related objects.
 
+If your relator requires additional keys/values to be available in the metadata (all the default
+ones do), you can use array notation instead:
+
+.. code-block:: php
+
+    <?php
+    class Bar
+    {
+        /** @primary */
+        public $id
+
+        /**
+         * @has.somethingElse.key value
+         * @has.somethingElse.anotherKey anotherValue
+         * @has.somethingElse.anArray value1
+         * @has.somethingElse.anArray value2
+         * @has.somethingElse.anArrayWithOneElement.0 yep
+         */
+        public $foo;
+    }

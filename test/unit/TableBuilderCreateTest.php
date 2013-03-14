@@ -226,7 +226,7 @@ class TestCreateWithIndexedSingleOnRelation
     public $quack;
     
     /**
-     * @has.one.of FooRecord
+     * @has.one.of stdClass
      * @has.one.on fooId
      */
     public $foo;
@@ -259,7 +259,7 @@ class TestCreateWithIndexedMultiOnRelation
     public $bar;
     
     /**
-     * @has.one.of FooRecord
+     * @has.one.of stdClass
      * @has.one.on.myFooId fooId
      * @has.one.on.myOtherFooId otherFooId
      */

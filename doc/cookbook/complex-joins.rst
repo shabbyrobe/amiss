@@ -44,7 +44,10 @@ Secondly, create an object to represent the row:
         /** @field */
         public $sequence;
         
-        /** @has one of=Event; on=eventId */
+        /**
+         * @has.one.of Event
+         * @has.one.on eventId
+         */
         public $event;
     }
 

@@ -51,17 +51,19 @@ Using the Annotation mapper, object/table mappings are defined in this way:
         /** @field */
         public $barId;
 
-        /** 
-         * One-to-many relation:
-         * @has many of=Bar 
-         */
-        public $bars;
-
         /**
          * One-to-one relation: 
-         * @has one of=Baz; on=bazId
+         * @has.one.of Baz
+         * @has.one.on bazId
          */
         public $baz;
+
+        /** 
+         * One-to-many relation:
+         * @has.many.of Bar
+         * @has.many.inverse foo
+         */
+        public $bars;
 
         // field is defined below using getter/setter
         private $fooDate;
@@ -182,39 +184,24 @@ Mapping an object relation is done inside a property or getter method's docblock
 
 The following annotations are available to define this mapping:
 
-.. py:attribute:: @has relationType relationParams
+.. py:attribute:: @has
 
     Defines a relation against a property or getter method.
 
-    ``relationType`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
-    ``one``, ``many`` and ``assoc`` relators are available by default.
-
-    ``relationParams`` allows you to pass an array of key/value pairs to instruct the relator
-    referred to by ``relationType`` how to handle retrieving the related objects.
-
-    ``relationParams`` is basically a query string with a few enhancements. Under the hood, Amiss
-    just uses PHP's stupidly named `parse_str <http://php.net/parse_str>`_ function. You can use
-    anything you would otherwise be able to use in a query string, like:
-
-        * ``url%20encoding%21``
-        * ``space+encoding``
-        * ``array[parameters]=yep``
-        * ``many=values&are=ok``
+    It supports a basic syntax when the relator requires no additional config::
     
-    As well as a few bits of syntactic sugar that gets cleaned up before parsing, like:
+        @has relationType
         
-        * ``semicolon=instead;of=ampersand;for=readability``
-        * ``whitespace = around ; separators = too``
+    And a more complex syntax when the relator does require more config::
     
-    You're free to use whatever you feel will be most readable, but my personal preference is for
-    this format, which is used throughout this guide::
-
-        foo=bar; this=that; array[a]=yep
+        @has.relationType.key1 value1
+        @has.relationType.key2 value2
+        
     
-    This saves Amiss the trouble of requiring you to learn a complicated annotation syntax to
-    represent complex data, with the added benefit of being mostly implemented in C.
+    ``relationType`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
+    ``one``, ``many`` and ``assoc`` relators are available by default, which all require config.
 
-    **One-to-one** (``@has one``) relationships require, at a minimum, the target object of the
+    **One-to-one** (``one``) relationships require, at a minimum, the target object of the
     relation and the field(s) on which the relation is established. You should read the 
     :ref:`relator-one` documentation for a full description of the data this relator requires. A
     simple one-to-one is annotated like so:
@@ -230,33 +217,42 @@ The following annotations are available to define this mapping:
             /** @field */
             public $artistTypeId;
             
-            /** @has one of=ArtistType; on=artistTypeId
+            /**
+             * @has.one.of ArtistType
+             * @has.one.on artistTypeId
+             */
             public $artist;
         }
     
 
     A one-to-one relationship where the left and right side have different field names::
 
-        @has one of=ArtistType; on[typeId]=artistTypeId
+        @has.one.of ArtistType
+        @has.one.on.typeId artistTypeId
 
 
     A one-to-one relationship on a composite key::
 
-        @has one of=ArtistType; on[]=typeIdPart1; on[]=typeIdPart2
+        @has.one.of ArtistType
+        @has.one.on typeIdPart1
+        @has.one.on typeIdPart2
 
 
     A one-to-one relationship on a composite key with different field names::
 
-        @has one of=ArtistType; on[typeIdPart1]=idPart1; on[typeIdPart2]=idPart2
+        @has.one.of ArtistType
+        @has.one.on.typeIdPart1 idPart1
+        @has.one.on.typeIdPart2 idPart2
         
     
     A one-to-one relationship with a matching one-to-many on the related object, where the ``on``
     values are to be determined from the related object::
         
-        @has one of=ArtistType; inverse=artist
+        @has.one.of ArtistType
+        @has.one.inverse artist
     
     
-    **One-to-many** (``@has many``) relationships support all the same options as one-to-one
+    **One-to-many** (``many``) relationships support all the same options as one-to-one
     relationships. You should read the :ref:`relator-many` documentation for a full description of 
     the data this relator requires. The simplest one-to-many is annotated like so:
 
@@ -268,12 +264,15 @@ The following annotations are available to define this mapping:
             /** @primary */
             public $artistTypeId;
 
-            /** @has many of=Artist; on=artistTypeId */
+            /**
+             * @has.many.of Artist
+             * @has.many.on artistTypeId
+             */
             public $artists;
         }
 
 
-    **Association** (``@has assoc``) relationships are annotated quite differently. You should read
+    **Association** (``assoc``) relationships are annotated quite differently. You should read
     the :ref:`relator-assoc` documentation for a full description of the data this relator requires.
     A quick example:
 
@@ -285,10 +284,16 @@ The following annotations are available to define this mapping:
             /** @primary */
             public $eventId;
 
-            /** @has many of=EventArtist; on=eventId */
+            /**
+             * @has.many.of EventArtist
+             * @has.many.on eventId
+             */
             public $eventArtists;
 
-            /** @has assoc of=Artist; via=EventArtist */
+            /** 
+             * @has.assoc.of Artist
+             * @has.assoc.via EventArtist
+             */
             public $artists;
         }
     
@@ -312,7 +317,7 @@ Getters and setters
 
 Properties should almost always be defined against your object as class-level fields in PHP. Don't
 use getters and setters when you are doing no more than getting or setting a private field value -
-it's a total waste of resources. See my `stackoverflow answer
+it's a total waste of resources. See my `stackoverflow rant
 <http://stackoverflow.com/a/813099/15004>`_ for a more thorough explanation of why you shouldn't,
 and for a brief explanation of how to get all of the benefits anyway.
 
@@ -337,7 +342,10 @@ property:
             return $this->baz;
         }
 
-        /** @has one of=Qux; on=baz */
+        /**
+         * @has.one.of Qux
+         * @has.one.on baz
+         */
         public function getQux()
         {
             return $this->qux;
@@ -399,7 +407,8 @@ opinionated so you can go ahead and make your names whatever you please:
         }
 
         /** 
-         * @has one of=Qux; on=baz
+         * @has.one.of Qux
+         * @has.one.on baz
          * @setter makeQuxEqualTo
          */
         public function pleaseGrabThatQuxForMe() 

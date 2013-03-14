@@ -3,6 +3,7 @@ from fabric.api import *
 import os, sys
 
 env.base_path = os.path.dirname(__file__)
+env.test_path = env.base_path
 
 @task
 def doc(clean=False):
@@ -25,7 +26,7 @@ def pdf():
 
 @task
 def test(filter=None):
-    with lcd(os.path.join(env.base_path, 'test')):
+    with lcd(env.test_path):
         cmd = 'phpunit --exclude-group faulty'
         if filter:
             cmd += ' --filter ' + filter
@@ -33,17 +34,17 @@ def test(filter=None):
 
 @task
 def testgrp(group):
-    with lcd(os.path.join(env.base_path, 'test')):
+    with lcd(env.test_path):
         local('phpunit --group %s' % group)
 
 @task
 def testall():
-    with lcd(os.path.join(env.base_path, 'test')):
+    with lcd(env.test_path):
         local('phpunit')
 
 @task
 def testcvg(coverage_path='/tmp/cvg'):
-    with lcd(os.path.join(env.base_path, 'test')):
+    with lcd(env.test_path):
         local('phpunit --exclude-group faulty --coverage-html=%s' % coverage_path)
         print "Coverage available at:"
         print "%s/index.html" % coverage_path

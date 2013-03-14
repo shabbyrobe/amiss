@@ -83,7 +83,10 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         /** @field */
         public $venueId;
 
-        /** @has one of=Venue; on=venueId */
+        /**
+         * @has.one.of Venue
+         * @has.one.on venueId
+         */
         public $venue;
     }
 
@@ -112,7 +115,8 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
 
         /** 
          * Inverse relationship of Event->venue
-         * @has many of=Event; inverse=venue
+         * @has.many.of Event
+         * @has.many.inverse venue
          */
         public $events;
     }
@@ -201,7 +205,8 @@ One-to-one
         // snip
 
         /**
-         * @has one of=Venue; on=venueId
+         * @has.one.of Venue
+         * @has.one.on venueId
          */
         public $venue;
     }
@@ -238,7 +243,8 @@ One-to-many
         // snip
 
         /**
-         * @has many of=Event; on=venueId
+         * @has.many.of Event
+         * @has.many.on venueId
          */
         public $events;
     }
@@ -281,7 +287,8 @@ also require the relation to be specified on both sides:
         // snip
         
         /**
-         * @has assoc of=Artist; via=EventArtist
+         * @has.assoc.of Artist
+         * @has.assoc.via EventArtist
          */
         public $artists;
     }
@@ -291,12 +298,14 @@ also require the relation to be specified on both sides:
         // snip
 
         /**
-         * @has one of=Event; on=eventId
+         * @has.one.of Event
+         * @has.one.on eventId
          */
         public $event;
 
         /**
-         * @has one of=Artist; on=artistId
+         * @has.one.of Artist
+         * @has.one.on artistId
          */
         public $artist;
     }
@@ -306,7 +315,8 @@ also require the relation to be specified on both sides:
         // snip
 
         /**
-         * @has assoc of=Event; via=EventArtist
+         * @has.assoc.of Event
+         * @has.assoc.via EventArtist
          */
         public $events;
     }
