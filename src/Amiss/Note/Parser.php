@@ -3,24 +3,18 @@ namespace Amiss\Note;
 
 class Parser
 {
-    const SEP_ARRAY = '/(\]\[|\[|\])/';
-    const SEP_DOT = '/\./';
-    
     public $defaultValue;
-    public $keySeparatorPattern;
     public $keyPrefix;
     
     public function __construct(array $config=null)
     {
         $defaultConfig = array(
-            'keySeparatorPattern'=>static::SEP_DOT,
             'defaultValue'=>true,
             'keyPrefix'=>null,
         );
         $config = $config ? array_merge($defaultConfig, $config) : $defaultConfig;
         
         $this->defaultValue = $config['defaultValue'];
-        $this->keySeparatorPattern = $config['keySeparatorPattern'];
         $this->keyPrefix = $config['keyPrefix'];
     }
     
@@ -55,8 +49,6 @@ class Parser
     
     public function parseDocComment($docComment)
     {
-        $keyPrefixLen = $this->keyPrefix ? strlen($this->keyPrefix) : 0;
-        
         // docblock start
         $docComment = preg_replace('@\s*/\*+@', '', $docComment);
         
@@ -66,8 +58,15 @@ class Parser
         // docblock margin
         $docComment = preg_replace('@^\s*\*\s*@mx', '', $docComment);
         
+        return $this->parse($docComment);
+    }
+    
+    public function parse($string)
+    {
+        $keyPrefixLen = $this->keyPrefix ? strlen($this->keyPrefix) : 0;
+        
         $data = array();
-        $lines = preg_split('@\n@', $docComment, null, PREG_SPLIT_NO_EMPTY);
+        $lines = preg_split('@\n@', $string, null, PREG_SPLIT_NO_EMPTY);
         foreach ($lines as $l) {
             $l = trim($l);
             if ($l && $l[0] == '@') {
@@ -81,10 +80,19 @@ class Parser
                     $key = substr($key, $keyPrefixLen);
                 }   
                 
-                $key = $this->keySeparatorPattern 
-                    ? preg_split($this->keySeparatorPattern, $key, null, PREG_SPLIT_NO_EMPTY)
-                    : array($key)
-                ;
+                $key = preg_split(
+                    "/(
+                           \]\[
+                        |  \[
+                        |  \]\.   # php style abuts dot notation (foo[a].b)
+                        |  \]
+                        |  \.)
+                    /x", 
+                    rtrim($key, ']')
+                );
+                end($key);
+                if (current($key) === "")
+                    $key[key($key)] = '0';
                 
                 $value = isset($d[1]) ? $d[1] : $this->defaultValue;
                 
