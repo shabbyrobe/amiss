@@ -155,10 +155,28 @@ class NoteParserTest extends \CustomTestCase
         $this->assertEquals(array('ab'=>array('one')), $parsed);
     }
     
+    public function testMultipleValueArrayCoercionWithEmptyIndex()
+    {
+        $parsed = $this->parser->parse(
+            "@ab. one\n".
+            "@ab. two\n"
+        );
+        $this->assertEquals(array('ab'=>array('one', 'two')), $parsed);
+    }
+    
     public function testSingleValueArrayCoercionWithPHPArrayNotation()
     {
         $parsed = $this->parser->parse("@ab[] one\n");
         $this->assertEquals(array('ab'=>array('one')), $parsed);
+    }
+    
+    public function testMultipleValueArrayCoercionWithPHPArrayNotation()
+    {
+        $parsed = $this->parser->parse(
+            "@ab[] one\n".
+            "@ab[] two\n"
+        );
+        $this->assertEquals(array('ab'=>array('one', 'two')), $parsed);
     }
     
     public function testAssoc()

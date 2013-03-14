@@ -165,7 +165,7 @@ class NoteMapperTest extends \CustomTestCase
     /**
      * @covers Amiss\Mapper\Note::loadMeta
      */
-    public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsTypeSet()
+    public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsType()
     {
         $mapper = new \Amiss\Mapper\Note;
         eval('

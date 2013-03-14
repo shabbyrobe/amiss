@@ -61,6 +61,10 @@ class Parser
         return $this->parse($docComment);
     }
     
+    // TODO: this should use a proper parser for the keys. it should be simple 
+    // to do, performance is not an issue here because the result of this should
+    // ALWAYS be cached somehow, and it allows better error handling. this 
+    // will do for now, but it's definitely one to revisit.
     public function parse($string)
     {
         $keyPrefixLen = $this->keyPrefix ? strlen($this->keyPrefix) : 0;
@@ -78,21 +82,18 @@ class Parser
                     if (strpos($key, $this->keyPrefix)!==0)
                         continue;
                     $key = substr($key, $keyPrefixLen);
-                }   
+                }
                 
                 $key = preg_split(
                     "/(
                            \]\[
                         |  \[
-                        |  \]\.   # php style abuts dot notation (foo[a].b)
+                        |  \]\.   # when php style abuts dot notation (foo[a].b)
                         |  \]
                         |  \.)
                     /x", 
                     rtrim($key, ']')
                 );
-                end($key);
-                if (current($key) === "")
-                    $key[key($key)] = '0';
                 
                 $value = isset($d[1]) ? $d[1] : $this->defaultValue;
                 
@@ -103,8 +104,15 @@ class Parser
                         throw new \UnexpectedValueException("Key at path ".implode('.', $found)." already had non-array value, tried to set key $part");
                     
                     $found[] = $part;
-                    $current = &$current[$part];
+                    
+                    // if the last segment is empty, it means "@key[] value" or "@key. value" was used,
+                    //  so we should just assign the next key
+                    if ($part !== "")
+                        $current = &$current[$part];
+                    else
+                        $current = &$current[];
                 }
+                
                 if ($current === null)
                     $current = $value;
                 elseif (!is_array($current))
