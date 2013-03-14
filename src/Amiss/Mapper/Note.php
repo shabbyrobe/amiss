@@ -62,6 +62,7 @@ class Note extends \Amiss\Mapper\Base
             'primary'=>array(),
             'fields'=>array(),
             'relations'=>array(),
+            'ext'=>isset($classNotes['ext']) ? $classNotes['ext'] : null,
             'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
         );
         
