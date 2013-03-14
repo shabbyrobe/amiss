@@ -156,10 +156,10 @@ Embed
     useful when using Amiss with the Mongo extension, or when you are ok with storing a complex
     document as a serialised blob in a relational column (I am, sometimes).
 
-    The ``Embed`` type places additional requirements on the type name - it must be followed with
-    the name of the class that is to be embedded, and an optional ``[]`` if the embedded value is  a
-    collection. In the following example, we add a type handler for a type called "nest" that will
-    embed one ``ArtistType`` object:
+    The ``Embed`` type requires the class name of the embedded object and, optionally, whether an 
+    array of objects is to be embedded. In the following example, we add a type handler for a type 
+    called "nest" and specify one field that embeds a single instance of an ``ArtistType`` object,
+    and another that embeds a collection of ``ArtistType`` objects:
 
     .. code-block:: php
 
@@ -168,13 +168,16 @@ Embed
         {
             /**
              * @field
-             * @type embed ArtistType
+             * @type.id embed
+             * @type.class ArtistType
              */
             public $artistType;
 
             /**
              * @field
-             * @type embed Member[]
+             * @type.id embed
+             * @type.class Member
+             * @type.many
              */
             public $members;
         }
@@ -185,9 +188,9 @@ Embed
 
     .. warning::
 
-        When using Amiss with MySQL or SQLite, this must be used in conjunction with the
+        When using Amiss with MySQL or SQLite, serialisation must be used in conjunction with the
         ``Amiss\\Type\\Encoder`` type as these data stores can not handle storing or retrieving
-        objects as column values directly.
+        objects directly.
 
         .. code-block:: php
 
