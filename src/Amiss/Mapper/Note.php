@@ -143,10 +143,15 @@ class Note extends \Amiss\Mapper\Base
         
         foreach ($relationNotes as $name=>$info) {
             $relation = $info['has'];
-            $id = key($relation);
-            $relation = current($relation);
-            array_unshift($relation, $id);
-            
+            if (is_string($relation)) {
+                $relation = array($relation);
+            }
+            else {
+                $id = key($relation);
+                $relation = current($relation);
+                array_unshift($relation, $id);
+            }
+                
             if (isset($info['getter']))
                 list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
             

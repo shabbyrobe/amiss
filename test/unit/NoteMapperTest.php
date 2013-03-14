@@ -2,11 +2,13 @@
 
 namespace Amiss\Test\Acceptance;
 
+/**
+ * @group mapper
+ * @group unit
+ */ 
 class NoteMapperTest extends \CustomTestCase
 {   
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaWithDefinedTable()
@@ -22,8 +24,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaWithDefaultTable()
@@ -43,8 +43,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaCache()
@@ -77,8 +75,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaMultiplePrimaries()
@@ -96,8 +92,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaFieldsFound()
@@ -116,8 +110,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaSkipsPropertiesWithNoFieldNote()
@@ -136,8 +128,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaGetterWithDefaultSetter()
@@ -157,8 +147,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaPrimaryNoteImpliesFieldNote()
@@ -175,8 +163,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsTypeSet()
@@ -197,8 +183,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaPrimaryNoteFound()
@@ -215,8 +199,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaMultiPrimaryNoteFound()
@@ -234,8 +216,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaFieldTypeFound()
@@ -257,8 +237,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::loadMeta
      */
     public function testGetMetaWithParentClass()
@@ -280,8 +258,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::buildRelations
      * @covers Amiss\Mapper\Note::findGetterSetter
      */
@@ -317,8 +293,6 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Note::buildRelations
      * @covers Amiss\Mapper\Note::findGetterSetter
      */
@@ -360,9 +334,6 @@ class NoteMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @group unit
-     * 
      * @covers Amiss\Mapper\Note::loadMeta
      * @covers Amiss\Mapper\Note::buildRelations
      */
@@ -394,4 +365,75 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals($expected, $meta->relations);
     }
     
+    /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     * @covers Amiss\Mapper\Note::buildRelations
+     */
+    public function testGetMetaWithStringRelation()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = __FUNCTION__;
+        eval("
+            namespace ".__NAMESPACE__.";
+            class {$name}Class1 {
+                /** @has test */ 
+                public \$test;
+            }
+        ");
+        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
+        $expected = array(
+            'test'=>array('test')
+        );
+        $this->assertEquals($expected, $meta->relations);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::buildRelations
+     */
+    public function testGetMetaRelationWithCompositeKeyAsStrings()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = __FUNCTION__;
+        eval("
+            namespace ".__NAMESPACE__.";
+            class {$name}Foo {
+                /** 
+                 * @has.one.of stdClass
+                 * @has.one.on barId
+                 * @has.one.on bazId
+                 */
+                public \$bar;
+            }
+        ");
+        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $expected = array(
+            'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId', 'bazId')),
+        );
+        $this->assertEquals($expected, $meta->relations);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::buildRelations
+     */
+    public function testGetMetaRelationWithCompositeKeyAsHash()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = __FUNCTION__;
+        eval("
+            namespace ".__NAMESPACE__.";
+            class {$name}Foo {
+                /** 
+                 * @has.one.of stdClass
+                 * @has.one.on.barId otherBarId
+                 * @has.one.on.bazId otherBazId
+                 */
+                public \$bar;
+            }
+        ");
+        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $expected = array(
+            'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId'=>'otherBarId', 'bazId'=>'otherBazId')),
+        );
+        $this->assertEquals($expected, $meta->relations);
+    }
 }
