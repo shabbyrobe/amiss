@@ -1,3 +1,0 @@
-[submodule "doc/_themes/amiss"]
-	path = doc/_themes/amiss
-	url = git@github.com:shabbyrobe/amiss-style.git
