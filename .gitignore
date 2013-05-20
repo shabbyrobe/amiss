@@ -7,3 +7,5 @@ doc/_build/
 *.pyc
 *.orig
 texput.log
+tags
+*.swp
