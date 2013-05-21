@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__.'/../../src/Loader.php');
+require_once(__DIR__.'/../../src/Amiss.php');
 require_once(__DIR__.'/../lib/functions.php');
 Amiss::register();
 
@@ -17,17 +17,19 @@ Options:
   -r, --recurse   Recurse all input directories looking for items
   --mapper        Mapper class name. Either pass this or define a mapper in the boostrap
   --note NOTE     Search for all classes that have this note set at class level 
-  --ns NAMESPACE  Search for all classes in this namespace. Can specify more than once.
+  --ns NAMESPACE  Search for all classes in this namespace. Can specify more than once. If
+                  only specified once, will be set as Amiss\Mapper\Base->objectNamespace
 
 Examples:
 Use all classes with the @foo annotation at class level:
-  amiss create-tables-sql --note foo
+  amiss create-tables-sql --note foo src/foo.php
 
-Use all classes in the Foo\Model namespace
-  amiss create-tables-sql --namespace Foo\\Model
+Use all classes in the Foo\Model namespace in the src/foo.php file
+  amiss create-tables-sql --namespace Foo\\Model src/foo.php
 
-Use all classes in the Foo\Model and Bar\Model namespaces with the @foo annotation:
-  amiss create-tables-sql --namespace Foo\\Model --namespace Bar\\Model --note foo
+Use all classes in the Foo\Model and Bar\Model namespaces with the @foo annotation in
+the current directory:
+  amiss create-tables-sql --namespace Foo\\Model --namespace Bar\\Model --note foo -r .
 
 ";
 
@@ -103,8 +105,11 @@ if (!$manager)
     $manager = new Amiss\Sql\Manager(new Amiss\Sql\Connector($engine.':blahblah'), $mapper);
 
 $toCreate = find_classes($input);
-if ($namespaces)
+if ($namespaces) {
     $toCreate = filter_classes_by_namespaces($toCreate, $namespaces);
+    if (count($namespaces) == 1 && $mapper instanceof \Amiss\Mapper\Base)
+        $mapper->objectNamespace = $namespaces[0];
+}
 if ($notes)
     $toCreate = filter_classes_by_notes($toCreate, $notes);
 

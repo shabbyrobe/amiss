@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__.'/../../src/Loader.php');
+require_once(__DIR__.'/../../src/Amiss.php');
 require_once(__DIR__.'/../lib/functions.php');
 Amiss::register();
 

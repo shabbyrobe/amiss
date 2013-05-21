@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__.'/../../src/Loader.php');
+require_once(__DIR__.'/../../src/Amiss.php');
 require_once(__DIR__.'/../lib/functions.php');
 Amiss::register();
 
@@ -129,7 +129,6 @@ foreach ($wtmp as $w) {
 $words = array_unique($words);
 
 $connector = new Amiss\Sql\Connector($dsn, $user, $password);
-
 $stmt = $connector->query("SHOW TABLES");
 while ($table = $stmt->fetchColumn()) {
     $oname = strtr($table, $words);
