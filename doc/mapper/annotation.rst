@@ -99,18 +99,39 @@ Annotations are javadoc-style key/values and are formatted like so:
      * @key this is the value
      */
 
+- Keys end at the first whitespace character. 
+- Values start at the first non-whitespace character after the key.
+- Values are optional.
+- Values are ended by a newline or the end of the docblock.
 
-The ``Amiss\Note\Parser`` class is used to extract these annotations. Go ahead and use it in your
-own application if you find it useful, but keep in mind the following:
 
- * Everything up to the first space is considered the key. Use whatever symbols 
-   you like for the key as long as it isn't whitespace.
+Arbitrarily nested arrays can be represented:
 
- * The value starts after the first space after the key and ends at the first newline. 
-   Currently, RFC 2822 style folding is not supported (though it may be in future if it 
-   is needed by Amiss). The value is *not trimmed for whitespace*.
+.. code-block:: php
 
- * Multiple annotations per line are *not supported*.
+    <?php
+    /**
+     * @foo.bar.baz value
+     */
+    $parsesTo = array(
+        'foo'=>array(
+            'bar'=>array(
+                'baz'=>'value',
+            ),
+        ),
+    );
+
+
+Arrays will be inferred if multiple values are specified:
+
+.. code-block:: php
+
+    <?php
+    /**
+     * @foo 1
+     * @foo 2
+     */
+    $parsesTo = array('foo'=>array(1, 2));
 
 
 Class Mapping
@@ -445,10 +466,11 @@ getter and setter as the first two arguments, then pass it as the first construc
     $cache = new \Amiss\Cache('eaccelerator_get', 'eaccelerator_put');
     
     // when using the SQL manager's default note mapper:
-    $manager = new \Amiss\Sql\Manager($db, $cache);
+    $manager = \Amiss::createSqlManager($db, array('cache'=>$cache));
     
     // when creating the mapper by hand
     $mapper = new \Amiss\Mapper\Note($cache);
+    $manager = \Amiss::createSqlManager($db, $mapper);
 
 
 By default, no TTL or expiration information will be passed by the mapper. In the case of

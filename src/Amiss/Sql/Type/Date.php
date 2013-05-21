@@ -41,6 +41,8 @@ class Date implements \Amiss\Type\Handler
     {
         $out = null;
         if ($value instanceof \DateTime) {
+            // This conversion may not be an issue. Wait until it is raised
+            // before making a decision.
             if ($value->getTimeZone() != $this->appTimeZone)
                 throw new \UnexpectedValueException();
             

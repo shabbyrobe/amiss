@@ -14,6 +14,21 @@ timestamp? But when you're working on them in PHP, you really want them to be a 
 ``Amiss\Mapper\Base`` provides a facility for handling specific database types arbirtrarily. Any
 class which inherits this class (including the :doc:`annotation`) gains this support.
 
+It's worth mentioning that type handlers should be used sparingly and only when absolutely
+necessary. When overused, they can significantly slow down the performance of the mapper as each
+time a column value is retrieved from the database for the field you set it against must be filtered
+through it. If you specify a type handler against all 20 fields of your class and you retrieve 200
+of them, you've just added 4000 function calls to your retrieval operation. Congratulations, you
+have just introduced the slowest part of your interaction with the database! By keeping the number
+of type handled fields to the absolute bare minimum necessary, you will arrive at exactly the
+intersection of performance and pragmatism that Amiss is targeting.
+
+A note on integers: PDO will return strings by default even when the underlying database column is
+an integer when using ``FETCH_ASSOC`` (which Amiss does), but does your application really care? PHP
+will treat a string as an integer if used as one, and unless you're doing things that explicitly
+rely on ``===`` to work, you almost certainly don't need to convert these values, though you should
+be aware of this behaviour.
+
 
 Quickstart (annotation mapper)
 ------------------------------
@@ -49,9 +64,9 @@ retrieval and storage.
 Using Type Handlers
 -------------------
 
-In order to register a handler with Amiss and allow it to be used, you need to either assign it
-directly by key to the ``Amiss\Mapper\Base->typeHandlers`` array, or if registering the same handler
-to many types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler, $id(s))``:
+In order to register a handler with Amiss and allow it to be used, you need to call
+``Amiss\Mapper\Base::addTypeHandler($typeHandler, $id)``, or if registering the same handler to many
+types, using ``Amiss\Mapper\Base::addTypeHandler($typeHandler, array($id1, $id2))``:
 
 .. code-block:: php
 
@@ -85,16 +100,23 @@ opening bracket
 Included Handlers
 -----------------
 
-Amiss provides the following type handlers out of the box:
+Amiss provides a set of type handlers for common use cases. These are set up by default when
+creating a manager or mapper using the ``Amiss`` helper class.
 
 
 Date
 ~~~~
 
-.. py:class:: Amiss\\Type\\Date( $withTime=true, $timeZone=null )
+.. py:class:: Amiss\\Type\\Date( $withTime=true, $dbTimeZone, $appTimeZone=null )
 
     Converts database ``DATE`` or ``DATETIME`` into a PHP ``DateTime`` on object creation and PHP
     DateTime objects into a ``DATE`` or ``DATETIME`` on row export.
+
+    Both timezone arguments take either a ``DateTimeZone`` object or a string that ``DateTimeZone``
+    will accept on its constructor.
+    
+    The ``$dbTimeZone`` parameter is required but the application time zone will be inferred from
+    ``date_default_timezone_get`` if it is not passed.
 
     :param withTime: Pass ``true`` if the type is a ``DATETIME``, ``false`` if it's a ``DATE``
     :param timeZone: Use this timezone with all created ``DateTime`` objects. If not passed, 
@@ -226,7 +248,8 @@ interface requires three methods:
     depending on whether you're using MySQL or SQLite.
 
 
-The following (naive) handler demonstrates serialising/deserialising an object into a single column:
+The following (naive) handler demonstrates serialising/deserialising an object into a single column
+(though in practice you would use the provided ``Amiss\Type\Encoder`` handler for this task):
 
 .. code-block:: php
 

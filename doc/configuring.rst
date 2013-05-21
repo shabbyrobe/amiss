@@ -91,7 +91,7 @@ configuration options as the second parameter. The following options are support
     Used instead of the default set of relators produced by ``Amiss::createSqlRelators``.
 
 
-``Amiss::createSqlTypeHandlers`` can returns handlers for converting database dates to PHP
+``Amiss::createSqlTypeHandlers`` returns handlers for converting database dates to PHP
 ``DateTime`` objects. For these conversions to happen consistently and reliably, both the
 database timezone and the application timezone need to be specified in the config otherwise the
 handlers will not be created:
