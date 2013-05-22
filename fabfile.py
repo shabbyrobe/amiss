@@ -28,7 +28,7 @@ def pdf():
 @task
 def test(filter=None):
     with lcd(env.test_path):
-        cmd = 'phpunit --exclude-group faulty'
+        cmd = 'php test/run.php --exclude-group faulty'
         if filter:
             cmd += ' --filter ' + filter
         local(cmd)
@@ -36,17 +36,17 @@ def test(filter=None):
 @task
 def testgrp(group):
     with lcd(env.test_path):
-        local('phpunit --group %s' % group)
+        local('php test/run.php --group %s' % group)
 
 @task
 def testall():
     with lcd(env.test_path):
-        local('phpunit')
+        local('php test/run.php')
 
 @task
 def testcvg(coverage_path='/tmp/cvg'):
     with lcd(env.test_path):
-        local('phpunit --exclude-group faulty --coverage-html=%s' % coverage_path)
+        local('php test/run.php --exclude-group faulty --coverage-html=%s' % coverage_path)
         print "Coverage available at:"
         print "%s/index.html" % coverage_path
 
