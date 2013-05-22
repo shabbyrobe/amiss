@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerSelectTest extends \SqliteDataTestCase
+class ManagerSelectTest extends \ModelDataTestCase
 {
     /**
      * @group acceptance

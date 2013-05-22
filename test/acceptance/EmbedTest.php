@@ -7,7 +7,7 @@ use Amiss\Type;
 /**
  * @group unit
  */
-class EmbedTest extends \SqliteDataTestCase
+class EmbedTest extends \ModelDataTestCase
 {
     public function setUp()
     {

@@ -3,7 +3,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\Criteria\Update;
 
-class ManagerUpdateTableTest extends \SqliteDataTestCase
+class ManagerUpdateTableTest extends \ModelDataTestCase
 {
     public function setUp()
     {

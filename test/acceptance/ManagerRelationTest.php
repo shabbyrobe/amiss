@@ -9,7 +9,7 @@ use Amiss\Demo;
  * @group acceptance
  * @group manager
  */
-class ManagerRelationTest extends \SqliteDataTestCase
+class ManagerRelationTest extends \ModelDataTestCase
 {
     /**
      * @group acceptance

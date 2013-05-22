@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerUpdateObjectTest extends \SqliteDataTestCase
+class ManagerUpdateObjectTest extends \ModelDataTestCase
 {
     public function setUp()
     {

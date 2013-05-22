@@ -213,7 +213,7 @@ class TestApp
     }
 }
     
-class SqliteDataTestCase extends DataTestCase
+class ModelDataTestCase extends DataTestCase
 {
     /**
      * @var Amiss\Sql\Manager
@@ -250,7 +250,7 @@ class SqliteDataTestCase extends DataTestCase
     }
 }
 
-class ActiveRecordDataTestCase extends SqliteDataTestCase
+class ActiveRecordDataTestCase extends ModelDataTestCase
 {
     public function getMapper()
     {

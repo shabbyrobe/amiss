@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerDeleteObjectTest extends \SqliteDataTestCase
+class ManagerDeleteObjectTest extends \ModelDataTestCase
 {
     public function setUp()
     {

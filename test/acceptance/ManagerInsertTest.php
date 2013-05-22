@@ -3,7 +3,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class ManagerInsertObjectTest extends \SqliteDataTestCase
+class ManagerInsertObjectTest extends \ModelDataTestCase
 {
     /**
      * Ensures the signature for object insertion works

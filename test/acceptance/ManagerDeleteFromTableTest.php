@@ -3,7 +3,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\Criteria\Query;
 
-class ManagerDeleteFromTableTest extends \SqliteDataTestCase
+class ManagerDeleteFromTableTest extends \ModelDataTestCase
 {
     public function setUp()
     {
