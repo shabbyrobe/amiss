@@ -13,12 +13,13 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithDefinedTable()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval("
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, "
             namespace ".__NAMESPACE__.";
             /** @table custom_table */
             class ".__FUNCTION__." {}
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals('custom_table', $meta->table);
     }
 
@@ -33,12 +34,13 @@ class NoteMapperTest extends \CustomTestCase
         ;
         $mapper->expects($this->once())->method('getDefaultTable');
         
-        eval("
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, "
             namespace ".__NAMESPACE__.";
             class ".__FUNCTION__." {}
         ");
         
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
     }
     
     /**
@@ -79,14 +81,15 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaMultiplePrimaries()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @primary */ public $id1;
                 /** @primary */ public $id2;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('id1', 'id2'), $meta->primary);
     }
     
@@ -96,7 +99,8 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaFieldsFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @field */ public $foo;
@@ -104,7 +108,7 @@ class NoteMapperTest extends \CustomTestCase
             }
         ');
         
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('foo', 'bar'), array_keys($meta->getFields()));
     }
     
@@ -114,7 +118,8 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaSkipsPropertiesWithNoFieldNote()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 public $notAField;
@@ -122,7 +127,7 @@ class NoteMapperTest extends \CustomTestCase
                 /** @field */ public $yepAField;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('yepAField'), array_keys($meta->getFields()));
     }
     
@@ -132,7 +137,8 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaGetterWithDefaultSetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @field */
@@ -140,7 +146,7 @@ class NoteMapperTest extends \CustomTestCase
                 public function setFoo($value){} 
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $expected = array('name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo');
         $this->assertEquals($expected, $meta->getField('foo'));
     }
@@ -151,13 +157,14 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaPrimaryNoteImpliesFieldNote()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @primary */ public $id;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('id'), array_keys($meta->getFields()));
     }
 
@@ -167,7 +174,8 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsType()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /**
@@ -177,7 +185,7 @@ class NoteMapperTest extends \CustomTestCase
                 public $id;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('id'=>array('name'=>'id', 'type'=>array('id'=>'autoinc'))), $meta->getFields());
     }
     
@@ -187,13 +195,14 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaPrimaryNoteFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @primary */ public $id;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('id'), $meta->primary);
     }
 
@@ -203,14 +212,15 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaMultiPrimaryNoteFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** @primary */ public $idPart1;
                 /** @primary */ public $idPart2;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $this->assertEquals(array('idPart1', 'idPart2'), $meta->primary);
     }
     
@@ -220,7 +230,8 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaFieldTypeFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.' {
                 /** 
@@ -230,7 +241,7 @@ class NoteMapperTest extends \CustomTestCase
                  public $id;
             }
         ');
-        $meta = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__);
+        $meta = $mapper->getMeta($class);
         $field = $meta->getField('id');
         $this->assertEquals(array('id'=>'foobar'), $field['type']);
     }
@@ -241,18 +252,22 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithParentClass()
     {
         $mapper = new \Amiss\Mapper\Note;
-        eval('
+        $prefix = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass("{$prefix}1", '
             namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.'1 {
                 /** @field */ public $foo;
             }
+        ');
+        $this->createClass("{$prefix}2", '
+            namespace '.__NAMESPACE__.';
             class '.__FUNCTION__.'2 extends '.__FUNCTION__.'1 {
                 /** @field */ public $bar;
             }
         ');
         
-        $meta1 = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__.'1');
-        $meta2 = $mapper->getMeta(__NAMESPACE__.'\\'.__FUNCTION__.'2');
+        $meta1 = $mapper->getMeta("{$prefix}1");
+        $meta2 = $mapper->getMeta("{$prefix}2");
         $this->assertEquals($meta1, $this->getProtected($meta2, 'parent'));
     }
 
@@ -264,7 +279,8 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = __FUNCTION__;
-        eval("
+        $class = __NAMESPACE__."\\{$name}Foo";
+        $this->createClass($class, "
             namespace ".__NAMESPACE__.";
             class {$name}Foo {
                 /** @primary */ 
@@ -284,7 +300,7 @@ class NoteMapperTest extends \CustomTestCase
                 }
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $meta = $mapper->getMeta($class);
         $expected = array(
             'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
         );
@@ -299,7 +315,8 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = __FUNCTION__;
-        eval("
+        $class = __NAMESPACE__."\\{$name}Foo";
+        $this->createClass($class, "
             namespace ".__NAMESPACE__.";
             class {$name}Foo {
                 /** @primary */ 
@@ -325,7 +342,7 @@ class NoteMapperTest extends \CustomTestCase
                 }
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $meta = $mapper->getMeta($class);
         $expected = array(
             'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
         );
@@ -340,7 +357,8 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = __FUNCTION__;
-        eval("
+        $prefix = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass("{$prefix}Class1", "
             namespace ".__NAMESPACE__.";
             class {$name}Class1 {
                 /** @primary */ 
@@ -352,12 +370,15 @@ class NoteMapperTest extends \CustomTestCase
                 /** @has.many.of {$name}Class2 */
                 public \${$name}2;
             }
+        ");
+        $this->createClass("{$prefix}Class2", "
+            namespace ".__NAMESPACE__.";
             class {$name}Class2 {
                 /** @primary */ 
                 public \${$name}2Id;
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
+        $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
             $name.'2'=>array('many', 'of'=>$name."Class2")
         );
@@ -371,15 +392,16 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithStringRelation()
     {
         $mapper = new \Amiss\Mapper\Note;
+        $prefix = __NAMESPACE__."\\".__FUNCTION__;
         $name = __FUNCTION__;
-        eval("
+        $this->createClass("{$prefix}Class1", "
             namespace ".__NAMESPACE__.";
             class {$name}Class1 {
                 /** @has test */ 
                 public \$test;
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Class1");
+        $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
             'test'=>array('test')
         );
@@ -393,7 +415,8 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = __FUNCTION__;
-        eval("
+        $prefix = __NAMESPACE__."\\".__FUNCTION__;
+        $this->createClass("{$prefix}Foo", "
             namespace ".__NAMESPACE__.";
             class {$name}Foo {
                 /** 
@@ -404,7 +427,7 @@ class NoteMapperTest extends \CustomTestCase
                 public \$bar;
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $meta = $mapper->getMeta("{$prefix}Foo");
         $expected = array(
             'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId', 'bazId')),
         );
@@ -418,7 +441,8 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = __FUNCTION__;
-        eval("
+        $prefix = __NAMESPACE__."\\".__FUNCTION__;
+        $this->createClass("{$prefix}Foo", "
             namespace ".__NAMESPACE__.";
             class {$name}Foo {
                 /** 
@@ -429,7 +453,7 @@ class NoteMapperTest extends \CustomTestCase
                 public \$bar;
             }
         ");
-        $meta = $mapper->getMeta(__NAMESPACE__."\\{$name}Foo");
+        $meta = $mapper->getMeta("{$prefix}Foo");
         $expected = array(
             'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId'=>'otherBarId', 'bazId'=>'otherBazId')),
         );

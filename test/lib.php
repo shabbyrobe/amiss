@@ -35,6 +35,13 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
     }
     */
     
+    protected function createClass($fqcn, $src)
+    {
+        if (!class_exists($fqcn)) {
+            eval($src);
+        }
+    }
+
     protected function callProtected($class, $name)
     {
         $ref = new ReflectionClass($class);
@@ -91,16 +98,17 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 
 class DataTestCase extends CustomTestCase
 {
-    private static $connectionInfo;
-    
     public function setUp()
     {
         parent::setUp();
         
         $info = $this->getConnectionInfo();
         if ($info['engine'] == 'mysql') {
+            if (!isset($info['dbName']))
+                throw new \UnexpectedValueException("Please set dbName in MySQL connection info");
+            
             $result = $this->getConnector()->exec("CREATE DATABASE IF NOT EXISTS `{$info['dbName']}`");
-            self::$connectionInfo['statements'] = (
+            TestApp::instance()->connectionInfo['statements'] = array(
                 "USE `{$info['dbName']}`"
             );
         }
@@ -113,19 +121,55 @@ class DataTestCase extends CustomTestCase
         $info = $this->getConnectionInfo();
         if ($info['engine'] == 'mysql') {
             $this->getConnector()->exec("DROP DATABASE IF EXISTS `{$info['dbName']}`");
-            self::$connectionInfo['statements'] = array();
+            TestApp::instance()->connectionInfo['statements'] = array();
         }
     }
     
     public function getConnector()
     {
         $connection = $this->getConnectionInfo();
-        $statements = isset($connection['statements']) ? $connection['statements'] : array();
-        return new \Amiss\Sql\Connector($connection['dsn'], $connection['user'], $connection['password'], array(), $statements);
+        return \Amiss\Sql\Connector::create($connection);
     }
     
     public function getConnectionInfo()
     {
+        return TestApp::instance()->getConnectionInfo();
+    }
+
+    public function getEngine()
+    {
+        $info = $this->getConnectionInfo();
+        return $info['engine'];
+    }
+    
+    public function readSqlFile($name)
+    {
+        $name = strtr($name, array(
+            '{engine}'=>$this->getEngine(),
+        ));
+        return file_get_contents($name);
+    }
+}
+
+class TestApp
+{
+    public $connectionInfo;
+
+    public static $instance;
+
+    public static function instance()
+    {
+        if (!static::$instance) {
+            static::$instance = new static;
+        }
+        return static::$instance;
+    }
+
+    public function getConnectionInfo()
+    {
+        return $this->connectionInfo;
+
+        /*
         if (!self::$connectionInfo) {
             $testEngine = getenv('AMISS_TEST_DB_ENGINE') ?: 'sqlite';
             
@@ -165,23 +209,10 @@ class DataTestCase extends CustomTestCase
             }
         }
         return self::$connectionInfo;
-    }
-    
-    public function getEngine()
-    {
-        $info = $this->getConnectionInfo();
-        return $info['engine'];
-    }
-    
-    public function readSqlFile($name)
-    {
-        $name = strtr($name, array(
-            '{engine}'=>$this->getEngine(),
-        ));
-        return file_get_contents($name);
+        */
     }
 }
-
+    
 class SqliteDataTestCase extends DataTestCase
 {
     /**
@@ -279,3 +310,23 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
         );
     }
 }
+
+class DatabaseSuite extends PHPUnit_Framework_TestSuite
+{
+    public $connectionInfo;
+
+    public function __construct($conn)
+    {
+        if (!is_array($conn))
+            throw new \InvalidArgumentException();
+
+        $this->connectionInfo = $conn;
+    }
+
+    public function setUp()
+    {
+        TestApp::instance()->connectionInfo = $this->connectionInfo;
+        parent::setUp();
+    }
+}
+

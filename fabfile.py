@@ -33,6 +33,10 @@ def test(filter=None):
             cmd += ' --filter ' + filter
         local(cmd)
 
+def testfull():
+    with lcd(env.test_path):
+        local("php test/run.php --mysql")
+
 @task
 def testgrp(group):
     with lcd(env.test_path):

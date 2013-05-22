@@ -121,13 +121,15 @@ class Connector
             elseif ($k=='connectionstatements' || $k=='statements')
                 $connectionStatements = $v;
         }
-        
+       
         if (!isset($params['dsn'])) {
-            $dsn = "mysql:host={$host};";
+            $dsn = (isset($params['engine']) ? $params['engine'] : 'mysql').":host={$host};";
             if ($port) $dsn .= "port=".$port.';';
             if (!empty($database)) $dsn .= "dbname={$database};";
         }
-        else $dsn = $params['dsn'];
+        else {
+            $dsn = $params['dsn'];
+        }
         
         return new static($dsn, $user, $password, $options, $connectionStatements);
     }

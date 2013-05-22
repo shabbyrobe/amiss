@@ -45,7 +45,7 @@ class ArrayMapperTest extends \CustomTestCase
     {
         $name = 'c'.md5(uniqid('', true));
         $name2 = $name.'2';
-        eval('class '.$name.'{} class '.$name2.' extends '.$name.'{}');
+        $this->createClass($name, 'class '.$name.'{} class '.$name2.' extends '.$name.'{}');
         $mappings = array(
             $name=>array(),
             $name2=>array(),
@@ -67,7 +67,7 @@ class ArrayMapperTest extends \CustomTestCase
     {
         $name = 'c'.md5(uniqid('', true));
         $name2 = $name.'2';
-        eval('class '.$name.'{} class '.$name2.' extends '.$name.'{}');
+        $this->createClass($name, 'class '.$name.'{} class '.$name2.' extends '.$name.'{}');
         $mappings = array(
             $name=>array(),
             $name2=>array(),
