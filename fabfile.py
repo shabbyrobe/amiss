@@ -30,7 +30,7 @@ def pdf():
 @task
 def test(filter=None):
     with lcd(env.test_path):
-        cmd = 'php test/run.php --mysql %s' % (test_exclude_arg)
+        cmd = 'php test/run.php --with-mysql %s' % (test_exclude_arg)
         if filter:
             cmd += ' --filter ' + filter
         local(cmd)

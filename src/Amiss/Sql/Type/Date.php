@@ -3,24 +3,24 @@ namespace Amiss\Sql\Type;
 
 class Date implements \Amiss\Type\Handler
 {
-    public $format;
+    public $formats;
     public $appTimeZone;
     public $dbTimeZone;
     
-    public function __construct($format='datetime', $dbTimeZone, $appTimeZone=null)
+    public function __construct($formats='datetime', $dbTimeZone, $appTimeZone=null)
     {
-        // compat. remove for v4
-        if ($format === true)
-            $format = 'datetime';
-        elseif ($format === false)
-            $format = 'date';
+        // compat. remove for v5
+        if ($formats === true)
+            $formats = 'datetime';
+        elseif ($formats === false)
+            $formats = 'date';
         
-        if ($format == 'datetime')
-            $this->format = 'Y-m-d H:i:s';
-        elseif ($format == 'date')
-            $this->format = 'Y-m-d';
+        if ($formats == 'datetime')
+            $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
+        elseif ($formats == 'date')
+            $this->formats = array('Y-m-d');
         else
-            $this->format = $format;
+            $this->formats = is_array($formats) ? $formats : array($formats);
         
         if ($appTimeZone && is_string($appTimeZone))
             $appTimeZone = new \DateTimeZone($appTimeZone);
@@ -47,7 +47,7 @@ class Date implements \Amiss\Type\Handler
                 throw new \UnexpectedValueException();
             
             $value->setTimeZone($this->dbTimeZone);
-            $out = $value->format($this->format);
+            $out = $value->format($this->formats[0]);
         }
         return $out;
     }
@@ -55,20 +55,28 @@ class Date implements \Amiss\Type\Handler
     function handleValueFromDb($value, $object, array $fieldInfo, $row)
     {
         $out = null;
-        if ($value !== null) {
-            $out = \DateTime::createFromFormat($this->format, $value, $this->dbTimeZone);
-            $out->setTimeZone($this->appTimeZone);
+        if ($value !== null && $value !== '' && $value !== false) {
+            foreach ($this->formats as $format) {
+                $out = \DateTime::createFromFormat($format, $value, $this->dbTimeZone);
+                if ($out instanceof \DateTime) {
+                    $out->setTimeZone($this->appTimeZone);
+                    break;
+                }
+            }
+            if (!$out) {
+                throw new \UnexpectedValueException("Date '$value' could not be handled with any of the following formats: ".implode(', ', $this->formats));
+            }
         }
         return $out;
     }
     
     function createColumnType($engine)
     {
-        if ($this->format == 'Y-m-d H:i:s')
+        if ($this->formats[0] == 'Y-m-d H:i:s')
             return 'datetime';
-        elseif ($this->format == 'Y-m-d')
+        elseif ($this->formats[0] == 'Y-m-d')
             return 'date';
-        elseif ($this->format == 'U')
+        elseif ($this->formats[0] == 'U')
             return 'int';
         else {
             return $engine == 'sqlite' ? 'STRING' : 'VARCHAR(32)';

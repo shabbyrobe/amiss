@@ -44,7 +44,55 @@ class DateTest extends \CustomTestCase
         $expected = $this->createDate('1970-01-01 00:00:00', 'UTC');
         $this->assertEquals($expected, $out);
     }
+
+    /**
+     * @dataProvider dataForHandleFromDbWithMultipleFormats
+     */
+    public function testDateTimeHandleFromDbWithMultipleFormats($format, $value, $expected)
+    {
+        // Handler order is deliberate - it ensures that the third one is picked up before the second when the
+        // incoming value contains the extra values.
+        $handler = new \Amiss\Sql\Type\Date(array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i'), 'Australia/Melbourne', 'Australia/Melbourne');
+        $out = $handler->handleValueFromDb($value, null, array(), array());
+        $expected = \DateTime::createFromFormat($format, $value, new \DateTimeZone('Australia/Melbourne')); 
+        $this->assertEquals($expected, $out);
+    }
+
+    public function dataForHandleFromDbWithMultipleFormats()
+    {
+        return array(
+            array("Y-m-d H:i:s", "2012-03-02 11:10:09", "2012-03-02 11:10:09"),
+            array("Y-m-d H:i", "2012-03-02 11:10", "2012-03-02 11:10:00"),
+            array("Y-m-d", "2012-03-02", "2012-03-02 00:00:00"),
+        );
+    }
+
+    /**
+     * @dataProvider dataForHandleFromDbWithEmptyValueReturnsNull
+     */
+    public function testDateTimeHandleFromDbWithEmptyValueReturnsNull($value)
+    {
+        $handler = new \Amiss\Sql\Type\Date("datetime", 'Australia/Melbourne', 'Australia/Melbourne');
+        $out = $handler->handleValueFromDb($value, null, array(), array());
+        $this->assertNull($out);
+    }
+
+    public function dataForHandleFromDbWithEmptyValueReturnsNull()
+    {
+        return array(
+            array(false),
+            array(""),
+            array(null),
+        );
+    }
     
+    public function testDateTimeHandleFromDbWithMultipleFormatsFailsWhenNoFormatMatches()
+    {
+        $handler = new \Amiss\Sql\Type\Date(array('Y-m-d H:i:s'), 'Australia/Melbourne', 'Australia/Melbourne');
+        $this->setExpectedException('UnexpectedValueException', 'Date \'2012-03-04\' could not be handled with any of the following formats: Y-m-d H:i:s');
+        $out = $handler->handleValueFromDb('2012-03-04', null, array(), array());
+    }
+
     public function testDateTimePrepareForDb()
     {
         $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'Australia/Melbourne', 'Australia/Melbourne');

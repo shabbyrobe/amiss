@@ -31,7 +31,7 @@ The runner supports the following PHPUnit arguments:
 And the following additional arguments:
 
 - ``--no-sqlite``: Exclude the SQLite acceptance tests
-- ``--mysql``: Include the MySQL acceptance tests (though you'll need to configure ``amisstestrc``,
+- ``--with-mysql``: Include the MySQL acceptance tests (though you'll need to configure ``amisstestrc``,
   see below).
 
 
@@ -63,7 +63,7 @@ with a ``[mysql]`` section, set out like so::
 
 You should then be able to run the MySQL tests::
 
-    php test/run.php --mysql
+    php test/run.php --with-mysql
 
 
 Building the docs

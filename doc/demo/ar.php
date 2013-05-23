@@ -116,6 +116,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     
     /**
      * @field
+     * @type VARCHAR(128)
      */
     public $name;
     
@@ -140,7 +141,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     private $venue;
     
     /**
-     * @has.one.of Venue
+     * @has.one.of VenueRecord
      * @has.one.on venueId
      */
     public function getVenue()

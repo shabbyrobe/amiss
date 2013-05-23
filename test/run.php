@@ -13,9 +13,9 @@ $options = array(
 );
 $options = array_merge(
     $options,
-    getopt('', array('no-sqlite', 'mysql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
+    getopt('', array('no-sqlite', 'with-mysql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
 );
-$testMysql = array_key_exists('mysql', $options);
+$testMysql = array_key_exists('with-mysql', $options);
 
 $config = array();
 if ($testMysql) {

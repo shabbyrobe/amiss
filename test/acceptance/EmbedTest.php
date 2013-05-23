@@ -5,7 +5,7 @@ namespace Amiss\Test\Acceptance;
 use Amiss\Type;
 
 /**
- * @group unit
+ * @group acceptance
  */
 class EmbedTest extends \ModelDataTestCase
 {
