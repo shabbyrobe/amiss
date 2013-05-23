@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Tests\Unit;
 
+/**
+ * @group unit
+ */
 class RelatorOneManyTest extends \CustomTestCase
 {
     public function setUp()

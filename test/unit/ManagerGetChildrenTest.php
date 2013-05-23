@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\Manager;
 
+/**
+ * @group unit
+ */
 class ManagerGetChildrenTest extends \CustomTestCase
 {
     public function setUp()

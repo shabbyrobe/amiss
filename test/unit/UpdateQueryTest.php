@@ -5,6 +5,9 @@ use Amiss\Meta;
 
 use Amiss\Sql\Criteria\Update;
 
+/**
+ * @group unit
+ */
 class UpdateQueryTest extends \CustomTestCase
 {
     /**

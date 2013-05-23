@@ -39,16 +39,19 @@ $args = array(
     'processUncoveredFilesFromWhitelist'=>true,
 );
 
+$sqliteConnection = array(
+    'engine'=>'sqlite',
+    'dsn'=>'sqlite::memory:',
+);
+TestApp::instance()->connectionInfo = $sqliteConnection;
+
 $suite = new PHPUnit_Framework_TestSuite();
+suite_add_dir($suite, $testPath.'/unit/');
+suite_add_dir($suite, $testPath.'/cookbook/');
 
 if (!array_key_exists('no-sqlite', $options)) {
-    $sqliteSuite = new DatabaseSuite(array(
-        'engine'=>'sqlite',
-        'dsn'=>'sqlite::memory:',
-    ));
-    suite_add_dir($sqliteSuite, $testPath.'/unit/');
+    $sqliteSuite = new DatabaseSuite($sqliteConnection);
     suite_add_dir($sqliteSuite, $testPath.'/acceptance/');
-    suite_add_dir($sqliteSuite, $testPath.'/cookbook/');
     $suite->addTest($sqliteSuite);
 }
 
@@ -63,9 +66,7 @@ if ($testMysql) {
         'password'=>$config['mysql']['password'],
         'dbName'=>'amiss_test_'.time(),
     ));
-    suite_add_dir($mysqlSuite, $testPath.'/unit/');
     suite_add_dir($mysqlSuite, $testPath.'/acceptance/');
-    suite_add_dir($mysqlSuite, $testPath.'/cookbook/');
     $suite->addTest($mysqlSuite);
 }
 

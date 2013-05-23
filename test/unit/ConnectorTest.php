@@ -6,6 +6,7 @@ use Amiss\Sql\Connector;
 /**
  * This test doesn't make any real connections, so it should not be necessary to
  * extend from DataTestCase
+ * @group unit
  */
 class ConnectorTest extends \CustomTestCase
 {

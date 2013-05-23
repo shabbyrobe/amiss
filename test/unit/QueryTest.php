@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\Criteria;
 
+/**
+ * @group unit
+ */
 class QueryTest extends \CustomTestCase
 {
     /**

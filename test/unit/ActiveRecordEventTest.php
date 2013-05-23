@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\ActiveRecord;
 
+/**
+ * @group unit
+ */
 class ActiveRecordEventTest extends \CustomTestCase
 {
     public function setUp()

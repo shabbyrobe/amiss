@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Test\Unit;
 
+/**
+ * @group unit
+ */
 class ManagerCountTest extends \CustomTestCase
 {
     public function setUp()

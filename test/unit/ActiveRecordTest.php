@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Test\Unit;
 
+/**
+ * @group unit
+ */
 class ActiveRecordTest extends \DataTestCase
 {
     public function setUp()

@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Mapper\Arrays;
 
+/**
+ * @group unit
+ */
 class ArrayMapperTest extends \CustomTestCase
 {
     /**

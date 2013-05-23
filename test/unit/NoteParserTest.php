@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Tests\Unit;
 
+/**
+ * @group unit
+ */
 class NoteParserTest extends \CustomTestCase
 {
     public function setUp()

@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\TableBuilder;
 
+/**
+ * @group unit
+ */
 class TableBuilderCreateTest extends \DataTestCase
 {
     public function setUp()

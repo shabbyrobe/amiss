@@ -6,6 +6,8 @@ import re
 env.base_path = os.path.dirname(__file__)
 env.test_path = env.base_path
 
+test_exclude_arg = ' --exclude-group faulty,faulty-mysql,faulty-sqlite '
+
 @task
 def doc(clean=False):
     with lcd(os.path.join(env.base_path, 'doc')):
@@ -28,14 +30,18 @@ def pdf():
 @task
 def test(filter=None):
     with lcd(env.test_path):
-        cmd = 'php test/run.php --exclude-group faulty'
+        cmd = 'php test/run.php --mysql %s' % (test_exclude_arg)
         if filter:
             cmd += ' --filter ' + filter
         local(cmd)
 
-def testfull():
+@task
+def testq(filter=None):
     with lcd(env.test_path):
-        local("php test/run.php --mysql")
+        cmd = 'php test/run.php %s' % (test_exclude_arg)
+        if filter:
+            cmd += ' --filter ' + filter
+        local(cmd)
 
 @task
 def testgrp(group):

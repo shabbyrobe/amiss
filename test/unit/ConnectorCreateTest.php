@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\Connector;
 
+/**
+ * @group unit
+ */
 class ConnectorCreateTest extends \CustomTestCase
 {
     /**

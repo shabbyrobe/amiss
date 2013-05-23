@@ -9,16 +9,61 @@ The code for Amiss is hosted at http://github.com/shabbyrobe/amiss
 Running the tests
 -----------------
 
-PHPUnit Tests are in the ``tests/`` directory of the distribution. You can run the tests like so::
+PHPUnit Tests are in the ``tests/`` directory of the distribution. Do not use the standard
+``phpunit`` command to run the tests - Amiss requires a heavily customised runner. Instead, run::
 
-    cd /path/to/amiss/dist/tests/
-    phpunit
+    cd /path/to/amiss/
+    php test/run.php
 
 
 There are some tests that are known to report incorrect results. These can be excluded by running
 the tests like so::
 
-    phpunit --exclude-group faulty
+    php test/run.php --exclude-group faulty
+
+
+The runner supports the following PHPUnit arguments:
+
+- ``--exclude-group=group1[,group2]``
+- ``--group=group1[,group2]``
+- ``--coverage-html=/path/to/reports``
+
+And the following additional arguments:
+
+- ``--no-sqlite``: Exclude the SQLite acceptance tests
+- ``--mysql``: Include the MySQL acceptance tests (though you'll need to configure ``amisstestrc``,
+  see below).
+
+
+MySQL testing
+~~~~~~~~~~~~~
+
+All of the tests in the ``test/acceptance`` directory should be runnable on both MySQL and SQLite.
+Patches won't be accepted unless all tests not marked as ``@group faulty``, ``@group faulty-sqlite``
+or ``@group faulty-mysql`` pass.
+
+Amiss will create a dummy database made up of ``amiss_test_`` and the current timestamp on your
+MySQL server in the ``setUp`` method, and should drop it in the ``tearDown``. If it does not, you
+can drop it by hand safely, and it'd be nice if you raised an issue with as much information as you
+have.
+
+The tester needs to know where your server is and what username and password to use. I strongly
+recommend creating a dedicated user for this job. It will need ``DROP`` and ``CREATE`` privileges,
+but this should be limited to only databases that start with ``amiss_test_``::
+
+    grant all on `amiss\_test\_%`.* to 'amisstester'@'localhost' identified by 'password';
+
+You can then create a file called ``.amisstestrc`` in your home folder. It should be an ini file
+with a ``[mysql]`` section, set out like so::
+
+    [mysql]
+    host = localhost
+    user = amisstester
+    password = password
+
+You should then be able to run the MySQL tests::
+
+    php test/run.php --mysql
 
 
 Building the docs

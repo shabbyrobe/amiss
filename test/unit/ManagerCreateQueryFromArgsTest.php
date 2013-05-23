@@ -3,6 +3,9 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Sql\Manager;
 
+/**
+ * @group unit
+ */
 class ManagerCreateQueryFromArgsTest extends \CustomTestCase
 {
     public function setUp()

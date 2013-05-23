@@ -3,6 +3,9 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
+/**
+ * @group unit
+ */
 class MapperTypeHandlerTest extends \CustomTestCase
 {
     public function setUp()
