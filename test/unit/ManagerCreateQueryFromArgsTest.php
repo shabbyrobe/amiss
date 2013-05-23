@@ -19,7 +19,6 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::createQueryFromArgs
@@ -35,7 +34,6 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::createQueryFromArgs
@@ -51,7 +49,6 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::createQueryFromArgs
@@ -67,7 +64,6 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::createQueryFromArgs
@@ -83,7 +79,6 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::createQueryFromArgs

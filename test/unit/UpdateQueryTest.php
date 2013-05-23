@@ -11,7 +11,6 @@ use Amiss\Sql\Criteria\Update;
 class UpdateQueryTest extends \CustomTestCase
 {
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildQuery
      */
     public function testBuildQueryWithArrayWhere()
@@ -27,7 +26,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildQuery
      */
     public function testBuildQueryWithStringWhereContainingNamedParams()
@@ -44,7 +42,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildQuery
      */
     public function testBuildQueryWithStringWhereContainingPositionalParams()
@@ -61,7 +58,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildSet
      */
     public function testBuildNamedSetWithoutMeta()
@@ -77,7 +73,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildSet
      */
     public function testBuildArraySetWithSomeManualClauses()
@@ -93,7 +88,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildSet
      */
     public function testBuildPositionalSetWithoutMeta()
@@ -109,7 +103,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildSet
      */
     public function testBuildNamedSetWithMeta()
@@ -126,7 +119,6 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Update::buildSet
      */
     public function testBuildPositionalSetWithMeta()

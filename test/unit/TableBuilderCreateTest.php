@@ -19,7 +19,6 @@ class TableBuilderCreateTest extends \DataTestCase
     
     /**
      * @group tablebuilder
-     * @group unit
      */
     public function testCreateDefaultTableSql()
     {
@@ -43,7 +42,6 @@ class TableBuilderCreateTest extends \DataTestCase
     
     /**
      * @group tablebuilder
-     * @group unit
      */
     public function testBuildCreateFieldsDefault()
     {
@@ -65,7 +63,6 @@ class TableBuilderCreateTest extends \DataTestCase
 
     /**
      * @group tablebuilder
-     * @group unit
      */
     public function testCreateTableWithSingleOnRelation()
     {
@@ -88,7 +85,6 @@ class TableBuilderCreateTest extends \DataTestCase
 
     /**
      * @group tablebuilder
-     * @group unit
      */
     public function testCreateTableWithSingleOnRelationSkipsIndexesForSqlite()
     {
@@ -110,7 +106,6 @@ class TableBuilderCreateTest extends \DataTestCase
 
     /**
      * @group tablebuilder
-     * @group unit
      */
     public function testCreateTableWithMultiOnRelation()
     {
@@ -134,7 +129,6 @@ class TableBuilderCreateTest extends \DataTestCase
 
     /**
      * @group tablebuilder
-     * @group unit
      * @expectedException Amiss\Exception
      */
     public function testCreateTableFailsWhenFieldsNotDefined()
@@ -145,7 +139,6 @@ class TableBuilderCreateTest extends \DataTestCase
     
     /**
      * @group tablebuilder
-     * @group unit
      * @expectedException Amiss\Exception
      */
     public function testCreateTableFailsWhenConnectorIsNotAmissConnector()

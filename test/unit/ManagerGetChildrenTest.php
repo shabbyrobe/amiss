@@ -15,7 +15,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren
@@ -31,7 +30,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren
@@ -47,7 +45,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren
@@ -63,7 +60,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren
@@ -79,7 +75,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren
@@ -95,7 +90,6 @@ class ManagerGetChildrenTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::getChildren

@@ -17,7 +17,6 @@ class ManagerTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::keyValue
@@ -37,7 +36,6 @@ class ManagerTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::keyValue
@@ -56,7 +54,6 @@ class ManagerTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @group manager
      * 
      * @covers Amiss\Sql\Manager::keyValue
@@ -76,7 +73,6 @@ class ManagerTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @group manager
      * @covers Amiss\Sql\Manager::getRelated
      */
@@ -88,7 +84,6 @@ class ManagerTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @group manager
      * @covers Amiss\Sql\Manager::getRelated
      */

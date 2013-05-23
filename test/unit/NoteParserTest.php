@@ -13,7 +13,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parseClass
      * @covers Amiss\Note\Parser::parseReflectors
      */
@@ -35,7 +34,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parse
      */
     public function testParseSingleValuelessNote()
@@ -45,7 +43,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parse
      */
     public function testParseSingleValuelessNoteWithAlternativeDefaultValue()
@@ -56,7 +53,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parse
      */
     public function testParseSingleValueNote()
@@ -66,7 +62,6 @@ class NoteParserTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parse
      */
     public function testParseManyValuelessNotes()
@@ -76,7 +71,6 @@ class NoteParserTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseManyNotesInDocComment()
@@ -88,7 +82,6 @@ class NoteParserTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParseManyNotesInDocCommentWithIrregularMargin()
@@ -100,7 +93,6 @@ class NoteParserTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParsingWorksWhenCommentIsNotDocblock()
@@ -112,7 +104,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parseDocComment
      */
     public function testParsingByDocCommentWorksWhenInputIsNotComment()
@@ -124,7 +115,6 @@ class NoteParserTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Note\Parser::parse
      */
     public function testParsingIgnoresEmailAddresses()

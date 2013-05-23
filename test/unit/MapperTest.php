@@ -61,7 +61,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group mapper
      * @covers Amiss\Mapper\Base::resolveObjectName
      */
@@ -74,7 +73,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group mapper
      * @covers Amiss\Mapper\Base::resolveObjectName
      */
@@ -88,7 +86,6 @@ class MapperTest extends \CustomTestCase
     
     /**
      * @group mapper
-     * @group unit
      * @dataProvider dataForDefaultTableName
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -110,7 +107,6 @@ class MapperTest extends \CustomTestCase
     
     /**
      * @group mapper
-     * @group unit
      * @dataProvider dataForDefaultTableNameWithTranslator
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -136,7 +132,6 @@ class MapperTest extends \CustomTestCase
     
     /**
      * @group mapper
-     * @group unit
      * @dataProvider dataForDefaultTableName
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -152,7 +147,6 @@ class MapperTest extends \CustomTestCase
     
     /**
      * @group mapper
-     * @group unit
      * @covers Amiss\Mapper\Base::resolveUnnamedFields
      */
     public function testResolveUnnamedFieldsColumn()
@@ -183,7 +177,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group mapper
      * @covers Amiss\Mapper\Note::determineTypeHandler
      * @dataProvider dataForDetermineTypeHandler

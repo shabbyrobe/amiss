@@ -16,7 +16,6 @@ class ManagerCountTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * @covers Amiss\Sql\Manager::count
      */
@@ -32,7 +31,6 @@ class ManagerCountTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * @covers Amiss\Sql\Manager::count
      */
@@ -57,7 +55,6 @@ class ManagerCountTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group manager
      * @covers Amiss\Sql\Manager::count
      */

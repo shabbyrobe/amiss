@@ -72,7 +72,6 @@ class ActiveRecordTest extends \DataTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
      * @group active
-     * @group unit
      */
     public function testGetById()
     {
@@ -89,7 +88,6 @@ class ActiveRecordTest extends \DataTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
      * @group active
-     * @group unit
      */
     public function testGetRelated()
     {
@@ -116,7 +114,6 @@ class ActiveRecordTest extends \DataTestCase
      * 
      * @covers Amiss\Sql\ActiveRecord::__get
      * @group active
-     * @group unit
      * @expectedException BadMethodCallException
      */
     public function testGetUnknownPropertyWhenFieldsUndefinedOnNewObjectReturnsNull()

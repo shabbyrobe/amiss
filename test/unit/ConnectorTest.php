@@ -11,7 +11,6 @@ use Amiss\Sql\Connector;
 class ConnectorTest extends \CustomTestCase
 {
     /**
-     * @group unit
      */
     public function testEngine()
     {
@@ -20,7 +19,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      */
     public function testConnect()
     {
@@ -31,7 +29,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::disconnect
      */
     public function testDisconnect()
@@ -44,7 +41,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::setAttribute
      */
     public function testDisconnectedSetAttribute()
@@ -58,7 +54,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::setAttribute
      */
     public function testConnectedSetAttribute()
@@ -77,7 +72,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::getAttribute
      */
     public function testDisconnectedGetAttribute()
@@ -92,7 +86,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::getAttribute
      */
     public function testConnectedGetAttribute()
@@ -112,7 +105,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::errorInfo
      */
     public function testErrorInfoConnected()
@@ -129,7 +121,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::errorInfo
      */
     public function testErrorInfoDisconnected()
@@ -139,7 +130,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::errorCode
      */
     public function testErrorCodeConnected()
@@ -156,7 +146,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::errorCode
      */
     public function testErrorCodeDisconnected()
@@ -166,7 +155,6 @@ class ConnectorTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::exec
      * @covers Amiss\Sql\Connector::lastInsertId
      * @covers Amiss\Sql\Connector::prepare
@@ -222,7 +210,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateHost
      */
@@ -246,7 +233,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateUser
      */
@@ -267,7 +253,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreatePassword
      */
@@ -289,7 +274,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateOptions
      */
@@ -309,7 +293,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      * @dataProvider dataForCreateConnectionStatements
      */
@@ -329,7 +312,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      */
     public function testCreateDsn()
@@ -340,7 +322,6 @@ class ConnectorTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Connector::create
      */
     public function testCreateDsnOverridesHost()

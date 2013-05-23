@@ -28,7 +28,6 @@ class ActiveRecordEventTest extends \CustomTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeUpdate
      * @group active
-     * @group unit
      */
     public function testBeforeUpdate()
     {
@@ -41,7 +40,6 @@ class ActiveRecordEventTest extends \CustomTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeInsert
      * @group active
-     * @group unit
      */
     public function testBeforeInsert()
     {
@@ -54,7 +52,6 @@ class ActiveRecordEventTest extends \CustomTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::delete
      * @group active
-     * @group unit
      */
     public function testBeforeDelete()
     {
@@ -67,7 +64,6 @@ class ActiveRecordEventTest extends \CustomTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeSave
      * @group active
-     * @group unit
      */
     public function testBeforeSaveCalledOnInsert()
     {
@@ -91,7 +87,6 @@ class ActiveRecordEventTest extends \CustomTestCase
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeInsert
      * @group active
-     * @group unit
      */
     public function testBeforeInsertCalledOnSave()
     {

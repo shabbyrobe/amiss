@@ -9,7 +9,6 @@ use Amiss\Mapper\Arrays;
 class ArrayMapperTest extends \CustomTestCase
 {
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      * @expectedException InvalidArgumentException
      */
@@ -20,7 +19,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayWithoutTableUsesDefault()
@@ -41,7 +39,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testInheritTrue()
@@ -63,7 +60,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testInheritFalse()
@@ -85,7 +81,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::__construct
      */
     public function testConstruct()
@@ -96,7 +91,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayFieldStrings()
@@ -116,7 +110,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayPrimaryInfersField()
@@ -134,7 +127,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayPrimaryInferredFieldDefaultType()
@@ -153,7 +145,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayDeclaredPrimaryFieldWithoutTypeAssumesDefaultPrimaryType()
@@ -172,7 +163,6 @@ class ArrayMapperTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayPrimaryExplicitFieldType()
@@ -192,7 +182,6 @@ class ArrayMapperTest extends \CustomTestCase
     
     /**
      * Tests issue #7
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayPrimaryExplicitFieldTypeWithFieldName()
@@ -218,7 +207,6 @@ class ArrayMapperTest extends \CustomTestCase
     
     /**
      * Tests issue #7
-     * @group unit
      * @covers Amiss\Mapper\Arrays::createMeta
      */
     public function testArrayPrimaryImplicitFieldTypeWithFieldName()

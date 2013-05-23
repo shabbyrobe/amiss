@@ -9,7 +9,6 @@ use Amiss\Sql\Criteria;
 class QueryTest extends \CustomTestCase
 {
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testInClauseStraight()
@@ -24,7 +23,6 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testInClauseWithFieldMapping()
@@ -45,7 +43,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForInClauseReplacementTolerance
      */
@@ -70,7 +67,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testMultipleInClause()
@@ -88,7 +84,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @group faulty
      * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForInClauseDoesNotRuinString
@@ -116,7 +111,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testBuildClauseWithoutParameterColons()
@@ -131,7 +125,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      */
     public function testShorthandWhere()
@@ -145,7 +138,6 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForBuildClauseFieldSubstitutionWithFromRawSql
      */
@@ -175,7 +167,6 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::buildClause
      * @dataProvider dataForBuildClauseFromArrayWithFieldSubstitution
      */
@@ -205,7 +196,6 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @group unit
      * @covers Amiss\Sql\Criteria\Query::paramsAreNamed
      * @dataProvider dataForParamsAreNamed
      */
