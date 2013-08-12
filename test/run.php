@@ -1,8 +1,16 @@
 <?php
+$usage = "Amiss test runner
+Usage: test/run.php [--no-sqlite] [--with-mysql] [--filter=<expr>]
+           [--coverage-html=<outpath>] [--exclude-group=<group>]
+           [--group=<group>]
+";
+
 $basePath = __DIR__.'/../';
 $testPath = __DIR__;
 
-require_once 'PHPUnit/Autoload.php';
+if (!class_exists('PHPUnit_Framework_Exception'))
+    require_once 'PHPUnit/Autoload.php';
+
 require $testPath.'/config.php';
 
 $options = array(
@@ -13,9 +21,14 @@ $options = array(
 );
 $options = array_merge(
     $options,
-    getopt('', array('no-sqlite', 'with-mysql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
+    getopt('', array('help', 'no-sqlite', 'with-mysql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
 );
 $testMysql = array_key_exists('with-mysql', $options);
+$help = array_key_exists('help', $options);
+if ($help) {
+    echo $usage;
+    exit;
+}
 
 $config = array();
 if ($testMysql) {
@@ -114,10 +127,11 @@ function require_tests($file)
 
 function amisstest_config_load()
 {
-    global $testPath;
-    
+    global $testPath, $basePath;
+
     $paths = array(
         $testPath."/amisstestrc",
+        $basePath."/amisstestrc",
     );
     if (isset($_SERVER['HOME'])) {
         $paths[] = $_SERVER['HOME']."/.amisstestrc";
