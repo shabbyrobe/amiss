@@ -70,7 +70,7 @@ def archive(outpath):
 def version(version):
     with lcd(env.base_path):
         local(r"""echo "%s" > VERSION""" % version)
-        local(r"""sed -i 's/"version": ".*"/"version": "%s"/g' composer.json""" % version)
+        local(r"""sed -i '' 's/"version": ".*"/"version": "%s"/g' composer.json""" % version)
         composer = open("composer.json", 'r').read()
         if not re.search(r'"%s"' % version, composer):
             raise RuntimeError("Could not replace version")
