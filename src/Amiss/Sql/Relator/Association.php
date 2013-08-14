@@ -82,11 +82,13 @@ class Association extends Base
         $sourceToViaOn = $sourceToViaRelation['on'];
         if (is_string($sourceToViaOn))
             $sourceToViaOn = array($sourceToViaOn=>$sourceToViaOn);
+        else
+            $sourceToViaOn = array_flip($sourceToViaOn);
         
         $viaToDestOn = $viaToDestRelation['on'];
         if (is_string($viaToDestOn))
             $viaToDestOn = array($viaToDestOn=>$viaToDestOn);
-        
+       
         // get the source ids, prepare an index to link the relationships
         list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         

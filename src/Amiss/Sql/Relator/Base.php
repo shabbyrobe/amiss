@@ -12,6 +12,7 @@ abstract class Base implements \Amiss\Sql\Relator
     {
         $resultIndex = array();
         $ids = array();
+
         foreach ($source as $idx=>$object) {
             $key = array();
             foreach ($on as $l=>$r) {
