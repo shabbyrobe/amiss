@@ -1,6 +1,6 @@
 {
     "name": "amiss",
-    "version": "4.0.0",
+    "version": "4.0.1",
     "homepage": "http://k3jw.com/code/amiss/",
     "autoload": {
         "psr-0": { "Amiss": "src/" }
