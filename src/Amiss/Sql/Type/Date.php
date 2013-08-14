@@ -43,6 +43,10 @@ class Date implements \Amiss\Type\Handler
         if ($value instanceof \DateTime) {
             // This conversion may not be an issue. Wait until it is raised
             // before making a decision.
+            // also - this doesn't seem to work right as of 5.5.1:
+            // var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
+            // bool(true)
+            // https://bugs.php.net/bug.php?id=54655
             if ($value->getTimeZone() != $this->appTimeZone)
                 throw new \UnexpectedValueException();
             
