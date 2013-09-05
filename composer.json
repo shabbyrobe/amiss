@@ -1,6 +1,13 @@
 {
-    "name": "amiss",
+    "name": "k3jw/amiss",
+    "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
     "version": "4.0.1",
+    "authors": [
+        {
+            "name": "Blake Williams", 
+            "email": "code@k3jw.com"
+        }
+    ],
     "homepage": "http://k3jw.com/code/amiss/",
     "autoload": {
         "psr-0": { "Amiss": "src/" }
