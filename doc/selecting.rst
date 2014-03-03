@@ -275,14 +275,14 @@ You can use all of the same signatures that you use for ``Amiss\Sql\Manager->get
 
     <?php
     // positional parameters
-    $dukeCount = $manager->count('Artist', 'slug=?', 'duke-nukem');
+    $dukeCount = $manager->count('Artist', '{slug}=?', 'duke-nukem');
 
     // named parameters, shorthand:
-    $dukeCount = $manager->count('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
+    $dukeCount = $manager->count('Artist', '{slug}=:slug', array(':slug'=>'duke-nukem'));
 
     // long form
     $criteria = new \Amiss\Sql\Criteria\Query();
-    $criteria->where = 'slug=:slug';
+    $criteria->where = '{slug}=:slug';
     $criteria->params = array(':slug'=>'duke-nukem');
     $dukeCount = $manager->count('Artist', $criteria);
 
@@ -401,4 +401,30 @@ If you are mapping an object that requires constructor arguments, you can pass t
 
 
 .. note:: Amiss does not yet support using row values as constructor arguments.
+
+
+FOR UPDATE
+----------
+
+If you are using InnoDB and wish to select rows using ``FOR UPDATE``, you can set the
+``forUpdate`` key of the criteria to ``true``. Make sure you're inside a transaction:
+
+.. code-block:: php
+
+    <?php
+    $manager->connector->beginTransaction();
+    
+    // all of these rows will now have row level locks
+    $rows = $manager->getList('Pants', [
+        'where'=>'{pantsTypeId}=1',
+        'forUpdate'=>true,
+    ]);
+
+    // there are better ways to do this, it just illustrates the locking example
+    foreach ($rows as $pants) {
+        $pants->counter++;
+        $manager->update($pants); 
+    }
+
+    $manager->connector->commit();
 

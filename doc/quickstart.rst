@@ -181,6 +181,15 @@ See :doc:`selecting` for more details.
     // Amiss will unroll and properly parameterise IN() clauses
     $events = $manager->getList('Event', 'IN (:foo)', array('foo'=>array(1, 2, 3)));
 
+    // FOR UPDATE InnoDB row locking
+    $manager->connector->beginTransaction();
+    $rows = $manager->getList('Event', array(
+        'where'=>'...',
+        'forUpdate'=>true,
+    ));
+    // do the update
+    $manager->connector->commit();
+
 
 Relations
 ---------

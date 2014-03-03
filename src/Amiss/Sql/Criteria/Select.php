@@ -12,6 +12,7 @@ class Select extends Query
     public $offset=0;
     public $fields;
     public $order=array();
+    public $forUpdate=false;
     
     public function getLimitOffset()
     {
@@ -35,6 +36,8 @@ class Select extends Query
             .($order  ? "ORDER BY $order "         : '').' '
             .($limit  ? "LIMIT  ".(int)$limit." "  : '').' '
             .($offset ? "OFFSET ".(int)$offset." " : '').' '
+
+            .($this->forUpdate ? 'FOR UPDATE' : '')
         ;
         
         return array($query, $params);

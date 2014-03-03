@@ -1,7 +1,7 @@
 {
     "name": "k3jw/amiss",
     "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "authors": [
         {
             "name": "Blake Williams", 
