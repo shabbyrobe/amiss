@@ -35,7 +35,60 @@ class MapperTest extends \CustomTestCase
         $mapper->expects($this->never())->method('fromObject');
         $mapper->fromObjects('foo', null, null);
     }
-    
+
+    /**
+     * @covers Amiss\Mapper\Base::fromObject
+     */
+    public function testFromObjectWithSkipNulls()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
+            ->setMethods([])
+            ->getMockForAbstractClass()
+        ;
+        $mapper->skipNulls = true;
+        
+        $meta = new \Amiss\Meta('stdClass', 'table', [
+            'fields'=>[
+                'a'=>['type'=>'text', 'name'=>'a'],
+                'b'=>['type'=>'text', 'name'=>'b'],
+                'c'=>['type'=>'text', 'name'=>'c'],
+                'd'=>['type'=>'text', 'name'=>'d'],
+                'e'=>['type'=>'text', 'name'=>'e'],
+                'f'=>['type'=>'text', 'name'=>'f'],
+            ],
+        ]);
+        $obj = (object)['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
+        $row = $mapper->fromObject($meta, $obj);
+        $this->assertEquals(['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0], $row);
+    }
+ 
+    /**
+     * @covers Amiss\Mapper\Base::fromObject
+     */
+    public function testFromObjectWithoutSkipNulls()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
+            ->setMethods([])
+            ->getMockForAbstractClass()
+        ;
+        $this->assertFalse($mapper->skipNulls);
+        
+        $meta = new \Amiss\Meta('stdClass', 'table', [
+            'fields'=>[
+                'a'=>['type'=>'text', 'name'=>'a'],
+                'b'=>['type'=>'text', 'name'=>'b'],
+                'c'=>['type'=>'text', 'name'=>'c'],
+                'd'=>['type'=>'text', 'name'=>'d'],
+                'e'=>['type'=>'text', 'name'=>'e'],
+                'f'=>['type'=>'text', 'name'=>'f'],
+            ],
+        ]);
+        $input = ['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
+        $obj = (object)$input;
+        $row = $mapper->fromObject($meta, $obj);
+        $this->assertEquals($input, $row);
+    }
+
     /**
      * @covers Amiss\Mapper\Base::toObjects
      */

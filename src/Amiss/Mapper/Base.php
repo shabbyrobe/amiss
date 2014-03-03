@@ -15,6 +15,8 @@ abstract class Base implements \Amiss\Mapper
     public $typeHandlers = array();
     
     public $objectNamespace;
+
+    public $skipNulls = false;
     
     private $typeHandlerMap = array();
     
@@ -77,7 +79,8 @@ abstract class Base implements \Amiss\Mapper
             
             // don't allow array_merging. it breaks mongo compatibility and is pretty 
             // confused anyway.
-            $output[$field['name']] = $value;
+            if (!$this->skipNulls || $value !== null) 
+                $output[$field['name']] = $value;
         }
         
         return $output;
