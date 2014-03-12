@@ -93,7 +93,10 @@ class Note extends \Amiss\Mapper\Base
                         list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
                     }
                     
-                    $fieldInfo['name'] = $field;
+                    if ($field && $field != $name) {
+                        $fieldInfo['name'] = $field;
+                    }
+
                     $fieldInfo['type'] = isset($itemNotes['type']) 
                         ? $itemNotes['type'] 
                         : null

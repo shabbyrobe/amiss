@@ -229,4 +229,27 @@ class ArrayMapperTest extends \CustomTestCase
         
         $this->assertEquals($expected, $meta->getFields());
     }
+
+    /**
+     * @covers Amiss\Mapper\Arrays::createMeta
+     */
+    public function testArrayPrimaryUnnamedFieldTranslation()
+    {
+        $mappings = array(
+            'foo'=>array(
+                'primary'=>'fooBarBaz',
+                'fields'=>array(
+                    'bazQuxDing'=>[],
+                ),
+            ),
+        );
+
+        $mapper = new Arrays($mappings);
+        $mapper->unnamedPropertyTranslator = new \Amiss\Name\CamelToUnderscore();
+        $meta = $mapper->getMeta('foo');
+        
+        $fields = $meta->getFields();
+        $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
+        $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
+    }
 }

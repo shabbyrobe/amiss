@@ -308,6 +308,33 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     */
+    public function testPrimaryFieldTranslation()
+    {
+        $name = __FUNCTION__;
+        $class = __NAMESPACE__."\\{$name}Foo";
+        $this->createClass($class, "
+            namespace ".__NAMESPACE__.";
+            class {$name}Foo {
+                /** @primary */
+                public \$fooBarBaz;
+
+                /** @field */
+                public \$bazQuxDing;
+            }
+        ");
+
+        $mapper = new \Amiss\Mapper\Note;
+        $mapper->unnamedPropertyTranslator = new \Amiss\Name\CamelToUnderscore();
+        $meta = $mapper->getMeta($class);
+        
+        $fields = $meta->getFields();
+        $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
+        $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
+    }
+
+    /**
      * @covers Amiss\Mapper\Note::buildRelations
      * @covers Amiss\Mapper\Note::findGetterSetter
      */

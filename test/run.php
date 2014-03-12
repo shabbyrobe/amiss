@@ -74,7 +74,7 @@ if ($testMysql) {
     
     $mysqlSuite = new DatabaseSuite(array(
         'engine'=>'mysql',
-        'dsn'=>'mysql:host='.$config['mysql']['host'],
+        'dsn'=>"mysql:host={$config['mysql']['host']};port={$config['mysql']['port']}",
         'user'=>$config['mysql']['user'],
         'password'=>$config['mysql']['password'],
         'dbName'=>'amiss_test_'.time(),
@@ -147,7 +147,9 @@ function amisstest_config_load()
     }
 
     if ($found) {
-        return parse_ini_file($found, true);
+        $ini = parse_ini_file($found, true);
+        $ini['mysql'] = array_merge(array('port'=>3306), $ini['mysql']);
+        return $ini;
     }
     else {
         die("Please place a file called amisstestrc in the root of this project, or at ~/.amisstestrc.\n"
