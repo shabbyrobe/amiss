@@ -154,6 +154,38 @@ class NoteMapperTest extends \CustomTestCase
     /**
      * @covers Amiss\Mapper\Note::loadMeta
      */
+    public function testGetMetaWithDefinedConstructor()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, "
+            namespace ".__NAMESPACE__.";
+            /** @constructor pants */
+            class ".__FUNCTION__." {}
+        ");
+        $meta = $mapper->getMeta($class);
+        $this->assertEquals('pants', $meta->constructor);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     */
+    public function testGetMetaWithDefaultConstructor()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $class = __NAMESPACE__.'\\'.__FUNCTION__;
+        $this->createClass($class, "
+            namespace ".__NAMESPACE__.";
+            /** @table pants */
+            class ".__FUNCTION__." {}
+        ");
+        $meta = $mapper->getMeta($class);
+        $this->assertEquals('__construct', $meta->constructor);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     */
     public function testGetMetaPrimaryNoteImpliesFieldNote()
     {
         $mapper = new \Amiss\Mapper\Note;

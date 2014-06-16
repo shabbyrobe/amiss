@@ -137,6 +137,19 @@ Arrays will be inferred if multiple values are specified:
 Class Mapping
 -------------
 
+These values must be assigned in the class' docblock:
+
+.. code-block:: php
+
+    <?php
+    /**
+     * @table my_table
+     * @fieldType string-a-doodle-doo
+     */
+    class Foo
+    {}
+
+
 The following class level annotations are available:
 
 .. py:attribute:: @table value
@@ -153,17 +166,30 @@ The following class level annotations are available:
     :doc:`types` for more details.
 
 
-These values must be assigned in the class' docblock:
+.. py:attribute:: @constructor value
 
-.. code-block:: php
+    The name of a static constructor to use when creating the object instead of the
+    default ``__construct``. The method must be static and must return an instance of the
+    class.
 
-    <?php
-    /**
-     * @table my_table
-     * @fieldType string-a-doodle-doo
-     */
-    class Foo
-    {}
+    If no constructor arguments are found in the meta, the entire unmapped input record is
+    passed as the first argument.
+
+    .. code-block:: php
+
+        <?php
+        /**
+         * @constructor pants
+         */
+        class Foo
+        {
+            static function pants(array $input)
+            {
+                $f = new static();
+                $f->value = $input['value'];
+                return $f;
+            }
+        }
 
 
 Property mapping

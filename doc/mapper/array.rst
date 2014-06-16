@@ -81,6 +81,7 @@ Object mappings have the following structure:
         'primary'=>...,
         'table'=>'table',
         'defaultFieldType'=>null,
+        'constructor'=>null,
         'fields'=>array(...),
         'relations'=>array(...),
     );
@@ -110,6 +111,16 @@ Object mappings have the following structure:
     details.
 
     This value is *optional*.
+
+
+.. py:attribute:: constructor
+ 
+    The name of a static constructor to use when creating the object instead of the
+    default ``__construct``. The method must be static and must return an instance of the
+    class.
+
+    If no constructor arguments are found in the meta, the entire unmapped input record is
+    passed as the first argument.
 
 
 .. py:attribute:: fields

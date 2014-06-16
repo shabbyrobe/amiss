@@ -1,7 +1,5 @@
 Metadata
 ========
 
-This ain't done yet. I'm sorry.
+The metadata's structure is documented here: :doc:`array`
 
-Take a peep at the source for ``Amiss\Mapper\Arrays`` and ``Amiss\Meta`` for a pretty good look at
-how the metadata is structured.

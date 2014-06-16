@@ -6,6 +6,7 @@ class Meta
     public $class;
     public $table;
     public $primary;
+    public $constructor = '__construct';
     
     /**
      * Array of relation arrays, hashed by property name
@@ -57,6 +58,9 @@ class Meta
         $this->setFields(isset($info['fields']) ? $info['fields'] : array());
         $this->relations = isset($info['relations']) ? $info['relations'] : array();
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
+        
+        if (isset($info['constructor']) && $info['constructor'])
+            $this->constructor = $info['constructor'];
         
         $this->defaultFieldType = null;
         if (isset($info['defaultFieldType'])) {

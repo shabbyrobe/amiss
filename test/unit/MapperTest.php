@@ -113,7 +113,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @covers Amiss\Mapper\Base::resolveObjectName
      */
     public function testResolveObjectNameWithNamespacedName()
@@ -125,7 +124,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @covers Amiss\Mapper\Base::resolveObjectName
      */
     public function testResolveObjectNameWithoutNamespaceWhenNoNamespaceSet()
@@ -137,7 +135,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @dataProvider dataForDefaultTableName
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -158,7 +155,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @dataProvider dataForDefaultTableNameWithTranslator
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -183,7 +179,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @dataProvider dataForDefaultTableName
      * @covers Amiss\Mapper\Base::getDefaultTable
      */
@@ -198,7 +193,6 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
      * @covers Amiss\Mapper\Base::resolveUnnamedFields
      */
     public function testResolveUnnamedFieldsColumn()
@@ -229,8 +223,7 @@ class MapperTest extends \CustomTestCase
     }
     
     /**
-     * @group mapper
-     * @covers Amiss\Mapper\Note::determineTypeHandler
+     * @covers Amiss\Mapper\Base::determineTypeHandler
      * @dataProvider dataForDetermineTypeHandler
      */
     public function testDetermineTypeHandler($in, $out)
@@ -252,6 +245,76 @@ class MapperTest extends \CustomTestCase
             array('  foo bar', 'foo'),
             array('|  foo bar', ''),
         );
+    }
+
+    /**
+     * @covers Amiss\Mapper\Base::createObject
+     */
+    public function testCreateObject()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta('stdClass', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ]
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar']);
+        $this->assertInstanceOf('stdClass', $obj);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertEquals('bar', $obj->b);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Base::createObject
+     */
+    public function testCreateObjectDefaultConstructor()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $class = __NAMESPACE__.'\TestCreateObject';
+        $meta = new \Amiss\Meta($class, 'test_table', [
+            'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $this->assertInstanceOf($class, $obj);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertTrue($obj->constructCalled);
+        $this->assertFalse($obj->staticConstructCalled);
+    }
+
+    /**
+     * @covers Amiss\Mapper\Base::createObject
+     */
+    public function testCreateObjectStaticConstructor()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $class = __NAMESPACE__.'\TestCreateObject';
+        $meta = new \Amiss\Meta($class, 'test_table', [
+            'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
+            'constructor'=>'staticConstruct',
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $this->assertInstanceOf($class, $obj);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertTrue($obj->constructCalled);
+        $this->assertTrue($obj->staticConstructCalled);
+    }
+}
+
+class TestCreateObject
+{
+    public $constructCalled = false;
+    public $staticConstructCalled = false;
+
+    public function __construct()
+    {
+        $this->constructCalled = true;
+    }
+
+    public static function staticConstruct()
+    {
+        $o = new static;
+        $o->staticConstructCalled = true;
+        return $o;
     }
 }
 

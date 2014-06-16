@@ -119,14 +119,28 @@ abstract class Base implements \Amiss\Mapper
     public function createObject($meta, $input, $args=null)
     {
         $object = null;
-        if ($args) {
-            $rc = new \ReflectionClass($meta->class);
-            $object = $rc->newInstanceArgs($args);
+        if ($meta->constructor == '__construct') {
+            if ($args) {
+                $rc = new \ReflectionClass($meta->class);
+                $object = $rc->newInstanceArgs($args);
+            }
+            else {
+                $cname = $meta->class;
+                $object = new $cname;
+            }
         }
         else {
-            $cname = $meta->class;
-            $object = new $cname;
+            $rc = new \ReflectionClass($meta->class);
+            $method = $rc->getMethod($meta->constructor);
+            $object = $method->invokeArgs(null, $args ?: $input);
         }
+
+        if (!$object instanceof $meta->class) {
+            throw new \UnexpectedValueException(
+                "Constructor {$meta->constructor} did not return instance of {$meta->class}"
+            );
+        }
+
         return $object;
     }
     
