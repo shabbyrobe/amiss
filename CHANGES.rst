@@ -1,5 +1,32 @@
-Upgrading
+Changelog
 =========
+
+v4.0.x to v4.1.0
+----------------
+
+New features
+~~~~~~~~~~~~
+
+Static ``assignRelated`` method added to Active Records::
+
+    $records = YourRecord::getList();
+    YourRecord::assignRelated($records, 'child');
+    
+Static constructor support added to mapper, receives unmapped input as argument by default::
+
+    /**
+     * @constructor foo
+     */
+    class YourMappedClass
+    {
+        static function foo(array $input)
+        {
+            $c = new static;
+            $c->prop = $input['prop'];
+            return $c;
+        }
+    }
+
 
 v3.0.x to v4.0
 --------------
