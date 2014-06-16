@@ -107,6 +107,55 @@ class ActiveRecordTest extends \DataTestCase
         $result = $child->getRelated('parent');
         $this->assertEquals(999, $result);
     }
+
+    /**
+     * @covers Amiss\Sql\ActiveRecord::__callStatic
+     * @group active
+     */
+    public function testAssignRelatedStatic()
+    {
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        \Amiss\Sql\ActiveRecord::setManager($manager);
+
+        $manager->expects($this->once())->method('getRelated')->with(
+            $this->isInstanceOf(__NAMESPACE__.'\TestRelatedChild'),
+            $this->equalTo('parent')
+        )->will($this->returnValue(999));
+
+        $child = new TestRelatedChild;
+        $child->childId = 6;
+        $child->parentId = 1;
+        TestRelatedChild::assignRelated($child, 'parent');
+        $this->assertEquals(999, $child->parent);
+    }
+
+    /**
+     * @covers Amiss\Sql\ActiveRecord::__callStatic
+     * @group active
+     */
+    public function testAssignRelatedStaticArray()
+    {
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        \Amiss\Sql\ActiveRecord::setManager($manager);
+
+        $child1 = new TestRelatedChild;
+        $child1->childId = 6;
+        $child1->parentId = 1;
+
+        $child2 = new TestRelatedChild;
+        $child2->childId = 7;
+        $child2->parentId = 2;
+
+        $input = [$child1, $child2];
+        $manager->expects($this->once())->method('getRelated')->with(
+            $this->equalTo($input),
+            $this->equalTo('parent')
+        )->will($this->returnValue([999, 777]));
+
+        TestRelatedChild::assignRelated($input, 'parent');
+        $this->assertEquals(999, $child1->parent);
+        $this->assertEquals(777, $child2->parent);
+    }
     
     /**
      * If a record has not been loaded from the database and the class doesn't

@@ -147,9 +147,42 @@ Consider the following equivalents:
     $yourRecordInstance->update ();
     $yourRecordInstance->delete ();
     $yourRecordInstance->save ();
-    $yourRecordInstance->assignRelated ( $into, $relationName );
-    $yourRecordInstance->getRelated ( $source, $relationName );
-    $yourRecordInstance->assignRelated ( $into, $relationName );
+
+
+Relations
+---------
+
+Relations can be retrieved directly from the active record. This does not change the
+parent object:
+
+.. code-block:: php
+
+    <?php
+    $record = YourRecord::getById(1);
+    $related = $record->getRelated('child');
+    assert($record->child == null);
+
+
+Relations can be populated directly (nothing is returned):
+
+.. code-block:: php
+
+    <?php
+    $record = YourRecord::getById(1);
+    $record->assignRelated('child');
+    assert($record->child != null);
+
+
+For convenience, ``assignRelated`` also works statically and directly proxies
+``Amiss\Sql\Manager->assignRelated()``. No validation is performed on the first argument -
+you can pass in anything accepted by the record's associated manager. This method is
+simply a bit of syntactic sugar:
+
+.. code-block:: php
+    
+    <?php
+    $data = YourRecord::getList();
+    YourRecord::assignRelated($data, 'relation');
 
 
 Lazy Loading

@@ -143,6 +143,9 @@ abstract class ActiveRecord
             $exists = true; 
             array_unshift($args, $called);
         }
+        elseif ($name == 'assignRelated') {
+            $exists = true;
+        }
         
         if ($exists)
             return call_user_func_array(array($manager, $name), $args);

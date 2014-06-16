@@ -189,7 +189,7 @@ class Manager
     public function assignRelated($source, $relationName)
     {
         $result = $this->getRelated($source, $relationName);
-        
+
         if ($result) {
             $sourceIsArray = is_array($source) || $source instanceof \Traversable;
             if (!$sourceIsArray) {
@@ -199,7 +199,7 @@ class Manager
             
             $meta = $this->getMeta(get_class($source[0]));
             $relation = $meta->relations[$relationName];
-            
+
             foreach ($result as $idx=>$item) {
                 if (!isset($relation['setter']))
                     $source[$idx]->{$relationName} = $item;
