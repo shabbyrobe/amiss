@@ -12,7 +12,7 @@ if (!isset($argv[1])) {
     exit;
 }
 
-$command = preg_replace('@[^A-z0-9\-]@', '', $argv[1]);
+$command = preg_replace('@[^A-Za-z0-9\-]@', '', $argv[1]);
 
 // remove the command from argv
 array_splice($argv, 1, 1);

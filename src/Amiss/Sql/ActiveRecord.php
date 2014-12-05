@@ -139,7 +139,10 @@ abstract class ActiveRecord
         $called = get_called_class();
         
         $exists = null;
-        if ($name == 'get' || $name == 'getByPk' || $name == 'getById' || $name == 'getList' || $name == 'count') { 
+        if ($name == 'get'     || $name == 'getByPk'    || 
+            $name == 'getById' || $name == 'getList'    || 
+            $name == 'count'   || $name == 'deleteById'
+        ) { 
             $exists = true; 
             array_unshift($args, $called);
         }

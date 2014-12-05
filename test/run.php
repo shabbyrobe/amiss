@@ -8,9 +8,6 @@ Usage: test/run.php [--no-sqlite] [--with-mysql] [--filter=<expr>]
 $basePath = __DIR__.'/../';
 $testPath = __DIR__;
 
-if (!class_exists('PHPUnit_Framework_Exception'))
-    require_once 'PHPUnit/Autoload.php';
-
 require $testPath.'/config.php';
 
 $options = array(

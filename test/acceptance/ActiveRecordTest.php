@@ -77,6 +77,18 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
     }
 
+    public function testDeleteById()
+    {
+        $obj = Active\ArtistRecord::getById(1);
+        $this->assertTrue($obj==true, "Couldn't retrieve object");
+        Active\ArtistRecord::deleteById(1);
+
+        $this->assertEquals(0, $this->manager->count('ArtistRecord', 'artistId=1'));
+
+        // sanity check: make sure we didn't delete everything!
+        $this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
+    }
+
     public function testUpdateByPrimary()
     {
         $n = md5(uniqid('', true));

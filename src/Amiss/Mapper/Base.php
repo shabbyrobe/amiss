@@ -1,6 +1,8 @@
 <?php
 namespace Amiss\Mapper;
 
+use Amiss\Meta;
+
 /**
  * @package Mapper
  */
@@ -55,6 +57,8 @@ abstract class Base implements \Amiss\Mapper
 
     public function fromObject($meta, $object, $context=null)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $output = array();
         
         $defaultType = $meta->getDefaultFieldType();
@@ -88,6 +92,8 @@ abstract class Base implements \Amiss\Mapper
 
     function fromObjects($meta, $input, $context=null)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $out = array();
         if ($input) {
             foreach ($input as $key=>$item) {
@@ -99,6 +105,8 @@ abstract class Base implements \Amiss\Mapper
     
     function toObject($meta, $input, $args=null)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $object = $this->createObject($meta, $input, $args);
         $this->populateObject($meta, $object, $input);
         return $object;
@@ -106,6 +114,8 @@ abstract class Base implements \Amiss\Mapper
     
     function toObjects($meta, $input, $args=null)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $out = array();
         if ($input) {
             foreach ($input as $item) {
@@ -118,6 +128,8 @@ abstract class Base implements \Amiss\Mapper
 
     public function createObject($meta, $input, $args=null)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $object = null;
         if ($meta->constructor == '__construct') {
             if ($args) {
@@ -146,6 +158,8 @@ abstract class Base implements \Amiss\Mapper
     
     public function populateObject($meta, $object, $input)
     {
+        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+
         $defaultType = null;
         
         $fields = $meta->getFields();
@@ -186,7 +200,7 @@ abstract class Base implements \Amiss\Mapper
         // this splits off any extra crap that you may have defined
         // in the field's definition, i.e. "varchar(80) not null etc etc"
         // becomes "varchar"
-        $x = preg_split('@[^A-z0-9\-\_]@', trim($type), 2);
+        $x = preg_split('@[^A-Za-z0-9\-\_]@', trim($type), 2);
         $id = strtolower($x[0]);
         
         // must be false not null for isset tests

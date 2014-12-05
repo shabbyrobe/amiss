@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v4.1.0 to v4.2.0
+----------------
+
+- Active Records support ``deleteById`` as a static method.
+
+- ``Mapper->toObject``, ``Mapper->fromObject``, ``Mapper->createObject`` etc
+  support accepting a string as well as an instance of ``Amiss\Meta``.
+
+- ``Amiss\Type\Date`` now allows you to specify a subclass of ``DateTime`` to
+  use instead of ``DateTime``.
+
+- Moved to packagist
+
+
 v4.0.x to v4.1.0
 ----------------
 

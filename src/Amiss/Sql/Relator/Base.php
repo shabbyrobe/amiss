@@ -28,7 +28,7 @@ abstract class Base implements \Amiss\Sql\Relator
                     $ids[$l] = array(
                         'values'=>array(), 
                         'rField'=>$rFields[$r], 
-                        'param'=>preg_replace('/[^A-z0-9_]/', '', $rFields[$r]['name'])
+                        'param'=>preg_replace('/[^A-Za-z0-9_]/', '', $rFields[$r]['name'])
                     );
                 }
                 

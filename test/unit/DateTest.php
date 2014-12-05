@@ -115,4 +115,60 @@ class DateTest extends \CustomTestCase
             $tz = new \DateTimeZone($tz);
         return \DateTime::createFromFormat('Y-m-d H:i:s', $date, $tz);
     }
+
+    public function testDateTimeCustomClassPrepareForDb()
+    {
+        $class = __NAMESPACE__.'\PantsDateTime';
+        $tz = new \DateTimeZone('UTC');
+        $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
+        $out = $handler->prepareValueForDb(new PantsDateTime('2015-01-01', $tz), null, array());
+        $this->assertEquals('2015-01-01 00:00:00', $out);
+    }
+
+    public function testDateTimeCustomClassHandleValueFromDb()
+    {
+        $class = __NAMESPACE__.'\PantsDateTime';
+        $tz = new \DateTimeZone('UTC');
+        $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
+        $out = $handler->handleValueFromDb('2015-01-01 00:00:00', null, [], array());
+        $this->assertInstanceOf($class, $out);
+    }
+
+    public function testDateTimeCustomClassFailsWhenPassedRawDateTime()
+    {
+        $class = __NAMESPACE__.'\PantsDateTime';
+        $tz = new \DateTimeZone('UTC');
+        $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
+
+        $this->setExpectedException(
+            'UnexpectedValueException',
+            "Date value was invalid. Expected $class, found DateTime"
+        );
+        $out = $handler->prepareValueForDb(new \DateTime('2015-01-01', $tz), null, array());
+    }
+
+    public function testDateTimeCustomClassFailsWhenPassedString()
+    {
+        $class = __NAMESPACE__.'\PantsDateTime';
+        $tz = new \DateTimeZone('UTC');
+        $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
+
+        $this->setExpectedException(
+            'UnexpectedValueException',
+            "Date value was invalid. Expected $class, found string"
+        );
+        $out = $handler->prepareValueForDb('2015-01-01', null, array());
+    }
 }
+
+class PantsDateTime extends \DateTime
+{
+	public static function createFromFormat($format, $time, $object=null)
+    {
+		$dateTime = \DateTime::createFromFormat($format, $time, $object);
+		$dt = new static('@'.$dateTime->getTimeStamp(), new \DateTimeZone('UTC'));
+		$dt->setTimeZone($dateTime->getTimeZone());
+		return $dt;
+    }
+}
+

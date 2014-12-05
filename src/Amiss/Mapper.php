@@ -35,9 +35,12 @@ interface Mapper
      * 
      * This will almost always have the exact same body. This is provided for
      * convenience, commented out below the definition.
+     *
+     * @param $meta Amiss\Meta or string used to call getMeta()
      */
     function toObject($meta, $input, $args=null);
     //{
+    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
     //    $object = $this->createObject($meta, $row, $args);
     //    $this->populateObject($meta, $object, $row);
     //    return $object;
@@ -48,9 +51,12 @@ interface Mapper
      * 
      * This will almost always have the exact same body. This is provided for
      * convenience, commented out below the definition.
+     *
+     * @param $meta Amiss\Meta or string used to call getMeta()
      */
     function toObjects($meta, $input, $args=null);
     //{
+    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
     //    $out = array();
     //    if ($input) {
     //        foreach ($input as $item) {
@@ -64,9 +70,9 @@ interface Mapper
     /**
      * Get row values from an object
      * 
-     * @param \Amiss\Meta $meta
-     * @param object The object to get row values from
-     * @param context Identifies the context in which the export is occurring. Useful
+     * @param $meta Amiss\Meta or string used to call getMeta()
+     * @param $input object The object to get row values from
+     * @param $context Identifies the context in which the export is occurring. Useful
      *     for distinguishing between inserts and updates when dealing with sql databases.
      * 
      * @return array
@@ -78,9 +84,12 @@ interface Mapper
      * 
      * This will almost always have the exact same body. This is provided for
      * convenience, commented out below the definition.
+     *
+     * @param $meta Amiss\Meta or string used to call getMeta()
      */
     function fromObjects($meta, $input, $context=null);
     //{
+    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
     //    $out = array();
     //    if ($input) {
     //        foreach ($input as $key=>$item) {
@@ -97,7 +106,7 @@ interface Mapper
      * used to construct the object, not to populate it. Feel free to ignore it, 
      * it will be passed to populateObject as well.
      * 
-     * @param \Amiss\Meta $meta The metadata to use to create the object
+     * @param $meta \Amiss\Meta The metadata to use to create the object
      * @param array $row The row values, which can be used to construct the object.
      * @param array $args Class constructor arguments
      * @return void
@@ -107,7 +116,7 @@ interface Mapper
     /**
      * Populate an object with row values
      * 
-     * @param \Amiss\Meta $meta 
+     * @param $meta Amiss\Meta or string used to call getMeta()
      * @param object $object The object to populate
      * @param array $row The row values to use to populate the object
      * @return void

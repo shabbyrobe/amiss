@@ -9,6 +9,7 @@ doc/_build/
 texput.log
 tags
 *.swp
+vendor/
 
 .amisstestrc
 amisstestrc

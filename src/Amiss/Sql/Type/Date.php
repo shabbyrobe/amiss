@@ -6,8 +6,9 @@ class Date implements \Amiss\Type\Handler
     public $formats;
     public $appTimeZone;
     public $dbTimeZone;
-    
-    public function __construct($formats='datetime', $dbTimeZone, $appTimeZone=null)
+    public $dateClass;
+
+    public function __construct($formats='datetime', $dbTimeZone, $appTimeZone=null, $dateClass=null)
     {
         // compat. remove for v5
         if ($formats === true)
@@ -29,6 +30,15 @@ class Date implements \Amiss\Type\Handler
         
         $this->dbTimeZone = $dbTimeZone;
         $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
+
+        if ($dateClass) {
+            if (!is_subclass_of($dateClass, 'DateTime'))
+                throw new \InvalidArgumentException("Custom date class must inherit DateTime");
+            $this->dateClass = $dateClass;
+        }
+        else {  
+            $this->dateClass = 'DateTime';
+        }
         // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
     }
     
@@ -40,7 +50,7 @@ class Date implements \Amiss\Type\Handler
     function prepareValueForDb($value, $object, array $fieldInfo)
     {
         $out = null;
-        if ($value instanceof \DateTime) {
+        if ($value instanceof $this->dateClass) {
             // This conversion may not be an issue. Wait until it is raised
             // before making a decision.
             // also - this doesn't seem to work right as of 5.5.1:
@@ -53,6 +63,14 @@ class Date implements \Amiss\Type\Handler
             $value->setTimeZone($this->dbTimeZone);
             $out = $value->format($this->formats[0]);
         }
+        elseif ($value) {
+            $type = gettype($value);
+            throw new \UnexpectedValueException(
+                "Date value was invalid. Expected {$this->dateClass}, found ".
+                ($type == 'object' ? get_class($value) : $type)
+            );
+        }
+
         return $out;
     }
     
@@ -60,13 +78,16 @@ class Date implements \Amiss\Type\Handler
     {
         $out = null;
         if ($value !== null && $value !== '' && $value !== false) {
+            $dateClass = $this->dateClass;
+
             foreach ($this->formats as $format) {
-                $out = \DateTime::createFromFormat($format, $value, $this->dbTimeZone);
-                if ($out instanceof \DateTime) {
+                $out = $dateClass::createFromFormat($format, $value, $this->dbTimeZone);
+                if ($out instanceof $dateClass) {
                     $out->setTimeZone($this->appTimeZone);
                     break;
                 }
             }
+
             if (!$out) {
                 throw new \UnexpectedValueException("Date '$value' could not be handled with any of the following formats: ".implode(', ', $this->formats));
             }
