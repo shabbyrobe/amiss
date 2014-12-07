@@ -12,8 +12,8 @@ class Meta
      * Array of relation arrays, hashed by property name
      * 
      * Relation arrays *must* contain at least a type at index 0. All other
-     * values in the array are defined by the relator. The meta only cares
-     * about the type.
+     * values in the array are defined by the relator except 'name', which 
+     * Meta will assign. The meta only cares about the type and name.
      * 
      * For e.g.
      * $meta->relations = array(
@@ -24,7 +24,7 @@ class Meta
      *     'bar'=>array('blahblah', 'fee'=>'fi', 'fo'=>'fum'),
      * );
      */
-    public $relations;
+    public $relations = [];
     
     /**
      * Additional metadata found but not explicitly handled by the mapper
@@ -114,7 +114,8 @@ class Meta
             }
         }
         $this->indexes = $indexes;
-        $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
+        if ($this->primary)
+            $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
     }
 
     private function setFields($fields)

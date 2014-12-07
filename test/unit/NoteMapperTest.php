@@ -324,7 +324,7 @@ class NoteMapperTest extends \CustomTestCase
                 
                 /** 
                  * @has.one.of {$name}Bar
-                 * @has.one.on barId
+                 * @has.one.from barId
                  */
                 public function getBar()
                 {
@@ -334,7 +334,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
+            'bar'=>array('one', 'name'=>'bar', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -387,7 +387,7 @@ class NoteMapperTest extends \CustomTestCase
                 
                 /** 
                  * @has.one.of {$name}Bar
-                 * @has.one.on barId
+                 * @has.one.from barId
                  * @setter setLaDiDaBar
                  */
                 public function getBar()
@@ -403,7 +403,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>$name."Bar", 'on'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+            'bar'=>array('one', 'name'=>'bar', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -439,7 +439,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
-            $name.'2'=>array('many', 'of'=>$name."Class2")
+            $name.'2'=>array('many', 'name'=>'testGetMetaOneToManyPropertyRelationWithNoOn2', 'of'=>$name."Class2")
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -462,59 +462,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
-            'test'=>array('test')
-        );
-        $this->assertEquals($expected, $meta->relations);
-    }
-
-    /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     */
-    public function testGetMetaRelationWithCompositeKeyAsStrings()
-    {
-        $mapper = new \Amiss\Mapper\Note;
-        $name = __FUNCTION__;
-        $prefix = __NAMESPACE__."\\".__FUNCTION__;
-        $this->createClass("{$prefix}Foo", "
-            namespace ".__NAMESPACE__.";
-            class {$name}Foo {
-                /** 
-                 * @has.one.of stdClass
-                 * @has.one.on barId
-                 * @has.one.on bazId
-                 */
-                public \$bar;
-            }
-        ");
-        $meta = $mapper->getMeta("{$prefix}Foo");
-        $expected = array(
-            'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId', 'bazId')),
-        );
-        $this->assertEquals($expected, $meta->relations);
-    }
-
-    /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     */
-    public function testGetMetaRelationWithCompositeKeyAsHash()
-    {
-        $mapper = new \Amiss\Mapper\Note;
-        $name = __FUNCTION__;
-        $prefix = __NAMESPACE__."\\".__FUNCTION__;
-        $this->createClass("{$prefix}Foo", "
-            namespace ".__NAMESPACE__.";
-            class {$name}Foo {
-                /** 
-                 * @has.one.of stdClass
-                 * @has.one.on.barId otherBarId
-                 * @has.one.on.bazId otherBazId
-                 */
-                public \$bar;
-            }
-        ");
-        $meta = $mapper->getMeta("{$prefix}Foo");
-        $expected = array(
-            'bar'=>array('one', 'of'=>'stdClass', 'on'=>array('barId'=>'otherBarId', 'bazId'=>'otherBazId')),
+            'test'=>array('test', 'name'=>'test')
         );
         $this->assertEquals($expected, $meta->relations);
     }

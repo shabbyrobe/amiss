@@ -22,7 +22,7 @@ use Amiss\Sql\RelatorContext;
  */
 class Association extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         if (!$source) return;
         
@@ -96,6 +96,7 @@ class Association extends Base
         list($query, $params, $sourcePkFields) = $this->buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria);
         
         $stmt = $this->manager->execute($query, $params);
+        ++$this->manager->queries;
         
         $list = array();
         $ids = array();

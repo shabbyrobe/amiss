@@ -3,6 +3,7 @@ namespace Amiss\Sql;
 
 use Amiss\Exception;
 use Amiss\Mapper;
+use Amiss\Meta;
 
 /**
  * Amiss query manager. This is the core of Amiss' functionality.
@@ -50,7 +51,7 @@ class Manager
         $this->connector = $connector;
         $this->mapper = $mapper;
     }
-    
+
     /**
      * @return \Amiss\Sql\Connector|\PDO
      */
@@ -58,7 +59,7 @@ class Manager
     {
         return $this->connector;
     }
-    
+
     /**
      * @param string Class name
      * @return \Amiss\Meta 
@@ -68,7 +69,7 @@ class Manager
         // Do not put any logic in here at all. this is just syntactic sugar.
         return $this->mapper->getMeta($class);
     }
-    
+
     public function get($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
@@ -133,6 +134,7 @@ class Manager
     private function autoFetchRelations($source, $meta, $stack)
     {
         $stack[$meta->class] = true;
+
         foreach ($meta->autoRelations as $id) {
             $this->assignRelated($source, $id, $stack);
         }
@@ -397,10 +399,9 @@ class Manager
         
         $first = array_shift($args);
         if (is_object($first)) {
-            $meta = $this->getMeta(get_class($first));
-            $class = $meta->class;
+            $class = $this->getMeta(get_class($first));
             $criteria = new Criteria\Query();
-            $criteria->where = $meta->getPrimaryValue($first);
+            $criteria->where = $class->getIndexValue($first);
         }
         else {
             if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
@@ -408,7 +409,7 @@ class Manager
             $class = $first;
             $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Criteria\Query');
         }
-        
+
         return $this->executeDelete($class, $criteria);
     }
     
@@ -624,15 +625,21 @@ class Manager
         return $criteria;
     }
     
-    protected function executeDelete($class, Criteria\Query $criteria)
+    protected function executeDelete($meta, Criteria\Query $criteria)
     {
-        $meta = $this->getMeta($class);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+            if (!$meta instanceof Meta) throw new \InvalidArgumentException();
+        }
+
         $table = $meta->table;
-        
+
         list ($whereClause, $whereParams) = $criteria->buildClause($meta);
-        
+        if (!$whereClause)
+            throw new \UnexpectedValueException("Empty where clause");
+
         $sql = "DELETE FROM $table WHERE $whereClause";
-        
+
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
         $stmt->execute($whereParams);
