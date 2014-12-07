@@ -28,6 +28,7 @@ class Amiss
         'Amiss\Sql\Criteria\Update'=>'Amiss/Sql/Criteria/Update.php',
         'Amiss\Sql\Manager'=>'Amiss/Sql/Manager.php',
         'Amiss\Sql\Relator'=>'Amiss/Sql/Relator.php',
+        'Amiss\Sql\RelatorContext'=>'Amiss/Sql/RelatorContext.php',
         'Amiss\Sql\Relator\Association'=>'Amiss/Sql/Relator/Association.php',
         'Amiss\Sql\Relator\Base'=>'Amiss/Sql/Relator/Base.php',
         'Amiss\Sql\Relator\OneMany'=>'Amiss/Sql/Relator/OneMany.php',

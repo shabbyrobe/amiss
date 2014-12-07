@@ -51,7 +51,7 @@ class Note extends \Amiss\Mapper\Base
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
         $table = isset($classNotes['table']) ? $classNotes['table'] : $this->getDefaultTable($class);
-        
+
         $parentClass = get_parent_class($class);
         $parent = null;
         if ($parentClass) {
@@ -67,6 +67,10 @@ class Note extends \Amiss\Mapper\Base
             'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
         );
 
+        if (isset($classNotes['index'])) {
+            $info['indexes'] = $classNotes['index'];
+        }
+
         if (isset($classNotes['constructor']))
             $info['constructor'] = $classNotes['constructor'];
 
@@ -74,7 +78,7 @@ class Note extends \Amiss\Mapper\Base
         
         $relationNotes = array();
         
-        $indexLengths = [];
+        $fieldIndexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
                 $field = null;
@@ -98,12 +102,12 @@ class Note extends \Amiss\Mapper\Base
                         else
                             $seq = (int) $seq;
 
-                        if (isset($info['indexes'][$k][$seq]))
+                        if (isset($info['indexes'][$k]['fields'][$seq]))
                             throw new Exception("Duplicate sequence $seq for index $k");
 
                         // hacky increment even if the key doesn't exist
-                        $c = &$indexLengths[$k]; $c = ((int)$c) + 1;
-                        $info['indexes'][$k][$seq] = $name;
+                        $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
+                        $info['indexes'][$k]['fields'][$seq] = $name;
                     }
                 }
                 
@@ -147,13 +151,13 @@ class Note extends \Amiss\Mapper\Base
 
         // The indexes may be added out of order:
         // $a[1] = 'b'; $a[0] = 'a'; == [1 => 'b', 0 => 'a']!
-        foreach ($info['indexes'] as $name=>&$index) {
-            if ($indexLengths[$name] > 1) {
-                ksort($index);
-                $index = array_values($index);
+        foreach ($fieldIndexLengths as $name=>$length) {
+            if ($length > 1) {
+                $f = $info['indexes'][$name]['fields'];
+                ksort($f);
+                $info['indexes'][$name]['fields'] = array_values($f);
             }
         }
-        unset($index);
 
         if ($relationNotes) {
             $info['relations'] = $this->buildRelations($relationNotes);

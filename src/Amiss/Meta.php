@@ -73,10 +73,9 @@ class Meta
         if ($this->primary && !is_array($this->primary))
             $this->primary = array($this->primary);
 
-        $this->indexes = isset($info['indexes']) ? $info['indexes'] : array();
-        $this->indexes['primary'] = $this->primary;
-
+        $this->setIndexes(isset($info['indexes']) ? $info['indexes'] : array());
         $this->setFields(isset($info['fields']) ? $info['fields'] : array());
+
         if (isset($info['relations']))
             $this->setRelations($info['relations']);
 
@@ -102,6 +101,19 @@ class Meta
             if (isset($r['auto']) && $r['auto'])
                 $this->autoRelations[] = $id;
         }
+    }
+
+    private function setIndexes($indexes)
+    {
+        foreach ($indexes as $name=>&$index) {
+            if (!isset($index['key']))
+                $index['key'] = false;
+            if (!isset($index['fields']) || !$index['fields']) {
+                throw new \UnexpectedValueException("Misconfigured index $name");
+            }
+        }
+        $this->indexes = $indexes;
+        $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
     }
 
     private function setFields($fields)
@@ -162,16 +174,24 @@ class Meta
         }
         return $this->defaultFieldType;
     }
-    
+
+    /**
+     * @deprecated Use getIndexValue($object, 'primary')
+     */
     function getPrimaryValue($object)
     {
+        return $this->getIndexValue($object);
+    }
+    
+    function getIndexValue($object, $indexName='primary')
+    {
         $foundValue = false;
-        
-        if (!$this->primary)
-            throw new Exception("Class {$this->class} doesn't define primary key(s)");
-        
-        $prival = array();
-        foreach ($this->primary as $p) {
+
+        if (!isset($this->indexes[$indexName]))
+            throw new Exception("Class {$this->class} doesn't define index $indexName");
+
+        $indexValue = array();
+        foreach ($this->indexes[$indexName]['fields'] as $p) {
             $field = $this->getField($p);
             $value = !isset($field['getter']) 
                 ? $object->{$p} 
@@ -180,11 +200,11 @@ class Meta
             if ($value)
                 $foundValue = true;
             
-            $prival[$p] = $value;
+            $indexValue[$p] = $value;
         }
         
         if ($foundValue)
-            return $prival;
+            return $indexValue;
     }
     
     function getValue($object, $property)

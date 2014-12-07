@@ -94,17 +94,12 @@ class Manager
 
             if ($meta->autoRelations) {
                 $context = $class instanceof RelatorContext ? $class : new RelatorContext();
-                $context->push($meta);
-                $context->add($object);
-                foreach ($meta->autoRelations as $id) {
-                    $this->assignRelated($object, $id, $context);
-                }
-                $context->pop($meta);
+                $this->autoFetchRelations($context, $object, $meta);
             }
         }
         return $object;
     }
-    
+
     public function getList($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
@@ -122,11 +117,23 @@ class Manager
         }
 
         if ($objects) {
-            foreach ($meta->autoRelations as $id)
-                $this->assignRelated($objects, $id);
+            foreach ($meta->autoRelations as $id) {
+                $context = $class instanceof RelatorContext ? $class : new RelatorContext();
+                $this->autoFetchRelations($context, $objects, $meta);
+            }
         }
 
         return $objects;
+    }
+    
+    private function autoFetchRelations($context, $source, $meta)
+    {
+        $context->push($meta);
+        $context->add($source);
+        foreach ($meta->autoRelations as $id) {
+            $this->assignRelated($source, $id, $context);
+        }
+        $context->pop($meta);
     }
     
     /**
@@ -188,25 +195,33 @@ class Manager
      * @param string The name of the relation to assign
      * @return void
      */
-    public function assignRelated($source, $relationName)
+    public function assignRelated($source, $relationName, $context=null)
     {
-        $result = $this->getRelated($source, $relationName);
+        $sourceIsArray = is_array($source) || $source instanceof \Traversable;
+        if (!$sourceIsArray)
+            $source = array($source);
 
-        if ($result) {
-            $sourceIsArray = is_array($source) || $source instanceof \Traversable;
-            if (!$sourceIsArray) {
-                $source = array($source);
-                $result = array($result);
-            }
-            
-            $meta = $this->getMeta(get_class($source[0]));
-            $relation = $meta->relations[$relationName];
+        $meta = $this->getMeta(get_class($source[0]));
+        $relation = $meta->relations[$relationName];
 
-            foreach ($result as $idx=>$item) {
-                if (!isset($relation['setter']))
-                    $source[$idx]->{$relationName} = $item;
-                else
-                    call_user_func(array($source[$idx], $relation['setter']), $item);
+        $missing = [];
+        foreach ($source as $item) {
+            if (!isset($relation['getter']) && !$item->{$relationName})
+                $missing[] = $item;
+            elseif (!call_user_func(array($item, $relation['getter']))) 
+                $missing[] = $item;
+        }
+
+        if ($missing) {
+            $result = $this->getRelated($missing, $relationName, null, $context);
+
+            if ($result) {
+                foreach ($result as $idx=>$item) {
+                    if (!isset($relation['setter']))
+                        $missing[$idx]->{$relationName} = $item;
+                    else
+                        call_user_func(array($missing[$idx], $relation['setter']), $item);
+                }
             }
         }
     }
@@ -219,7 +234,7 @@ class Manager
      * @param criteria Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null, $context=null)
     {
         if (!$source) return;
         
@@ -250,7 +265,7 @@ class Manager
             $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
         }
         
-        return $relator->getRelated(null, $source, $relationName, $query);
+        return $relator->getRelated($context, $source, $relationName, $query);
     }
     
     /**

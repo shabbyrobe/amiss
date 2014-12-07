@@ -7,7 +7,30 @@ class RelatorContext
     private $stackIdx = -1;
     private $metaCount = [];
 
-    public $objects = [];
+    private $objects = [];
+
+    function add($objects)
+    {
+        if (!is_array($objects))
+            $objects = [$objects];
+
+        $meta = $this->stack[$this->stackIdx];
+        foreach ($objects as $object) {
+            foreach ($meta->indexes as $indexName=>$index) {
+                if ($index['key']) {
+                    $value = $meta->getIndexValue($object, $indexName);
+                    ksort($value);
+                    $this->objects[$meta->class][$indexName][serialize($value)] = $object;
+                }
+            }
+        }
+    }
+
+    function get($class, $object, $indexName, array $indexValue)
+    {
+        ksort($indexValue);
+        return $this->objects[$class][$object][$indexName][serialize($indexValue)];
+    }
 
     function push($meta)
     {

@@ -51,10 +51,10 @@ class OneMany extends Base
         // If an index exists, you don't need to join on all of it.
         // This assumes that the indexes are properly numbered. If not, BOOM!
         $on = [];
-        foreach ($meta->indexes[$from] as $idx=>$fromField) {
-            if (!isset($relatedMeta->indexes[$to][$idx]))
+        foreach ($meta->indexes[$from]['fields'] as $idx=>$fromField) {
+            if (!isset($relatedMeta->indexes[$to]['fields'][$idx]))
                 break;
-            $on[$fromField] = $relatedMeta->indexes[$to][$idx];
+            $on[$fromField] = $relatedMeta->indexes[$to]['fields'][$idx];
         }
 
         // find query values in source object(s)
