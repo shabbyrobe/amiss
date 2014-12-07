@@ -61,6 +61,7 @@ class Note extends \Amiss\Mapper\Base
         $info = array(
             'primary'=>array(),
             'fields'=>array(),
+            'indexes'=>array(),
             'relations'=>array(),
             'ext'=>isset($classNotes['ext']) ? $classNotes['ext'] : null,
             'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
@@ -73,6 +74,7 @@ class Note extends \Amiss\Mapper\Base
         
         $relationNotes = array();
         
+        $indexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
                 $field = null;
@@ -83,6 +85,27 @@ class Note extends \Amiss\Mapper\Base
                 
                 if (isset($itemNotes['has']))
                     $relationNote = $itemNotes['has'];
+
+                if (isset($itemNotes['index'])) {
+                    $indexNote = $itemNotes['index'];
+                    if ($indexNote === true) {
+                        $indexNote = [$name=>true];
+                    }
+
+                    foreach ($indexNote as $k=>$seq) {
+                        if ($seq === true)
+                            $seq = 0;
+                        else
+                            $seq = (int) $seq;
+
+                        if (isset($info['indexes'][$k][$seq]))
+                            throw new Exception("Duplicate sequence $seq for index $k");
+
+                        // hacky increment even if the key doesn't exist
+                        $c = &$indexLengths[$k]; $c = ((int)$c) + 1;
+                        $info['indexes'][$k][$seq] = $name;
+                    }
+                }
                 
                 if (isset($itemNotes['primary'])) {
                     $info['primary'][] = $name;
@@ -104,7 +127,7 @@ class Note extends \Amiss\Mapper\Base
                         ? $itemNotes['type'] 
                         : null
                     ;
-                    
+
                     $info['fields'][$name] = $fieldInfo;
                 }
                 
@@ -121,7 +144,17 @@ class Note extends \Amiss\Mapper\Base
                 }
             }
         }
-        
+
+        // The indexes may be added out of order:
+        // $a[1] = 'b'; $a[0] = 'a'; == [1 => 'b', 0 => 'a']!
+        foreach ($info['indexes'] as $name=>&$index) {
+            if ($indexLengths[$name] > 1) {
+                ksort($index);
+                $index = array_values($index);
+            }
+        }
+        unset($index);
+
         if ($relationNotes) {
             $info['relations'] = $this->buildRelations($relationNotes);
         }

@@ -24,7 +24,10 @@ class RelatorOneManyTest extends \CustomTestCase
         $this->relator = new \Amiss\Sql\Relator\OneMany($this->manager);
         
         if (!class_exists('DummyParent')) {
-            eval('class DummyParent { public $id; public $parentId; } class DummyChild { public $id; }');
+            eval('
+                class DummyParent { public $id; public $parentId; }
+                class DummyChild { public $id; }
+            ');
         }
     }
 
@@ -86,7 +89,7 @@ class RelatorOneManyTest extends \CustomTestCase
             }
         ));
         
-        $this->relator->getRelated($source, $relation);
+        $this->relator->getRelated(null, $source, $relation);
         
         return $capture;
     }
@@ -115,7 +118,7 @@ class RelatorOneManyTest extends \CustomTestCase
         $this->mapper->meta['DummyChild'] = new \Amiss\Meta('DummyChild', 'child', array(
             'primary'=>array($data['childIdField']),
             'fields'=>array(
-                $data['childIdField']     => array('name'=>$data['childIdColumn']    ?: $data['childIdField']),
+                $data['childIdField']     => array('name'=>$data['childIdColumn']     ?: $data['childIdField']),
                 $data['childParentField'] => array('name'=>$data['childParentColumn'] ?: $data['childParentField']),
             ),
             'relations'=>array(

@@ -64,14 +64,17 @@ class RelatedGetterTestChild
     /** @primary */
     public $id;
 
-    /** @field */
+    /**
+     * @field
+     * @index
+     */
     public $parentId;
 
     private $parent;
 
     /**
      * @has.one.of Amiss\Test\Acceptance\Manager\RelatedGetterTestParent
-     * @has.one.on.parentId id
+     * @has.one.from parentId
      */
     public function getParent()
     {

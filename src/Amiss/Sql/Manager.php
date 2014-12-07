@@ -22,8 +22,7 @@ class Manager
     public $connector;
     
     /**
-     * Number of queries performed by the manager.
-     * May not be accurate.
+     * Number of queries performed by the manager. May not be accurate.
      * @var int
      */
     public $queries = 0;
@@ -53,8 +52,6 @@ class Manager
     }
     
     /**
-     * Get the database connector
-     * 
      * @return \Amiss\Sql\Connector|\PDO
      */
     public function getConnector()
@@ -63,26 +60,21 @@ class Manager
     }
     
     /**
-     * Get the table mappping metadata for a class
-     * 
      * @param string Class name
      * @return \Amiss\Meta 
      */
     public function getMeta($class)
     {
+        // Do not put any logic in here at all. this is just syntactic sugar.
         return $this->mapper->getMeta($class);
     }
     
-    /**
-     * Get a single object from the database
-     * 
-     * @return object
-     */
     public function get($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->getMeta($class);
-        
+
+        $meta = $class instanceof RelatorContext ? $class->meta : $this->mapper->getMeta($class);
+
         list ($limit, $offset) = $criteria->getLimitOffset();
         if ($limit && $limit != 1)
             throw new Exception("Limit must be one or zero");
@@ -97,17 +89,22 @@ class Manager
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             if ($object)
                 throw new Exception("Query returned more than one row");
-            
+
             $object = $this->mapper->toObject($meta, $row, $criteria->args);
+
+            if ($meta->autoRelations) {
+                $context = $class instanceof RelatorContext ? $class : new RelatorContext();
+                $context->push($meta);
+                $context->add($object);
+                foreach ($meta->autoRelations as $id) {
+                    $this->assignRelated($object, $id, $context);
+                }
+                $context->pop($meta);
+            }
         }
         return $object;
     }
     
-    /**
-     * Get a list of objects from the database
-     * 
-     * @return object[]
-     */
     public function getList($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
@@ -123,7 +120,12 @@ class Manager
             $object = $this->mapper->toObject($meta, $row, $criteria->args);
             $objects[] = $object;
         }
-        
+
+        if ($objects) {
+            foreach ($meta->autoRelations as $id)
+                $this->assignRelated($objects, $id);
+        }
+
         return $objects;
     }
     
@@ -237,7 +239,7 @@ class Manager
         if (!isset($this->relators[$relation[0]])) {
             throw new Exception("Relator {$relation[0]} not found");
         }
-        
+
         $relator = $this->relators[$relation[0]];
         if (!$relator instanceof Relator) {
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
@@ -248,7 +250,7 @@ class Manager
             $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
         }
         
-        return $relator->getRelated($source, $relationName, $query);
+        return $relator->getRelated(null, $source, $relationName, $query);
     }
     
     /**
@@ -281,7 +283,8 @@ class Manager
         foreach ($values as $k=>$v) {
             $columns[] = '`'.str_replace('`', '', $k).'`';
         }
-        $sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
+        $sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") ".
+            "VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
         
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
@@ -293,9 +296,13 @@ class Manager
         
         // we need to be careful with "lastInsertId": SQLLite generates one even without a PRIMARY
         if ($object && $meta->primary && $lastInsertId) {
-            if (($count=count($meta->primary)) != 1)
-                throw new Exception("Last insert ID $lastInsertId found for class {$meta->class}. Expected 1 primary field, but class defines {$count}");
-            
+            if (($count = count($meta->primary)) != 1) {
+                throw new Exception(
+                    "Last insert ID $lastInsertId found for class {$meta->class}. ".
+                    "Expected 1 primary field, but class defines {$count}"
+                );
+            }
+
             $field = $meta->getField($meta->primary[0]);
             $handler = $this->mapper->determineTypeHandler($field['type']['id']);
             
@@ -328,16 +335,19 @@ class Manager
         $first = array_shift($args);
         
         if (is_object($first)) {
+        // Object update mode
+
             $class = get_class($first);
             $meta = $this->getMeta($class);
             $criteria = new Criteria\Update();
             $criteria->set = $this->mapper->fromObject($meta, $first, 'update');
             $criteria->where = $meta->getPrimaryValue($first);
         }
+
         elseif (is_string($first)) {
-            // FIXME: improve text
+        // Table update mode
             if ($count < 2)
-                throw new \InvalidArgumentException();
+                throw new \InvalidArgumentException("Criteria missing for table update");
             
             $criteria = $this->createTableUpdateCriteria($args);
             $class = $first;
@@ -443,7 +453,8 @@ class Manager
 
     
     /**
-     * Iterate over an array of objects and returns an array of objects indexed by a property
+     * Iterate over an array of objects and returns an array of objects
+     * indexed by a property
      * 
      * @param array The list of objects to index
      * @param string The property to index by
@@ -568,8 +579,6 @@ class Manager
     }
     
     /**
-     * Create criteria to update a table
-     * @param array Arguments to create criteria from
      * @return \Amiss\Sql\Criteria\Update
      */
     protected function createTableUpdateCriteria($args)
@@ -597,11 +606,6 @@ class Manager
         return $criteria;
     }
     
-    /**
-     * Execute a delete query
-     * @param string The class to delete
-     * @param Criteria\Query The criteria to use to build the where clause
-     */
     protected function executeDelete($class, Criteria\Query $criteria)
     {
         $meta = $this->getMeta($class);
@@ -618,8 +622,6 @@ class Manager
     
     /**
      * Parses remaining function arguments into a query object
-     * @param array Leftover function arguments
-     * @param string Class name of query to instantiate
      * @return \Amiss\Sql\Criteria\Query
      */
     protected function createQueryFromArgs($args, $type='Amiss\Sql\Criteria\Select')
@@ -639,22 +641,20 @@ class Manager
     }
     
     /**
-     * Populates the "where" clause of a criteria object
-     * 
      * Allows functions to have different query syntaxes:
      * get('Name', 'pants=? AND foo=?', 'pants', 'foo')
      * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
      * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
-     * 
-     * @param Criteria\Query The criteria to populate
-     * @param array The arguments to use to populate the criteria
      */
     protected function populateWhereAndParamsFromArgs(Criteria\Query $criteria, $args)
     {
-        if (count($args)==1 && is_array($args[0])) {
+        if (count($args) == 1 && is_array($args[0])) {
+        // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
             $criteria->populate($args[0]);
         }
+
         elseif (!is_array($args[0])) {
+        // Args criteria: $manager->get('class', 'a=? AND b=?', 'a', 'b');
             $criteria->where = $args[0];
             if (isset($args[1]) && is_array($args[1])) {
                 $criteria->params = $args[1];

@@ -14,6 +14,7 @@ class ArtistRecord extends \Amiss\Sql\ActiveRecord
     
     /**
      * @field
+     * @index
      */
     public $artistTypeId;
     
@@ -40,7 +41,7 @@ class ArtistRecord extends \Amiss\Sql\ActiveRecord
     
     /**
      * @has.one.of ArtistType
-     * @has.one.on artistTypeId
+     * @has.one.from artistTypeId
      */
     public function getType()
     {
@@ -76,6 +77,7 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
     
     /**
      * @has.many.of Artist
+     * @has.many.to artistTypeId
      */
     public function getArtists()
     {

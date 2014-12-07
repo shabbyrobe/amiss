@@ -111,7 +111,7 @@ class MappedFieldNameLeft
 
     /**
      * @has.many.of MappedFieldNameAssoc
-     * @has.many.on.id leftId
+     * @has.many.to leftId
      */
     public $assocs = array();
 
@@ -134,24 +134,26 @@ class MappedFieldNameAssoc
     /**
      * @field left_id
      * @type integer
+     * @index
      */
     public $leftId;
 
     /**
      * @field right_id
      * @type integer
+     * @index
      */
     public $rightId;
 
     /**
      * @has.one.of MappedFieldNameLeft
-     * @has.one.on.leftId id
+     * @has.one.from leftId
      */
     public $left;
 
     /**
      * @has.one.of MappedFieldNameRight
-     * @has.one.on.rightId id
+     * @has.one.from rightId
      */
     public $right;
 }

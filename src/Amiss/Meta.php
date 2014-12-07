@@ -7,7 +7,7 @@ class Meta
     public $table;
     public $primary;
     public $constructor = '__construct';
-    
+
     /**
      * Array of relation arrays, hashed by property name
      * 
@@ -30,6 +30,10 @@ class Meta
      * Additional metadata found but not explicitly handled by the mapper
      */
     public $ext;
+
+    public $autoRelations = [];
+
+    public $indexes;
     
     /**
      * Array of fields, hashed by property name
@@ -45,18 +49,37 @@ class Meta
      */
     protected $defaultFieldType;
     
+    function __sleep()
+    {
+        // precache this stuff before serialization
+        $this->getFields();
+        $this->getDefaultFieldType();
+        $this->getColumnToPropertyMap();
+
+        return array(
+            'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
+            'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
+            'indexes',
+        ); 
+    }
+
     public function __construct($class, $table, array $info, Meta $parent=null)
     {
         $this->class = $class;
         $this->parent = $parent;
         $this->table = $table;
         $this->primary = isset($info['primary']) ? $info['primary'] : array();
-        
+
         if ($this->primary && !is_array($this->primary))
             $this->primary = array($this->primary);
-        
+
+        $this->indexes = isset($info['indexes']) ? $info['indexes'] : array();
+        $this->indexes['primary'] = $this->primary;
+
         $this->setFields(isset($info['fields']) ? $info['fields'] : array());
-        $this->relations = isset($info['relations']) ? $info['relations'] : array();
+        if (isset($info['relations']))
+            $this->setRelations($info['relations']);
+
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
         
         if (isset($info['constructor']) && $info['constructor'])
@@ -67,10 +90,20 @@ class Meta
             $ft = $info['defaultFieldType'];
             if (!is_array($ft))
                 $ft = array('id'=>$ft);
+
             $this->defaultFieldType = $ft;
         }
     }
-    
+
+    private function setRelations($relations)
+    {
+        foreach ($relations as $id=>$r) {
+            $this->relations[$id] = $r;
+            if (isset($r['auto']) && $r['auto'])
+                $this->autoRelations[] = $id;
+        }
+    }
+
     private function setFields($fields)
     {
         foreach ($fields as &$field) {
@@ -140,7 +173,10 @@ class Meta
         $prival = array();
         foreach ($this->primary as $p) {
             $field = $this->getField($p);
-            $value = !isset($field['getter']) ? $object->{$p} : call_user_func(array($object, $field['getter']));
+            $value = !isset($field['getter']) 
+                ? $object->{$p} 
+                : call_user_func(array($object, $field['getter']))
+            ;
             if ($value)
                 $foundValue = true;
             
@@ -169,15 +205,5 @@ class Meta
         else
             call_user_func(array($object, $field['setter']), $value);
         return $this;
-    }
-    
-    function __sleep()
-    {
-        // precache this stuff before serialization
-        $this->getFields();
-        $this->getDefaultFieldType();
-        $this->getColumnToPropertyMap();
-        
-        return array('class', 'table', 'primary', 'relations', 'fields', 'allFields', 'parent', 'defaultFieldType', 'columnToPropertyMap'); 
     }
 }

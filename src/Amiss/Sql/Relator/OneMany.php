@@ -2,13 +2,15 @@
 namespace Amiss\Sql\Relator;
 
 use Amiss\Sql\Criteria;
+use Amiss\Sql\RelatorContext;
+use Amiss\Exception;
 
 class OneMany extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated(RelatorContext $context=null, $source, $relationName, $criteria=null)
     {
         if (!$source) return;
-        
+
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray) $source = array($source);
         
@@ -28,32 +30,41 @@ class OneMany extends Base
             throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
-        
-        $on = null;
+
+        if (isset($relation['inverse'])) {
+            list ($from, $to) = $this->resolveInverse($relation, $relatedMeta);
+        }
+        else {
+            $from = isset($relation['from']) ? $relation['from'] : 'primary';
+            $to = isset($relation['to']) ? $relation['to'] : 'primary';
+        }
+
         if (isset($relation['on']))
-            $on = $relation['on'];
-        elseif (isset($relation['inverse']))
-            $on = $this->resolveInverseOn($relation, $relatedMeta);
-        
-        if (!$on) {
-            throw new \Amiss\Exception("Relation $relationName on class $class did not specify an 'on'");
+            throw new Exception("Relation $relationName used 'on' in class {$meta->class}. Please use 'from' and/or 'to'");
+
+        // TODO: clean up logic below to use $from and $to instead of $on
+        if (!isset($meta->indexes[$from]))
+            throw new Exception("Index $from does not exist on {$meta->class}");
+        if (!isset($relatedMeta->indexes[$to]))
+            throw new Exception("Index $to does not exist on {$relatedMeta->class}");
+
+        // If an index exists, you don't need to join on all of it.
+        // This assumes that the indexes are properly numbered. If not, BOOM!
+        $on = [];
+        foreach ($meta->indexes[$from] as $idx=>$fromField) {
+            if (!isset($relatedMeta->indexes[$to][$idx]))
+                break;
+            $on[$fromField] = $relatedMeta->indexes[$to][$idx];
         }
-        
-        $relatedFields = $relatedMeta->getFields();
-        
-        if (!is_array($on)) {
-            if ($type == 'one' && count($relatedMeta->primary)==1)
-                $rOn = $relatedMeta->primary[0];
-            else
-                $rOn = $on;
-            $on = array($on=>$rOn);
-        }
-        
+
         // find query values in source object(s)
-        list($ids, $resultIndex) = $this->indexSource($source, $on, $meta->getFields(), $relatedFields);
-        
-        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria);
-        
+        $relatedFields = $relatedMeta->getFields();
+        list ($ids, $resultIndex) = $this->indexSource(
+            $source, $on, $meta->getFields(), $relatedFields
+        );
+
+        $list = $this->runQuery($context, $ids, $relation, $relatedMeta, $criteria);
+
         // prepare the result
         $result = null;
         if (!$sourceIsArray) {
@@ -91,28 +102,23 @@ class OneMany extends Base
         return $result;
     }
     
-    private function resolveInverseOn($relation, $relatedMeta)
+    private function resolveInverse($relation, $relatedMeta)
     {
         if (!isset($relatedMeta->relations[$relation['inverse']]))
             throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");
-        if (!isset($relatedMeta->relations[$relation['inverse']]['on']))
-            throw new \Amiss\Exception("'on' not found on inverse relation {$relation['inverse']} on class {$relatedMeta->class}");
         
-        $inverseOn = $relatedMeta->relations[$relation['inverse']]['on'];
-        if (!is_array($inverseOn))
-            $inverseOn = array($inverseOn=>$inverseOn);
+        $inverseRel = $relatedMeta->relations[$relation['inverse']];
+        $to = isset($inverseRel['from']) ? $inverseRel['from'] : 'primary';
+        $from = isset($inverseRel['to']) ? $inverseRel['to'] : 'primary';
         
-        $on = array();
-        foreach ($inverseOn as $l=>$r)
-            $on[$r] = $l;
-        
-        return $on;
+        return [$from, $to];
     }
     
-    private function runQuery($ids, $relation, $relatedMeta, $criteria)
+    private function runQuery($context, $ids, $relation, $relatedMeta, $criteria)
     {
         $query = new Criteria\Select;
         $where = array();
+
         foreach ($ids as $l=>$idInfo) {
             $rName = $idInfo['rField']['name'];
             $query->params['r_'.$rName] = array_keys($idInfo['values']);

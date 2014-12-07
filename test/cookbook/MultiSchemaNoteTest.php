@@ -85,12 +85,15 @@ class MultiSchemaNoteTestOne
     /** @field */
     public $oneName;
     
-    /** @field */
+    /**
+     * @field 
+     * @index
+     */
     public $twoId;
     
     /**
      * @has.one.of MultiSchemaNoteTestTwo
-     * @has.one.on twoId
+     * @has.one.from twoId
      */
     public $two;
 }
@@ -111,7 +114,7 @@ class MultiSchemaNoteTestTwo
     
     /**
      * @has.many.of MultiSchemaNoteTestOne
-     * @has.many.on.id twoId
+     * @has.many.to twoId
      */
     public $ones = array();
 }

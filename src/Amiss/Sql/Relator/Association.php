@@ -2,6 +2,7 @@
 namespace Amiss\Sql\Relator;
 
 use Amiss\Sql\Criteria;
+use Amiss\Sql\RelatorContext;
 
 /**
  * TODO: Two stage query? Pros: can allow full use of criteria. Cons: two queries (duh).
@@ -21,7 +22,7 @@ use Amiss\Sql\Criteria;
  */
 class Association extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated(RelatorContext $context=null, $source, $relationName, $criteria=null)
     {
         if (!$source) return;
         

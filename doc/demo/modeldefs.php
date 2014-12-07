@@ -9,7 +9,10 @@ class Artist extends Object
      */
     public $artistId;
     
-    /** @field */
+    /**
+     * @field
+     * @index
+     */
     public $artistTypeId;
     
     /** @field */
@@ -26,7 +29,7 @@ class Artist extends Object
     
     /** 
      * @has.one.of ArtistType
-     * @has.one.on artistTypeId
+     * @has.one.from artistTypeId
      */
     public $artistType;
     
@@ -78,7 +81,10 @@ class Event extends Object
     /** @field */
     public $dateEnd;
     
-    /** @field */
+    /**
+     * @field
+     * @index
+     */
     public $venueId;
     
     /**
@@ -89,7 +95,7 @@ class Event extends Object
     
     /**
      * @has.one.of Venue
-     * @has.one.on venueId
+     * @has.one.from venueId
      */
     public $venue;
     
@@ -147,7 +153,10 @@ class EventArtist
     /** @primary */
     public $eventId;
     
-    /** @primary */
+    /**
+     * @primary
+     * @index
+     */
     public $artistId;
     
     /** @field */
@@ -161,14 +170,13 @@ class EventArtist
     
     /**
      * @has.one.of Event
-     * @has.one.on eventId
      * @var Amiss\Demo\Event
      */
     public $event;
     
     /**
      * @has.one.of Artist
-     * @has.one.on artistId
+     * @has.one.from artistId
      * @var Amiss\Demo\Artist
      */
     public $artist;
