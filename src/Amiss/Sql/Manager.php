@@ -72,8 +72,7 @@ class Manager
     public function get($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-
-        $meta = $class instanceof RelatorContext ? $class->meta : $this->mapper->getMeta($class);
+        $meta = $this->mapper->getMeta($class);
 
         list ($limit, $offset) = $criteria->getLimitOffset();
         if ($limit && $limit != 1)
@@ -91,19 +90,19 @@ class Manager
                 throw new Exception("Query returned more than one row");
 
             $object = $this->mapper->toObject($meta, $row, $criteria->args);
-
-            if ($meta->autoRelations) {
-                $context = $class instanceof RelatorContext ? $class : new RelatorContext();
-                $this->autoFetchRelations($context, $object, $meta);
-            }
         }
+
+        if ($object && $criteria->follow && $meta->autoRelations) {
+            $this->autoFetchRelations($object, $meta);
+        }
+
         return $object;
     }
 
     public function getList($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $class instanceof RelatorContext ? $class->meta : $this->mapper->getMeta($class);
+        $meta = $this->mapper->getMeta($class);
 
         list ($query, $params) = $criteria->buildQuery($meta);
         $stmt = $this->getConnector()->prepare($query);
@@ -116,24 +115,18 @@ class Manager
             $objects[] = $object;
         }
 
-        if ($objects) {
-            foreach ($meta->autoRelations as $id) {
-                $context = $class instanceof RelatorContext ? $class : new RelatorContext();
-                $this->autoFetchRelations($context, $objects, $meta);
-            }
+        if ($objects && $criteria->follow && $meta->autoRelations) {
+            $this->autoFetchRelations($objects, $meta);
         }
 
         return $objects;
     }
     
-    private function autoFetchRelations($context, $source, $meta)
+    private function autoFetchRelations($source, $meta)
     {
-        $context->push($meta);
-        $context->add($source);
         foreach ($meta->autoRelations as $id) {
-            $this->assignRelated($source, $id, $context);
+            $this->assignRelated($source, $id);
         }
-        $context->pop($meta);
     }
     
     /**
@@ -190,12 +183,13 @@ class Manager
     
     /**
      * Retrieve related objects from the database and assign them to the source
+     * if the source field is not yet populated.
      * 
      * @param object|array Source objects to assign relations for
      * @param string The name of the relation to assign
      * @return void
      */
-    public function assignRelated($source, $relationName, $context=null)
+    public function assignRelated($source, $relationName)
     {
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray)
@@ -210,19 +204,14 @@ class Manager
                 $missing[] = $item;
             elseif (!call_user_func(array($item, $relation['getter']))) 
                 $missing[] = $item;
+            else
+                throw new \UnexpectedValueException();
         }
 
         if ($missing) {
-            $result = $this->getRelated($missing, $relationName, null, $context);
-
-            if ($result) {
-                foreach ($result as $idx=>$item) {
-                    if (!isset($relation['setter']))
-                        $missing[$idx]->{$relationName} = $item;
-                    else
-                        call_user_func(array($missing[$idx], $relation['setter']), $item);
-                }
-            }
+            $result = $this->getRelated($missing, $relationName);
+            $relator = $this->getRelator($meta, $relationName);
+            $relator->assignRelated($missing, $result, $relation);
         }
     }
     
@@ -234,7 +223,7 @@ class Manager
      * @param criteria Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $criteria=null, $context=null)
+    public function getRelated($source, $relationName, $criteria=null)
     {
         if (!$source) return;
         
@@ -249,6 +238,18 @@ class Manager
             throw new Exception("Unknown relation $relationName on $class");
         }
         
+        $relator = $this->getRelator($meta, $relationName);
+        
+        $query = null;
+        if ($criteria) {
+            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
+        }
+        
+        return $relator->getRelated($source, $relationName, $query);
+    }
+
+    public function getRelator($meta, $relationName)
+    {
         $relation = $meta->relations[$relationName];
         
         if (!isset($this->relators[$relation[0]])) {
@@ -259,13 +260,8 @@ class Manager
         if (!$relator instanceof Relator) {
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
-        
-        $query = null;
-        if ($criteria) {
-            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
-        }
-        
-        return $relator->getRelated($context, $source, $relationName, $query);
+
+        return $relator;
     }
     
     /**

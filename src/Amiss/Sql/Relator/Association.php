@@ -22,7 +22,7 @@ use Amiss\Sql\RelatorContext;
  */
 class Association extends Base
 {
-    public function getRelated(RelatorContext $context=null, $source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null)
     {
         if (!$source) return;
         

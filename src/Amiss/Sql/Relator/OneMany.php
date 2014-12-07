@@ -2,12 +2,11 @@
 namespace Amiss\Sql\Relator;
 
 use Amiss\Sql\Criteria;
-use Amiss\Sql\RelatorContext;
 use Amiss\Exception;
 
 class OneMany extends Base
 {
-    public function getRelated(RelatorContext $context=null, $source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null)
     {
         if (!$source) return;
 
@@ -63,7 +62,7 @@ class OneMany extends Base
             $source, $on, $meta->getFields(), $relatedFields
         );
 
-        $list = $this->runQuery($context, $ids, $relation, $relatedMeta, $criteria);
+        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria);
 
         // prepare the result
         $result = null;
@@ -98,8 +97,33 @@ class OneMany extends Base
                 }
             }
         }
-        
+
         return $result;
+    }
+
+    public function assignRelated($source, $result, $relation)
+    {
+        if (isset($relation['inverse'])) {
+            $relatedMeta = $this->manager->getMeta($relation['of']);
+            $relatedRelation = $relatedMeta->relations[$relation['inverse']];
+        }
+
+        foreach ($result as $idx=>$item) {
+            if (!isset($relation['setter']))
+                $source[$idx]->{$relation['name']} = $item;
+            else
+                call_user_func(array($missing[$idx], $relation['setter']), $item);
+ 
+            if ($relatedMeta) {
+                $items = ($relation[0] == 'one') ? [$item] : $item;
+                foreach ($items as $i) {
+                    if (!isset($relatedRelation['setter']))
+                        $i->{$relatedRelation['name']} = $source[$idx];
+                    else
+                        call_user_func(array($i, $relatedRelation['setter']), $i);
+                }
+            }
+        }
     }
     
     private function resolveInverse($relation, $relatedMeta)
@@ -114,7 +138,7 @@ class OneMany extends Base
         return [$from, $to];
     }
     
-    private function runQuery($context, $ids, $relation, $relatedMeta, $criteria)
+    private function runQuery($ids, $relation, $relatedMeta, $criteria)
     {
         $query = new Criteria\Select;
         $where = array();
