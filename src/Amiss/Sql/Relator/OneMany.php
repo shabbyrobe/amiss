@@ -6,7 +6,7 @@ use Amiss\Exception;
 
 class OneMany extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         if (!$source) return;
 
@@ -62,7 +62,7 @@ class OneMany extends Base
             $source, $on, $meta->getFields(), $relatedFields
         );
 
-        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria);
+        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria, $stack);
 
         // prepare the result
         $result = null;
@@ -76,7 +76,7 @@ class OneMany extends Base
         }
         else {
             $result = array();
-            foreach ($list as $related) {
+            foreach ($list ?: [] as $related) {
                 $key = array();
                 
                 foreach ($on as $l=>$r) {
@@ -112,8 +112,8 @@ class OneMany extends Base
         
         return [$from, $to];
     }
-    
-    private function runQuery($ids, $relation, $relatedMeta, $criteria)
+
+    private function runQuery($ids, $relation, $relatedMeta, $criteria, $stack)
     {
         $query = new Criteria\Select;
         $where = array();
@@ -131,7 +131,7 @@ class OneMany extends Base
             $query->where .= ' AND ('.$cWhere.')';
         }
 
-        $query->follow = false;
+        $query->stack = $stack;
         $list = $this->manager->getList($relation['of'], $query);
         
         return $list;

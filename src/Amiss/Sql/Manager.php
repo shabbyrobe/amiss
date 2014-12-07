@@ -74,6 +74,10 @@ class Manager
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $this->mapper->getMeta($class);
 
+        // Hack to stop circular references in auto relations
+        if (isset($criteria->stack[$meta->class]))
+            return;
+
         list ($limit, $offset) = $criteria->getLimitOffset();
         if ($limit && $limit != 1)
             throw new Exception("Limit must be one or zero");
@@ -92,8 +96,8 @@ class Manager
             $object = $this->mapper->toObject($meta, $row, $criteria->args);
         }
 
-        if ($object && $criteria->follow && $meta->autoRelations) {
-            $this->autoFetchRelations($object, $meta);
+        if ($object && $meta->autoRelations) {
+            $this->autoFetchRelations($object, $meta, $criteria->stack);
         }
 
         return $object;
@@ -103,6 +107,10 @@ class Manager
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $this->mapper->getMeta($class);
+
+        // Hack to stop circular references in auto relations
+        if (isset($criteria->stack[$meta->class]))
+            return;
 
         list ($query, $params) = $criteria->buildQuery($meta);
         $stmt = $this->getConnector()->prepare($query);
@@ -115,20 +123,21 @@ class Manager
             $objects[] = $object;
         }
 
-        if ($objects && $criteria->follow && $meta->autoRelations) {
-            $this->autoFetchRelations($objects, $meta);
+        if ($objects && $meta->autoRelations) {
+            $this->autoFetchRelations($objects, $meta, $criteria->stack);
         }
 
         return $objects;
     }
     
-    private function autoFetchRelations($source, $meta)
+    private function autoFetchRelations($source, $meta, $stack)
     {
+        $stack[$meta->class] = true;
         foreach ($meta->autoRelations as $id) {
-            $this->assignRelated($source, $id);
+            $this->assignRelated($source, $id, $stack);
         }
     }
-    
+
     /**
      * Get a single object from the database by primary key
      * 
@@ -189,7 +198,7 @@ class Manager
      * @param string The name of the relation to assign
      * @return void
      */
-    public function assignRelated($source, $relationName)
+    public function assignRelated($source, $relationName, $stack=[])
     {
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray)
@@ -207,7 +216,7 @@ class Manager
         }
 
         if ($missing) {
-            $result = $this->getRelated($missing, $relationName);
+            $result = $this->getRelated($missing, $relationName, null, $stack);
 
             if ($result) {
                 foreach ($result as $idx=>$item) {
@@ -228,7 +237,7 @@ class Manager
      * @param criteria Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $criteria=null)
+    public function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         if (!$source) return;
         
@@ -259,7 +268,7 @@ class Manager
             $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
         }
         
-        return $relator->getRelated($source, $relationName, $query);
+        return $relator->getRelated($source, $relationName, $query, $stack);
     }
     
     /**
