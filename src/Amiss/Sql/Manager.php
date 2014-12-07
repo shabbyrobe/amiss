@@ -199,19 +199,24 @@ class Manager
         $relation = $meta->relations[$relationName];
 
         $missing = [];
-        foreach ($source as $item) {
+        foreach ($source as $idx=>$item) {
             if (!isset($relation['getter']) && !$item->{$relationName})
-                $missing[] = $item;
+                $missing[$idx] = $item;
             elseif (!call_user_func(array($item, $relation['getter']))) 
-                $missing[] = $item;
-            else
-                throw new \UnexpectedValueException();
+                $missing[$idx] = $item;
         }
 
         if ($missing) {
             $result = $this->getRelated($missing, $relationName);
-            $relator = $this->getRelator($meta, $relationName);
-            $relator->assignRelated($missing, $result, $relation);
+
+            if ($result) {
+                foreach ($result as $idx=>$item) {
+                    if (!isset($relation['setter']))
+                        $missing[$idx]->{$relationName} = $item;
+                    else
+                        call_user_func(array($missing[$idx], $relation['setter']), $item);
+                }
+            }
         }
     }
     
@@ -238,18 +243,6 @@ class Manager
             throw new Exception("Unknown relation $relationName on $class");
         }
         
-        $relator = $this->getRelator($meta, $relationName);
-        
-        $query = null;
-        if ($criteria) {
-            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
-        }
-        
-        return $relator->getRelated($source, $relationName, $query);
-    }
-
-    public function getRelator($meta, $relationName)
-    {
         $relation = $meta->relations[$relationName];
         
         if (!isset($this->relators[$relation[0]])) {
@@ -260,8 +253,13 @@ class Manager
         if (!$relator instanceof Relator) {
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
-
-        return $relator;
+        
+        $query = null;
+        if ($criteria) {
+            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
+        }
+        
+        return $relator->getRelated($source, $relationName, $query);
     }
     
     /**

@@ -100,31 +100,6 @@ class OneMany extends Base
 
         return $result;
     }
-
-    public function assignRelated($source, $result, $relation)
-    {
-        if (isset($relation['inverse'])) {
-            $relatedMeta = $this->manager->getMeta($relation['of']);
-            $relatedRelation = $relatedMeta->relations[$relation['inverse']];
-        }
-
-        foreach ($result as $idx=>$item) {
-            if (!isset($relation['setter']))
-                $source[$idx]->{$relation['name']} = $item;
-            else
-                call_user_func(array($missing[$idx], $relation['setter']), $item);
- 
-            if ($relatedMeta) {
-                $items = ($relation[0] == 'one') ? [$item] : $item;
-                foreach ($items as $i) {
-                    if (!isset($relatedRelation['setter']))
-                        $i->{$relatedRelation['name']} = $source[$idx];
-                    else
-                        call_user_func(array($i, $relatedRelation['setter']), $i);
-                }
-            }
-        }
-    }
     
     private function resolveInverse($relation, $relatedMeta)
     {
