@@ -131,7 +131,8 @@ class OneMany extends Base
             $query->params = array_merge($cParams, $query->params);
             $query->where .= ' AND ('.$cWhere.')';
         }
-        
+
+        $query->follow = false;
         $list = $this->manager->getList($relation['of'], $query);
         
         return $list;

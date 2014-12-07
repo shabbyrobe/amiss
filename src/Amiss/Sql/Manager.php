@@ -103,8 +103,8 @@ class Manager
     public function getList($class)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->getMeta($class);
-        
+        $meta = $class instanceof RelatorContext ? $class->meta : $this->mapper->getMeta($class);
+
         list ($query, $params) = $criteria->buildQuery($meta);
         $stmt = $this->getConnector()->prepare($query);
         $this->execute($stmt, $params);

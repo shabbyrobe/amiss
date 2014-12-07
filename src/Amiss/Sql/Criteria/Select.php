@@ -9,10 +9,11 @@ class Select extends Query
     public $args=array();
     public $page;
     public $limit;
-    public $offset=0;
+    public $offset = 0;
     public $fields;
-    public $order=array();
-    public $forUpdate=false;
+    public $order = array();
+    public $forUpdate = false;
+    public $follow = true;
     
     public function getLimitOffset()
     {

@@ -9,18 +9,19 @@ class RelatorContext
 
     private $objects = [];
 
+    public $meta;
+
     function add($objects)
     {
         if (!is_array($objects))
             $objects = [$objects];
 
-        $meta = $this->stack[$this->stackIdx];
         foreach ($objects as $object) {
-            foreach ($meta->indexes as $indexName=>$index) {
+            foreach ($this->meta->indexes as $indexName=>$index) {
                 if ($index['key']) {
-                    $value = $meta->getIndexValue($object, $indexName);
+                    $value = $this->meta->getIndexValue($object, $indexName);
                     ksort($value);
-                    $this->objects[$meta->class][$indexName][serialize($value)] = $object;
+                    $this->objects[$this->meta->class][$indexName][serialize($value)] = $object;
                 }
             }
         }
@@ -34,15 +35,15 @@ class RelatorContext
 
     function push($meta)
     {
-        $this->stack[++$this->stackIdx] = $meta;
-        $c = &$this->metaCount[$meta->class];
-        $c = $c ? $c + 1 : 1;
+        if ($this->meta)
+            $this->stack[++$this->stackIdx] = $this->meta;
+
+        $this->meta = $meta;
     }
 
     function pop($meta)
     {
-        --$this->stackIdx;
-        --$this->metaCount[$meta->class];
+        $this->meta = $this->stack[--$this->stackIdx];
         if ($this->stackIdx < 0) {
             // Finalise... likely a gc cycle nightmare!
         }
