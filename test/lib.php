@@ -2,39 +2,31 @@
 
 use Amiss\Sql\TableBuilder;
 
+class DummyClass
+{
+    public function __get($name)
+    {
+        return isset($this->$name) ? $this->$name : null;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
+
+    public function __unset($name)
+    {
+        $this->$name = null;
+    }
+
+    public function __isset($name)
+    {
+        return isset($this->$name);
+    }
+}
+
 abstract class CustomTestCase extends PHPUnit_Framework_TestCase
 {
-    /*
-    protected static $parentSetupCalled = false;
-    protected static $parentTearDownCalled = false;
-    
-    public static function setUpBeforeClass()
-    {
-        self::$parentSetupCalled = false;
-        self::$parentTearDownCalled = false;
-    }
-    
-    public function setUp()
-    {
-        parent::setUp();
-        self::$parentSetupCalled = true;
-    }
-    
-    public function tearDown()
-    {
-        parent::setUp();
-        self::$parentTearDownCalled = true;
-    }
-    
-    public static function tearDownAfterClass()
-    {
-        if (!self::$parentSetupCalled)
-            throw new \RuntimeException("Your test case ".get_called_class()." did not call parent::setup()");
-        if (!self::$parentTearDownCalled)
-            throw new \RuntimeException("Your test case ".get_called_class()." did not call parent::tearDown()");
-    }
-    */
-    
     protected function createFnScopeClass($name, $body)
     {
         $bt = debug_backtrace();       
@@ -179,48 +171,6 @@ class TestApp
     public function getConnectionInfo()
     {
         return $this->connectionInfo;
-
-        /*
-        if (!self::$connectionInfo) {
-            $testEngine = getenv('AMISS_TEST_DB_ENGINE') ?: 'sqlite';
-            
-            if ($testEngine == 'sqlite') {
-                self::$connectionInfo = array(
-                    'engine'=>'sqlite',
-                    'dsn'=>'sqlite::memory:',
-                    'user'=>null,
-                    'password'=>null,
-                );
-            }
-            elseif ($testEngine == 'mysql') {
-                $dbName = getenv('AMISS_TEST_DB_NAME') ?: 'amiss_test_'.md5(time());
-                $host = getenv('AMISS_TEST_DB_HOST') ?: '127.0.0.1';
-                $user = getenv('AMISS_TEST_DB_USER');
-                $password = getenv('AMISS_TEST_DB_PASSWORD');
-                
-                if (!$host) {
-                    echo "Please export AMISS_TEST_DB_HOST if you want to test using the mysql engine\n";
-                    exit(1);
-                }
-                
-                $dbName = str_replace('`', '', $dbName);
-                
-                self::$connectionInfo = array(
-                    'engine'=>'mysql',
-                    'dsn'=>"mysql:host=$host",
-                    'host'=>$host,
-                    'user'=>$user,
-                    'password'=>$password,
-                    'dbName'=>$dbName,
-                );
-            }
-            else {
-                echo "Unknown test engine $testEngine\n";
-                exit(1);
-            }
-        }
-        return self::$connectionInfo;
-        */
     }
 }
     

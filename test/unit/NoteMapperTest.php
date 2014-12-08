@@ -407,16 +407,164 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithClassIndex()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Class1", '
-            class Class1 {
-                /** @has test */ 
-                public $test;
+        $name = $this->createFnScopeClass("Test", '
+            /** @index.foo.fields[] a */
+            class Test {
+                /** @field */ public $a;
             }
         ');
         $meta = $mapper->getMeta($name);
-        $expected = array(
-            'test'=>array('test')
-        );
-        $this->assertEquals($expected, $meta->relations);
+        $expected = ['foo'=>['fields'=>['a'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithClassKeyIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            /** 
+             * @index.foo.fields[] a
+             * @index.foo.key
+             */
+            class Test {
+                /** @field */ public $a;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['a'], 'key'=>true]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithMultiFieldClassIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            /** 
+             * @index.foo.fields[] b
+             * @index.foo.fields[] a
+             */
+            class Test {
+                /** @field */ public $a;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['b', 'a'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithClassKeyFieldIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            /** 
+             * @index.foo.key
+             */
+            class Test {
+                /**
+                 * @field
+                 * @index foo
+                 */
+                 public $a;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['a'], 'key'=>true]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithMixedFieldDefsIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            /** 
+             * @index.foo.fields[] a
+             */
+            class Test {
+                /** @field */       public $a;
+                /** @index.foo 1 */ public $b;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['a', 'b'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithStringFieldIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** 
+                 * @field 
+                 * @index foo
+                 */
+                public $a;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['a'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithEmptyArrayFieldIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** 
+                 * @field 
+                 * @index.foo
+                 */
+                public $a;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['a'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaWithSequenceFieldIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** 
+                 * @field 
+                 * @index.foo 2
+                 */
+                public $a;
+
+                /** 
+                 * @field 
+                 * @index.foo 1
+                 */
+                public $b;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>['fields'=>['b', 'a'], 'key'=>false]];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaFailsWithDuplicateSequenceFieldIndex()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** 
+                 * @field 
+                 * @index.foo 1
+                 */
+                public $a;
+
+                /** 
+                 * @field 
+                 * @index.foo 1
+                 */
+                public $b;
+            }
+        ');
+        $this->setExpectedException('Amiss\Exception', 'Duplicate sequence 1 for index foo');
+        $meta = $mapper->getMeta($name);
     }
 }
