@@ -111,6 +111,7 @@ class Meta
             if (!isset($index['fields']) || !$index['fields']) {
                 throw new \UnexpectedValueException("Misconfigured index $name");
             }
+            $index['fields'] = (array)$index['fields'];
         }
         $this->indexes = $indexes;
         if ($this->primary)
