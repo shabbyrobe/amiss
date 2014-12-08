@@ -334,7 +334,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'name'=>'bar', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
+            'bar'=>array('one', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -403,7 +403,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'name'=>'bar', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+            'bar'=>array('one', 'of'=>$name."Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -439,7 +439,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
-            $name.'2'=>array('many', 'name'=>'testGetMetaOneToManyPropertyRelationWithNoOn2', 'of'=>$name."Class2")
+            $name.'2'=>array('many', 'of'=>$name."Class2")
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -462,7 +462,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta("{$prefix}Class1");
         $expected = array(
-            'test'=>array('test', 'name'=>'test')
+            'test'=>array('test')
         );
         $this->assertEquals($expected, $meta->relations);
     }

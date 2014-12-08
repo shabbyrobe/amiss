@@ -31,37 +31,23 @@ class RelatorOneManyTest extends \CustomTestCase
         }
     }
 
-    /**
-     * @dataProvider dataForGetOneToOne
-     */
-    public function testGetOneToOne($index, $data)
+    public function testGetOneToOne()
     {
-        $this->createSinglePrimaryMeta($data);
+        $this->createSinglePrimaryMeta();
         
         $source = new \DummyChild;
         $source->childId = 1;
         $source->childParentId = 2;
-        
+
         list ($class, $query) = $this->captureRelatedQuery($source, 'parent');
         $this->assertEquals('DummyParent', $class);
         $this->assertEquals('`parent_id` IN(:r_parent_id)', $query->where);
         $this->assertEquals(array('r_parent_id'=>array(2)), $query->params);
     }
     
-    function dataForGetOneToOne()
+    public function testGetOneToMany()
     {
-        return array(
-            array(1, array('childOn'=>'childParentId')),
-            array(2, array('childOn'=>array('childParentId'=>'parentId'))),
-        );
-    }
-    
-    /**
-     * @dataProvider dataForGetOneToMany
-     */
-    public function testGetOneToMany($data)
-    {
-        $this->createSinglePrimaryMeta($data);
+        $this->createSinglePrimaryMeta();
         $source = new \DummyParent;
         $source->parentId = 1;
         
@@ -70,68 +56,47 @@ class RelatorOneManyTest extends \CustomTestCase
         $this->assertEquals('`child_parent_id` IN(:r_child_parent_id)', $query->where);
         $this->assertEquals(array('r_child_parent_id'=>array(1)), $query->params);
     }
-    
-    function dataForGetOneToMany()
-    {
-        return array(
-            array(array('childParentField'=>'parentId', 'parentOn'=>'parentId')),
-            array(array('parentOn'=>array('parentId'=>'childParentId'))),
-        );
-    }
-    
+
     protected function captureRelatedQuery($source, $relation)
     {
         $capture = null;
-        
+
         $this->manager->expects($this->any())->method('getList')->will($this->returnCallback(
             function () use (&$capture) {
                 $capture = func_get_args();
             }
         ));
         
-        $this->relator->getRelated(null, $source, $relation);
+        $this->relator->getRelated($source, $relation);
         
         return $capture;
     }
     
-    protected function createSinglePrimaryMeta($data)
+    protected function createSinglePrimaryMeta()
     {
-        $defaults = array(
-            'parentOn'=>null,
-            'childOn'=>null,
-            
-            'childIdField'=>'childId',
-            'childIdColumn'=>'child_id',
-            
-            'childParentField'=>'childParentId',
-            'childParentColumn'=>'child_parent_id',
-            
-            'parentIdField'=>'parentId',
-            'parentIdColumn'=>'parent_id',
-        );
-        
-        $data = array_merge($defaults, $data);
-        
         $source = new \DummyParent();
         $metaIndex = array();
         
         $this->mapper->meta['DummyChild'] = new \Amiss\Meta('DummyChild', 'child', array(
-            'primary'=>array($data['childIdField']),
+            'primary'=>array('childId'),
             'fields'=>array(
-                $data['childIdField']     => array('name'=>$data['childIdColumn']     ?: $data['childIdField']),
-                $data['childParentField'] => array('name'=>$data['childParentColumn'] ?: $data['childParentField']),
+                'childId'=>array('name'=>'child_id'),
+                'childParentId'=>array('name'=>'child_parent_id'),
+            ),
+            'indexes'=>array(
+                'childParentId'=>array('fields'=>array('childParentId')),
             ),
             'relations'=>array(
-                'parent'=>array('one', 'of'=>'DummyParent', 'on'=>$data['childOn'])
+                'parent'=>array('one', 'of'=>'DummyParent', 'from'=>'childParentId')
             ),
         ));
         $this->mapper->meta['DummyParent'] = new \Amiss\Meta('DummyParent', 'parent', array(
-            'primary'=>array($data['parentIdField']),
+            'primary'=>array('parentId'),
             'fields'=>array(
-                $data['parentIdField']=>array('name'=>$data['parentIdColumn'] ?: $data['parentIdField']),
+                'parentId'=>array('name'=>'parent_id'),
             ),
             'relations'=>array(
-                'children'=>array('many', 'of'=>'DummyChild', 'on'=>$data['parentOn'])
+                'children'=>array('many', 'of'=>'DummyChild', 'to'=>'childParentId'),
             ),
         ));
     }

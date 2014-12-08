@@ -25,7 +25,7 @@ class MetaTest extends \CustomTestCase
         $this->assertEquals(array('pri'), $meta->primary);
         
         $this->assertEquals(array('f'=>array()), $this->getProtected($meta, 'fields'));
-        $this->assertEquals(array('r'=>array('name'=>'r')), $this->getProtected($meta, 'relations'));
+        $this->assertEquals(array('r'=>array()), $this->getProtected($meta, 'relations'));
         $this->assertEquals(array('id'=>'def'),  $this->getProtected($meta, 'defaultFieldType'));
     }
     

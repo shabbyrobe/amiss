@@ -118,9 +118,11 @@ class ActiveRecordTest extends \DataTestCase
         \Amiss\Sql\ActiveRecord::setManager($manager);
 
         $manager->expects($this->once())->method('getRelated')->with(
-            $this->isInstanceOf(__NAMESPACE__.'\TestRelatedChild'),
-            $this->equalTo('parent')
-        )->will($this->returnValue(999));
+            $this->containsOnlyInstancesOf(__NAMESPACE__.'\TestRelatedChild'),
+            $this->equalTo('parent'),
+            $this->isNull(),
+            $this->anything()
+        )->will($this->returnValue([999]));
 
         $child = new TestRelatedChild;
         $child->childId = 6;

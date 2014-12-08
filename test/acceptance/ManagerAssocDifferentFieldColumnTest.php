@@ -105,18 +105,21 @@ namespace Amiss\Demo\AssocDifferentFieldColumn
         /** @primary */
         public $eventId;
 
-        /** @primary */
+        /**
+         * @primary
+         * @index
+         */
         public $artistId;
 
         /**
          * @has.one.of Amiss\Demo\AssocDifferentFieldColumn\Event
-         * @has.one.on.eventId id
+         * @has.one.from primary
          */
         public $event;
 
         /**
          * @has.one.of Amiss\Demo\AssocDifferentFieldColumn\Artist
-         * @has.one.on.artistId id
+         * @has.one.from artistId
          */
         public $artist;
     }

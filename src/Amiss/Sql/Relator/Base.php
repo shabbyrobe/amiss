@@ -1,6 +1,8 @@
 <?php
 namespace Amiss\Sql\Relator;
 
+use Amiss\Exception;
+
 abstract class Base implements \Amiss\Sql\Relator
 {
     public function __construct($manager)
@@ -22,7 +24,7 @@ abstract class Base implements \Amiss\Sql\Relator
                 $key[] = $lValue;
                 
                 if (!isset($rFields[$r]))
-                    throw new \Exception("Field $r does not exist against relation for ".get_class($object));
+                    throw new Exception("Field $r does not exist against relation for ".get_class($object));
                 
                 if (!isset($ids[$l])) {
                     $ids[$l] = array(
@@ -44,5 +46,54 @@ abstract class Base implements \Amiss\Sql\Relator
         }
         
         return array($ids, $resultIndex);
+    }
+
+    // Transitional - allows OneMany and Assoc to turn 'from' and 'to'
+    // relation config into the old-style 'on' so the logic doesn't need
+    // to be interfered with yet.
+    protected function createOn($meta, $fromIndex, $relatedMeta, $toIndex)
+    {
+        if (!isset($meta->indexes[$fromIndex]))
+            throw new Exception("Index $fromIndex does not exist on {$meta->class}");
+        if (!isset($relatedMeta->indexes[$toIndex]))
+            throw new Exception("Index $toIndex does not exist on {$relatedMeta->class}");
+
+        $on = [];
+
+        // If an index exists, you don't need to join on all of it.
+        // This assumes that the indexes are properly numbered. If not, BOOM!
+        foreach ($meta->indexes[$fromIndex]['fields'] as $idx=>$fromField) {
+            if (!isset($relatedMeta->indexes[$toIndex]['fields'][$idx]))
+                break;
+            $on[$fromField] = $relatedMeta->indexes[$toIndex]['fields'][$idx];
+        }
+
+        return $on;
+    }
+
+    protected function resolveFromTo($relation, $relatedMeta)
+    {
+        if (isset($relation['inverse'])) {
+            $fromTo = $this->resolveInverse($relation, $relatedMeta);
+        }
+        else {
+            $fromTo = [
+                isset($relation['from']) ? $relation['from'] : 'primary',
+                isset($relation['to']) ? $relation['to'] : 'primary',
+            ];
+        }
+        return $fromTo;
+    }
+
+    protected function resolveInverse($relation, $relatedMeta)
+    {
+        if (!isset($relatedMeta->relations[$relation['inverse']]))
+            throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");
+        
+        $inverseRel = $relatedMeta->relations[$relation['inverse']];
+        $to = isset($inverseRel['from']) ? $inverseRel['from'] : 'primary';
+        $from = isset($inverseRel['to']) ? $inverseRel['to'] : 'primary';
+        
+        return [$from, $to];
     }
 }

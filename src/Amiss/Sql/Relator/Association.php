@@ -3,6 +3,7 @@ namespace Amiss\Sql\Relator;
 
 use Amiss\Sql\Criteria;
 use Amiss\Sql\RelatorContext;
+use Amiss\Exception;
 
 /**
  * TODO: Two stage query? Pros: can allow full use of criteria. Cons: two queries (duh).
@@ -55,10 +56,10 @@ class Association extends Base
         $sourceToViaRelation = null;
         $viaToDestRelationName = null;
         $viaToDestRelation = null;
-        
+
         if ($sourceToViaRelationName)
             $sourceToViaRelation = $viaMeta->relations[$relation];
-        
+
         foreach ($viaMeta->relations as $k=>$v) {
             // inefficient. consider requiring this to be specified rather than inferred
             $of = $this->manager->getMeta($v['of']);
@@ -78,18 +79,24 @@ class Association extends Base
         }
         
         if (!$sourceToViaRelation || !$viaToDestRelation)
-            throw new \Amiss\Exception("Could not find relation between {$meta->class} and {$relation['via']} for relation $relationName");
-        
-        $sourceToViaOn = $sourceToViaRelation['on'];
-        if (is_string($sourceToViaOn))
-            $sourceToViaOn = array($sourceToViaOn=>$sourceToViaOn);
-        else
-            $sourceToViaOn = array_flip($sourceToViaOn);
-        
-        $viaToDestOn = $viaToDestRelation['on'];
-        if (is_string($viaToDestOn))
-            $viaToDestOn = array($viaToDestOn=>$viaToDestOn);
-       
+            throw new Exception("Could not find relation between {$meta->class} and {$relation['via']} for relation $relationName");
+
+        { // can be removed eventually. sanity check for old versions.
+            if (isset($sourceToViaRelation['on']))
+                throw new Exception("Relation $sourceToViaRelationName used 'on' in class {$meta->class}. Please use 'from' and/or 'to'");
+
+            if (isset($viaToDestRelation['on']))
+                throw new Exception("Relation $viaToDestRelationName used 'on' in class {$viaMeta->class}. Please use 'from' and/or 'to'");
+        }
+
+        { // resolve relation field connections
+            list ($sourceToViaFrom, $sourceToViaTo) = $this->resolveFromTo($sourceToViaRelation, $viaMeta);
+            $sourceToViaOn = $this->createOn($meta, $sourceToViaTo, $viaMeta, $sourceToViaFrom);
+
+            list ($viaToDestFrom, $viaToDestTo) = $this->resolveFromTo($viaToDestRelation, $viaMeta);
+            $viaToDestOn = $this->createOn($viaMeta, $viaToDestFrom, $relatedMeta, $viaToDestTo);
+        } 
+
         // get the source ids, prepare an index to link the relationships
         list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         
