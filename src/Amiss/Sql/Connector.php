@@ -261,6 +261,16 @@ class Connector
     {
         return $this->getPDO()->exec($statement);
     }
+
+    public function execAll($statements, $transaction=false)
+    {
+        $out = [];
+        if ($transaction) $this->beginTransaction();
+        foreach ($statements as $k=>$statement)
+            $out[$k] = $this->getPDO()->exec($statement);
+        if ($transaction) $this->commit();
+        return $out;
+    }
     
     /**
      * PDO calls it 'exec'. PDOStatement calls it 'execute'. Crazy!

@@ -95,6 +95,9 @@ class Note extends \Amiss\Mapper\Base
                     if ($indexNote === true) {
                         $indexNote = [$name=>true];
                     }
+                    elseif (is_string($indexNote)) {
+                        $indexNote = [$indexNote=>true];
+                    }
 
                     foreach ($indexNote as $k=>$seq) {
                         if ($seq === true)

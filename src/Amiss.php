@@ -26,6 +26,8 @@ class Amiss
         'Amiss\Sql\Criteria\Query'=>'Amiss/Sql/Criteria/Query.php',
         'Amiss\Sql\Criteria\Select'=>'Amiss/Sql/Criteria/Select.php',
         'Amiss\Sql\Criteria\Update'=>'Amiss/Sql/Criteria/Update.php',
+        'Amiss\Sql\Engine\MySQL\TableBuilder'=>'Amiss/Sql/Engine/MySQL/TableBuilder.php',
+        'Amiss\Sql\Engine\SQLite\TableBuilder'=>'Amiss/Sql/Engine/SQLite/TableBuilder.php',
         'Amiss\Sql\Manager'=>'Amiss/Sql/Manager.php',
         'Amiss\Sql\Relator'=>'Amiss/Sql/Relator.php',
         'Amiss\Sql\RelatorContext'=>'Amiss/Sql/RelatorContext.php',

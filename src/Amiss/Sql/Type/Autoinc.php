@@ -25,6 +25,6 @@ class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
         if ($engine == 'sqlite')
             return "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT";
         else
-            return $this->type." NOT NULL PRIMARY KEY AUTO_INCREMENT";
+            return $this->type." NOT NULL AUTO_INCREMENT";
     }
 }

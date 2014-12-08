@@ -1,165 +1,130 @@
 <?php
 namespace Amiss\Sql;
 
-use Amiss\Exception,
-    Amiss\Sql\Connector
-;
+use Amiss\Exception;
+use Amiss\Meta;
+use Amiss\Sql\Connector;
+use Amiss\Mapper;
 
-class TableBuilder
+abstract class TableBuilder
 {
     /**
      * @var Amiss\Meta
      */
-    private $meta;
+    protected $meta;
     
     /**
-     * @var Amiss\Sql\Manager
+     * @var Amiss\Mapper
      */
-    private $manager;
+    protected $mapper;
     
-    private $class;
+    protected $engine;
+
+    protected $defaultFieldType;
     
-    public function __construct($manager, $class)
+    public function __construct(Mapper $mapper, $class)
     {
-        $this->manager = $manager;
-        $this->class = $class;
-        $this->meta = $manager->getMeta($class);
+        if (!$this->engine)
+            throw new \UnexpectedValueException();
+
+        $this->mapper = $mapper;
+        
+        if ($class instanceof Meta)
+            $this->meta = $class;
+        else
+            $this->meta = $mapper->getMeta($class);
     }
-    
+
+    public static function create(Connector $connector, Mapper $mapper, $classes)
+    {
+        foreach (static::createSQL($connector, $mapper, $classes) as $classQueries)
+            $connector->execAll($classQueries);
+    }
+
+    public static function createSQL($engine, Mapper $mapper, $classes)
+    {
+        if ($engine instanceof Connector)
+            $engine = $engine->engine;
+
+        $single = false;
+        if (is_string($classes)) {
+            $single = true;
+            $classes = [$classes];
+        }
+
+        $queries = [];
+        foreach ((array) $classes as $class) {
+            $builder = null;
+            switch ($engine) {
+                case 'sqlite': $builder = new Engine\SQLite\TableBuilder($mapper, $class); break;
+                case 'mysql' : $builder = new Engine\MySQL\TableBuilder ($mapper, $class); break;
+                default:
+                    throw new \Exception();
+            }
+            $queries[$class] = $builder->buildTableQueries();
+        }
+
+        if ($single)
+            return current($queries);
+        else
+            return $queries;
+    }
+
     public function getClass()
     {
         return $this->meta->class;
     }
     
-    public function createTable()
+    /**
+     * @return array
+     */
+    public abstract function buildTableQueries();
+
+    protected function buildField($id, $info, $default)
     {
-        $connector = $this->manager->getConnector();
+        $current = "`{$info['name']}` ";
         
-        if (!($connector instanceof Connector))
-            throw new Exception("Can't create tables if not using Amiss\Sql\Connector");
-        
-        $sql = $this->buildCreateTableSql();
-        
-        $connector->exec($sql);
+        $colType = null;
+        if (isset($info['type'])) {
+            $handler = $this->mapper->determineTypeHandler($info['type']['id']);
+            if ($handler) {
+                $new = $handler->createColumnType($this->engine);
+                if ($new) $colType = $new;
+            }
+            if (!$colType)
+                $colType = $info['type']['id'];
+        }
+
+        $current .= $colType ?: $default;
+        return $current;
     }
-    
+
     protected function buildFields()
     {
-        $engine = $this->manager->getConnector()->engine;
         $primary = $this->meta->primary;
         
-        $default = $this->meta->getDefaultFieldType();
-        if (!$default) {
-            $default = array('id'=>$engine == 'sqlite' ? 'STRING NULL' : 'VARCHAR(255) NULL');
-        } 
+        $defaultType = $this->meta->getDefaultFieldType();
+        if (!$defaultType)
+            $defaultType = $this->defaultFieldType;
+
         $f = array();
         $found = array();
         
-        $fields = $this->meta->getFields();
-        
         // make sure the primary key ends up first
-        if ($this->meta->primary) {
-            $pFields = array();
-            foreach ($this->meta->primary as $p) {
-                $primaryField = $fields[$p];
-                unset($fields[$p]);
-                $pFields[$p] = $primaryField;
-            }
-            $fields = array_merge($pFields, $fields);
+        $pFieldIds = [];
+        foreach ($this->meta->primary as $p)
+            $pFieldIds[$p] = true;
+
+        $pFieldOut = [];
+        $fieldOut = [];
+        foreach ($this->meta->getFields() as $id=>$info) {
+            $f = $this->buildField($id, $info, $defaultType);
+            if (isset($pFieldIds[$id]))
+                $pFieldOut[$id] = $f;
+            else
+                $fieldOut[$id] = $f;
         }
         
-        foreach ($fields as $id=>$info) {
-            $current = "`{$info['name']}` ";
-            
-            $type = isset($info['type']) ? $info['type'] : $default;
-            $typeId = $type['id'];
-            
-            $handler = $this->manager->mapper->determineTypeHandler($typeId);
-            if ($handler) {
-                $new = $handler->createColumnType($engine);
-                if ($new) $typeId = $new;
-            }
-            
-            $current .= $typeId;
-            $f[] = $current;
-            $found[] = $id;
-        }
-        
-        return $f;
-    }
-    
-    protected function buildTableConstraints()
-    {
-        $engine = $this->manager->getConnector()->engine;
-        
-        $fields = $this->meta->getFields();
-        
-        $idx = array();
-        if ($engine == 'mysql') {
-            foreach ($this->meta->relations as $k=>$details) {
-                if ($details[0] == 'one' || $details[0] == 'many') {
-                    $relatedMeta = $this->manager->getMeta($details['of']);
-                    
-                    $cols = array();
-                    if (isset($details['inverse'])) {
-                        $inverse = $relatedMeta->relations[$details['inverse']];
-                        $details['on'] = $inverse['on'];
-                        if (is_array($details['on']))
-                            $details['on'] = array_combine(array_values($inverse['on']), array_keys($inverse['on']));
-                    }
-                    
-                    if (is_string($details['on'])) {
-                        $cols[] = $details['on'];
-                    }
-                    elseif ($details['on']) {
-                        foreach ($details['on'] as $l=>$r) {
-                            if (is_numeric($l)) $l = $r;
-                            $cols[] = $l;
-                        }
-                    }
-                    
-                    foreach ($cols as &$col) {
-                        $col = $fields[$col]['name'];
-                    }
-                    unset($col);
-                    
-                    if ($details[0] == 'one')
-                        $idx[] = "KEY `idx_$k` (`".implode('`, `', $cols).'`)';
-                }
-            }
-        }
-        return $idx;
-    }
-    
-    public function buildCreateTableSql()
-    {
-        $fields = $this->meta->getFields();
-        
-        if (!$fields)
-            throw new Exception("Tried to create table for object {$this->meta->class} but it doesn't declare fields");
-        
-        $table = '`'.str_replace('`', '', $this->meta->table).'`';
-        $connector = $this->manager->getConnector();
-        $engine = $connector->engine;
-        
-        $primary = $this->meta->primary;
-        $fields = static::buildFields();
-        if (is_array($fields))
-            $fields = implode(",\n  ", $fields);
-        
-        $query = "CREATE TABLE $table (\n  ";
-        $query .= $fields;
-        
-        $indexes = $this->buildTableConstraints();
-        if ($indexes) {
-            $query .= ",\n  ".implode(",\n  ", $indexes);
-        }
-        
-        $query .= "\n)";
-        if ($engine == 'mysql') {
-            $query .= ' ENGINE=InnoDB';
-        }
-        
-        return $query;
-    }
+        return array_merge($pFieldOut, $fieldOut);
+    }    
 }
