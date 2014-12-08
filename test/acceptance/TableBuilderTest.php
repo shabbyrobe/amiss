@@ -1,9 +1,8 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Sql\TableBuilder,
-    Amiss\Demo
-;
+use Amiss\Sql\TableBuilder;
+use Amiss\Demo;
 
 class TableBuilderTest extends \DataTestCase
 {

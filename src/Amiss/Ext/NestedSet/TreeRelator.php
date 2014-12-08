@@ -10,7 +10,7 @@ class TreeRelator implements \Amiss\Sql\Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelated($source, $relationName, $criteria=null)
+    function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         $treeMeta = $this->nestedSetManager->getTreeMeta($source);
         $meta = $treeMeta->meta;
@@ -33,6 +33,7 @@ class TreeRelator implements \Amiss\Sql\Relator
             $query->order = $criteria->order;
         }
         
+        $query->stack = $stack;
         $children = $this->nestedSetManager->manager->getList($meta->class, $query);
         
         if ($children)

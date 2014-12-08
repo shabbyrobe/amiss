@@ -35,6 +35,19 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
     }
     */
     
+    protected function createFnScopeClass($name, $body)
+    {
+        $bt = debug_backtrace();       
+        $callClass = $bt[1]['class'];
+        $callFn = $bt[1]['function'];
+        $ns = $callClass.'\\'.$callFn;
+        $fqcn = $ns.'\\'.$name;
+        if (!class_exists($fqcn)) {
+            eval("namespace $ns { $body }");
+        }
+        return $fqcn;
+    }
+
     protected function createClass($fqcn, $src)
     {
         if (!class_exists($fqcn)) {

@@ -10,7 +10,7 @@ class ParentRelator implements \Amiss\Sql\Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelated($source, $relationName, $criteria=null)
+    function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         if ($criteria)
             throw new \InvalidArgumentException("Can't use criteria with parent relator");

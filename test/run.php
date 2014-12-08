@@ -34,7 +34,6 @@ if ($testMysql) {
 
 $groups = $options['group'] ? explode(',', $options['group']) : null;
 $args = array(
-    'reportDirectory'=>$options['coverage-html'],
     'filter'=>$options['filter'],
     'excludeGroups'=>explode(',', $options['exclude-group']),
     'groups'=>$groups,
@@ -48,6 +47,10 @@ $args = array(
     'addUncoveredFilesFromWhitelist'=>true,
     'processUncoveredFilesFromWhitelist'=>true,
 );
+
+if ($options['coverage-html']) {
+    $args['coverageHtml'] = $options['coverage-html'];
+}
 
 $sqliteConnection = array(
     'engine'=>'sqlite',

@@ -10,7 +10,7 @@ class ParentsRelator implements \Amiss\Sql\Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelated($source, $relationName, $criteria=null)
+    function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
         if ($criteria)
             throw new \InvalidArgumentException("Can't use criteria with parents relator");
@@ -22,12 +22,14 @@ class ParentsRelator implements \Amiss\Sql\Relator
         $leftValue = $meta->getValue($source, $treeMeta->leftId);
         $rightValue = $meta->getValue($source, $treeMeta->rightId);
         
-        $parents = $this->nestedSetManager->manager->getList($meta->class, array(
-            'where'=>"{".$treeMeta->leftId."} < ? AND {".$treeMeta->rightId."} > ?",
-            'params'=>array($leftValue, $rightValue),
-            'order'=>array($treeMeta->leftId=>'desc'),
-        ));
-        
+        $query = new \Amiss\Sql\Criteria\Select;
+        $query->stack = $stack;
+        $query->where = "{".$treeMeta->leftId."} < ? AND {".$treeMeta->rightId."} > ?";
+        $query->params = array($leftValue, $rightValue);
+        $query->order = array($treeMeta->leftId=>'desc');
+
+        $parents = $this->nestedSetManager->manager->getList($meta->class, $query);
+
         if ($parents && isset($relation['includeRoot']) && !$relation['includeRoot'])
             array_pop($parents);
         
