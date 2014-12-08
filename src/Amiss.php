@@ -30,7 +30,6 @@ class Amiss
         'Amiss\Sql\Engine\SQLite\TableBuilder'=>'Amiss/Sql/Engine/SQLite/TableBuilder.php',
         'Amiss\Sql\Manager'=>'Amiss/Sql/Manager.php',
         'Amiss\Sql\Relator'=>'Amiss/Sql/Relator.php',
-        'Amiss\Sql\RelatorContext'=>'Amiss/Sql/RelatorContext.php',
         'Amiss\Sql\Relator\Association'=>'Amiss/Sql/Relator/Association.php',
         'Amiss\Sql\Relator\Base'=>'Amiss/Sql/Relator/Base.php',
         'Amiss\Sql\Relator\OneMany'=>'Amiss/Sql/Relator/OneMany.php',

@@ -153,16 +153,6 @@ class Manager
         return $this->get($class, $criteria);
     }
     
-    /*
-     * Get a single object from the database by primary key
-     * 
-     * @deprecated Use getById
-     */
-    public function getByPk($class, $id, $args=null)
-    {
-        return $this->getById($class, $id, $args);
-    }
-    
     /**
      * Count the objects in the database that match the criteria
      * 
@@ -215,6 +205,8 @@ class Manager
                 $missing[$idx] = $item;
             elseif (!call_user_func(array($item, $relation['getter']))) 
                 $missing[$idx] = $item;
+            else
+                throw new \UnexpectedValueException();
         }
 
         if ($missing) {
@@ -421,15 +413,7 @@ class Manager
     {
         return $this->delete($class, $this->createIdCriteria($class, $id));
     }
-    
-    /**
-     * @deprecated Use deleteById
-     */
-    public function deleteByPk($class, $pk)
-    {
-        return $this->deleteById($class, $pk);
-    }
-    
+
     /**
      * This is a hack to allow active record to intercept saving and fire events.
      * 
@@ -469,7 +453,6 @@ class Manager
         else
             $this->update($object);
     }
-
     
     /**
      * Iterate over an array of objects and returns an array of objects
