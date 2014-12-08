@@ -293,7 +293,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar', 'name'=>'bar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -347,7 +347,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar', 'name'=>'bar'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -379,7 +379,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class1);
         $expected = array(
-            'class2'=>array('many', 'of'=>"Class2")
+            'class2'=>array('many', 'of'=>"Class2", 'name'=>'class2')
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -399,7 +399,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($name);
         $expected = array(
-            'test'=>array('test')
+            'test'=>array('test', 'name'=>'test')
         );
         $this->assertEquals($expected, $meta->relations);
     }

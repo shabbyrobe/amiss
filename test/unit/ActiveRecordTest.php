@@ -115,6 +115,7 @@ class ActiveRecordTest extends \DataTestCase
     public function testAssignRelatedStatic()
     {
         $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        $manager->relators = \Amiss::createSqlRelators();
         \Amiss\Sql\ActiveRecord::setManager($manager);
 
         $manager->expects($this->once())->method('getRelated')->with(
@@ -138,6 +139,7 @@ class ActiveRecordTest extends \DataTestCase
     public function testAssignRelatedStaticArray()
     {
         $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        $manager->relators = \Amiss::createSqlRelators();
         \Amiss\Sql\ActiveRecord::setManager($manager);
 
         $child1 = new TestRelatedChild;

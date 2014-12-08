@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Ext\NestedSet;
 
-class TreeRelator implements \Amiss\Sql\Relator
+class TreeRelator extends Relator
 {
     public $nestedSetManager;
     

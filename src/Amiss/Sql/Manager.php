@@ -37,7 +37,7 @@ class Manager
      * Relators used by getRelated
      * @var (Amiss\Sql\Relator|callable)[]
      */
-    public $relators;
+    public $relators = [];
     
     /**
      * @param Amiss\Sql\Connector|\PDO|array  Database connector
@@ -211,18 +211,26 @@ class Manager
 
         if ($missing) {
             $result = $this->getRelated($missing, $relationName, null, $stack);
-
-            if ($result) {
-                foreach ($result as $idx=>$item) {
-                    if (!isset($relation['setter']))
-                        $missing[$idx]->{$relationName} = $item;
-                    else
-                        call_user_func(array($missing[$idx], $relation['setter']), $item);
-                }
-            }
+            $relator = $this->getRelator($meta, $relationName);
+            $relator->assignRelated($missing, $result, $relation);
         }
     }
-    
+ 
+    public function getRelator($meta, $relationName)
+    {
+        $relation = $meta->relations[$relationName];
+        if (!isset($this->relators[$relation[0]])) {
+            throw new Exception("Relator {$relation[0]} not found");
+        }
+
+        $relator = $this->relators[$relation[0]];
+        if (!$relator instanceof Relator) {
+            $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
+        }
+
+        return $relator;
+    }   
+
     /**
      * Get related objects from the database
      * 

@@ -97,6 +97,7 @@ class Meta
     private function setRelations($relations)
     {
         foreach ($relations as $id=>$r) {
+            $r['name'] = $id;
             $this->relations[$id] = $r;
             if (isset($r['auto']) && $r['auto'])
                 $this->autoRelations[] = $id;
