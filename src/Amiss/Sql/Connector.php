@@ -264,6 +264,9 @@ class Connector
 
     public function execAll($statements, $transaction=false)
     {
+        if (!$statements)
+            throw new \InvalidArgumentException();
+
         $out = [];
         if ($transaction) $this->beginTransaction();
         foreach ($statements as $k=>$statement)

@@ -87,12 +87,10 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
     
     public function createRecordMemoryDb($class)
     {
-        $tb = new TableBuilder($this->manager, $class);
-
         if ($class instanceof \Amiss\Active\Record)
             forward_static_call(array($class, 'setManager'), $this->manager);
-        
-        $tb->createTable();
+
+        TableBuilder::create($this->manager->connector, $this->manager->mapper, $class);
     }
 }
 
@@ -272,6 +270,7 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      */
     public function __construct($string)
     {
+		parent::__construct($string);
         $this->string = $string;
     }
 
@@ -303,11 +302,7 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      */
     public function toString()
     {
-        return sprintf(
-          'matches loose string "%s"',
-
-          $this->string
-        );
+        return sprintf('matches loose string "%s"', $this->string);
     }
 }
 

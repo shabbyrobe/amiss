@@ -1,18 +1,19 @@
 <?php
 namespace Amiss\Test\Acceptance
 {
+    use \Amiss\Sql\TableBuilder;
+
     class ManagerAssocDifferentFieldColumnTest extends \ModelDataTestCase
     {
         public function setUp()
         {
             parent::setUp();
             $this->ns = 'Amiss\Demo\AssocDifferentFieldColumn';
-            $tb = new \Amiss\Sql\TableBuilder($this->manager, $this->ns.'\Event');
-            $tb->createTable();
-            $tb = new \Amiss\Sql\TableBuilder($this->manager, $this->ns.'\Artist');
-            $tb->createTable();
-            $tb = new \Amiss\Sql\TableBuilder($this->manager, $this->ns.'\EventArtist');
-            $tb->createTable();
+            $tb = TableBuilder::create($this->manager->connector, $this->manager->mapper, [
+                $this->ns.'\Event',
+                $this->ns.'\Artist',
+                $this->ns.'\EventArtist',
+            ]);
 
             $manager = $this->manager;
             $manager->insert($this->ns.'\Event', ['eventId'=>1, 'name'=>'event1']);

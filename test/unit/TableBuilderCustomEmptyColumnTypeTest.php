@@ -17,7 +17,7 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
         $this->mapper = \Amiss::createSqlMapper(array());
         $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
         \Amiss\Sql\ActiveRecord::setManager($this->manager);
-        $this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord');
+        $this->class = __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord';
     }
     
     /**
@@ -30,13 +30,12 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
         
         $pattern = "
             CREATE TABLE `bar` (
-                `id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                `foo1` int
-            ) ENGINE=InnoDB
+                `id` INTEGER NOT NULL AUTO_INCREMENT,
+                `foo1` int,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB;
         ";
-        $this->tableBuilder->createTable();
-        
-        $last = $this->connector->getLastCall();
+        $last = TableBuilder::createSQL($this->connector, $this->mapper, $this->class);
         $this->assertLoose($pattern, $last[0]);
     }
 }

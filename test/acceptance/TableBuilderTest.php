@@ -25,8 +25,7 @@ class TableBuilderTest extends \DataTestCase
         \Amiss\Sql\ActiveRecord::_reset();
         \Amiss\Sql\ActiveRecord::setManager($manager);
         
-        $tableBuilder = new TableBuilder($manager, 'Amiss\Demo\Active\EventRecord');
-        $tableBuilder->createTable();
+        TableBuilder::create($manager->connector, $manager->mapper, 'Amiss\Demo\Active\EventRecord');
         
         $er = new Demo\Active\EventRecord();
         $er->name = 'foo bar';

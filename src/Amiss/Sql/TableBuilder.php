@@ -37,7 +37,7 @@ abstract class TableBuilder
 
     public static function create(Connector $connector, Mapper $mapper, $classes)
     {
-        foreach (static::createSQL($connector, $mapper, $classes) as $classQueries)
+        foreach (static::createSQL($connector, $mapper, (array) $classes) as $classQueries)
             $connector->execAll($classQueries);
     }
 
@@ -101,6 +101,10 @@ abstract class TableBuilder
 
     protected function buildFields()
     {
+        $fields = $this->meta->getFields();
+        if (!$fields)
+            throw new Exception("No fields defined for {$this->meta->class}");
+
         $primary = $this->meta->primary;
         
         $defaultType = $this->meta->getDefaultFieldType();
@@ -117,7 +121,7 @@ abstract class TableBuilder
 
         $pFieldOut = [];
         $fieldOut = [];
-        foreach ($this->meta->getFields() as $id=>$info) {
+        foreach ($fields as $id=>$info) {
             $f = $this->buildField($id, $info, $defaultType);
             if (isset($pFieldIds[$id]))
                 $pFieldOut[$id] = $f;

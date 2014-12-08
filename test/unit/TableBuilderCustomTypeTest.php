@@ -15,7 +15,7 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
         $this->connector = new \TestConnector('mysql:xx');
         $this->mapper = \Amiss::createSqlMapper();
         $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
-        $this->tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithCustomType');
+        $this->class = __NAMESPACE__.'\TestCreateWithCustomType';
     }
     
     /**
@@ -26,14 +26,14 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
     {
         $pattern = "
             CREATE TABLE `bar` (
-                `testCreateId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                `testCreateId` INTEGER NOT NULL AUTO_INCREMENT,
                 `foo1` slappywag,
                 `foo2` slappywag,
-                `pants` int unsigned not null
-            ) ENGINE=InnoDB
+                `pants` int unsigned not null,
+                PRIMARY KEY (`testCreateId`)
+            ) ENGINE=InnoDB;
         ";
-        $this->tableBuilder->createTable();
-        $last = $this->connector->getLastCall();
+        $last = TableBuilder::createSQL($this->connector, $this->mapper, $this->class);
         $this->assertLoose($pattern, $last[0]);
     }
     
@@ -47,15 +47,14 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
         
         $pattern = "
             CREATE TABLE `bar` (
-                `testCreateId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                `testCreateId` INTEGER NOT NULL AUTO_INCREMENT,
                 `foo1` OH YEAH,
                 `foo2` OH YEAH,
-                `pants` int unsigned not null
-            ) ENGINE=InnoDB
+                `pants` int unsigned not null,
+                PRIMARY KEY (`testCreateId`)
+            ) ENGINE=InnoDB;
         ";
-        $this->tableBuilder->createTable();
-        
-        $last = $this->connector->getLastCall();
+        $last = TableBuilder::createSQL($this->connector, $this->mapper, $this->class);
         $this->assertLoose($pattern, $last[0]);
     }
 }

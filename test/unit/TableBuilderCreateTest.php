@@ -22,22 +22,19 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testCreateDefaultTableSql()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreate');
+        $class = __NAMESPACE__.'\TestCreate';
          
         $pattern = "
             CREATE TABLE `test_create` (
                 `testCreateId` int,
                 `foo1` varchar(128),
                 `foo2` varchar(128),
-                `pants` int unsigned not null
-            )
+                `pants` int unsigned not null,
+                PRIMARY KEY (`testCreateId`)
+            );
         ";
-        
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
-        $this->manager->connector->expects($this->once())->method('exec')
-            ->with($this->matchesLoose($pattern));
-        
-        $tableBuilder->createTable();
+        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $this->assertLoose($pattern, $sql[0]);
     }
     
     /**
@@ -45,20 +42,17 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testBuildCreateFieldsDefault()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateDefaultField');
+        $class = __NAMESPACE__.'\TestCreateDefaultField';
         
         $pattern = "
             CREATE TABLE `test_create_default_field` (
                 `testCreateDefaultFieldId` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                `foo` STRING null,
-                `bar` STRING null
-            )
+                `foo` STRING NULL,
+                `bar` STRING NULL
+            );
         ";
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
-        $this->manager->connector->expects($this->once())->method('exec')
-            ->with($this->matchesLoose($pattern));
-        
-        $tableBuilder->createTable();
+        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $this->assertLoose($pattern, $sql[0]);
     }
 
     /**
@@ -66,21 +60,19 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testCreateTableWithSingleOnRelation()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithIndexedSingleOnRelation');
+        $class = __NAMESPACE__.'\TestCreateWithIndexedSingleOnRelation';
         
         $pattern = "
             CREATE TABLE `bar` (
-                `barId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                `fooId` varchar(255) null,
-                `quack` varchar(255) null,
-                KEY `idx_foo` (`fooId`)
-            )
+                `barId` INTEGER NOT NULL AUTO_INCREMENT,
+                `fooId` VARCHAR(255) NULL,
+                `quack` VARCHAR(255) NULL,
+                PRIMARY KEY (`barId`),
+                KEY `fooId` (`fooId`)
+            ) ENGINE=InnoDB;
         ";
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('mysql:xx'));
-        $this->manager->connector->expects($this->once())->method('exec')
-            ->with($this->matchesLoose($pattern));
-        
-        $tableBuilder->createTable();
+        $sql = TableBuilder::createSQL('mysql', $this->manager->mapper, $class);
+        $this->assertLoose($pattern, $sql[0]);
     }
 
     /**
@@ -88,20 +80,20 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testCreateTableWithSingleOnRelationSkipsIndexesForSqlite()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithIndexedSingleOnRelation');
+        $class = __NAMESPACE__.'\TestCreateWithIndexedSingleOnRelation';
         
-        $pattern = "
-            CREATE TABLE `bar` (
+        $patterns = [
+            "CREATE TABLE `bar` (
                 `barId` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 `fooId` STRING null,
                 `quack` STRING null
-            )
-        ";
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('sqlite::memory:'));
-        $this->manager->connector->expects($this->once())->method('exec')
-            ->with($this->matchesLoose($pattern));
-        
-        $tableBuilder->createTable();
+            );",
+            "CREATE INDEX `bar_fooId` ON `bar`(`fooId`);",
+        ];
+        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $this->assertLoose($patterns[0], $sql[0]);
+        $this->assertLoose($patterns[1], $sql[1]);
+        $this->assertCount(2, $sql);
     }
 
     /**
@@ -109,22 +101,20 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testCreateTableWithMultiOnRelation()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestCreateWithIndexedMultiOnRelation');
+        $class = __NAMESPACE__.'\TestCreateWithIndexedMultiOnRelation';
         
         $pattern = "
             CREATE TABLE `bar` (
-                `barId` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                `myFooId` varchar(255) null,
-                `myOtherFooId` varchar(255) null,
-                `bar` varchar(255) null,
-                KEY `idx_foo` (`myFooId`, `myOtherFooId`)
+                `barId` INTEGER NOT NULL AUTO_INCREMENT,
+                `myFooId` VARCHAR(255) NULL,
+                `myOtherFooId` VARCHAR(255) NULL,
+                `bar` VARCHAR(255) NULL,
+                PRIMARY KEY (`barId`),
+                KEY `myFoo` (`myFooId`, `myOtherFooId`)
             )
         ";
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('exec'), array('mysql:xx'));
-        $this->manager->connector->expects($this->once())->method('exec')
-            ->with($this->matchesLoose($pattern));
-        
-        $tableBuilder->createTable();
+        $sql = TableBuilder::createSQL('mysql', $this->manager->mapper, $class);
+        $this->assertLoose($pattern, $sql[0]);
     }
 
     /**
@@ -133,19 +123,17 @@ class TableBuilderCreateTest extends \DataTestCase
      */
     public function testCreateTableFailsWhenFieldsNotDefined()
     {
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestNoFieldsCreate');
-        $tableBuilder->createTable();
+        TableBuilder::createSQL($this->manager->connector, $this->manager->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
     }
     
     /**
      * @group tablebuilder
-     * @expectedException Amiss\Exception
      */
     public function testCreateTableFailsWhenConnectorIsNotAmissConnector()
     {
         $this->manager->connector = new \PDO('sqlite::memory:');
-        $tableBuilder = new TableBuilder($this->manager, __NAMESPACE__.'\TestNoFieldsCreate');
-        $tableBuilder->createTable();
+        $this->setExpectedException('PHPUnit_Framework_Error');
+        TableBuilder::create($this->manager->connector, $this->manager->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
     }
 }
 
@@ -213,6 +201,7 @@ class TestCreateWithIndexedSingleOnRelation
     
     /**
      * @field
+     * @index
      */
     public $fooId;
     
@@ -223,7 +212,7 @@ class TestCreateWithIndexedSingleOnRelation
     
     /**
      * @has.one.of stdClass
-     * @has.one.on fooId
+     * @has.one.from fooId
      */
     public $foo;
 }
@@ -241,11 +230,13 @@ class TestCreateWithIndexedMultiOnRelation
     
     /**
      * @field
+     * @index.myFoo 0
      */
     public $myFooId;
     
     /**
      * @field
+     * @index.myFoo 1
      */
     public $myOtherFooId;
     
@@ -256,8 +247,7 @@ class TestCreateWithIndexedMultiOnRelation
     
     /**
      * @has.one.of stdClass
-     * @has.one.on.myFooId fooId
-     * @has.one.on.myOtherFooId otherFooId
+     * @has.one.from.myFoo
      */
     public $foo;
 }
