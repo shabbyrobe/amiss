@@ -205,9 +205,12 @@ class Manager
 
         $missing = [];
         foreach ($source as $idx=>$item) {
-            if (!isset($relation['getter']) && !$item->{$relationName})
-                $missing[$idx] = $item;
-            elseif (!call_user_func(array($item, $relation['getter']))) 
+            // we have to assume it's missing if we see a getter as there
+            // may be serious unintended side effects from calling a getter
+            // that may be unpopulated. it might lazy load if it's an active
+            // record, or it might throw an exception because the 'set' hasn't
+            // been called.
+            if (isset($relation['getter']) || !$item->{$relationName})
                 $missing[$idx] = $item;
             else
                 throw new \UnexpectedValueException();
