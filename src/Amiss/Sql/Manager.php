@@ -98,7 +98,7 @@ class Manager
         }
 
         if ($object && $meta->autoRelations) {
-            $this->autoFetchRelations($object, $meta, $criteria->stack);
+            $this->assignRelatedAuto($object, $meta, $criteria->stack);
         }
 
         return $object;
@@ -125,14 +125,18 @@ class Manager
         }
 
         if ($objects && $meta->autoRelations) {
-            $this->autoFetchRelations($objects, $meta, $criteria->stack);
+            $this->assignRelatedAuto($objects, $meta, $criteria->stack);
         }
 
         return $objects;
     }
     
-    private function autoFetchRelations($source, $meta, $stack)
+    public function assignRelatedAuto($source, $class=null, $stack=[])
     {
+        if ($class == null)
+            $class = get_class(is_array($source) ? current($source) : $source);
+
+        $meta = $class instanceof Meta ? $class : $this->mapper->getMeta($class);
         $stack[$meta->class] = true;
 
         foreach ($meta->autoRelations as $id) {
