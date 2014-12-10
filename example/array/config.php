@@ -38,4 +38,4 @@ $manager = Amiss::createSqlManager($connector, array(
     'mapper'=>$mapper,
 ));
 $connector->exec(file_get_contents($amissPath.'/../doc/demo/schema.sqlite.sql'));
-$connector->exec(file_get_contents($amissPath.'/../doc/demo/testdata.sqlite.sql'));
+$connector->exec(file_get_contents($amissPath.'/../doc/demo/testdata.sql'));

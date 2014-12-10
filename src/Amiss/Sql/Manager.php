@@ -17,7 +17,6 @@ class Manager
     const INDEX_DUPE_FAIL = 1;
     
     /**
-     * Database connector
      * @var Amiss\Sql\Connector|\PDO|PDO-esque
      */
     public $connector;
@@ -34,7 +33,6 @@ class Manager
     public $mapper;
     
     /**
-     * Relators used by getRelated
      * @var (Amiss\Sql\Relator|callable)[]
      */
     public $relators = [];
@@ -97,8 +95,12 @@ class Manager
             $object = $this->mapper->toObject($meta, $row, $criteria->args);
         }
 
-        if ($object && $meta->autoRelations) {
-            $this->assignRelatedAuto($object, $meta, $criteria->stack);
+        if ($object) {
+            $rel = $criteria->with;
+            if ($meta->autoRelations)
+                $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
+
+            $this->assignRelated($object, $rel, $criteria->stack);
         }
 
         return $object;
@@ -124,31 +126,17 @@ class Manager
             $objects[] = $object;
         }
 
-        if ($objects && $meta->autoRelations) {
-            $this->assignRelatedAuto($objects, $meta, $criteria->stack);
+        if ($objects) {
+            $rel = $criteria->with;
+            if ($meta->autoRelations)
+                $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
+
+            $this->assignRelated($objects, $rel, $criteria->stack);
         }
 
         return $objects;
     }
-    
-    public function assignRelatedAuto($source, $class=null, $stack=[])
-    {
-        if ($class == null)
-            $class = get_class(is_array($source) ? current($source) : $source);
 
-        $meta = $class instanceof Meta ? $class : $this->mapper->getMeta($class);
-        $stack[$meta->class] = true;
-
-        foreach ($meta->autoRelations as $id) {
-            $this->assignRelated($source, $id, $stack);
-        }
-    }
-
-    /**
-     * Get a single object from the database by primary key
-     * 
-     * @return object
-     */
     public function getById($class, $id, $args=null)
     {
         $criteria = $this->createIdCriteria($class, $id);
@@ -157,11 +145,6 @@ class Manager
         return $this->get($class, $criteria);
     }
     
-    /**
-     * Count the objects in the database that match the criteria
-     * 
-     * @return int
-     */
     public function count($class, $criteria=null)
     {
         $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
@@ -191,35 +174,45 @@ class Manager
      * if the source field is not yet populated.
      * 
      * @param object|array Source objects to assign relations for
-     * @param string The name of the relation to assign
+     * @param string|array The name of the relation(s) to assign
      * @return void
      */
-    public function assignRelated($source, $relationName, $stack=[])
+    public function assignRelated($source, $relationNames, $stack=[])
     {
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray)
             $source = array($source);
 
         $meta = $this->getMeta(get_class($source[0]));
-        $relation = $meta->relations[$relationName];
+        $stack[$meta->class] = true;
 
-        $missing = [];
-        foreach ($source as $idx=>$item) {
-            // we have to assume it's missing if we see a getter as there
-            // may be serious unintended side effects from calling a getter
-            // that may be unpopulated. it might lazy load if it's an active
-            // record, or it might throw an exception because the 'set' hasn't
-            // been called.
-            if (isset($relation['getter']) || !$item->{$relationName})
-                $missing[$idx] = $item;
-            else
-                throw new \UnexpectedValueException();
-        }
+        $done = [];
+        foreach ((array)$relationNames as $relationName) {
+            if (isset($done[$relationName]))
+                continue;
 
-        if ($missing) {
-            $result = $this->getRelated($missing, $relationName, null, $stack);
-            $relator = $this->getRelator($meta, $relationName);
-            $relator->assignRelated($missing, $result, $relation);
+            $done[$relationName] = true;
+
+            $relation = $meta->relations[$relationName];
+
+            $missing = [];
+            foreach ($source as $idx=>$item) {
+                // we have to assume it's missing if we see a getter as there
+                // may be serious unintended side effects from calling a getter
+                // that may be unpopulated. it might lazy load if it's an active
+                // record, or it might throw an exception because the 'set' hasn't
+                // been called.
+                if (isset($relation['getter']) || !$item->{$relationName})
+                    $missing[$idx] = $item;
+                else
+                    throw new \UnexpectedValueException();
+            }
+
+            if ($missing) {
+                $result = $this->getRelated($missing, $relationName, null, $stack);
+                $relator = $this->getRelator($meta, $relationName);
+                $relator->assignRelated($missing, $result, $relation);
+            }
         }
     }
  

@@ -92,6 +92,12 @@ class Event extends Object
      * @has.many.inverse event
      */
     public $eventArtists;
+
+    /**
+     * @has.many.of Ticket
+     * @has.many.inverse event
+     */
+    public $tickets;
     
     /**
      * @has.one.of Venue
@@ -146,6 +152,36 @@ class Event extends Object
     {
         $this->subName = $value;
     }
+}
+
+class Ticket
+{
+    /** @primary */
+    public $ticketId;
+
+    /**
+     * @field
+     * @index
+     */
+    public $eventId;
+
+    /** @field */
+    public $name;
+
+    /** @field */
+    public $cost;
+
+    /** @field */
+    public $numAvailable;
+
+    /** @field */
+    public $numSold;
+
+    /**
+     * @has.one.of Event
+     * @has.one.from eventId
+     */
+    public $event;
 }
 
 class EventArtist

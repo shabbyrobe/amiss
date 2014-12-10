@@ -53,6 +53,17 @@ CREATE TABLE `event_artist` (
   PRIMARY KEY (`eventId`,`artistId`)
 ) ENGINE=InnoDB;
 
+CREATE TABLE `ticket` (
+  `ticketId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `eventId` int(10) unsigned NOT NULL,
+  `name` varchar(200) not null,
+  `cost` decimal(18,2) not null,
+  `numAvailable` int(10) not null default '0',
+  `numSold` int(10) not null default '0',
+  PRIMARY KEY (`ticketId`),
+  KEY `FK_ticket_event` (`eventId`)
+) ENGINE=InnoDB;
+
 CREATE TABLE `venue` (
   `venueId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -74,6 +85,9 @@ ALTER TABLE `event`
 
 ALTER TABLE `artist`
   ADD CONSTRAINT `FK_artist_artisttype` FOREIGN KEY (`artistTypeId`) REFERENCES `artist_type` (`artistTypeId`);
+
+ALTER TABLE `ticket`
+  ADD CONSTRAINT `FK_ticket_event` FOREIGN KEY (`eventId`) REFERENCES `event` (`eventId`);
 
 ALTER TABLE `event_artist`
   ADD CONSTRAINT `FK_eventartist_artist` FOREIGN KEY (`artistId`) REFERENCES `artist` (`artistId`),

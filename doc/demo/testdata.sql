@@ -49,3 +49,9 @@ INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(2, 6, 1, 
 /* need a few artists of a different type against an event */
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 4, 3, 1);
 INSERT INTO event_artist(eventId, artistId, priority, sequence) VALUES(1, 5, 3, 2);
+
+INSERT INTO ticket(eventId, name, cost) VALUES(1, "Fancy seats", 1000);
+INSERT INTO ticket(eventId, name, cost) VALUES(1, "Nosebleeds", 100);
+INSERT INTO ticket(eventId, name, cost) VALUES(1, "Car Park", 200);
+INSERT INTO ticket(eventId, name, cost) VALUES(2, "The Toilet", 50);
+

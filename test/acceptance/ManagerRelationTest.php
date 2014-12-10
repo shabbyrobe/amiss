@@ -11,10 +11,6 @@ use Amiss\Demo;
  */
 class ManagerRelationTest extends \ModelDataTestCase
 {
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testGetRelatedSingle()
     {
         $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
@@ -24,29 +20,35 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertEquals('awexxome-fest-20x6', $event->getSlug());
     }
     
-    public function testAssignRelatedSingle()
+    public function testAssignSingleSourceToOneRelation()
     {
         $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
         $this->manager->assignRelated($eventArtist, 'event');
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
     }
-    
-    public function testAssignRelatedSingleToList()
+
+    public function testAssignSingleSourceToMultipleOneRelations()
+    {
+        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
+        $this->manager->assignRelated($eventArtist, ['event', 'artist']);
+        $this->assertTrue($eventArtist->event instanceof Demo\Event);
+        $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
+        $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
+        $this->assertEquals('the-sonic-manipulator', $eventArtist->artist->slug);
+        $this->assertEquals(3, $this->manager->queries);
+    }
+ 
+    public function testAssignListSourceToMultipleOneRelations()
     {
         $eventArtist = $this->manager->getList('EventArtist', 'eventId=?', 1);
-        $this->manager->assignRelated($eventArtist, 'event');
+        $this->manager->assignRelated($eventArtist, ['event', 'artist']);
         
         $current = current($eventArtist);
         $this->assertTrue($current->event instanceof Demo\Event);
-        $this->assertEquals('awexxome-fest', $current->event->getSlug());
-        
-        // make sure the second object has exactly the same instance
-        next($eventArtist);
-        $next = current($eventArtist);
-        $this->assertTrue($current->event === $next->event);
+        $this->assertTrue($current->artist instanceof Demo\Artist);
     }
-    
+
     public function testGetRelatedList()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -57,7 +59,7 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertTrue($eventArtists[0] instanceof Demo\EventArtist);
         // TODO: improve checking
     }
-    
+ 
     public function testGetRelatedAssocForSingle()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -111,7 +113,7 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertEquals(array(1, 2, 3, 7), $ids);
     }
     
-    public function testAssignRelatedList()
+    public function testAssignSingleSourceToManyRelation()
     {
         $event = $this->manager->get('Event', 'eventId=1');
         $this->manager->assignRelated($event, 'eventArtists');
@@ -122,7 +124,16 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertEquals(2, $event->eventArtists[1]->artistId);
     }
     
-    public function testAssignRelatedListToList()
+    public function testAssignSingleSourceToMultipleManyRelations()
+    {
+        $event = $this->manager->get('Event', 'eventId=1');
+        $this->manager->assignRelated($event, ['eventArtists', 'tickets']);
+        
+        $this->assertTrue($event->eventArtists[0] instanceof Demo\EventArtist);
+        $this->assertTrue($event->tickets[0] instanceof Demo\Ticket);
+    }
+    
+    public function testAssignListSourceToManyRelation()
     {
         $types = $this->manager->getList('ArtistType');
         
@@ -136,6 +147,18 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertTrue(current(current($types)->artists) instanceof Demo\Artist);
     }
     
+    public function testAssignListSourceToMultipleManyRelations()
+    {
+        $events = $this->manager->getList('Event');
+        $this->assertCount(2, $events);
+        $this->manager->assignRelated($events, ['eventArtists', 'tickets']);
+        
+        foreach ($events as $event) {
+            $this->assertTrue($event->eventArtists[0] instanceof Demo\EventArtist);
+            $this->assertTrue($event->tickets[0] instanceof Demo\Ticket);
+        }
+    }
+
     public function testAssignRelatedDeepThroughAssocToSingle()
     {
         $event = $this->manager->getById('Event', 1);
@@ -150,5 +173,41 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertGreaterThan(0, count($event->artists));
         $this->assertInstanceOf('Amiss\Demo\Artist', $event->artists[0]);
         $this->assertInstanceOf('Amiss\Demo\ArtistType', $event->artists[0]->artistType);
+    }
+
+    public function testGetAssignsToOneRelationUsingCriteria()
+    {
+        $query = [
+            'params'=>[2, 6],
+            'where'=>'eventId=? AND artistId=?',
+            'with'=>'event',
+        ];
+        $eventArtist = $this->manager->get('EventArtist', $query);
+        $this->assertTrue($eventArtist->event instanceof Demo\Event);
+    }
+    
+    public function testGetAssignsToMultipleOneRelationsUsingCriteria()
+    {
+        $query = [
+            'params'=>[2, 6],
+            'where'=>'eventId=? AND artistId=?',
+            'with'=>['event', 'artist'],
+        ];
+        $eventArtist = $this->manager->get('EventArtist', $query);
+        $this->assertTrue($eventArtist->event instanceof Demo\Event);
+        $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
+    }
+
+    public function testGetListAssignsToOneRelationUsingCriteria()
+    {
+        $query = [
+            'params'=>[1],
+            'where'=>'eventId=?',
+            'with'=>'event',
+        ];
+        $eventArtist = $this->manager->getList('EventArtist', $query);
+        $current = current($eventArtist);
+        $this->assertTrue($current->event instanceof Demo\Event);
+        $this->assertEquals('awexxome-fest', $current->event->getSlug());
     }
 }

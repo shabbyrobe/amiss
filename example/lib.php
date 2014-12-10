@@ -7,7 +7,7 @@ $files = array(
     'ar.php',
     'model.php',
     'schema.sqlite.sql',
-    'testdata.sqlite.sql',
+    'testdata.sql',
 );
 if (in_array($ex, $files)) {
     $extn = pathinfo($ex, PATHINFO_EXTENSION);

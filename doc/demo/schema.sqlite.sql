@@ -37,6 +37,15 @@ CREATE TABLE `planned_event` (
   UNIQUE  (`slug`)
 );
 
+CREATE TABLE `ticket` (
+  `ticketId` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `eventId` INTEGER NOT NULL,
+  `name` STRING,
+  `cost` STRING,
+  `numAvailable` INTEGER,
+  `numSold` INTEGER
+);
+
 CREATE TABLE `event_artist` (
   `eventId` INTEGER NOT NULL,
   `artistId` INTEGER NOT NULL,

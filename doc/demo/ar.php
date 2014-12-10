@@ -167,6 +167,36 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     }
 }
 
+class Ticket extends \Amiss\Sql\ActiveRecord
+{
+    /** @primary */
+    public $ticketId;
+
+    /**
+     * @field
+     * @index
+     */
+    public $eventId;
+
+    /** @field */
+    public $name;
+
+    /** @field */
+    public $cost;
+
+    /** @field */
+    public $numAvailable;
+
+    /** @field */
+    public $numSold;
+
+    /**
+     * @has.one.of Event
+     * @has.one.from eventId
+     */
+    public $event;
+}
+
 class PlannedEvent extends EventRecord
 {
     /**

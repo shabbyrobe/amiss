@@ -13,6 +13,7 @@ class Select extends Query
     public $fields;
     public $order = array();
     public $forUpdate = false;
+    public $with = [];
     public $stack = [];
     
     public function getLimitOffset()
