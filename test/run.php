@@ -18,9 +18,10 @@ $options = array(
 );
 $options = array_merge(
     $options,
-    getopt('', array('help', 'no-sqlite', 'with-mysql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
+    getopt('', array('help', 'no-sqlite', 'with-mysql', 'with-pgsql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
 );
 $testMysql = array_key_exists('with-mysql', $options);
+$testPgsql = array_key_exists('with-pgsql', $options);
 $help = array_key_exists('help', $options);
 if ($help) {
     echo $usage;
@@ -28,7 +29,7 @@ if ($help) {
 }
 
 $config = array();
-if ($testMysql) {
+if ($testMysql || $testPgsql) {
     $config = amisstest_config_load();
 }
 
@@ -81,6 +82,29 @@ if ($testMysql) {
     ));
     suite_add_dir($mysqlSuite, $testPath.'/acceptance/');
     $suite->addTest($mysqlSuite);
+}
+
+if ($testPgsql) {
+    if (!isset($config['pgsql']))
+        throw new \Exception("Missing [pgsql] section in amisstestrc file");
+    
+    $parts = [];
+    if ($config['pgsql']['host'])
+        $parts[] = "host=".$config['pgsql']['host'];
+    if ($config['pgsql']['port'])
+        $parts[] = "port=".$config['pgsql']['port'];
+
+    $parts[] = "dbname=amiss_test";
+
+    $pgsqlSuite = new DatabaseSuite(array(
+        'engine'=>'pgsql',
+        'dsn'=>"pgsql:".implode(';', $parts),
+        'user'=>$config['pgsql']['user'],
+        'password'=>$config['pgsql']['password'],
+        'dbName'=>'amiss_test_'.time(),
+    ));
+    suite_add_dir($pgsqlSuite, $testPath.'/acceptance/');
+    $suite->addTest($pgsqlSuite);
 }
 
 $filter = new PHP_CodeCoverage_Filter();

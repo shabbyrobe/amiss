@@ -100,7 +100,8 @@ class Manager
             if ($meta->autoRelations)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
-            $this->assignRelated($object, $rel, $criteria->stack);
+            if ($rel)
+                $this->assignRelated($object, $rel, $criteria->stack);
         }
 
         return $object;
@@ -131,7 +132,8 @@ class Manager
             if ($meta->autoRelations)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
-            $this->assignRelated($objects, $rel, $criteria->stack);
+            if ($rel)
+                $this->assignRelated($objects, $rel, $criteria->stack);
         }
 
         return $objects;
@@ -177,13 +179,22 @@ class Manager
      * @param string|array The name of the relation(s) to assign
      * @return void
      */
-    public function assignRelated($source, $relationNames, $stack=[])
+    public function assignRelated($source, $relationNames=null, $stack=[])
     {
+        if (!$source) return;
+
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray)
             $source = array($source);
 
         $meta = $this->getMeta(get_class($source[0]));
+        if (!$relationNames) {
+            if ($meta->autoRelations)
+                $relationNames = $meta->autoRelations;
+            else
+                throw new Exception("relationNames not passed, class {$meta->class} does not define autoRelations");
+        }
+
         $stack[$meta->class] = true;
 
         $done = [];
@@ -192,6 +203,9 @@ class Manager
                 continue;
 
             $done[$relationName] = true;
+
+            if (!isset($meta->relations[$relationName]))
+                throw new Exception("Unknown relation $relationName on {$meta->class}");
 
             $relation = $meta->relations[$relationName];
 

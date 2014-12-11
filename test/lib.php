@@ -115,6 +115,11 @@ class DataTestCase extends CustomTestCase
                 "USE `{$info['dbName']}`"
             );
         }
+        elseif ($info['engine'] == 'pgsql') {
+            $c = $this->getConnector();
+            $c->exec('drop schema public cascade');
+            $c->exec('create schema public');
+        }
     }
     
     public function tearDown()
