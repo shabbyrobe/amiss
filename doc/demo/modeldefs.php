@@ -51,8 +51,14 @@ class ArtistType extends Object
     /** @field */
     public $type;
     
-    /** @field */
-    public $slug;
+    /**
+     * @field
+     * @readOnly
+     */
+    public function getSlug()
+    {
+        return trim(preg_replace('/[^a-z\d]+/', '-', strtolower($this->type)), '-');
+    }
     
     /**
      * @has.many.of Artist

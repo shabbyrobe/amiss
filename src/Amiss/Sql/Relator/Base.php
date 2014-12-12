@@ -110,6 +110,8 @@ abstract class Base implements \Amiss\Sql\Relator
         }
 
         foreach ($result as $idx=>$item) {
+            // no read only support... why would you be assigning relations to
+            // a read only object?
             if (!isset($relation['setter']))
                 $source[$idx]->{$relation['name']} = $item;
             else

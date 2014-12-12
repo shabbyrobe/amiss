@@ -67,8 +67,12 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
     
     /**
      * @field
+     * @readOnly
      */
-    public $slug;
+    public function getSlug()
+    {
+        return trim(preg_replace('/[^a-z\d]+/', '-', strtolower($this->type)), '-');
+    }
     
     /**
      * @var Amiss\Demo\Active\ArtistRecord[]

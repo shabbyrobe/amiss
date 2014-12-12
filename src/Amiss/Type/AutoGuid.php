@@ -14,6 +14,8 @@ class AutoGuid implements Handler, Identity
     {
         $name = $fieldInfo['name'];
         $getter = isset($fieldInfo['getter']);
+        if ($getter && $fieldInfo['setter'] === false)
+            throw new \UnexpectedValueException("Property was read only");
         
         if (!$value) {
             $value = $this->generate();

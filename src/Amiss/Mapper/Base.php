@@ -188,10 +188,14 @@ abstract class Base implements \Amiss\Mapper
                 }
             }
             
-            if (!isset($field['setter']))
+            if (!isset($field['setter'])) {
                 $object->{$prop} = $value;
-            else
-                call_user_func(array($object, $field['setter']), $value);
+            }
+            else {
+                // false setter means read only
+                if ($field['setter'] !== false)
+                    call_user_func(array($object, $field['setter']), $value);
+            }
         }
     }
     

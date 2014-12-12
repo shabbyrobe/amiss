@@ -364,10 +364,13 @@ class Manager
                 if ($generated) {
                     // skip using populateObject - we don't need the type handler stack because we 
                     // already used one to handle the value
-                    if (isset($field['getter']))
-                        $object->{$field['setter']}($generated);
-                    else
+                    if (!isset($field['getter'])) {
                         $object->{$meta->primary[0]} = $generated;
+                    }
+                    else {
+                        if (isset($field['setter']) && $field['setter'] !== false)
+                            $object->{$field['setter']}($generated);
+                    }
                 }
             }
         }
@@ -389,7 +392,6 @@ class Manager
         
         if (is_object($first)) {
         // Object update mode
-
             $class = get_class($first);
             $meta = $this->getMeta($class);
             $query = new Query\Update();

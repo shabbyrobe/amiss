@@ -123,7 +123,7 @@ class Note extends \Amiss\Mapper\Base
                     $fieldInfo = array();
                     
                     if ($type == 'method') {
-                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes); 
+                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
                     }
                     
                     if ($field && $field != $name) {
@@ -171,12 +171,16 @@ class Note extends \Amiss\Mapper\Base
         return new \Amiss\Meta($class, $table, $info, $parent);
     }
     
-    protected function findGetterSetter($name, $itemNotes)
+    protected function findGetterSetter($name, $itemNotes, $readOnlyAllowed=false)
     {
         $getter = $name;
         $methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
         $name = lcfirst($methodWithoutPrefix);
-        $setter = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
+
+        if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNodes['readonly'])))
+            $setter = false;
+        else
+            $setter = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
         
         return array($name, $getter, $setter);
     }
@@ -200,7 +204,7 @@ class Note extends \Amiss\Mapper\Base
             }
                 
             if (isset($info['getter']))
-                list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info);
+                list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info, !'readOnly');
             
             $relations[$name] = $relation;
         }

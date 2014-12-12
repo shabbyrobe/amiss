@@ -1,13 +1,10 @@
 <?php
 namespace Amiss\Sql\Query;
 
-/**
- * @package Criteria
- */
 class Update extends Criteria
 {
-    public $set=array();
-    
+    public $set = array();
+
     public function buildSet($meta)
     {
         $params = array();
