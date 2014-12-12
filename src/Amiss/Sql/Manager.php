@@ -70,20 +70,20 @@ class Manager
 
     public function get($class)
     {
-        $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $this->mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
-        if (isset($criteria->stack[$meta->class]))
+        if (isset($query->stack[$meta->class]))
             return;
 
-        list ($limit, $offset) = $criteria->getLimitOffset();
+        list ($limit, $offset) = $query->getLimitOffset();
         if ($limit && $limit != 1)
             throw new Exception("Limit must be one or zero");
         
-        list ($query, $params) = $criteria->buildQuery($meta);
+        list ($sql, $params) = $query->buildQuery($meta);
         
-        $stmt = $this->getConnector()->prepare($query);
+        $stmt = $this->getConnector()->prepare($sql);
         $this->execute($stmt, $params);
         
         $object = null;
@@ -92,16 +92,16 @@ class Manager
             if ($object)
                 throw new Exception("Query returned more than one row");
 
-            $object = $this->mapper->toObject($meta, $row, $criteria->args);
+            $object = $this->mapper->toObject($meta, $row, $query->args);
         }
 
         if ($object) {
-            $rel = $criteria->with;
+            $rel = $query->with;
             if ($meta->autoRelations)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
             if ($rel)
-                $this->assignRelated($object, $rel, $criteria->stack);
+                $this->assignRelated($object, $rel, $query->stack);
         }
 
         return $object;
@@ -109,31 +109,31 @@ class Manager
 
     public function getList($class)
     {
-        $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $this->mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
-        if (isset($criteria->stack[$meta->class]))
+        if (isset($query->stack[$meta->class]))
             return;
 
-        list ($query, $params) = $criteria->buildQuery($meta);
-        $stmt = $this->getConnector()->prepare($query);
+        list ($sql, $params) = $query->buildQuery($meta);
+        $stmt = $this->getConnector()->prepare($sql);
         $this->execute($stmt, $params);
         
         $objects = array();
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->mapper->toObject($meta, $row, $criteria->args);
+            $object = $this->mapper->toObject($meta, $row, $query->args);
             $objects[] = $object;
         }
 
         if ($objects) {
-            $rel = $criteria->with;
+            $rel = $query->with;
             if ($meta->autoRelations)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
             if ($rel)
-                $this->assignRelated($objects, $rel, $criteria->stack);
+                $this->assignRelated($objects, $rel, $query->stack);
         }
 
         return $objects;
@@ -141,20 +141,20 @@ class Manager
 
     public function getById($class, $id, $args=null)
     {
-        $criteria = $this->createIdCriteria($class, $id);
+        $query = $this->createIdCriteria($class, $id);
         if ($args)
-            $criteria['args'] = $args; 
-        return $this->get($class, $criteria);
+            $query['args'] = $args; 
+        return $this->get($class, $query);
     }
     
-    public function count($class, $criteria=null)
+    public function count($class, $query=null)
     {
-        $criteria = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $this->getMeta($class);
         
-        $table = $meta->table;
+        $table = $query->table ?: $meta->table;
         
-        list ($where, $params) = $criteria->buildClause($meta);
+        list ($where, $params) = $query->buildClause($meta);
         
         $field = '*';
         if ($meta->primary && count($meta->primary) == 1) {
@@ -250,13 +250,13 @@ class Manager
      * 
      * @param object|array Source objects to assign relations for
      * @param string The name of the relation to assign
-     * @param criteria Optional criteria to limit the result
+     * @param query Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $criteria=null, $stack=[])
+    public function getRelated($source, $relationName, $query=null, $stack=[])
     {
         if (!$source) return;
-        
+
         $test = $source;
         if (is_array($test) || $test instanceof \Traversable)
             $test = $test[0];
@@ -279,9 +279,8 @@ class Manager
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
         
-        $query = null;
-        if ($criteria) {
-            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Criteria\Query');
+        if ($query) {
+            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Query\Criteria');
         }
         
         return $relator->getRelated($source, $relationName, $query, $stack);
@@ -295,11 +294,15 @@ class Manager
     public function insert()
     {
         $args = func_get_args();
-        $count = count($args);
+        $count = func_num_args();
         $meta = null;
         $object = null;
-        
-        if ($count == 1) {
+
+        if ($count < 1) {
+            throw new \InvalidArgumentException();
+        }
+
+        if (is_object($args[0])) {
             $object = $args[0];
             $meta = $this->getMeta(get_class($object));
             $values = $this->mapper->fromObject($meta, $object, 'insert');
@@ -317,7 +320,11 @@ class Manager
         foreach ($values as $k=>$v) {
             $columns[] = '`'.str_replace('`', '', $k).'`';
         }
-        $sql = "INSERT INTO {$meta->table}(".implode(',', $columns).") ".
+
+        // $table = $query->table ?: $meta->table;
+        $table = $meta->table;
+
+        $sql = "INSERT INTO {$table}(".implode(',', $columns).") ".
             "VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
         
         $stmt = $this->getConnector()->prepare($sql);
@@ -373,17 +380,17 @@ class Manager
 
             $class = get_class($first);
             $meta = $this->getMeta($class);
-            $criteria = new Criteria\Update();
-            $criteria->set = $this->mapper->fromObject($meta, $first, 'update');
-            $criteria->where = $meta->getPrimaryValue($first);
+            $query = new Query\Update();
+            $query->set = $this->mapper->fromObject($meta, $first, 'update');
+            $query->where = $meta->getPrimaryValue($first);
         }
 
         elseif (is_string($first)) {
         // Table update mode
             if ($count < 2)
-                throw new \InvalidArgumentException("Criteria missing for table update");
+                throw new \InvalidArgumentException("Query missing for table update");
             
-            $criteria = $this->createTableUpdateCriteria($args);
+            $query = $this->createTableUpdateQuery($args);
             $class = $first;
             $meta = $this->getMeta($class);
         }
@@ -391,7 +398,7 @@ class Manager
             throw new \InvalidArgumentException();
         }
         
-        list ($sql, $params) = $criteria->buildQuery($meta);
+        list ($sql, $params) = $query->buildQuery($meta);
         
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
@@ -414,14 +421,14 @@ class Manager
         $first = array_shift($args);
         if (is_object($first)) {
             $class = $this->getMeta(get_class($first));
-            $criteria = new Criteria\Query();
+            $criteria = new Query\Criteria();
             $criteria->where = $class->getIndexValue($first);
         }
         else {
             if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
             
             $class = $first;
-            $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Criteria\Query');
+            $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Query\Criteria');
         }
 
         return $this->executeDelete($class, $criteria);
@@ -603,41 +610,41 @@ class Manager
     }
     
     /**
-     * @return \Amiss\Sql\Criteria\Update
+     * @return \Amiss\Sql\Query\Update
      */
-    protected function createTableUpdateCriteria($args)
+    protected function createTableUpdateQuery($args)
     {
-        $criteria = null;
-        if ($args[0] instanceof Criteria\Update) {
-            $criteria = $args[0];
+        $query = null;
+        if ($args[0] instanceof Query\Update) {
+            $query = $args[0];
         }
         else {
-            $cnt=count($args);
+            $cnt = count($args);
             if ($cnt == 1) {
-                $criteria = new Criteria\Update($args[0]);
+                $query = new Query\Update($args[0]);
             }
             elseif ($cnt >= 2 && $cnt < 4) {
                 if (!is_array($args[0]))
                     throw new \InvalidArgumentException("Set must be an array");
-                $criteria = new Criteria\Update();
-                $criteria->set = array_shift($args);
-                $this->populateWhereAndParamsFromArgs($criteria, $args);
+                $query = new Query\Update();
+                $query->set = array_shift($args);
+                $this->populateWhereAndParamsFromArgs($query, $args);
             }
             else {
                 throw new \InvalidArgumentException("Unknown args count $cnt");
             }
         }
-        return $criteria;
+        return $query;
     }
     
-    protected function executeDelete($meta, Criteria\Query $criteria)
+    protected function executeDelete($meta, Query\Criteria $criteria)
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta);
             if (!$meta instanceof Meta) throw new \InvalidArgumentException();
         }
 
-        $table = $meta->table;
+        $table = $criteria->table ?: $meta->table;
 
         list ($whereClause, $whereParams) = $criteria->buildClause($meta);
         if (!$whereClause)
@@ -652,22 +659,22 @@ class Manager
     
     /**
      * Parses remaining function arguments into a query object
-     * @return \Amiss\Sql\Criteria\Query
+     * @return \Amiss\Sql\Query\Criteria
      */
-    protected function createQueryFromArgs($args, $type='Amiss\Sql\Criteria\Select')
+    protected function createQueryFromArgs($args, $type='Amiss\Sql\Query\Select')
     {
         if (!$args) {
-            $criteria = new $type();
+            $query = new $type();
         }
         elseif ($args[0] instanceof $type) {
-            $criteria = $args[0];
+            $query = $args[0];
         }
         else {
-            $criteria = new $type();
-            $this->populateWhereAndParamsFromArgs($criteria, $args);
+            $query = new $type();
+            $this->populateWhereAndParamsFromArgs($query, $args);
         }
         
-        return $criteria;
+        return $query;
     }
     
     /**
@@ -676,21 +683,21 @@ class Manager
      * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
      * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
      */
-    protected function populateWhereAndParamsFromArgs(Criteria\Query $criteria, $args)
+    protected function populateWhereAndParamsFromArgs(Query\Criteria $query, $args)
     {
         if (count($args) == 1 && is_array($args[0])) {
         // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
-            $criteria->populate($args[0]);
+            $query->populate($args[0]);
         }
 
         elseif (!is_array($args[0])) {
         // Args criteria: $manager->get('class', 'a=? AND b=?', 'a', 'b');
-            $criteria->where = $args[0];
+            $query->where = $args[0];
             if (isset($args[1]) && is_array($args[1])) {
-                $criteria->params = $args[1];
+                $query->params = $args[1];
             }
             elseif (isset($args[1])) {
-                $criteria->params = array_slice($args, 1);
+                $query->params = array_slice($args, 1);
             }
         } 
         else {

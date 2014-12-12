@@ -63,9 +63,9 @@ class ManagerCountTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testCountObjectsUsingCriteria()
+    public function testCountObjectsUsingQuery()
     {
-        $criteria = new \Amiss\Sql\Criteria\Select;
+        $criteria = new \Amiss\Sql\Query\Select;
         $criteria->where = 'artistTypeId=:artistTypeId';
         $criteria->params[':artistTypeId'] = 1;
         

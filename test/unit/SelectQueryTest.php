@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Unit;
 
-use Amiss\Sql\Criteria;
+use Amiss\Sql\Query;
 
 /**
  * @group unit
@@ -9,11 +9,11 @@ use Amiss\Sql\Criteria;
 class SelectQueryTest extends \CustomTestCase
 {
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithoutMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = array('abc_def', 'ghi_jkl');
         
         $meta = null;
@@ -22,11 +22,11 @@ class SelectQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsFromStringWithoutMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = 'abc_def, ghi_jkl';
         
         $meta = null;
@@ -35,11 +35,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = array('foo', 'bar');
         
         $meta = $this->createGenericMeta();
@@ -48,11 +48,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsFromArrayWithIncompleteMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = array('foo', 'bar');
         
         $meta = new \Amiss\Meta('stdClass', 'std_class', array(
@@ -65,11 +65,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsWithPrefix()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = array('foo', 'bar');
         
         $meta = null;
@@ -78,11 +78,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildFields
+     * @covers Amiss\Sql\Query\Select::buildFields
      */
     public function testBuildFieldsWithNoFieldsOrMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->fields = null;
         
         $meta = null;
@@ -91,11 +91,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsOrMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = null;
         
         $meta = null;
@@ -104,11 +104,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsAndEmptyMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = null;
         
         $meta = new \Amiss\Meta('stdClass', 'std_class', array());
@@ -117,11 +117,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderWithNoFieldsAndFullMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = null;
         
         $meta = $this->createGenericMeta();
@@ -130,11 +130,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderFromStringWithoutMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = 'abc_def, ghi_jkl desc';
         
         $meta = null;
@@ -143,11 +143,11 @@ class SelectQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderFromStringWithMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = '{foo}, {bar} desc';
         
         $meta = $this->createGenericMeta();
@@ -156,11 +156,11 @@ class SelectQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithoutMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = array('abc_def', 'ghi_jkl');
         
         $meta = null;
@@ -169,11 +169,11 @@ class SelectQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithEmptyMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = array('abc_def', 'ghi_jkl');
         
         $meta = new \Amiss\Meta('stdClass', 'std_class', array());
@@ -182,12 +182,12 @@ class SelectQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      * @dataProvider dataForBuildOrderFromArrayWithMeta
      */
     public function testBuildOrderFromArrayWithMeta($order, $expected)
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = $order;
         
         $meta = $this->createGenericMeta();
@@ -205,11 +205,11 @@ class SelectQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Select::buildOrder
+     * @covers Amiss\Sql\Query\Select::buildOrder
      */
     public function testBuildOrderFromArrayWithIncompleteMeta()
     {
-        $criteria = new Criteria\Select;
+        $criteria = new Query\Select;
         $criteria->order = array('foo', 'bar');
         
         $meta = new \Amiss\Meta('stdClass', 'std_class', array(

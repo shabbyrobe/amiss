@@ -116,7 +116,7 @@ class ManagerTest extends \CustomTestCase
             'offset'=>'3',
         ];
         $query = $this->callProtected($this->manager, 'createQueryFromArgs', [$params]);
-        $this->assertTrue($query instanceof \Amiss\Sql\Criteria\Select);
+        $this->assertTrue($query instanceof \Amiss\Sql\Query\Select);
         $this->assertEquals($params['where'], $query->where);
         $this->assertEquals($params['params'], $query->params);
         $this->assertEquals($params['forUpdate'], $query->forUpdate);

@@ -1,10 +1,7 @@
 <?php
-namespace Amiss\Sql\Criteria;
+namespace Amiss\Sql\Query;
 
-/**
- * @package Criteria
- */
-class Select extends Query
+class Select extends Criteria
 {
     public $args=array();
     public $page;
@@ -27,7 +24,7 @@ class Select extends Query
 
     public function buildQuery($meta)
     {
-        $table = $meta->table;
+        $table = $this->table ?: $meta->table;
         
         list ($where, $params) = $this->buildClause($meta);
         $order = $this->buildOrder($meta);

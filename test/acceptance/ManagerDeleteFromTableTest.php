@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Sql\Criteria\Query;
+use Amiss\Sql\Query\Criteria;
 
 class ManagerDeleteFromTableTest extends \ModelDataTestCase
 {
@@ -106,7 +106,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
         
-        $criteria = new Query(array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
+        $criteria = new Criteria(array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
         $this->manager->delete('Artist', $criteria);
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', 1));

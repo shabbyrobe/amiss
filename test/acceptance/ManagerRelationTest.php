@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Sql\Criteria\Query;
+use Amiss\Sql\Query\Criteria;
 
 use Amiss\Demo;
 
@@ -99,12 +99,12 @@ class ManagerRelationTest extends \ModelDataTestCase
     public function testGetRelatedAssocWithCriteria()
     { 
         $event = $this->manager->get('Event', 'eventId=1');
-        $criteria = new Query();
+        $criteria = new Criteria();
         $criteria->where = 'artistTypeId=:tid';
         $criteria->params = array('tid'=>1);
-        
+
         $artists = $this->manager->getRelated($event, 'artists', $criteria);
-        
+
         $ids = array();
         foreach ($artists as $a) {
             $ids[] = $a->artistId;

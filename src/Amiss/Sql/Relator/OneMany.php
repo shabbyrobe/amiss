@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Sql\Relator;
 
-use Amiss\Sql\Criteria;
+use Amiss\Sql\Query;
 use Amiss\Exception;
 
 class OneMany extends Base
@@ -85,7 +85,7 @@ class OneMany extends Base
     
     private function runQuery($ids, $relation, $relatedMeta, $criteria, $stack)
     {
-        $query = new Criteria\Select;
+        $query = new Query\Select;
         $where = array();
 
         foreach ($ids as $l=>$idInfo) {

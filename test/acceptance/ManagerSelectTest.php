@@ -81,9 +81,9 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testSingleObjectUsingCriteria()
+    public function testSingleObjectUsingQuery()
     {
-        $criteria = new \Amiss\Sql\Criteria\Select;
+        $criteria = new \Amiss\Sql\Query\Select;
         $criteria->where = 'slug=:slug';
         $criteria->params[':slug'] = 'limozeen';
         

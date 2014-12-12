@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Unit;
 
-use Amiss\Sql\Criteria;
+use Amiss\Sql\Query;
 
 /**
  * @group unit
@@ -9,11 +9,11 @@ use Amiss\Sql\Criteria;
 class QueryTest extends \CustomTestCase
 {
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      */
     public function testInClauseStraight()
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = array(':foo'=>array(1, 2, 3));
         $criteria->where = 'bar IN(:foo)';
         
@@ -23,11 +23,11 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      */
     public function testInClauseWithFieldMapping()
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $meta = new \Amiss\Meta('stdClass', 'std_class', array(
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
@@ -43,12 +43,12 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      * @dataProvider dataForInClauseReplacementTolerance
      */
     public function testInClauseReplacementTolerance($clause)
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = array(':foo'=>array(1, 2, 3));
         $criteria->where = $clause;
         
@@ -67,11 +67,11 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      */
     public function testMultipleInClause()
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = array(
             ':foo'=>array(1, 2),
             ':baz'=>array(4, 5),
@@ -85,12 +85,12 @@ class QueryTest extends \CustomTestCase
     
     /**
      * @group faulty
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      * @dataProvider dataForInClauseDoesNotRuinString
      */
     public function testInClauseDoesNotRuinString($where, $result)
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = array(
             ':foo'=>array(1, 2),
             ':bar'=>array(3, 4),
@@ -111,11 +111,11 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      */
     public function testBuildClauseWithoutParameterColons()
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = array('foo'=>1, 'baz'=>2);
         $criteria->where = 'bar=:foo AND qux=:baz';
         
@@ -125,11 +125,11 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      */
     public function testShorthandWhere()
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->where = array('bar'=>'yep', 'qux'=>'sub');
         
         list ($where, $params) = $criteria->buildClause(null);
@@ -138,12 +138,12 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      * @dataProvider dataForBuildClauseFieldSubstitutionWithFromRawSql
      */
     public function testBuildClauseFieldSubstitutionWithFromRawSql($query, $expected)
     { 
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $meta = new \Amiss\Meta('stdClass', 'std_class', array(
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
@@ -167,12 +167,12 @@ class QueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Query::buildClause
+     * @covers Amiss\Sql\Query\Criteria::buildClause
      * @dataProvider dataForBuildClauseFromArrayWithFieldSubstitution
      */
     public function testBuildClauseFieldSubstitutionWithArray($query, $expected)
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $meta = new \Amiss\Meta('stdClass', 'std_class', array(
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
@@ -196,12 +196,12 @@ class QueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Query::paramsAreNamed
+     * @covers Amiss\Sql\Query\Criteria::paramsAreNamed
      * @dataProvider dataForParamsAreNamed
      */
     public function testParamsAreNamed($name, $areNamed, $params)
     {
-        $criteria = new Criteria\Query;
+        $criteria = new Query\Criteria;
         $criteria->params = $params;
         $this->assertEquals($areNamed, $criteria->paramsAreNamed(), $name.' failed');
     }

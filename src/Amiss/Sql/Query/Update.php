@@ -1,10 +1,10 @@
 <?php
-namespace Amiss\Sql\Criteria;
+namespace Amiss\Sql\Query;
 
 /**
  * @package Criteria
  */
-class Update extends Query
+class Update extends Criteria
 {
     public $set=array();
     
@@ -43,7 +43,7 @@ class Update extends Query
     
     public function buildQuery($meta)
     {
-        $table = $meta->table;
+        $table = $this->table ?: $meta->table;
         
         list ($setClause,   $setParams)   = $this->buildSet($meta);
         list ($whereClause, $whereParams) = $this->buildClause($meta);

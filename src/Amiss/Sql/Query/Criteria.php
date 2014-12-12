@@ -1,11 +1,11 @@
 <?php
-namespace Amiss\Sql\Criteria;
+namespace Amiss\Sql\Query;
 
-/**
- * @package Criteria
- */
-class Query
+use Amiss\Sql;
+
+class Criteria extends Sql\Query
 {
+    public $table;
     public $where;
     public $params=array();
     

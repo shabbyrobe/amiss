@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Sql\Relator;
 
-use Amiss\Sql\Criteria;
+use Amiss\Sql\Query;
 use Amiss\Sql\RelatorContext;
 use Amiss\Exception;
 
@@ -144,7 +144,7 @@ class Association extends Base
         $viaFields = $viaMeta->getFields();
         $relatedFields = $relatedMeta->getFields();
         
-        $query = new Criteria\Select();
+        $query = new Query\Select();
         
         $where = array();
         foreach ($ids as $l=>$idInfo) {

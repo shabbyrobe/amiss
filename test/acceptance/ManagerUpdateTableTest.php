@@ -1,7 +1,8 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Sql\Criteria\Update;
+use Amiss\Sql\Query\Criteria;
+use Amiss\Sql\Query\Update;
 
 class ManagerUpdateTableTest extends \ModelDataTestCase
 {

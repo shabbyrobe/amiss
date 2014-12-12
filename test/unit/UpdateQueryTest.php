@@ -3,7 +3,7 @@ namespace Amiss\Test\Unit;
 
 use Amiss\Meta;
 
-use Amiss\Sql\Criteria\Update;
+use Amiss\Sql\Query\Update;
 
 /**
  * @group unit
@@ -11,7 +11,7 @@ use Amiss\Sql\Criteria\Update;
 class UpdateQueryTest extends \CustomTestCase
 {
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildQuery
+     * @covers Amiss\Sql\Query\Update::buildQuery
      */
     public function testBuildQueryWithArrayWhere()
     {
@@ -26,7 +26,7 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildQuery
+     * @covers Amiss\Sql\Query\Update::buildQuery
      */
     public function testBuildQueryWithStringWhereContainingNamedParams()
     {
@@ -42,7 +42,7 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildQuery
+     * @covers Amiss\Sql\Query\Update::buildQuery
      */
     public function testBuildQueryWithStringWhereContainingPositionalParams()
     {
@@ -58,11 +58,11 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildSet
+     * @covers Amiss\Sql\Query\Update::buildSet
      */
     public function testBuildNamedSetWithoutMeta()
     {
-        $uq = $this->getMock('Amiss\Sql\Criteria\Update', array('paramsAreNamed'));
+        $uq = $this->getMock('Amiss\Sql\Query\Update', array('paramsAreNamed'));
         $uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(true));
         
         $uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux');
@@ -73,11 +73,11 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildSet
+     * @covers Amiss\Sql\Query\Update::buildSet
      */
     public function testBuildArraySetWithSomeManualClauses()
     {
-        $uq = $this->getMock('Amiss\Sql\Criteria\Update', array('paramsAreNamed'));
+        $uq = $this->getMock('Amiss\Sql\Query\Update', array('paramsAreNamed'));
         $uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(true));
         
         $uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux', 'dingdong=dangdung+1');
@@ -88,11 +88,11 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildSet
+     * @covers Amiss\Sql\Query\Update::buildSet
      */
     public function testBuildPositionalSetWithoutMeta()
     {
-        $uq = $this->getMock('Amiss\Sql\Criteria\Update', array('paramsAreNamed'));
+        $uq = $this->getMock('Amiss\Sql\Query\Update', array('paramsAreNamed'));
         $uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(false));
         
         $uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux');
@@ -103,11 +103,11 @@ class UpdateQueryTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildSet
+     * @covers Amiss\Sql\Query\Update::buildSet
      */
     public function testBuildNamedSetWithMeta()
     {
-        $uq = $this->getMock('Amiss\Sql\Criteria\Update', array('paramsAreNamed'));
+        $uq = $this->getMock('Amiss\Sql\Query\Update', array('paramsAreNamed'));
         $uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(true));
         
         $uq->set = array('fooFoo'=>'baz', 'barBar'=>'qux');
@@ -119,11 +119,11 @@ class UpdateQueryTest extends \CustomTestCase
     }
     
     /**
-     * @covers Amiss\Sql\Criteria\Update::buildSet
+     * @covers Amiss\Sql\Query\Update::buildSet
      */
     public function testBuildPositionalSetWithMeta()
     {
-        $uq = $this->getMock('Amiss\Sql\Criteria\Update', array('paramsAreNamed'));
+        $uq = $this->getMock('Amiss\Sql\Query\Update', array('paramsAreNamed'));
         $uq->expects($this->any())->method('paramsAreNamed')->will($this->returnValue(false));
         
         $uq->set = array('fooFoo'=>'baz', 'barBar'=>'qux');

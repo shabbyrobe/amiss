@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance\Manager;
 
-use Amiss\Sql\Criteria\Query;
+use Amiss\Sql\Query\Criteria;
 
 use Amiss\Demo;
 

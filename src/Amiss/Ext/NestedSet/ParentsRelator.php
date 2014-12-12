@@ -22,7 +22,7 @@ class ParentsRelator extends Relator
         $leftValue = $meta->getValue($source, $treeMeta->leftId);
         $rightValue = $meta->getValue($source, $treeMeta->rightId);
         
-        $query = new \Amiss\Sql\Criteria\Select;
+        $query = new \Amiss\Sql\Query\Select;
         $query->stack = $stack;
         $query->where = "{".$treeMeta->leftId."} < ? AND {".$treeMeta->rightId."} > ?";
         $query->params = array($leftValue, $rightValue);
