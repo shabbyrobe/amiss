@@ -294,42 +294,54 @@ class Manager
     public function insert()
     {
         $args = func_get_args();
-        $count = func_num_args();
+        $argc = func_num_args();
         $meta = null;
         $object = null;
 
-        if ($count < 1) {
+        if ($argc < 1 || $argc > 2)
             throw new \InvalidArgumentException();
-        }
 
         if (is_object($args[0])) {
             $object = $args[0];
             $meta = $this->getMeta(get_class($object));
-            $values = $this->mapper->fromObject($meta, $object, 'insert');
         }
-        elseif ($count == 2) {
+        else {
             $meta = $this->getMeta($args[0]);
-            $values = $args[1];
         }
-        
-        if (!$values)
+
+        if ($argc == 1) {
+            $query = new Query\Insert;
+            $query->table = $meta->table;
+        }
+        elseif ($argc == 2) {
+            $query = $args[1] instanceof Query\Insert ? $args[1] : new Query\Insert(['values'=>$args[1]]);
+        }
+
+        if ($object && !$query->values)
+            $query->values = $this->mapper->fromObject($meta, $object, 'insert');
+
+        if (!$query->table)
+            $query->table = $meta->table;
+
+        if (!$query->values)
             throw new Exception("No values found for class {$meta->class}. Are your fields defined?");
         
+        if (!$query->table)
+            throw new Exception("No table");
+
+        // right, now that we have handled all the crazy arguments, let's insert!
         $columns = array();
-        $count = count($values);
-        foreach ($values as $k=>$v) {
+        $count = count($query->values);
+        foreach ($query->values as $k=>$v) {
             $columns[] = '`'.str_replace('`', '', $k).'`';
         }
 
-        // $table = $query->table ?: $meta->table;
-        $table = $meta->table;
-
-        $sql = "INSERT INTO {$table}(".implode(',', $columns).") ".
+        $sql = "INSERT INTO {$query->table}(".implode(',', $columns).") ".
             "VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
         
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
-        $stmt->execute(array_values($values));
+        $stmt->execute(array_values($query->values));
         
         $lastInsertId = null;
         if (($object && $meta->primary) || !$object)

@@ -5,4 +5,5 @@ use Amiss\Sql;
 
 class Insert extends Sql\Query
 {
+    public $values;
 }
