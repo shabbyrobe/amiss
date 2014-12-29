@@ -177,7 +177,7 @@ class Note extends \Amiss\Mapper\Base
         $methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
         $name = lcfirst($methodWithoutPrefix);
 
-        if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNodes['readonly'])))
+        if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNotes['readonly'])))
             $setter = false;
         else
             $setter = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
