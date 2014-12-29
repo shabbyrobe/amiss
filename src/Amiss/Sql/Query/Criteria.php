@@ -9,7 +9,7 @@ class Criteria extends Sql\Query
     public $where;
     public $params=array();
     
-     public function buildClause($meta)
+    public function buildClause($meta)
     {
         $where = $this->where;
         $params = array();

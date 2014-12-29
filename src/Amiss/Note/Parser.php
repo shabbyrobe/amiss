@@ -50,14 +50,14 @@ class Parser
     public function parseDocComment($docComment)
     {
         // docblock start
-        $docComment = preg_replace('@\s*/\*+@', '', $docComment);
+        $docComment = preg_replace('@\s*/\*+\s*@', '', $docComment);
         
         // docblock end
-        $docComment = preg_replace('@\*+/\s*$@', '', $docComment);
+        $docComment = preg_replace('@\s*\*+/\s*$@', '', $docComment);
         
         // docblock margin
-        $docComment = preg_replace('@^\s*\*\s*@mx', '', $docComment);
-        
+        $docComment = preg_replace('@^\h*\*\h*@mx', '', $docComment);
+
         return $this->parse($docComment);
     }
     

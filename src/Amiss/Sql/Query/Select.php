@@ -10,6 +10,7 @@ class Select extends Criteria
     public $fields;
     public $order = array();
     public $forUpdate = false;
+    public $follow = true;
     public $with = [];
     public $stack = [];
     

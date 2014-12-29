@@ -97,7 +97,7 @@ class Manager
 
         if ($object) {
             $rel = $query->with;
-            if ($meta->autoRelations)
+            if ($meta->autoRelations && $query->follow)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
             if ($rel)
@@ -129,7 +129,7 @@ class Manager
 
         if ($objects) {
             $rel = $query->with;
-            if ($meta->autoRelations)
+            if ($meta->autoRelations && $query->follow)
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
 
             if ($rel)

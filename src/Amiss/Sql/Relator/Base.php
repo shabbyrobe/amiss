@@ -104,7 +104,7 @@ abstract class Base implements \Amiss\Sql\Relator
         // if the relation is a many relation and the inverse property is
         // specified, we want to populate the 'one' side of the relation
         // with the source
-        if (isset($relation['inverse']) && $relation[0] == 'many') {
+        if (isset($relation['inverse'])) {
             $relatedMeta = $this->manager->getMeta($relation['of']);
             $relatedRelation = $relatedMeta->relations[$relation['inverse']];
         }
@@ -118,6 +118,9 @@ abstract class Base implements \Amiss\Sql\Relator
                 call_user_func(array($source[$idx], $relation['setter']), $item);
 
             if ($relatedMeta) {
+				if ($relation[0] == 'one')
+					$item = [$item];
+
                 foreach ($item as $i) {
                     if (!isset($relatedRelation['setter']))
                         $i->{$relatedRelation['name']} = $source[$idx];
