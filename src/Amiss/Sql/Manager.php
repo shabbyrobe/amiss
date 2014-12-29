@@ -218,8 +218,6 @@ class Manager
                 // been called.
                 if (isset($relation['getter']) || !$item->{$relationName})
                     $missing[$idx] = $item;
-                else
-                    throw new \UnexpectedValueException();
             }
 
             if ($missing) {
