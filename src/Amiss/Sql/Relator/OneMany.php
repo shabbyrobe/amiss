@@ -22,11 +22,12 @@ class OneMany extends Base
         $relation = $meta->relations[$relationName];
         $type = $relation[0];
         
-        if ($type != 'one' && $type != 'many')
+        if ($type != 'one' && $type != 'many') {
             throw new \InvalidArgumentException("This relator only works with 'one' or 'many' as the type");
-        
-        if ($type == 'one' && $criteria)
-            throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
+        }
+        // actually there is: constructor args.
+        // if ($type == 'one' && $criteria)
+        //     throw new \InvalidArgumentException("There's no point passing criteria for a one-to-one relation.");
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
 
