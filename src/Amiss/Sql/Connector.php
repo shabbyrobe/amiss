@@ -84,6 +84,11 @@ class Connector
         $this->connectionStatements = $connectionStatements ?: array();
     }
     
+    public function __destruct()
+    {
+        $this->pdo = null;
+    }
+
     /**
      * @ignore
      */

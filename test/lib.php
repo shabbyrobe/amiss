@@ -104,6 +104,7 @@ class DataTestCase extends CustomTestCase
     public function setUp()
     {
         parent::setUp();
+        $this->connections = [];
         
         $info = $this->getConnectionInfo();
         if ($info['engine'] == 'mysql') {
@@ -131,12 +132,21 @@ class DataTestCase extends CustomTestCase
             $this->getConnector()->exec("DROP DATABASE IF EXISTS `{$info['dbName']}`");
             TestApp::instance()->connectionInfo['statements'] = array();
         }
+        foreach ($this->connections as $connector) {
+            $connector->disconnect();
+        }
     }
     
     public function getConnector()
     {
         $connection = $this->getConnectionInfo();
-        return \Amiss\Sql\Connector::create($connection);
+        $connector = \Amiss\Sql\Connector::create($connection);
+        $hash = spl_object_hash($connector);
+        if (isset($this->connections[$hash])) {
+            throw new \UnexpectedValueException();
+        }
+        $this->connections[$hash] = $connector;
+        return $connector;
     }
     
     public function getConnectionInfo()
