@@ -610,4 +610,21 @@ class NoteMapperTest extends \CustomTestCase
         ];
         $this->assertEquals($expected, $meta->indexes);
     }
+
+    public function testGetMetaPrimaryAutoFieldNameFromMethod()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                private $field;
+                /** @primary */
+                public function getField() { return $this->field; }
+                public function setField($v) { $this->field = $v; }
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+
+        $expected = ['field'];
+        $this->assertEquals($expected, $meta->primary);
+    }
 }

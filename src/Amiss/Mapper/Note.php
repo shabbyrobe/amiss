@@ -83,26 +83,29 @@ class Note extends \Amiss\Mapper\Base
             foreach ($noteBag as $name=>$itemNotes) {
                 $field = null;
                 $relationNote = null;
+                $fieldSetToName = false;
                 
-                if (isset($itemNotes['field']))
+                if (isset($itemNotes['field'])) {
                     $field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
-                
-                if (isset($itemNotes['has']))
-                    $relationNote = $itemNotes['has'];
-
-                if (isset($itemNotes['primary'])) {
-                    $info['primary'][] = $name;
-                    if (!$field) $field = $name;
                 }
-                
+                if (isset($itemNotes['has'])) {
+                    $relationNote = $itemNotes['has'];
+                }
+                if (isset($itemNotes['primary']) && !$field) {
+                    $field = $name;
+                    $fieldSetToName = true;
+                }
+
+                // do not use $name until after this block
                 if ($field !== null) {
                     $fieldInfo = array();
                     
                     if ($type == 'method') {
                         list($name, $fieldInfo['getter'], $fieldInfo['setter']) = 
                             $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
+                        if ($fieldSetToName) { $field = $name; }
                     }
-                    
+
                     if ($field && $field != $name) {
                         $fieldInfo['name'] = $field;
                     }
@@ -115,7 +118,10 @@ class Note extends \Amiss\Mapper\Base
                     $info['fields'][$name] = $fieldInfo;
                 }
 
-                // index needs to come after getter/setter checking as the name gets changed
+                if (isset($itemNotes['primary'])) {
+                    $info['primary'][] = $name;
+                }
+
                 if (isset($itemNotes['index'])) {
                     $indexNote = $itemNotes['index'];
                     if ($indexNote === true) {
