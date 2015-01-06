@@ -8,10 +8,10 @@ class OneMany extends Base
 {
     public function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
-        if (!$source) return;
+        if (!$source) { return; }
 
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
-        if (!$sourceIsArray) $source = array($source);
+        if (!$sourceIsArray) { $source = array($source); }
         
         $class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
         $meta = $this->manager->getMeta($class);
@@ -31,8 +31,9 @@ class OneMany extends Base
         
         $relatedMeta = $this->manager->getMeta($relation['of']);
 
-        if (isset($relation['on']))
+        if (isset($relation['on'])) {
             throw new Exception("Relation $relationName used 'on' in class {$meta->class}. Please use 'from' and/or 'to'");
+        }
 
         list ($from, $to) = $this->resolveFromTo($relation, $relatedMeta);
 
@@ -51,9 +52,8 @@ class OneMany extends Base
         $result = null;
         if (!$sourceIsArray) {
             if ($type == 'one') {
-                if ($list) $result = current($list);
-            }
-            else {
+                if ($list) { $result = current($list); }
+            } else {
                 $result = $list;
             }
         }
@@ -74,7 +74,7 @@ class OneMany extends Base
                         $result[$idx] = $related;
                     }
                     elseif ('many' == $type) {
-                        if (!isset($result[$idx])) $result[$idx] = array();
+                        if (!isset($result[$idx])) { $result[$idx] = array(); }
                         $result[$idx][] = $related;
                     }
                 }

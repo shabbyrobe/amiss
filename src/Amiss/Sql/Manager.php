@@ -43,9 +43,9 @@ class Manager
      */
     public function __construct($connector, $mapper)
     {
-        if (is_array($connector)) 
+        if (is_array($connector)) {
             $connector = Connector::create($connector);
-        
+        }
         $this->connector = $connector;
         $this->mapper = $mapper;
     }
@@ -74,12 +74,14 @@ class Manager
         $meta = $this->mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
-        if (isset($query->stack[$meta->class]))
+        if (isset($query->stack[$meta->class])) {
             return;
+        }
 
         list ($limit, $offset) = $query->getLimitOffset();
-        if ($limit && $limit != 1)
+        if ($limit && $limit != 1) {
             throw new Exception("Limit must be one or zero");
+        }
         
         list ($sql, $params) = $query->buildQuery($meta);
         
@@ -89,19 +91,20 @@ class Manager
         $object = null;
         
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            if ($object)
+            if ($object) {
                 throw new Exception("Query returned more than one row");
-
+            }
             $object = $this->mapper->toObject($meta, $row, $query->args);
         }
 
         if ($object) {
             $rel = $query->with;
-            if ($meta->autoRelations && $query->follow)
+            if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
-
-            if ($rel)
+            }
+            if ($rel) {
                 $this->assignRelated($object, $rel, $query->stack);
+            }
         }
 
         return $object;
@@ -113,9 +116,9 @@ class Manager
         $meta = $this->mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
-        if (isset($query->stack[$meta->class]))
+        if (isset($query->stack[$meta->class])) {
             return;
-
+        }
         list ($sql, $params) = $query->buildQuery($meta);
         $stmt = $this->getConnector()->prepare($sql);
         $this->execute($stmt, $params);
@@ -129,11 +132,12 @@ class Manager
 
         if ($objects) {
             $rel = $query->with;
-            if ($meta->autoRelations && $query->follow)
+            if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
-
-            if ($rel)
+            }
+            if ($rel) {
                 $this->assignRelated($objects, $rel, $query->stack);
+            }
         }
 
         return $objects;
@@ -142,8 +146,9 @@ class Manager
     public function getById($class, $id, $args=null)
     {
         $query = $this->createIdCriteria($class, $id);
-        if ($args)
+        if ($args) {
             $query['args'] = $args; 
+        }
         return $this->get($class, $query);
     }
     
@@ -181,32 +186,34 @@ class Manager
      */
     public function assignRelated($source, $relationNames=null, $stack=[])
     {
-        if (!$source) return;
+        if (!$source) { return; }
 
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
-        if (!$sourceIsArray)
+        if (!$sourceIsArray) {
             $source = array($source);
+        }
 
         $meta = $this->getMeta(get_class($source[0]));
         if (!$relationNames) {
-            if ($meta->autoRelations)
+            if ($meta->autoRelations) {
                 $relationNames = $meta->autoRelations;
-            else
+            } else {
                 throw new Exception("relationNames not passed, class {$meta->class} does not define autoRelations");
+            }
         }
 
         $stack[$meta->class] = true;
 
         $done = [];
         foreach ((array)$relationNames as $relationName) {
-            if (isset($done[$relationName]))
+            if (isset($done[$relationName])) {
                 continue;
-
+            }
             $done[$relationName] = true;
 
-            if (!isset($meta->relations[$relationName]))
+            if (!isset($meta->relations[$relationName])) {
                 throw new Exception("Unknown relation $relationName on {$meta->class}");
-
+            }
             $relation = $meta->relations[$relationName];
 
             $missing = [];
@@ -216,8 +223,9 @@ class Manager
                 // that may be unpopulated. it might lazy load if it's an active
                 // record, or it might throw an exception because the 'set' hasn't
                 // been called.
-                if (isset($relation['getter']) || !$item->{$relationName})
+                if (isset($relation['getter']) || !$item->{$relationName}) {
                     $missing[$idx] = $item;
+                }
             }
 
             if ($missing) {
@@ -253,11 +261,12 @@ class Manager
      */
     public function getRelated($source, $relationName, $query=null, $stack=[])
     {
-        if (!$source) return;
+        if (!$source) { return; }
 
         $test = $source;
-        if (is_array($test) || $test instanceof \Traversable)
+        if (is_array($test) || $test instanceof \Traversable) {
             $test = $test[0];
+        }
         
         $class = !is_object($test) ? $test : get_class($test);
         
@@ -267,7 +276,6 @@ class Manager
         }
         
         $relation = $meta->relations[$relationName];
-        
         if (!isset($this->relators[$relation[0]])) {
             throw new Exception("Relator {$relation[0]} not found");
         }
@@ -296,8 +304,9 @@ class Manager
         $meta = null;
         $object = null;
 
-        if ($argc < 1 || $argc > 2)
+        if ($argc < 1 || $argc > 2) {
             throw new \InvalidArgumentException();
+        }
 
         if (is_object($args[0])) {
             $object = $args[0];
@@ -315,17 +324,18 @@ class Manager
             $query = $args[1] instanceof Query\Insert ? $args[1] : new Query\Insert(['values'=>$args[1]]);
         }
 
-        if ($object && !$query->values)
+        if ($object && !$query->values) {
             $query->values = $this->mapper->fromObject($meta, $object, 'insert');
-
-        if (!$query->table)
+        }
+        if (!$query->table) {
             $query->table = $meta->table;
-
-        if (!$query->values)
+        }
+        if (!$query->values) {
             throw new Exception("No values found for class {$meta->class}. Are your fields defined?");
-        
-        if (!$query->table)
+        }
+        if (!$query->table) {
             throw new Exception("No table");
+        }
 
         // right, now that we have handled all the crazy arguments, let's insert!
         $columns = array();
@@ -342,8 +352,9 @@ class Manager
         $stmt->execute(array_values($query->values));
         
         $lastInsertId = null;
-        if (($object && $meta->primary) || !$object)
+        if (($object && $meta->primary) || !$object) {
             $lastInsertId = $this->getConnector()->lastInsertId();
+        }
         
         // we need to be careful with "lastInsertId": SQLLite generates one even without a PRIMARY
         if ($object && $meta->primary && $lastInsertId) {
@@ -365,9 +376,8 @@ class Manager
                     if (!isset($field['getter'])) {
                         $object->{$meta->primary[0]} = $generated;
                     }
-                    else {
-                        if (isset($field['setter']) && $field['setter'] !== false)
-                            $object->{$field['setter']}($generated);
+                    elseif (isset($field['setter']) && $field['setter'] !== false) {
+                        $object->{$field['setter']}($generated);
                     }
                 }
             }
@@ -399,9 +409,9 @@ class Manager
 
         elseif (is_string($first)) {
         // Table update mode
-            if ($count < 2)
+            if ($count < 2) {
                 throw new \InvalidArgumentException("Query missing for table update");
-            
+            }
             $query = $this->createTableUpdateQuery($args);
             $class = $first;
             $meta = $this->getMeta($class);
@@ -428,7 +438,9 @@ class Manager
         $meta = null;
         $class = null;
         
-        if (!$args) throw new \InvalidArgumentException();
+        if (!$args) {
+            throw new \InvalidArgumentException();
+        }
         
         $first = array_shift($args);
         if (is_object($first)) {
@@ -437,8 +449,9 @@ class Manager
             $criteria->where = $class->getIndexValue($first);
         }
         else {
-            if (!$args) throw new \InvalidArgumentException("Cannot delete from table without a condition");
-            
+            if (!$args) {
+                throw new \InvalidArgumentException("Cannot delete from table without a condition");
+            }
             $class = $first;
             $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Query\Criteria');
         }
@@ -470,11 +483,13 @@ class Manager
         }
         else {
             $field = $meta->getField($meta->primary[0]);
-            if ($field['type']['id'] != 'autoinc')
+            if ($field['type']['id'] != 'autoinc') {
                 $nope = true;
+            }
         }
-        if ($nope)
+        if ($nope) {
             throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
+        }
         
         $prival = $meta->getPrimaryValue($object);
         return $prival == false;
@@ -489,10 +504,11 @@ class Manager
     {
         $shouldInsert = $this->shouldInsert($object);
         
-        if ($shouldInsert)
+        if ($shouldInsert) {
             $this->insert($object);
-        else
+        } else {
             $this->update($object);
+        }
     }
     
     /**
@@ -508,8 +524,9 @@ class Manager
     {
         $index = array();
         foreach ($list as $i) {
-            if ($mode === self::INDEX_DUPE_FAIL && isset($index[$i->$property]))
+            if ($mode === self::INDEX_DUPE_FAIL && isset($index[$i->$property])) {
                 throw new \UnexpectedValueException("Duplicate value for property $property");
+            }
             $index[$i->$property] = $i;
         }
         return $index;
@@ -528,8 +545,9 @@ class Manager
         $index = array();
         foreach ($list as $i) {
             if ($keyProperty) {
-                if (!$valueProperty) 
+                if (!$valueProperty) { 
                     throw new \InvalidArgumentException("Must set value property if setting key property");
+                }
                 $index[$i->$keyProperty] = $i->$valueProperty;
             }
             else {
@@ -552,18 +570,24 @@ class Manager
     public function getChildren($objects, $path)
     {
         $array = array();
-        if (!is_array($path)) $path = explode('/', $path);
-        if (!is_array($objects)) $objects = array($objects);
+        if (!is_array($path)) {
+            $path = explode('/', $path);
+        }
+        if (!is_array($objects)) {
+            $objects = array($objects);
+        }
         
         $count = count($path);
         
         foreach ($objects as $o) {
             $value = $o->{$path[0]};
             
-            if (is_array($value) || $value instanceof \Traversable)
+            if (is_array($value) || $value instanceof \Traversable) {
                 $array = array_merge($array, $value);
-            elseif ($value !== null)
+            }
+            elseif ($value !== null) {
                 $array[] = $value;
+            }
         }
         
         if ($count > 1) {
@@ -581,12 +605,12 @@ class Manager
      */
     public function execute($stmt, $params=null)
     {
-        if (is_string($stmt)) 
+        if (is_string($stmt)) {
             $stmt = $this->getConnector()->prepare($stmt);
-        
-        if (!isset($stmt->queryString))
+        }
+        if (!isset($stmt->queryString)) {
             throw new \InvalidArgumentException("Statement didn't look like a PDOStatement");
-        
+        }
         ++$this->queries;
         $stmt->execute($params);
         
@@ -605,16 +629,19 @@ class Manager
     {
         $meta = $this->getMeta($class);
         $primary = $meta->primary;
-        if (!$primary)
+        if (!$primary) {
             throw new Exception("Can't use {$meta->class} by primary - none defined.");
-        
-        if (!is_array($id)) $id = array($id);
+        }
+        if (!is_array($id)) {
+            $id = array($id);
+        }
         $where = array();
         
         foreach ($primary as $idx=>$p) {
             $idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
-            if (!$idVal)
+            if (!$idVal) {
                 throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by id");
+            }
             $where[$p] = $idVal;
         }
         
@@ -636,8 +663,9 @@ class Manager
                 $query = new Query\Update($args[0]);
             }
             elseif ($cnt >= 2 && $cnt < 4) {
-                if (!is_array($args[0]))
+                if (!is_array($args[0])) {
                     throw new \InvalidArgumentException("Set must be an array");
+                }
                 $query = new Query\Update();
                 $query->set = array_shift($args);
                 $this->populateWhereAndParamsFromArgs($query, $args);
@@ -653,17 +681,19 @@ class Manager
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta);
-            if (!$meta instanceof Meta) throw new \InvalidArgumentException();
+            if (!$meta instanceof Meta) {
+                throw new \InvalidArgumentException();
+            }
         }
 
         $table = $criteria->table ?: $meta->table;
 
         list ($whereClause, $whereParams) = $criteria->buildClause($meta);
-        if (!$whereClause)
+        if (!$whereClause) {
             throw new \UnexpectedValueException("Empty where clause");
+        }
 
         $sql = "DELETE FROM $table WHERE $whereClause";
-
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
         $stmt->execute($whereParams);
