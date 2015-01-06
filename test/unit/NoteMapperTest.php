@@ -567,4 +567,47 @@ class NoteMapperTest extends \CustomTestCase
         $this->setExpectedException('Amiss\Exception', 'Duplicate sequence 1 for index foo');
         $meta = $mapper->getMeta($name);
     }
+
+    public function testGetMetaAutoNamedIndexFromGetter()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                private $field;
+                
+                /**
+                 * @field
+                 * @index
+                 */
+                public function getField()   { return $this->field; }
+                public function setField($v) { $this->field = $v;   }
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+
+        $expected = [
+            'field'=>['fields'=>['field'], 'key'=>false],
+        ];
+        $this->assertEquals($expected, $meta->indexes);
+    }
+
+    public function testGetMetaAutoNamedIndexFromField()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /**
+                 * @field
+                 * @index
+                 */
+                public $field;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+
+        $expected = [
+            'field'=>['fields'=>['field'], 'key'=>false],
+        ];
+        $this->assertEquals($expected, $meta->indexes);
+    }
 }

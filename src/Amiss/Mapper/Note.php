@@ -90,6 +90,32 @@ class Note extends \Amiss\Mapper\Base
                 if (isset($itemNotes['has']))
                     $relationNote = $itemNotes['has'];
 
+                if (isset($itemNotes['primary'])) {
+                    $info['primary'][] = $name;
+                    if (!$field) $field = $name;
+                }
+                
+                if ($field !== null) {
+                    $fieldInfo = array();
+                    
+                    if ($type == 'method') {
+                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = 
+                            $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
+                    }
+                    
+                    if ($field && $field != $name) {
+                        $fieldInfo['name'] = $field;
+                    }
+
+                    $fieldInfo['type'] = isset($itemNotes['type']) 
+                        ? $itemNotes['type'] 
+                        : null
+                    ;
+
+                    $info['fields'][$name] = $fieldInfo;
+                }
+
+                // index needs to come after getter/setter checking as the name gets changed
                 if (isset($itemNotes['index'])) {
                     $indexNote = $itemNotes['index'];
                     if ($indexNote === true) {
@@ -112,30 +138,6 @@ class Note extends \Amiss\Mapper\Base
                         $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
                         $info['indexes'][$k]['fields'][$seq] = $name;
                     }
-                }
-                
-                if (isset($itemNotes['primary'])) {
-                    $info['primary'][] = $name;
-                    if (!$field) $field = $name;
-                }
-                
-                if ($field !== null) {
-                    $fieldInfo = array();
-                    
-                    if ($type == 'method') {
-                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
-                    }
-                    
-                    if ($field && $field != $name) {
-                        $fieldInfo['name'] = $field;
-                    }
-
-                    $fieldInfo['type'] = isset($itemNotes['type']) 
-                        ? $itemNotes['type'] 
-                        : null
-                    ;
-
-                    $info['fields'][$name] = $fieldInfo;
                 }
                 
                 if ($relationNote !== null) {
