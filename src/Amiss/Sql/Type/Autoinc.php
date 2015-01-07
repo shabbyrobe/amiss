@@ -22,9 +22,10 @@ class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
     
     function createColumnType($engine)
     {
-        if ($engine == 'sqlite')
+        if ($engine == 'sqlite') {
             return "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT";
-        else
+        } else {
             return $this->type." NOT NULL AUTO_INCREMENT";
+        }
     }
 }

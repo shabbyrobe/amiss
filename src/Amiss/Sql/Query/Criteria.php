@@ -21,7 +21,9 @@ class Criteria extends Sql\Query
         if (is_array($where)) {
             $wh = array();
             foreach ($where as $k=>$v) {
-                if (isset($fields[$k])) $k = $fields[$k]['name'];
+                if (isset($fields[$k])) {
+                    $k = $fields[$k]['name'];
+                }
                 $wh[] = '`'.str_replace('`', '', $k).'`=:'.$k;
                 $params[':'.$k] = $v;
             }
@@ -29,13 +31,17 @@ class Criteria extends Sql\Query
             $namedParams = true;
         }
         else {
-            if ($fields && strpos($where, '{')!==false)
+            if ($fields && strpos($where, '{') !== false) {
                 $where = $this->replaceFieldTokens($fields, $where);
+            }
         }
         
         if ($namedParams) {
             foreach ($this->params as $k=>$v) {
-                if (!is_numeric($k) && $k[0] != ':') $k = ':'.$k;
+                // ($k == 0 && $k !== 0) == !is_numeric($k)
+                if (($k == 0 && $k !== 0) && $k[0] != ':') {
+                    $k = ':'.$k;
+                }
                 if (is_array($v)) {
                     $inparms = array();
                     $cnt = 0;
@@ -59,20 +65,22 @@ class Criteria extends Sql\Query
     
     public function paramsAreNamed()
     {
-        if (is_array($this->where))
+        if (is_array($this->where)) {
             return true;
-        
+        }
         foreach ($this->params as $k=>$v) {
-            if ($k==0 && $k!==0) return true;
+            if ($k==0 && $k!==0) {
+                return true;
+            }
         }
     }
     
     protected function replaceFieldTokens($fields, $clause)
     {
         $tokens = array();
-        foreach ($fields as $k=>$v)
+        foreach ($fields as $k=>$v) {
             $tokens['{'.$k.'}'] = '`'.$v['name'].'`';
-        
+        }
         $clause = strtr($clause, $tokens);
         
         return $clause;

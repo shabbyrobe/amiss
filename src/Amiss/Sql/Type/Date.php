@@ -11,29 +11,34 @@ class Date implements \Amiss\Type\Handler
     public function __construct($formats='datetime', $dbTimeZone, $appTimeZone=null, $dateClass=null)
     {
         // compat. remove for v5
-        if ($formats === true)
+        if ($formats === true) {
             $formats = 'datetime';
-        elseif ($formats === false)
+        } elseif ($formats === false) {
             $formats = 'date';
+        }
         
-        if ($formats == 'datetime')
+        if ($formats == 'datetime') {
             $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
-        elseif ($formats == 'date')
+        } elseif ($formats == 'date') {
             $this->formats = array('Y-m-d');
-        else
+        } else {
             $this->formats = is_array($formats) ? $formats : array($formats);
+        }
         
-        if ($appTimeZone && is_string($appTimeZone))
+        if ($appTimeZone && is_string($appTimeZone)) {
             $appTimeZone = new \DateTimeZone($appTimeZone);
-        if ($dbTimeZone && is_string($dbTimeZone))
+        }
+        if ($dbTimeZone && is_string($dbTimeZone)) {
             $dbTimeZone = new \DateTimeZone($dbTimeZone);
+        }
         
         $this->dbTimeZone = $dbTimeZone;
         $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
 
         if ($dateClass) {
-            if (!is_subclass_of($dateClass, 'DateTime'))
+            if (!is_subclass_of($dateClass, 'DateTime')) {
                 throw new \InvalidArgumentException("Custom date class must inherit DateTime");
+            }
             $this->dateClass = $dateClass;
         }
         else {  
@@ -57,9 +62,9 @@ class Date implements \Amiss\Type\Handler
             // var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
             // bool(true)
             // https://bugs.php.net/bug.php?id=54655
-            if ($value->getTimeZone() != $this->appTimeZone)
+            if ($value->getTimeZone() != $this->appTimeZone) {
                 throw new \UnexpectedValueException();
-            
+            }
             $value->setTimeZone($this->dbTimeZone);
             $out = $value->format($this->formats[0]);
         }
@@ -97,13 +102,13 @@ class Date implements \Amiss\Type\Handler
     
     function createColumnType($engine)
     {
-        if ($this->formats[0] == 'Y-m-d H:i:s')
+        if ($this->formats[0] == 'Y-m-d H:i:s') {
             return 'datetime';
-        elseif ($this->formats[0] == 'Y-m-d')
+        } elseif ($this->formats[0] == 'Y-m-d') {
             return 'date';
-        elseif ($this->formats[0] == 'U')
+        } elseif ($this->formats[0] == 'U') {
             return 'int';
-        else {
+        } else {
             return $engine == 'sqlite' ? 'STRING' : 'VARCHAR(32)';
         }
     }

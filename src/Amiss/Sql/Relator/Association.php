@@ -25,26 +25,30 @@ class Association extends Base
 {
     public function getRelated($source, $relationName, $criteria=null, $stack=[])
     {
-        if (!$source) return;
-        
-        if ($criteria && !$criteria->paramsAreNamed())
+        if (!$source) {
+            return;
+        }
+        if ($criteria && !$criteria->paramsAreNamed()) {
             throw new \InvalidArgumentException("Association mapper criteria requires named parameters");
+        }
         
         // find the source object details
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
-        if (!$sourceIsArray) $source = array($source);
+        if (!$sourceIsArray) {
+            $source = array($source);
+        }
         
         $class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
         $meta = $this->manager->getMeta($class);
-        if (!isset($meta->relations[$relationName]))
+        if (!isset($meta->relations[$relationName])) {
             throw new Exception("Unknown relation $relationName on $class");
-        
+        }
         $relation = $meta->relations[$relationName];
-        if ($relation[0] != 'assoc')
+        if ($relation[0] != 'assoc') {
             throw new \InvalidArgumentException("This relator only works with 'assoc' as the type");
+        }
         
         $sourceFields = $meta->getFields();
-        
         
         // find all the necessary metadata
         $relatedMeta = $this->manager->getMeta($relation['of']);
@@ -57,8 +61,9 @@ class Association extends Base
         $viaToDestRelationName = null;
         $viaToDestRelation = null;
 
-        if ($sourceToViaRelationName)
+        if ($sourceToViaRelationName) {
             $sourceToViaRelation = $viaMeta->relations[$relation];
+        }
 
         foreach ($viaMeta->relations as $k=>$v) {
             // inefficient. consider requiring this to be specified rather than inferred
@@ -75,18 +80,22 @@ class Association extends Base
                     $viaToDestRelationName = $k;
                 }
             }
-            if ($viaToDestRelation && $sourceToViaRelation) break;
+            if ($viaToDestRelation && $sourceToViaRelation) {
+                break;
+            }
         }
         
-        if (!$sourceToViaRelation || !$viaToDestRelation)
+        if (!$sourceToViaRelation || !$viaToDestRelation) {
             throw new Exception("Could not find relation between {$meta->class} and {$relation['via']} for relation $relationName");
+        }
 
         { // can be removed eventually. sanity check for old versions.
-            if (isset($sourceToViaRelation['on']))
+            if (isset($sourceToViaRelation['on'])) {
                 throw new Exception("Relation $sourceToViaRelationName used 'on' in class {$meta->class}. Please use 'from' and/or 'to'");
-
-            if (isset($viaToDestRelation['on']))
+            }
+            if (isset($viaToDestRelation['on'])) {
                 throw new Exception("Relation $viaToDestRelationName used 'on' in class {$viaMeta->class}. Please use 'from' and/or 'to'");
+            }
         }
 
         { // resolve relation field connections
@@ -130,7 +139,9 @@ class Association extends Base
                 $key = !isset($id[1]) ? $id[0] : implode('|', $id['id']);
                 
                 foreach ($resultIndex[$key] as $idx=>$lObj) {
-                    if (!isset($result[$idx])) $result[$idx] = array();
+                    if (!isset($result[$idx])) {
+                        $result[$idx] = array();
+                    }
                     $result[$idx][] = $related;
                 }
             }

@@ -14,9 +14,9 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         $queries = array();
         
         foreach ($this->meta->indexes as $k=>$details) {
-            if ($k == 'primary')
+            if ($k == 'primary') {
                 continue;
-
+            }
             $fields = [];
             foreach ($details['fields'] as $p) {
                 $fields[] = $this->meta->getField($p)['name'];
@@ -38,15 +38,18 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         $foundPrimaries = [];
         foreach ($fields as $id=>$f) {
             // filthy hack to support AUTOINC + sqlite's bodgy autoincrement syntax
-            if (preg_match('/\bprimary\s+key\b/i', $f))
+            if (preg_match('/\bprimary\s+key\b/i', $f)) {
                 $foundPrimaries[] = $id;
+            }
         }
 
         if ($foundPrimaries) {
-            if (array_diff($foundPrimaries, $this->meta->primary))
+            if (array_diff($foundPrimaries, $this->meta->primary)) {
                 throw new \Exception();
-            if (array_diff($this->meta->primary, $foundPrimaries))
+            }
+            if (array_diff($this->meta->primary, $foundPrimaries)) {
                 throw new \Exception();
+            }
         }
 
         if (is_array($fields)) {
@@ -57,9 +60,9 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         $query .= $fields;
         if (!$foundPrimaries && $this->meta->primary) {
             $priFields = [];
-            foreach ($this->meta->primary as $p)
+            foreach ($this->meta->primary as $p) {
                 $priFields[] = $this->meta->getField($p)['name'];
-
+            }
             $query .= ",\n  PRIMARY KEY (`".implode('`, `', $priFields)."`)";
         }
 

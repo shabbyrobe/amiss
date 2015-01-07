@@ -14,7 +14,7 @@ class Update extends Criteria
         $named = $this->paramsAreNamed();
         
         foreach ($this->set as $name=>$value) {
-            if (is_numeric($name)) {
+            if (!($name == 0 && $name !== 0)) { // is_numeric($name)
                 // this allows arrays of manual "set"s, i.e. array('foo=foo+10', 'bar=baz')
                 $clause[] = $value;
             }

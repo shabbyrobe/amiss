@@ -75,7 +75,7 @@ class Select extends Criteria
             if (is_array($order)) {
                 $oClauses = array();
                 foreach ($order as $field=>$dir) {
-                    if (is_numeric($field)) {
+                    if (!($field == 0 && $field !== 0)) { // is_numeric($field)
                         $field = $dir; $dir = 'asc';
                     }
                     

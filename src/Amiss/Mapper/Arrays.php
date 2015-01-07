@@ -19,39 +19,42 @@ class Arrays extends Base
     
     protected function createMeta($class)
     {
-        if (!isset($this->arrayMap[$class]))
+        if (!isset($this->arrayMap[$class])) {
             throw new \InvalidArgumentException("Unknown class $class");
-        
+        }
         $array = $this->arrayMap[$class];
         $parent = null;
         if ($this->inherit) {
             $parentClass = get_parent_class($class);
-            if ($parentClass) $parent = $this->getMeta($parentClass);
+            if ($parentClass) { $parent = $this->getMeta($parentClass); }
         }
         
         $table = null;
-        if (isset($array['table']))
+        if (isset($array['table'])) {
             $table = $array['table'];
-        else
+        } else {
             $table = $this->getDefaultTable($class);
+        }
         
         $fields = array();
         if (isset($array['fields'])) {
             foreach ($array['fields'] as $id=>$field) {
-                if ( !($id == 0 && $id !== 0)) { // it's a numeric index, not a string
+                if (!($id == 0 && $id !== 0)) { // it's a numeric index, not a string
                     $id = $field; 
                     $field = array();
                 }
-                if (!isset($field['type'])) $field['type'] = null;
+                if (!isset($field['type'])) {
+                    $field['type'] = null;
+                }
                 $fields[$id] = $field;
             }
         }
         $array['fields'] = $fields;
         
         if (isset($array['primary'])) {
-            if (!is_array($array['primary']))
+            if (!is_array($array['primary'])) {
                 $array['primary'] = array($array['primary']);
-            
+            }
             foreach ($array['primary'] as $v) {
                 if (!isset($array['fields'][$v])) {
                     $array['fields'][$v] = array();
