@@ -87,7 +87,8 @@ class Meta
             $this->constructor = $info['constructor'];
         }
         if (isset($info['constructorArgs']) && $info['constructorArgs']) {
-            $this->constructorArgs = $info['constructorArgs'];
+            // must come after setFields()
+            $this->setConstructorArgs($info['constructorArgs']);
         }
         if (!$this->constructor) {
             $this->constructor = '__construct';
@@ -110,6 +111,16 @@ class Meta
             $this->relations[$id] = $r;
             if (isset($r['auto']) && $r['auto']) {
                 $this->autoRelations[] = $id;
+            }
+        }
+    }
+
+    private function setConstructorArgs($args)
+    {
+        foreach ($args as $arg) {
+            $this->constructorArgs[] = $arg;
+            if ($arg[0] == 'property') {
+                $this->fields[$arg[1]]['constructor'] = true;
             }
         }
     }
@@ -177,8 +188,9 @@ class Meta
     
     function getField($field)
     {
-        if (!$this->allFields) { $this->getFields(); }
-        
+        if (!$this->allFields) {
+            $this->getFields();
+        }
         if (isset($this->allFields[$field])) {
             return $this->allFields[$field];
         }

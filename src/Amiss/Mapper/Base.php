@@ -92,36 +92,6 @@ abstract class Base extends \Amiss\Mapper
         return $output;
     }
 
-    public function createObject($meta, $input, $args=null)
-    {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
-
-        $object = null;
-        if ($meta->constructor == '__construct') {
-            if ($args) {
-                $rc = new \ReflectionClass($meta->class);
-                $object = $rc->newInstanceArgs($args);
-            }
-            else {
-                $cname = $meta->class;
-                $object = new $cname;
-            }
-        }
-        else {
-            $rc = new \ReflectionClass($meta->class);
-            $method = $rc->getMethod($meta->constructor);
-            $object = $method->invokeArgs(null, $args ?: $input);
-        }
-
-        if (!$object instanceof $meta->class) {
-            throw new \UnexpectedValueException(
-                "Constructor {$meta->constructor} did not return instance of {$meta->class}"
-            );
-        }
-
-        return $object;
-    }
-
     public function determineTypeHandler($type)
     {
         // this splits off any extra crap that you may have defined

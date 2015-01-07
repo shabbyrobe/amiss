@@ -141,19 +141,76 @@ abstract class Mapper
      * used to construct the object, not to populate it. Feel free to ignore it, 
      * it will be passed to populateObject as well.
      * 
-     * @param $meta \Amiss\Meta The metadata to use to create the object
-     * @param array $row The row values, which can be used to construct the object.
-     * @param array $args Class constructor arguments
+     * @param $meta \Amiss\Meta  The metadata to use to create the object
+     * @param array $mapped      Input values after mapping to property names and type handling
+     * @param array $args        Class constructor arguments
      * @return void
      */
-    public abstract function createObject($meta, $row, $args=null);
+    public function createObject($meta, $mapped, $args=null)
+    {
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        $object = null;
+        if ($meta->constructorArgs) {
+            $actualArgs = [];
+            foreach ($meta->constructorArgs as list($type, $id)) {
+                switch ($type) {
+                case 'relation':
+                    throw new \Exception("Not yet supported");
+                break;
+
+                case 'property':
+                    if (!isset($mapped[$id])) {
+                        throw new Exception("Missing constructor arg property $id when building class {$meta->class}");
+                    }
+                    $actualArgs[] = $mapped[$id];
+                break;
+
+                case 'arg':
+                    if (!isset($args[$id])) {
+                        throw new Exception("Class {$meta->class} requires argument at index $id - please use Select->\$args");
+                    }
+                    $actualArgs[] = $args[$id];
+                break;
+
+                default:
+                    throw new Exception("Invalid constructor argument type {$type}");
+                }
+            }
+            $args = $actualArgs;
+        }
+
+        if ($meta->constructor == '__construct') {
+            if ($args) {
+                $rc = new \ReflectionClass($meta->class);
+                $object = $rc->newInstanceArgs($args);
+            }
+            else {
+                $cname = $meta->class;
+                $object = new $cname;
+            }
+        }
+        else {
+            $rc = new \ReflectionClass($meta->class);
+            $method = $rc->getMethod($meta->constructor);
+            $object = $method->invokeArgs(null, $args ?: []);
+        }
+
+        if (!$object instanceof $meta->class) {
+            throw new Exception(
+                "Constructor {$meta->constructor} did not return instance of {$meta->class}"
+            );
+        }
+
+        return $object;
+    }
     
     /**
      * Populate an object with row values
      * 
-     * @param $meta Amiss\Meta or string used to call getMeta()
-     * @param object $object The object to populate
-     * @param array $row The row values to use to populate the object
+     * @param $meta  Amiss\Meta|string
+     * @param object $object            
+     * @param array  $mapped Input after mappiing to property names and type handling
      * @return void
      */
     public function populateObject($meta, $object, array $mapped)
@@ -163,6 +220,9 @@ abstract class Mapper
         $fields = $meta->getFields();
         foreach ($mapped as $prop=>$value) {
             $field = $fields[$prop];
+            if (isset($field['constructor']) && $field['constructor']) {
+                continue;
+            }
             if (!isset($field['setter'])) {
                 $object->{$prop} = $value;
             }

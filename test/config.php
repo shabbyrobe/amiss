@@ -1,7 +1,5 @@
 <?php
-
 require_once __DIR__.'/../vendor/autoload.php';
-Amiss::register();
 
 date_default_timezone_set('Australia/Melbourne');
 

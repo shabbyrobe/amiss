@@ -248,11 +248,11 @@ class MapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
      */
     public function testCreateObject()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $meta = new \Amiss\Meta('stdClass', 'test_table', [
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
@@ -265,11 +265,71 @@ class MapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
+     */
+    public function testCreateObjectPropertyArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['property', 'b'],
+                ['property', 'a'],
+            ],
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar']);
+        $this->assertEquals(['bar', 'foo'], $obj->args);
+        $this->assertFalse(isset($obj->a));
+        $this->assertFalse(isset($obj->b));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     */
+    public function testCreateObjectArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar'], ['bar', 'foo']);
+        $this->assertEquals(['bar', 'foo'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertEquals('bar', $obj->b);
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     */
+    public function testCreateObjectMixedArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['arg', 1],
+                ['property', 'b'],
+                ['arg', 0],
+            ],
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar'], ['baz', 'qux']);
+        $this->assertEquals(['qux', 'bar', 'baz'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertFalse(isset($obj->b));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
      */
     public function testCreateObjectDefaultConstructor()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
         $meta = new \Amiss\Meta($class, 'test_table', [
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
@@ -282,11 +342,11 @@ class MapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
      */
     public function testCreateObjectStaticConstructor()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
         $meta = new \Amiss\Meta($class, 'test_table', [
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
@@ -304,16 +364,19 @@ class TestCreateObject
 {
     public $constructCalled = false;
     public $staticConstructCalled = false;
+    public $args;
 
     public function __construct()
     {
         $this->constructCalled = true;
+        $this->args = func_get_args();
     }
 
     public static function staticConstruct()
     {
         $o = new static;
         $o->staticConstructCalled = true;
+        $o->args = func_get_args();
         return $o;
     }
 }
