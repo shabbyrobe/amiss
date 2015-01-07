@@ -388,8 +388,12 @@ class Manager
                     if (!isset($field['getter'])) {
                         $object->{$meta->primary[0]} = $generated;
                     }
-                    elseif (isset($field['setter']) && $field['setter'] !== false) {
-                        $object->{$field['setter']}($generated);
+                    elseif (isset($field['setter'])) {
+                        if ($field['setter'] !== false) {
+                            $object->{$field['setter']}($generated);
+                        } else {
+                            throw new Exception("Tried to assign ID to read-only setter on {$meta->class}");
+                        }
                     }
                 }
             }
