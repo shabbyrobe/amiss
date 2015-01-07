@@ -36,9 +36,10 @@ abstract class Mapper
     {
         if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
 
-        $object = $this->createObject($meta, $input, $args);
         $mapped = $this->mapValues($meta, $input);
+        $object = $this->createObject($meta, $mapped, $args);
         $this->populateObject($meta, $object, $mapped);
+
         return $object;
     }
 

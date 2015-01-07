@@ -70,8 +70,9 @@ class Manager
 
     public function get($class)
     {
+        $mapper = $this->mapper;
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->mapper->getMeta($class);
+        $meta = $mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
@@ -88,16 +89,18 @@ class Manager
         $stmt = $this->getConnector()->prepare($sql);
         $this->execute($stmt, $params);
         
-        $object = null;
-        
+        $mappedRow = null;
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            if ($object) {
+            if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $object = $this->mapper->toObject($meta, $row, $query->args);
+            $mappedRow = $mapper->mapValues($meta, $row);
         }
 
-        if ($object) {
+        if ($mappedRow) {
+            $object = $mapper->createObject($meta, $mappedRow, $query->args);
+            $mapper->populateObject($meta, $object, $mappedRow);
+
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
@@ -113,24 +116,33 @@ class Manager
     public function getList($class)
     {
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->mapper->getMeta($class);
+        $mapper = $this->mapper;
+        $meta = $mapper->getMeta($class);
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
             return;
         }
+
         list ($sql, $params) = $query->buildQuery($meta);
         $stmt = $this->getConnector()->prepare($sql);
         $this->execute($stmt, $params);
         
-        $objects = array();
+        $mappedRows = [];
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->mapper->toObject($meta, $row, $query->args);
-            $objects[] = $object;
+            $mappedRow = $mapper->mapValues($meta, $row);
+            $mappedRows[] = $mappedRow;
         }
 
-        if ($objects) {
+        $objects = [];
+        if ($mappedRows) {
+            foreach ($mappedRows as $mappedRow) {
+                $object = $mapper->createObject($meta, $mappedRow, $query->args);
+                $mapper->populateObject($meta, $object, $mappedRow);
+                $objects[] = $object;
+            }
+
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
