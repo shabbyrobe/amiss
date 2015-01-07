@@ -10,25 +10,17 @@ class AutoGuid implements Handler, Identity
     }
     
     // FIXME: this class should derive from an IdGenerator base.
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         $name = $fieldInfo['name'];
-        $getter = isset($fieldInfo['getter']);
-        if ($getter && $fieldInfo['setter'] === false)
-            throw new \UnexpectedValueException("Property was read only");
-        
         if (!$value) {
             $value = $this->generate();
-            if ($getter)
-                $object->{$fieldInfo['setter']}($value);
-            else
-                $object->$name = $value;
         }
         
         return $value;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return $value;
     }

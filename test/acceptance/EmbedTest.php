@@ -38,7 +38,7 @@ class EmbedTest extends \ModelDataTestCase
         $parent->child->foo = 'yep';
         $meta = $this->mapper->getMeta('TestEmbedOneParent');
         $field = $meta->getField('child');
-        $result = $embed->prepareValueForDb($parent->child, $parent, $field);
+        $result = $embed->prepareValueForDb($parent->child, $field);
         $expected = array('pants'=>'yep');
 
         $this->assertEquals($expected, $result);
@@ -58,7 +58,7 @@ class EmbedTest extends \ModelDataTestCase
 
         $meta = $this->mapper->getMeta('TestEmbedManyParent');
         $field = $meta->getField('children');
-        $result = $embed->prepareValueForDb($parent->children, $parent, $field);
+        $result = $embed->prepareValueForDb($parent->children, $field);
         $expected = array(array('pants'=>'yep'), array('pants'=>'yep2'));
 
         $this->assertEquals($expected, $result);
@@ -75,7 +75,7 @@ class EmbedTest extends \ModelDataTestCase
         $meta = $this->mapper->getMeta('TestEmbedOneParent');
         $field = $meta->getField('child');
         $value = array('pants'=>'yep');
-        $result = $embed->handleValueFromDb($value, $parent, $field, array());
+        $result = $embed->handleValueFromDb($value, $field, array());
 
         $this->assertEquals($expected, $result);
     }
@@ -95,7 +95,7 @@ class EmbedTest extends \ModelDataTestCase
         $meta = $this->mapper->getMeta('TestEmbedManyParent');
         $field = $meta->getField('children');
         $value = array(array('pants'=>'yep'), array('pants'=>'yep2'));
-        $result = $embed->handleValueFromDb($value, $parent, $field, array());
+        $result = $embed->handleValueFromDb($value, $field, array());
 
         $this->assertEquals($parent->children, $result);
     }

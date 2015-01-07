@@ -47,7 +47,7 @@ class Date implements \Amiss\Type\Handler
         return new static('U', 'UTC', $appTimeZone);
     }
     
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         $out = null;
         if ($value instanceof $this->dateClass) {
@@ -74,7 +74,7 @@ class Date implements \Amiss\Type\Handler
         return $out;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         $out = null;
         if ($value !== null && $value !== '' && $value !== false) {

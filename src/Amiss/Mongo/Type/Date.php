@@ -10,7 +10,7 @@ class Date implements \Amiss\Type\Handler
         $this->timeZone = $timeZone;
     }
     
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         if ($value) {
             if ($this->timeZone && $value->getTimezone() != $this->timeZone) {
@@ -20,7 +20,7 @@ class Date implements \Amiss\Type\Handler
         }
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         $out = null;
         if ($value) {

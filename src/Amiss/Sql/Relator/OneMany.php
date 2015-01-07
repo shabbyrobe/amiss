@@ -95,11 +95,16 @@ class OneMany extends Base
             $where[] = '`'.str_replace('`', '', $rName).'` IN(:r_'.$idInfo['param'].')';
         }
         $query->where = implode(' AND ', $where);
-        
+		if (isset($criteria->args)) {
+			$query->args = $criteria->args;
+		}
+
         if ($criteria) {
             list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
-            $query->params = array_merge($cParams, $query->params);
-            $query->where .= ' AND ('.$cWhere.')';
+			if ($cWhere) {
+				$query->params = array_merge($cParams, $query->params);
+				$query->where .= ' AND ('.$cWhere.')';
+			}
         }
 
         $query->stack = $stack;

@@ -18,55 +18,90 @@ namespace Amiss;
  *     from input: use ``createObject``
  *   - An instance you already have lying around to be populated by the mapper:
  *     use ``populateObject``.
- * 
- * @codeCoverageIgnoreStart
  */
-interface Mapper
+abstract class Mapper
 {
     /**
      * Get the metadata for the class
      * @param string Class name
      * @return \Amiss\Meta
      */
-    function getMeta($class);
-    
-    /**
-     * Create and populate an object
-     * 
-     * This will almost always have the exact same body. This is provided for
-     * convenience, commented out below the definition.
-     *
-     * @param $meta Amiss\Meta or string used to call getMeta()
-     */
-    function toObject($meta, $input, $args=null);
-    //{
-    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-    //    $object = $this->createObject($meta, $row, $args);
-    //    $this->populateObject($meta, $object, $row);
-    //    return $object;
-    //}
+    public abstract function getMeta($class);
 
     /**
-     * Create and populate a list of objects
-     * 
-     * This will almost always have the exact same body. This is provided for
-     * convenience, commented out below the definition.
-     *
+     * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    function toObjects($meta, $input, $args=null);
-    //{
-    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-    //    $out = array();
-    //    if ($input) {
-    //        foreach ($input as $item) {
-    //            $obj = $this->toObject($meta, $item);
-    //            $out[] = $obj;
-    //        }
-    //    }
-    //    return $out;
-    //}
-    
+    public function toObject($meta, $input, $args=null)
+    {
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        $object = $this->createObject($meta, $input, $args);
+        $mapped = $this->mapValues($meta, $input);
+        $this->populateObject($meta, $object, $mapped);
+        return $object;
+    }
+
+    /**
+     * @param $meta Amiss\Meta or string used to call getMeta()
+     */
+    public function toObjects($meta, $input, $args=null)
+    {
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        $out = array();
+        if ($input) {
+            foreach ($input as $item) {
+                $obj = $this->toObject($meta, $item);
+                $out[] = $obj;
+            }
+        }
+        return $out;
+    }
+
+    public function mapValues($meta, $input, $fieldMap=null)
+    {
+        if (!$fieldMap) { $fieldMap = $meta->getColumnToPropertyMap(); }
+
+        $mapped = [];
+        $fields = $meta->getFields();
+        $defaultType = null;
+
+        foreach ($input as $col=>$value) {
+            if (!isset($fieldMap[$col])) {
+                continue;
+                // throw new \UnexpectedValueException("Unexpected key $col in input");
+            }
+
+            $prop = $fieldMap[$col];
+            $field = $fields[$prop];
+            $type = $field['type'];
+            if (!$type) {
+                if ($defaultType === null) {
+                    $defaultType = $meta->getDefaultFieldType() ?: false;
+                }
+                $type = $defaultType;
+            }
+            
+            if ($type) {
+                $typeId = $type['id'];
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
+                }
+                if ($this->typeHandlerMap[$typeId]) {
+                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $field, $input);
+                }
+            }
+
+            if (isset($mapped[$prop])) {
+                throw new \UnexpectedValueException();
+            }
+            $mapped[$prop] = $value;
+        }
+
+        return $mapped;
+    }
+
     /**
      * Get row values from an object
      * 
@@ -77,7 +112,7 @@ interface Mapper
      * 
      * @return array
      */
-    function fromObject($meta, $input, $context=null);
+    public abstract function fromObject($meta, $input, $context=null);
 
     /**
      * Get row values from a list of objects
@@ -87,21 +122,20 @@ interface Mapper
      *
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    function fromObjects($meta, $input, $context=null);
-    //{
-    //    if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-    //    $out = array();
-    //    if ($input) {
-    //        foreach ($input as $key=>$item) {
-    //            $out[$key] = $this->fromObject($meta, $item, $context);
-    //        }
-    //    }
-    //    return $out;
-    //}
+    public function fromObjects($meta, $input, $context=null)
+    {
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        $out = array();
+        if ($input) {
+            foreach ($input as $key=>$item) {
+                $out[$key] = $this->fromObject($meta, $item, $context);
+            }
+        }
+        return $out;
+    }
     
     /**
-     * Create the object
-     * 
      * The row is made available to this function, but this is so it can be
      * used to construct the object, not to populate it. Feel free to ignore it, 
      * it will be passed to populateObject as well.
@@ -111,7 +145,7 @@ interface Mapper
      * @param array $args Class constructor arguments
      * @return void
      */
-    function createObject($meta, $row, $args=null);
+    public abstract function createObject($meta, $row, $args=null);
     
     /**
      * Populate an object with row values
@@ -121,12 +155,29 @@ interface Mapper
      * @param array $row The row values to use to populate the object
      * @return void
      */
-    function populateObject($meta, $object, $row);
+    public function populateObject($meta, $object, array $mapped)
+    {
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        $fields = $meta->getFields();
+        foreach ($mapped as $prop=>$value) {
+            $field = $fields[$prop];
+            if (!isset($field['setter'])) {
+                $object->{$prop} = $value;
+            }
+            else {
+                // false setter means read only
+                if ($field['setter'] !== false) {
+                    call_user_func(array($object, $field['setter']), $value);
+                }
+            }
+        }
+    }
     
     /**
      * Get a type handler for a field type
      * @param string $type The type of the field
      * @return \Amiss\Type\Handler
      */
-    function determineTypeHandler($type);
+    public abstract function determineTypeHandler($type);
 }

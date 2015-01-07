@@ -64,7 +64,7 @@ class TestStatement
     }
 }
 
-class TestMapper implements \Amiss\Mapper
+class TestMapper extends \Amiss\Mapper
 {
     public $meta;
     
@@ -78,50 +78,14 @@ class TestMapper implements \Amiss\Mapper
         return isset($this->meta[$class]) ? $this->meta[$class] : null;
     }
 
-    function toObject($meta, $row, $args=null)
-    {
-        $object = $this->createObject($meta, $row, $args);
-        $this->populateObject($meta, $object, $row);
-        return $object;
-    }
-    
     function createObject($meta, $row, $args=null) {}
     
-    function populateObject($meta, $object, $row) {}
+    function populateObject($meta, $object, array $mapped) {}
 
     function fromObject($meta, $object, $context=null) {}
     
     function determineTypeHandler($type) {}
-    
-    /**
-     * Create and populate a list of objects
-     */
-    function toObjects($meta, $input, $args=null)
-    {
-       $out = array();
-       if ($input) {
-           foreach ($input as $item) {
-               $obj = $this->toObject($meta, $item);
-               $out[] = $obj;
-           }
-       }
-       return $out;
-    }
-
-    /**
-     * Get row values from a list of objects.
-     */
-    function fromObjects($meta, $input, $context=null)
-    {
-       $out = array();
-       if ($input) {
-           foreach ($input as $key=>$item) {
-               $out[$key] = $this->fromObject($meta, $item, $context);
-           }
-       }
-       return $out;
-    }
-}
+}    
 
 class TestTypeHandler implements \Amiss\Type\Handler
 {
@@ -134,12 +98,12 @@ class TestTypeHandler implements \Amiss\Type\Handler
         foreach ($data as $k=>$v) $this->$k = $v;
     }
     
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         return $this->valueForDb;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return $this->valueFromDb;
     }

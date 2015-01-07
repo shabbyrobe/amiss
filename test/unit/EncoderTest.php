@@ -43,10 +43,10 @@ class EncoderTest extends \CustomTestCase
     {
         $obj = new \stdClass;
 
-        $result = $enc->prepareValueForDb($raw, $obj, array());
+        $result = $enc->prepareValueForDb($raw, array());
         $this->assertEquals($result, $serialised);
 
-        $result = $enc->handleValueFromDb($serialised, $obj, array(), array());
+        $result = $enc->handleValueFromDb($serialised, array(), array());
         $this->assertEquals($result, $raw);
     }
 

@@ -121,7 +121,9 @@ class Meta
 
     private function setFields($fields)
     {
-        foreach ($fields as &$field) {
+        foreach ($fields as $name=>&$field) {
+            if (!isset($field['name']))
+                $field['name'] = $name;
             if (isset($field['type']) && !is_array($field['type'])) {
                 $field['type'] = array('id'=>$field['type']);
             }

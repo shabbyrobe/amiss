@@ -13,7 +13,7 @@ class Embed implements Handler
         $this->mapper = $mapper;
     }
 
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         $class = $fieldInfo['type']['class'];
         $many = isset($fieldInfo['type']['many']) ? $fieldInfo['type']['many'] : false;
@@ -35,7 +35,7 @@ class Embed implements Handler
         return $return;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         $class = $fieldInfo['type']['class'];
         $many = isset($fieldInfo['type']['many']) ? $fieldInfo['type']['many'] : false;

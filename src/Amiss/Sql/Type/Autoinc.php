@@ -10,12 +10,12 @@ class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
         return (int)$value;
     }
 
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         return $value;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return (int)$value;
     }

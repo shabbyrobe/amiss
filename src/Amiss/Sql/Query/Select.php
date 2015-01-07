@@ -13,13 +13,13 @@ class Select extends Criteria
     public $follow = true;
     public $with = [];
     public $stack = [];
-    
+
     public function getLimitOffset()
     {
-        if ($this->limit) 
-            return array($this->limit, $this->offset);
-        else {
-            return array($this->page[1], ($this->page[0] - 1) * $this->page[1]); 
+        if ($this->limit) {
+            return [$this->limit, $this->offset];
+        } else {
+            return [$this->page[1], ($this->page[0] - 1) * $this->page[1]]; 
         }
     }
 
