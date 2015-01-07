@@ -65,6 +65,8 @@ class Note extends \Amiss\Mapper\Base
             'relations'=>array(),
             'ext'=>isset($classNotes['ext']) ? $classNotes['ext'] : null,
             'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
+            'constructor'=>null,
+            'constructorArgs'=>[],
         );
 
         if (isset($classNotes['index'])) {
@@ -81,51 +83,49 @@ class Note extends \Amiss\Mapper\Base
         $fieldIndexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
+                $property = null;
                 $field = null;
                 $relationNote = null;
-                $fieldSetToName = false;
-                
+
                 if (isset($itemNotes['field'])) {
-                    $field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
+                    $field = $itemNotes['field'] !== true ? $itemNotes['field'] : true;
+                }
+                if (isset($itemNotes['primary']) && !$field) {
+                    $field = true;
                 }
                 if (isset($itemNotes['has'])) {
                     $relationNote = $itemNotes['has'];
                 }
-                if (isset($itemNotes['primary']) && !$field) {
-                    $field = $name;
-                    $fieldSetToName = true;
-                }
 
-                // do not use $name until after this block
+                // $property is set by this block
                 if ($field !== null) {
                     $fieldInfo = array();
                     
                     if ($type == 'method') {
-                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = 
+                        list ($property, $fieldInfo['getter'], $fieldInfo['setter']) = 
                             $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
-                        if ($fieldSetToName) { $field = $name; }
                     }
-
-                    if ($field && $field != $name) {
+                    else {
+                        $property = $name;
+                    }
+                    if ($field !== true) {
                         $fieldInfo['name'] = $field;
                     }
-
                     $fieldInfo['type'] = isset($itemNotes['type']) 
                         ? $itemNotes['type'] 
                         : null
                     ;
-
-                    $info['fields'][$name] = $fieldInfo;
+                    $info['fields'][$property] = $fieldInfo;
                 }
 
-                if (isset($itemNotes['primary'])) {
-                    $info['primary'][] = $name;
+                if ($property && isset($itemNotes['primary'])) {
+                    $info['primary'][] = $property;
                 }
 
-                if (isset($itemNotes['index'])) {
+                if ($property && isset($itemNotes['index'])) {
                     $indexNote = $itemNotes['index'];
                     if ($indexNote === true) {
-                        $indexNote = [$name=>true];
+                        $indexNote = [$property=>true];
                     }
                     elseif (is_string($indexNote)) {
                         $indexNote = [$indexNote=>true];
@@ -142,13 +142,16 @@ class Note extends \Amiss\Mapper\Base
 
                         // hacky increment even if the key doesn't exist
                         $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
-                        $info['indexes'][$k]['fields'][$seq] = $name;
+                        $info['indexes'][$k]['fields'][$seq] = $property;
                     }
                 }
                 
                 if ($relationNote !== null) {
-                    if ($field)
-                        throw new \UnexpectedValueException("Invalid class {$class}: relation and a field declared together on {$name}");
+                    if ($field) {
+                        throw new \UnexpectedValueException(
+                            "Invalid class {$class}: relation and a field declared together on {$name}"
+                        );
+                    }
                     
                     if ($type == 'method') {
                         if (!isset($itemNotes['getter'])) {
@@ -156,6 +159,23 @@ class Note extends \Amiss\Mapper\Base
                         }
                     }
                     $relationNotes[$name] = $itemNotes;
+                }
+
+                // look for the constructor!
+                if ($type == 'method' && isset($itemNotes['constructor'])) {
+                    if ($info['constructor']) {
+                        throw new \UnexpectedValueException("Constructor already declared: {$info['constructor']}");
+                    }
+                    $info['constructor'] = $name;
+                    if (isset($itemNotes['constructor']['args'])) {
+                        foreach ($itemNotes['constructor']['args'] as $idx=>$arg) {
+                            $split = preg_split('/:\s*/', $arg, 2);
+                            if (!$split[0] || !isset($split[1]) || !$split[1]) {
+                                throw new \UnexpectedValueException("Invalid arg specification. Expected 'type:id', found '$arg'");
+                            }
+                            $info['constructorArgs'][$idx] = [$split[0], $split[1]];
+                        }
+                    }
                 }
             }
         }

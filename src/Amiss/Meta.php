@@ -6,7 +6,8 @@ class Meta
     public $class;
     public $table;
     public $primary;
-    public $constructor = '__construct';
+    public $constructor;
+    public $constructorArgs = [];
 
     /**
      * Array of relation arrays, hashed by property name
@@ -59,7 +60,7 @@ class Meta
         return array(
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
-            'indexes',
+            'indexes', 'constructor', 'constructorArgs', 'ext',
         ); 
     }
 
@@ -70,26 +71,34 @@ class Meta
         $this->table = $table;
         $this->primary = isset($info['primary']) ? $info['primary'] : array();
 
-        if ($this->primary && !is_array($this->primary))
+        if ($this->primary && !is_array($this->primary)) {
             $this->primary = array($this->primary);
-
+        }
         $this->setIndexes(isset($info['indexes']) ? $info['indexes'] : array());
         $this->setFields(isset($info['fields']) ? $info['fields'] : array());
 
-        if (isset($info['relations']))
+        if (isset($info['relations'])) {
             $this->setRelations($info['relations']);
+        }
 
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
         
-        if (isset($info['constructor']) && $info['constructor'])
+        if (isset($info['constructor']) && $info['constructor']) {
             $this->constructor = $info['constructor'];
+        }
+        if (isset($info['constructorArgs']) && $info['constructorArgs']) {
+            $this->constructorArgs = $info['constructorArgs'];
+        }
+        if (!$this->constructor) {
+            $this->constructor = '__construct';
+        }
         
         $this->defaultFieldType = null;
         if (isset($info['defaultFieldType'])) {
             $ft = $info['defaultFieldType'];
-            if (!is_array($ft))
+            if (!is_array($ft)) {
                 $ft = array('id'=>$ft);
-
+            }
             $this->defaultFieldType = $ft;
         }
     }
@@ -99,31 +108,35 @@ class Meta
         foreach ($relations as $id=>$r) {
             $r['name'] = $id;
             $this->relations[$id] = $r;
-            if (isset($r['auto']) && $r['auto'])
+            if (isset($r['auto']) && $r['auto']) {
                 $this->autoRelations[] = $id;
+            }
         }
     }
 
     private function setIndexes($indexes)
     {
         foreach ($indexes as $name=>&$index) {
-            if (!isset($index['key']))
+            if (!isset($index['key'])) {
                 $index['key'] = false;
+            }
             if (!isset($index['fields']) || !$index['fields']) {
                 throw new \UnexpectedValueException("Misconfigured index $name");
             }
             $index['fields'] = (array)$index['fields'];
         }
         $this->indexes = $indexes;
-        if ($this->primary)
+        if ($this->primary) {
             $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
+        }
     }
 
     private function setFields($fields)
     {
         foreach ($fields as $name=>&$field) {
-            if (!isset($field['name']))
+            if (!isset($field['name'])) {
                 $field['name'] = $name;
+            }
             if (isset($field['type']) && !is_array($field['type'])) {
                 $field['type'] = array('id'=>$field['type']);
             }
@@ -164,8 +177,7 @@ class Meta
     
     function getField($field)
     {
-        if (!$this->allFields)
-            $this->getFields();
+        if (!$this->allFields) { $this->getFields(); }
         
         if (isset($this->allFields[$field])) {
             return $this->allFields[$field];
@@ -192,9 +204,9 @@ class Meta
     {
         $foundValue = false;
 
-        if (!isset($this->indexes[$indexName]))
+        if (!isset($this->indexes[$indexName])) {
             throw new Exception("Class {$this->class} doesn't define index $indexName");
-
+        }
         $indexValue = array();
         foreach ($this->indexes[$indexName]['fields'] as $p) {
             $field = $this->getField($p);
@@ -202,14 +214,12 @@ class Meta
                 ? $object->{$p} 
                 : call_user_func(array($object, $field['getter']))
             ;
-            if ($value)
-                $foundValue = true;
+            if ($value) { $foundValue = true; }
             
             $indexValue[$p] = $value;
         }
         
-        if ($foundValue)
-            return $indexValue;
+        if ($foundValue) { return $indexValue; }
     }
     
     function getValue($object, $property)
@@ -225,10 +235,11 @@ class Meta
     function setValue($object, $property, $value)
     {
         $field = $this->getField($property);
-        if (!isset($field['setter']))
+        if (!isset($field['setter'])) {
             $object->{$property} = $value;
-        else
+        } else {
             call_user_func(array($object, $field['setter']), $value);
+        }
         return $this;
     }
 }

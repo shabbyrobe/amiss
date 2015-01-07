@@ -27,7 +27,7 @@ class Parser
         if ($doc) {
             $info->notes = $this->parseDocComment($doc);
         }
-        
+
         $info->methods = $this->parseReflectors($class->getMethods());
         $info->properties = $this->parseReflectors($class->getProperties());
         

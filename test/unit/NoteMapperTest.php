@@ -481,7 +481,11 @@ class NoteMapperTest extends \CustomTestCase
              */
             class Test {
                 /** @field */       public $a;
-                /** @index.foo 1 */ public $b;
+                /** 
+                 * @field
+                 * @index.foo 1
+                 */
+                public $b;
             }
         ');
         $meta = $mapper->getMeta($name);
@@ -626,5 +630,86 @@ class NoteMapperTest extends \CustomTestCase
 
         $expected = ['field'];
         $this->assertEquals($expected, $meta->primary);
+    }
+
+    public function testGetMetaConstructor()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** @constructor */
+                public static function foo() {}
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $this->assertEquals('foo', $meta->constructor);
+    }
+
+    public function testGetMetaConstructorArg()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /**
+                 * @constructor.args[] relation:pants
+                 */
+                public static function foo() {}
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $this->assertEquals('foo', $meta->constructor);
+        $this->assertEquals([['relation', 'pants']], $meta->constructorArgs);
+    }
+
+    public function testGetMetaDefaultConstructorArg()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /**
+                 * @constructor.args[] relation:pants
+                 */
+                public function __construct()
+                {}
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $this->assertEquals('__construct', $meta->constructor);
+        $this->assertEquals([['relation', 'pants']], $meta->constructorArgs);
+    }
+
+    public function testGetMetaConstructorArgs()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /**
+                 * @constructor.args[] relation:pants
+                 * @constructor.args[] field:foo
+                 */
+                public static function foo($a, $b) {}
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $this->assertEquals('foo', $meta->constructor);
+        $this->assertEquals([['relation', 'pants'], ['field', 'foo']], $meta->constructorArgs);
+    }
+
+    public function testGetMetaField()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+
+        $name = $this->createFnScopeClass("Test", '
+            class Test {
+                /** @field bar */
+                public $foo;
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $this->assertEquals(['name'=>'bar', 'type'=>null], $meta->getField('foo'));
     }
 }
