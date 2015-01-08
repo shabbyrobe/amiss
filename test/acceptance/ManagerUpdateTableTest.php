@@ -151,7 +151,6 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
     }
 
-    /*
     public function testUpdateTableValuesUseTypeHandlers()
     {
         $this->manager->update(
@@ -166,5 +165,4 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $this->assertEquals(new \DateTime('2030-01-01 11:11'), $event->dateStart);
         $this->assertEquals(new \DateTime('2030-02-02 11:11'), $event->dateEnd);
     }
-    */
 }

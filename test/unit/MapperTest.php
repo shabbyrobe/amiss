@@ -94,10 +94,12 @@ class MapperTest extends \CustomTestCase
     public function testToObjects()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
-            ->setMethods(array('toObject'))
+            ->setMethods(array('toObject', 'getMeta'))
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('toObject');
+        $meta = new \Amiss\Meta('a', 'b', []);
+        $mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
         $mapper->toObjects(array('a', 'b'), null, 'foo');
     }
     

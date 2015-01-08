@@ -91,7 +91,7 @@ class Manager
             if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $mappedRow = $mapper->mapValues($row, $meta);
+            $mappedRow = $mapper->toProperties($row, $meta);
         }
 
         if ($mappedRow) {
@@ -139,7 +139,7 @@ class Manager
         $mappedRows = [];
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->mapValues($row, $meta);
+            $mappedRow = $mapper->toProperties($row, $meta);
             $mappedRows[] = $mappedRow;
         }
 
@@ -492,7 +492,7 @@ class Manager
             $query = $this->createTableUpdateQuery($args);
             $class = $first;
             $meta = $this->getMeta($class);
-            // $query->set = (array) $this->mapper->mapValues($query->set, $meta);
+            $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
         }
         else {
             throw new \InvalidArgumentException();
