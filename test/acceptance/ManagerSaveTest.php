@@ -67,7 +67,10 @@ class ManagerSaveTest extends \ModelDataTestCase
     public function testSaveFailsWhenAutoincNotDeclared()
     {
         $object = new Demo\EventArtist();
-        $this->setExpectedException('Amiss\Exception', "Manager requires a single-column autoincrement primary if you want to call 'save'");
+        $this->setExpectedException(
+            'Amiss\Exception', 
+            "Manager requires a single-column autoincrement primary if you want to call 'save'"
+        );
         $this->manager->save($object);
     }
 }

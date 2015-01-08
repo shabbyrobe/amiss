@@ -492,6 +492,7 @@ class Manager
             $query = $this->createTableUpdateQuery($args);
             $class = $first;
             $meta = $this->getMeta($class);
+            // $query->set = (array) $this->mapper->mapValues($query->set, $meta);
         }
         else {
             throw new \InvalidArgumentException();
