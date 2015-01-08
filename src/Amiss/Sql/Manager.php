@@ -4,6 +4,7 @@ namespace Amiss\Sql;
 use Amiss\Exception;
 use Amiss\Mapper;
 use Amiss\Meta;
+use Amiss\Sql\Query\Criteria;
 
 /**
  * Amiss query manager. This is the core of Amiss' functionality.
@@ -12,10 +13,6 @@ use Amiss\Meta;
  */
 class Manager
 {
-    const INDEX_DUPE_CONTINUE = 0;
-    
-    const INDEX_DUPE_FAIL = 1;
-    
     /**
      * @var Amiss\Sql\Connector|\PDO|PDO-esque
      */
@@ -98,16 +95,27 @@ class Manager
         }
 
         if ($mappedRow) {
-            $object = $mapper->createObject($meta, $mappedRow, $query->args);
-            $mapper->populateObject($meta, $object, $mappedRow);
+            $relations = [];
+            $relators = [];
 
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
             }
             if ($rel) {
-                $this->assignRelated($object, $rel, $query->stack);
+                $relQuery = new Criteria;
+                foreach ((array) $rel as $relationId) {
+                    $relation = $meta->relations[$relationId];
+                    $relator = isset($relators[$relation[0]]) 
+                        ? $relators[$relation[0]] 
+                        : ($relators[$relation[0]] = $this->getRelator($relation));
+                    $relQuery->stack = $query->stack;
+                    $relQuery->stack[$meta->class] = true;
+                    $mappedRow->{$relationId} = $relator->getRelated($meta, $mappedRow, $relation);
+                }
             }
+            $object = $mapper->createObject($meta, $mappedRow, $query->args);
+            $mapper->populateObject($meta, $object, $mappedRow);
         }
 
         return $object;
@@ -136,22 +144,41 @@ class Manager
         }
 
         $objects = [];
-        if ($mappedRows) {
-            foreach ($mappedRows as $mappedRow) {
-                $object = $mapper->createObject($meta, $mappedRow, $query->args);
-                $mapper->populateObject($meta, $object, $mappedRow);
-                $objects[] = $object;
-            }
+        if (!$mappedRows)
+            return $objects;
 
-            $rel = $query->with;
-            if ($meta->autoRelations && $query->follow) {
-                $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
-            }
-            if ($rel) {
-                $this->assignRelated($objects, $rel, $query->stack);
+        $relations = [];
+        $relators = [];
+        $related = [];
+
+        $rel = $query->with;
+        if ($meta->autoRelations && $query->follow) {
+            $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
+        }
+        if ($rel) {
+            $relQuery = new Criteria;
+            foreach ((array) $rel as $relationId) {
+                $relation = $meta->relations[$relationId];
+                $relator = isset($relators[$relation[0]]) 
+                    ? $relators[$relation[0]] 
+                    : ($relators[$relation[0]] = $this->getRelator($relation));
+                $relQuery->stack = $query->stack;
+                $relQuery->stack[$meta->class] = true;
+                $cur = $relator->getRelatedForList($meta, $mappedRows, $relation, $relQuery);
+                if ($cur) {
+                    $related[$relationId] = $cur;
+                }
             }
         }
-
+        
+        foreach ($mappedRows as $idx=>$mappedRow) {
+            foreach ($related as $relId=>$objs) {
+                $mappedRow->{$relId} = $objs[$idx];
+            }
+            $object = $mapper->createObject($meta, $mappedRow, $query->args);
+            $mapper->populateObject($meta, $object, $mappedRow);
+            $objects[] = $object;
+        }
         return $objects;
     }
 
@@ -214,8 +241,6 @@ class Manager
             }
         }
 
-        $stack[$meta->class] = true;
-
         $done = [];
         foreach ((array)$relationNames as $relationName) {
             if (isset($done[$relationName])) {
@@ -241,16 +266,61 @@ class Manager
             }
 
             if ($missing) {
-                $result = $this->getRelated($missing, $relationName, null, $stack);
+                $result = $this->getRelated($missing, $relationName, ['stack'=>$stack]);
                 $relator = $this->getRelator($meta, $relationName);
-                $relator->assignRelated($missing, $result, $relation);
+                $this->populateObjectsWithRelated($missing, $result, $relation);
             }
         }
     }
  
-    public function getRelator($meta, $relationName)
+    private function populateObjectsWithRelated(array $source, array $result, $relation)
     {
-        $relation = $meta->relations[$relationName];
+        $relatedMeta = null;
+
+        // if the relation is a many relation and the inverse property is
+        // specified, we want to populate the 'one' side of the relation
+        // with the source
+        if (isset($relation['inverse'])) {
+            $relatedMeta = $this->getMeta($relation['of']);
+            $relatedRelation = $relatedMeta->relations[$relation['inverse']];
+        }
+
+        foreach ($result as $idx=>$item) {
+            // no read only support... why would you be assigning relations to
+            // a read only object?
+            if (!isset($relation['setter'])) {
+                $source[$idx]->{$relation['name']} = $item;
+            } else {
+                call_user_func(array($source[$idx], $relation['setter']), $item);
+            }
+
+            if ($relatedMeta) {
+				if ($relation[0] == 'one') {
+					$item = [$item];
+                }
+                foreach ($item as $i) {
+                    if (!isset($relatedRelation['setter'])) {
+                        $i->{$relatedRelation['name']} = $source[$idx];
+                    } else {
+                        call_user_func(array($i, $relatedRelation['setter']), $i);
+                    }
+                }
+            }
+        }
+    }
+
+    public function getRelator($arg1, $arg2=null)
+    {
+        if ($arg2) {
+            list ($meta, $relationName) = [$arg1, $arg2];
+            if (!isset($meta->relations[$relationName])) {
+                throw new Exception("Relation $relationName not found on class {$meta->class}");
+            }
+            $relation = $meta->relations[$relationName];
+        } else {
+            $relation = $arg1;
+        }
+
         if (!isset($this->relators[$relation[0]])) {
             throw new Exception("Relator {$relation[0]} not found");
         }
@@ -266,20 +336,23 @@ class Manager
     /**
      * Get related objects from the database
      * 
-     * @param object|array Source objects to assign relations for
+     * @param object|array Source objects to get relations for
      * @param string The name of the relation to assign
      * @param query Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $query=null, $stack=[])
+    public function getRelated($source, $relationName, $query=null)
     {
         if (!$source) { return; }
 
+        $sourceIsArray = false;
+
         $test = $source;
         if (is_array($test) || $test instanceof \Traversable) {
+            $sourceIsArray = true;
             $test = $test[0];
         }
-        
+
         $class = !is_object($test) ? $test : get_class($test);
         
         $meta = $this->getMeta($class);
@@ -291,17 +364,25 @@ class Manager
         if (!isset($this->relators[$relation[0]])) {
             throw new Exception("Relator {$relation[0]} not found");
         }
-
         $relator = $this->relators[$relation[0]];
         if (!$relator instanceof Relator) {
             $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
         }
         
         if ($query) {
-            $query = $this->createQueryFromArgs(array_slice(func_get_args(), 2), 'Amiss\Sql\Query\Criteria');
+            $query = $this->createQueryFromArgs([$query], 'Amiss\Sql\Query\Criteria');
+            $stack = $query->stack;
         }
-        
-        return $relator->getRelated($source, $relationName, $query, $stack);
+        else {
+            $stack = [];
+        }
+
+        $stack[$meta->class] = true;
+        if ($sourceIsArray) {
+            return $relator->getRelatedForList($meta, $source, $relation, $query, $stack);
+        } else {
+            return $relator->getRelated($meta, $source, $relation, $query, $stack);
+        }
     }
     
     /**
@@ -335,33 +416,18 @@ class Manager
         elseif ($argc == 2) {
             $query = $args[1] instanceof Query\Insert ? $args[1] : new Query\Insert(['values'=>$args[1]]);
         }
-
         if ($object && !$query->values) {
             $query->values = $this->mapper->fromObject($meta, $object, 'insert');
         }
         if (!$query->table) {
             $query->table = $meta->table;
         }
-        if (!$query->values) {
-            throw new Exception("No values found for class {$meta->class}. Are your fields defined?");
-        }
-        if (!$query->table) {
-            throw new Exception("No table");
-        }
 
-        // right, now that we have handled all the crazy arguments, let's insert!
-        $columns = array();
-        $count = count($query->values);
-        foreach ($query->values as $k=>$v) {
-            $columns[] = '`'.str_replace('`', '', $k).'`';
-        }
+        list ($sql, $params) = $query->buildQuery();
 
-        $sql = "INSERT INTO {$query->table}(".implode(',', $columns).") ".
-            "VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
-        
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
-        $stmt->execute(array_values($query->values));
+        $stmt->execute($params);
         
         $lastInsertId = null;
         if (($object && $meta->primary) || !$object) {
@@ -526,93 +592,7 @@ class Manager
             $this->update($object);
         }
     }
-    
-    /**
-     * Iterate over an array of objects and returns an array of objects
-     * indexed by a property
-     * 
-     * @param array The list of objects to index
-     * @param string The property to index by
-     * @param integer Index mode
-     * @return array
-     */
-    public function indexBy($list, $property, $mode=self::INDEX_DUPE_CONTINUE)
-    {
-        $index = array();
-        foreach ($list as $i) {
-            if ($mode === self::INDEX_DUPE_FAIL && isset($index[$i->$property])) {
-                throw new \UnexpectedValueException("Duplicate value for property $property");
-            }
-            $index[$i->$property] = $i;
-        }
-        return $index;
-    }
-    
-    /**
-     * Create a one-dimensional associative array from a list of objects, or a list of 2-tuples.
-     * 
-     * @param object[]|array $list
-     * @param string $keyProperty
-     * @param string $valueProperty
-     * @return array
-     */
-    public function keyValue($list, $keyProperty=null, $valueProperty=null)
-    {
-        $index = array();
-        foreach ($list as $i) {
-            if ($keyProperty) {
-                if (!$valueProperty) { 
-                    throw new \InvalidArgumentException("Must set value property if setting key property");
-                }
-                $index[$i->$keyProperty] = $i->$valueProperty;
-            }
-            else {
-                $key = current($i);
-                next($i);
-                $value = current($i);
-                $index[$key] = $value;
-            }
-        }
-        return $index;
-    }
-    
-    /**
-     * Retrieve all object child values through a property path.
-     * 
-     * @param object[] $objects
-     * @param string|array $path
-     * @return array
-     */
-    public function getChildren($objects, $path)
-    {
-        $array = array();
-        if (!is_array($path)) {
-            $path = explode('/', $path);
-        }
-        if (!is_array($objects)) {
-            $objects = array($objects);
-        }
-        
-        $count = count($path);
-        
-        foreach ($objects as $o) {
-            $value = $o->{$path[0]};
-            
-            if (is_array($value) || $value instanceof \Traversable) {
-                $array = array_merge($array, $value);
-            }
-            elseif ($value !== null) {
-                $array[] = $value;
-            }
-        }
-        
-        if ($count > 1) {
-            $array = $this->getChildren($array, array_slice($path, 1));
-        }
-        
-        return $array;
-    }
-    
+  
     /**
      * @param string|\PDOStatement $stmt
      * @param array $params

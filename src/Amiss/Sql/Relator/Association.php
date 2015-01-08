@@ -1,8 +1,8 @@
 <?php
 namespace Amiss\Sql\Relator;
 
-use Amiss\Sql\Query;
-use Amiss\Sql\RelatorContext;
+use Amiss\Meta;
+use Amiss\Sql\Query\Criteria;
 use Amiss\Exception;
 
 /**
@@ -23,7 +23,11 @@ use Amiss\Exception;
  */
 class Association extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null, $stack=[])
+    public function getRelatedForList(Meta $meta, $source, $relationName, Criteria $criteria=null)
+    {
+    }
+
+    public function getRelated(Meta $meta, $source, $relationName, Criteria $criteria=null)
     {
         if (!$source) {
             return;

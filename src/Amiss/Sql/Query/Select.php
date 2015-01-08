@@ -12,7 +12,6 @@ class Select extends Criteria
     public $forUpdate = false;
     public $follow = true;
     public $with = [];
-    public $stack = [];
 
     public function getLimitOffset()
     {

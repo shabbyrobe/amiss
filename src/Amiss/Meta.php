@@ -41,6 +41,7 @@ class Meta
      */
     protected $fields;
     protected $allFields;
+    protected $properties;
     protected $parent;
     protected $columnToPropertyMap;
     
@@ -54,13 +55,14 @@ class Meta
     {
         // precache this stuff before serialization
         $this->getFields();
+        $this->getProperties();
         $this->getDefaultFieldType();
         $this->getColumnToPropertyMap();
 
         return array(
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
-            'indexes', 'constructor', 'constructorArgs', 'ext',
+            'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
         ); 
     }
 
@@ -107,6 +109,9 @@ class Meta
     private function setRelations($relations)
     {
         foreach ($relations as $id=>$r) {
+            if (isset($r['on'])) {
+                throw new Exception("Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to'");
+            }
             $r['name'] = $id;
             $this->relations[$id] = $r;
             if (isset($r['auto']) && $r['auto']) {
@@ -119,9 +124,6 @@ class Meta
     {
         foreach ($args as $arg) {
             $this->constructorArgs[] = $arg;
-            if ($arg[0] == 'property') {
-                $this->fields[$arg[1]]['constructor'] = true;
-            }
         }
     }
 
@@ -169,8 +171,23 @@ class Meta
             
             $this->allFields = $fields ?: array();
         }
-        
+
         return $this->allFields;
+    }
+
+    public function getProperties()
+    {
+        if ($this->properties === null) {
+            foreach ($this->getFields() as $name=>$field) {
+                $field['source'] = 'field';
+                $this->properties[$name] = $field;
+            }
+            foreach ($this->relations as $name=>$relation) {
+                $field['source'] = 'relation';
+                $this->properties[$name] = $relation;
+            }
+        }
+        return $this->properties;
     }
 
     public function getColumnToPropertyMap()

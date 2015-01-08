@@ -78,7 +78,7 @@ class TestMapper extends \Amiss\Mapper
 
     function createObject($meta, $row, $args=null) {}
     
-    function populateObject($meta, $object, array $mapped) {}
+    function populateObject($meta, $object, \stdClass $mapped) {}
 
     function fromObject($meta, $object, $context=null) {}
     

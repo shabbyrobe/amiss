@@ -34,12 +34,13 @@ class RelatorOneManyTest extends \CustomTestCase
     public function testGetOneToOne()
     {
         $this->createSinglePrimaryMeta();
+        $meta = $this->mapper->getMeta('DummyChild');
         
         $source = new \DummyChild;
         $source->childId = 1;
         $source->childParentId = 2;
 
-        list ($class, $query) = $this->captureRelatedQuery($source, 'parent');
+        list ($class, $query) = $this->captureRelatedQuery($meta, $source, $meta->relations['parent']);
         $this->assertEquals('DummyParent', $class);
         $this->assertEquals('`parent_id` IN(:r_parent_id)', $query->where);
         $this->assertEquals(array('r_parent_id'=>array(2)), $query->params);
@@ -48,16 +49,17 @@ class RelatorOneManyTest extends \CustomTestCase
     public function testGetOneToMany()
     {
         $this->createSinglePrimaryMeta();
+        $meta = $this->mapper->getMeta('DummyParent');
         $source = new \DummyParent;
         $source->parentId = 1;
         
-        list ($class, $query) = $this->captureRelatedQuery($source, 'children');
+        list ($class, $query) = $this->captureRelatedQuery($meta, $source, $meta->relations['children']);
         $this->assertEquals('DummyChild', $class);
         $this->assertEquals('`child_parent_id` IN(:r_child_parent_id)', $query->where);
         $this->assertEquals(array('r_child_parent_id'=>array(1)), $query->params);
     }
 
-    protected function captureRelatedQuery($source, $relation)
+    protected function captureRelatedQuery($meta, $source, $relation)
     {
         $capture = null;
 
@@ -66,15 +68,14 @@ class RelatorOneManyTest extends \CustomTestCase
                 $capture = func_get_args();
             }
         ));
-        
-        $this->relator->getRelated($source, $relation);
+
+        $this->relator->getRelated($meta, $source, $relation);
         
         return $capture;
     }
     
     protected function createSinglePrimaryMeta()
     {
-        $source = new \DummyParent();
         $metaIndex = array();
         
         $this->mapper->meta['DummyChild'] = new \Amiss\Meta('DummyChild', 'child', array(

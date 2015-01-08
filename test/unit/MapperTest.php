@@ -249,6 +249,7 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObject()
     {
@@ -266,6 +267,7 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectPropertyArgs()
     {
@@ -287,6 +289,7 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectArgs()
     {
@@ -304,6 +307,7 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectMixedArgs()
     {
@@ -326,6 +330,35 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectRelations()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'relations'=>[
+                'rel1'=>['one', 'from'=>'foo'],
+                'rel2'=>['one', 'from'=>'bar'],
+            ],
+            'constructorArgs'=>[
+                ['property', 'rel1'],
+                ['property', 'rel2'],
+            ],
+        ]);
+        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo']);
+        $this->assertEquals(['yep', 'woo'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertEquals('bar', $obj->b);
+        $this->assertFalse(isset($obj->rel1));
+        $this->assertFalse(isset($obj->rel2));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectDefaultConstructor()
     {
@@ -343,6 +376,7 @@ class MapperTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectStaticConstructor()
     {

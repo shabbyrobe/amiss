@@ -102,40 +102,4 @@ abstract class Base implements \Amiss\Sql\Relator
         
         return [$from, $to];
     }
-
-    public function assignRelated(array $source, array $result, $relation)
-    {
-        $relatedMeta = null;
-
-        // if the relation is a many relation and the inverse property is
-        // specified, we want to populate the 'one' side of the relation
-        // with the source
-        if (isset($relation['inverse'])) {
-            $relatedMeta = $this->manager->getMeta($relation['of']);
-            $relatedRelation = $relatedMeta->relations[$relation['inverse']];
-        }
-
-        foreach ($result as $idx=>$item) {
-            // no read only support... why would you be assigning relations to
-            // a read only object?
-            if (!isset($relation['setter'])) {
-                $source[$idx]->{$relation['name']} = $item;
-            } else {
-                call_user_func(array($source[$idx], $relation['setter']), $item);
-            }
-
-            if ($relatedMeta) {
-				if ($relation[0] == 'one') {
-					$item = [$item];
-                }
-                foreach ($item as $i) {
-                    if (!isset($relatedRelation['setter'])) {
-                        $i->{$relatedRelation['name']} = $source[$idx];
-                    } else {
-                        call_user_func(array($i, $relatedRelation['setter']), $i);
-                    }
-                }
-            }
-        }
-    }
 }

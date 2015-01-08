@@ -121,8 +121,7 @@ class ActiveRecordTest extends \DataTestCase
         $manager->expects($this->once())->method('getRelated')->with(
             $this->containsOnlyInstancesOf(__NAMESPACE__.'\TestRelatedChild'),
             $this->equalTo('parent'),
-            $this->isNull(),
-            $this->anything()
+            $this->equalTo(['stack'=>[]])
         )->will($this->returnValue([999]));
 
         $child = new TestRelatedChild;
@@ -270,12 +269,15 @@ class TestRelatedChild extends \Amiss\Sql\ActiveRecord
     /** @primary */
     public $childId;
     
-    /** @field */
+    /**
+     * @field 
+     * @index
+     */
     public $parentId;
     
     /**
      * @has.one.of TestRelatedParent
-     * @has.one.on parentId
+     * @has.one.from parentId
      */
     public $parent;
 }

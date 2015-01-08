@@ -65,18 +65,17 @@ abstract class Mapper
         if (!$fieldMap) { $fieldMap = $meta->getColumnToPropertyMap(); }
 
         $mapped = [];
-        $fields = $meta->getFields();
+        $properties = $meta->getProperties();
         $defaultType = null;
 
         foreach ($input as $col=>$value) {
-            if (!isset($fieldMap[$col])) {
+            $propId = isset($fieldMap[$col]) ? $fieldMap[$col] : $col;
+            if (!isset($properties[$propId])) {
                 continue;
-                // throw new \UnexpectedValueException("Unexpected key $col in input");
             }
 
-            $prop = $fieldMap[$col];
-            $field = $fields[$prop];
-            $type = $field['type'];
+            $property = $properties[$propId];
+            $type = isset($property['type']) ? $property['type'] : null;
             if (!$type) {
                 if ($defaultType === null) {
                     $defaultType = $meta->getDefaultFieldType() ?: false;
@@ -90,17 +89,17 @@ abstract class Mapper
                     $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
                 if ($this->typeHandlerMap[$typeId]) {
-                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $field, $input);
+                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $property, $input);
                 }
             }
 
-            if (isset($mapped[$prop])) {
+            if (isset($mapped[$propId])) {
                 throw new \UnexpectedValueException();
             }
-            $mapped[$prop] = $value;
+            $mapped[$propId] = $value;
         }
 
-        return $mapped;
+        return (object) $mapped;
     }
 
     /**
@@ -155,15 +154,12 @@ abstract class Mapper
             $actualArgs = [];
             foreach ($meta->constructorArgs as list($type, $id)) {
                 switch ($type) {
-                case 'relation':
-                    throw new \Exception("Not yet supported");
-                break;
-
                 case 'property':
-                    if (!isset($mapped[$id])) {
+                    if (!isset($mapped->{$id})) {
                         throw new Exception("Missing constructor arg property $id when building class {$meta->class}");
                     }
-                    $actualArgs[] = $mapped[$id];
+                    $actualArgs[] = $mapped->{$id};
+                    unset($mapped->{$id});
                 break;
 
                 case 'arg':
@@ -213,23 +209,20 @@ abstract class Mapper
      * @param array  $mapped Input after mappiing to property names and type handling
      * @return void
      */
-    public function populateObject($meta, $object, array $mapped)
+    public function populateObject($meta, $object, \stdClass $mapped)
     {
         if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
 
-        $fields = $meta->getFields();
+        $properties = $meta->getProperties();
         foreach ($mapped as $prop=>$value) {
-            $field = $fields[$prop];
-            if (isset($field['constructor']) && $field['constructor']) {
-                continue;
-            }
-            if (!isset($field['setter'])) {
+            $property = $properties[$prop];
+            if (!isset($property['setter'])) {
                 $object->{$prop} = $value;
             }
             else {
                 // false setter means read only
-                if ($field['setter'] !== false) {
-                    call_user_func(array($object, $field['setter']), $value);
+                if ($property['setter'] !== false) {
+                    call_user_func(array($object, $property['setter']), $value);
                 }
             }
         }

@@ -8,6 +8,9 @@ class Criteria extends Sql\Query
     public $table;
     public $where;
     public $params=array();
+
+    // this hack is for the auto relations circular ref hack
+    public $stack = [];
     
     public function buildClause($meta)
     {
