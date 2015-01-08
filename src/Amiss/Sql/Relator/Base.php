@@ -19,7 +19,9 @@ abstract class Base implements \Amiss\Sql\Relator
             $key = array();
             foreach ($on as $l=>$r) {
                 $lField = $lFields[$l];
-                $lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
+                $lValue = $object instanceof \stdClass || !isset($lField['getter']) 
+                    ? $object->$l 
+                    : call_user_func(array($object, $lField['getter']));
                 
                 $key[] = $lValue;
                 

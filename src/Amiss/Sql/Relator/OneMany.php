@@ -57,7 +57,9 @@ class OneMany extends Base
             
             foreach ($on as $l=>$r) {
                 $rField = $relatedFields[$r];
-                $rValue = !isset($rField['getter']) ? $related->$r : call_user_func(array($related, $rField['getter']));
+                $rValue = $related instanceof \stdClass || !isset($rField['getter']) 
+                    ? $related->$r 
+                    : call_user_func(array($related, $rField['getter']));
                 $key[] = $rValue;
             }
             $key = !isset($key[1]) ? $key[0] : implode('|', $key);
