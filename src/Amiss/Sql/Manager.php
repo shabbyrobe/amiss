@@ -501,7 +501,7 @@ class Manager
         
         $stmt = $this->getConnector()->prepare($sql);
         ++$this->queries;
-        $stmt->execute($params);
+        return $stmt->execute($params);
     }
     
     /**
