@@ -35,8 +35,9 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
 
         $primary = $this->meta->primary;
         $fields = $this->buildFields();
-        if (is_array($fields))
+        if (is_array($fields)) {
             $fields = implode(",\n  ", $fields);
+        }
         
         $query = "CREATE TABLE $table (\n  ";
         $query .= $fields;

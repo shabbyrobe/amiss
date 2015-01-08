@@ -24,27 +24,31 @@ abstract class TableBuilder
     
     public function __construct(Mapper $mapper, $class)
     {
-        if (!$this->engine)
+        if (!$this->engine) {
             throw new \UnexpectedValueException();
+        }
 
         $this->mapper = $mapper;
         
-        if ($class instanceof Meta)
+        if ($class instanceof Meta) {
             $this->meta = $class;
-        else
+        } else {
             $this->meta = $mapper->getMeta($class);
+        }
     }
 
     public static function create(Connector $connector, Mapper $mapper, $classes)
     {
-        foreach (static::createSQL($connector, $mapper, (array) $classes) as $classQueries)
+        foreach (static::createSQL($connector, $mapper, (array) $classes) as $classQueries) {
             $connector->execAll($classQueries);
+        }
     }
 
     public static function createSQL($engine, Mapper $mapper, $classes)
     {
-        if ($engine instanceof Connector)
+        if ($engine instanceof Connector) {
             $engine = $engine->engine;
+        }
 
         $single = false;
         if (is_string($classes)) {
@@ -64,10 +68,11 @@ abstract class TableBuilder
             $queries[$class] = $builder->buildTableQueries();
         }
 
-        if ($single)
+        if ($single) {
             return current($queries);
-        else
+        } else {
             return $queries;
+        }
     }
 
     public function getClass()
@@ -89,10 +94,13 @@ abstract class TableBuilder
             $handler = $this->mapper->determineTypeHandler($info['type']['id']);
             if ($handler) {
                 $new = $handler->createColumnType($this->engine);
-                if ($new) $colType = $new;
+                if ($new) { 
+                    $colType = $new;
+                }
             }
-            if (!$colType)
+            if (!$colType) {
                 $colType = $info['type']['id'];
+            }
         }
 
         $current .= $colType ?: $default;
@@ -102,31 +110,35 @@ abstract class TableBuilder
     protected function buildFields()
     {
         $fields = $this->meta->getFields();
-        if (!$fields)
+        if (!$fields) {
             throw new Exception("No fields defined for {$this->meta->class}");
+        }
 
         $primary = $this->meta->primary;
         
         $defaultType = $this->meta->getDefaultFieldType();
-        if (!$defaultType)
+        if (!$defaultType) {
             $defaultType = $this->defaultFieldType;
+        }
 
         $f = array();
         $found = array();
         
         // make sure the primary key ends up first
         $pFieldIds = [];
-        foreach ($this->meta->primary as $p)
+        foreach ($this->meta->primary as $p) {
             $pFieldIds[$p] = true;
+        }
 
         $pFieldOut = [];
         $fieldOut = [];
         foreach ($fields as $id=>$info) {
             $f = $this->buildField($id, $info, $defaultType);
-            if (isset($pFieldIds[$id]))
+            if (isset($pFieldIds[$id])) {
                 $pFieldOut[$id] = $f;
-            else
+            } else {
                 $fieldOut[$id] = $f;
+            }
         }
         
         return array_merge($pFieldOut, $fieldOut);

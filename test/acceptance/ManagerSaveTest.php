@@ -54,6 +54,12 @@ class ManagerSaveTest extends \ModelDataTestCase
         $this->assertEquals("Yep yep yep", $found->name);
     }
 
+    function testUpdateRowCount()
+    {
+        // there are 3 artist types in the test data, this should only affect 2 of them
+        $this->assertEquals(2, $this->manager->update('ArtistType', ['type'=>'Band'], '1=1'));
+    }
+
     /**
      * @group acceptance
      * @group manager
@@ -61,7 +67,10 @@ class ManagerSaveTest extends \ModelDataTestCase
     public function testSaveFailsWhenAutoincNotDeclared()
     {
         $object = new Demo\EventArtist();
-        $this->setExpectedException('Amiss\Exception', "Manager requires a single-column autoincrement primary if you want to call 'save'");
+        $this->setExpectedException(
+            'Amiss\Exception', 
+            "Manager requires a single-column autoincrement primary if you want to call 'save'"
+        );
         $this->manager->save($object);
     }
 }

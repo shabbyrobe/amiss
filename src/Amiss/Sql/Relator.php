@@ -1,9 +1,12 @@
 <?php
 namespace Amiss\Sql;
 
+use Amiss\Meta;
+use Amiss\Sql\Query\Criteria;
+
 interface Relator
 {
-    function getRelated($source, $relationName, $criteria=null, $stack=[]);
+    function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null);
 
-    function assignRelated(array $source, array $result, $relation);
+    function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null);
 }

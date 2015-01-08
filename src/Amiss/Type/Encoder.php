@@ -19,12 +19,12 @@ class Encoder implements Handler
         $this->innerHandler = $innerHandler;
     }
 
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         $return = null;
         if ($value) {
             if ($this->innerHandler)
-                $value = $this->innerHandler->prepareValueForDb($value, $object, $fieldInfo);
+                $value = $this->innerHandler->prepareValueForDb($value, $fieldInfo);
             
             if ($value)
                 $return = call_user_func($this->serialiser, $value);
@@ -32,14 +32,14 @@ class Encoder implements Handler
         return $return;
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         $return = null;
         if ($value) {
             $return = call_user_func($this->deserialiser, $value);
             
             if ($this->innerHandler)
-                $return = $this->innerHandler->handleValueFromDb($return, $object, $fieldInfo, $row);
+                $return = $this->innerHandler->handleValueFromDb($return, $fieldInfo, $row);
         }
         return $return;
     }

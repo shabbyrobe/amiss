@@ -1,0 +1,7 @@
+<?php
+require __DIR__."/vendor/autoload.php";
+
+// $boris->setLocal(['memFs'=>$memFs]);
+
+echo "Amiss Boris\n\n";
+

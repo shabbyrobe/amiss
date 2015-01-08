@@ -15,14 +15,14 @@ class DateTest extends \CustomTestCase
     public function testUnixPrepareForDb()
     {
         $handler = new \Amiss\Sql\Type\Date('U', 'UTC', 'UTC');
-        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 01:00:00', 'UTC'), null, array());
+        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 01:00:00', 'UTC'), array());
         $this->assertEquals(1325379600, $out);
     }
     
     public function testUnixHandleFromDb()
     {
         $handler = new \Amiss\Sql\Type\Date('U', 'UTC', 'UTC');
-        $out = $handler->handleValueFromDb(1325379600, null, array(), array());
+        $out = $handler->handleValueFromDb(1325379600, array(), array());
         
         $expected = $this->createDate('2012-01-01 01:00:00', 'UTC');
         $this->assertEquals($expected, $out);
@@ -31,7 +31,7 @@ class DateTest extends \CustomTestCase
     public function testUnixHandleFromDbWithTimeZone()
     {
         $handler = new \Amiss\Sql\Type\Date('U', 'UTC', 'Australia/Melbourne');
-        $out = $handler->handleValueFromDb(1, null, array(), array());
+        $out = $handler->handleValueFromDb(1, array(), array());
         
         $expected = $this->createDate('1970-01-01 10:00:01', 'Australia/Melbourne');
         $this->assertEquals($expected, $out);
@@ -40,7 +40,7 @@ class DateTest extends \CustomTestCase
     public function testUnixHandleZeroFromDb()
     {
         $handler = new \Amiss\Sql\Type\Date('U', 'UTC', 'UTC');
-        $out = $handler->handleValueFromDb(0, null, array(), array());
+        $out = $handler->handleValueFromDb(0, array(), array());
         $expected = $this->createDate('1970-01-01 00:00:00', 'UTC');
         $this->assertEquals($expected, $out);
     }
@@ -53,7 +53,7 @@ class DateTest extends \CustomTestCase
         // Handler order is deliberate - it ensures that the third one is picked up before the second when the
         // incoming value contains the extra values.
         $handler = new \Amiss\Sql\Type\Date(array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i'), 'Australia/Melbourne', 'Australia/Melbourne');
-        $out = $handler->handleValueFromDb($value, null, array(), array());
+        $out = $handler->handleValueFromDb($value, array(), array());
         $expected = \DateTime::createFromFormat($format, $value, new \DateTimeZone('Australia/Melbourne')); 
         $this->assertEquals($expected, $out);
     }
@@ -73,7 +73,7 @@ class DateTest extends \CustomTestCase
     public function testDateTimeHandleFromDbWithEmptyValueReturnsNull($value)
     {
         $handler = new \Amiss\Sql\Type\Date("datetime", 'Australia/Melbourne', 'Australia/Melbourne');
-        $out = $handler->handleValueFromDb($value, null, array(), array());
+        $out = $handler->handleValueFromDb($value, array(), array());
         $this->assertNull($out);
     }
 
@@ -90,20 +90,20 @@ class DateTest extends \CustomTestCase
     {
         $handler = new \Amiss\Sql\Type\Date(array('Y-m-d H:i:s'), 'Australia/Melbourne', 'Australia/Melbourne');
         $this->setExpectedException('UnexpectedValueException', 'Date \'2012-03-04\' could not be handled with any of the following formats: Y-m-d H:i:s');
-        $out = $handler->handleValueFromDb('2012-03-04', null, array(), array());
+        $out = $handler->handleValueFromDb('2012-03-04', array(), array());
     }
 
     public function testDateTimePrepareForDb()
     {
         $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'Australia/Melbourne', 'Australia/Melbourne');
-        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 12:00:00', 'Australia/Melbourne'), null, array());
+        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 12:00:00', 'Australia/Melbourne'), array());
         $this->assertEquals('2012-01-01 12:00:00', $out);
     }
     
     public function testDateTimePrepareForDbWithDifferentDbTimeZone()
     {
         $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'Australia/Melbourne');
-        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 12:00:00', 'Australia/Melbourne'), null, array());
+        $out = $handler->prepareValueForDb($this->createDate('2012-01-01 12:00:00', 'Australia/Melbourne'), array());
         
         // Date should be converted to UTC before save
         $this->assertEquals('2012-01-01 01:00:00', $out);
@@ -121,7 +121,7 @@ class DateTest extends \CustomTestCase
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
         $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
-        $out = $handler->prepareValueForDb(new PantsDateTime('2015-01-01', $tz), null, array());
+        $out = $handler->prepareValueForDb(new PantsDateTime('2015-01-01', $tz), array());
         $this->assertEquals('2015-01-01 00:00:00', $out);
     }
 
@@ -130,7 +130,7 @@ class DateTest extends \CustomTestCase
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
         $handler = new \Amiss\Sql\Type\Date('Y-m-d H:i:s', 'UTC', 'UTC', $class); 
-        $out = $handler->handleValueFromDb('2015-01-01 00:00:00', null, [], array());
+        $out = $handler->handleValueFromDb('2015-01-01 00:00:00', [], array());
         $this->assertInstanceOf($class, $out);
     }
 
@@ -144,7 +144,7 @@ class DateTest extends \CustomTestCase
             'UnexpectedValueException',
             "Date value was invalid. Expected $class, found DateTime"
         );
-        $out = $handler->prepareValueForDb(new \DateTime('2015-01-01', $tz), null, array());
+        $out = $handler->prepareValueForDb(new \DateTime('2015-01-01', $tz), array());
     }
 
     public function testDateTimeCustomClassFailsWhenPassedString()
@@ -157,7 +157,7 @@ class DateTest extends \CustomTestCase
             'UnexpectedValueException',
             "Date value was invalid. Expected $class, found string"
         );
-        $out = $handler->prepareValueForDb('2015-01-01', null, array());
+        $out = $handler->prepareValueForDb('2015-01-01', array());
     }
 }
 

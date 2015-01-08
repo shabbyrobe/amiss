@@ -19,7 +19,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('fromObject');
-        $mapper->fromObjects('foo', array('a', 'b'), null);
+        $mapper->fromObjects(array('a', 'b'), null, 'foo');
     }
     
     /**
@@ -32,7 +32,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->never())->method('fromObject');
-        $mapper->fromObjects('foo', null, null);
+        $mapper->fromObjects(null, null, 'foo');
     }
 
     /**
@@ -57,7 +57,7 @@ class MapperTest extends \CustomTestCase
             ],
         ]);
         $obj = (object)['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
-        $row = $mapper->fromObject($meta, $obj);
+        $row = $mapper->fromObject($obj, $meta);
         $this->assertEquals(['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0], $row);
     }
  
@@ -84,7 +84,7 @@ class MapperTest extends \CustomTestCase
         ]);
         $input = ['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
         $obj = (object)$input;
-        $row = $mapper->fromObject($meta, $obj);
+        $row = $mapper->fromObject($obj, $meta);
         $this->assertEquals($input, $row);
     }
 
@@ -98,7 +98,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('toObject');
-        $mapper->toObjects('foo', array('a', 'b'), null);
+        $mapper->toObjects(array('a', 'b'), null, 'foo');
     }
     
     /**
@@ -248,33 +248,126 @@ class MapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObject()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $meta = new \Amiss\Meta('stdClass', 'test_table', [
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ]
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
         $this->assertInstanceOf('stdClass', $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectPropertyArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['property', 'b'],
+                ['property', 'a'],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
+        $this->assertEquals(['bar', 'foo'], $obj->args);
+        $this->assertFalse(isset($obj->a));
+        $this->assertFalse(isset($obj->b));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], ['bar', 'foo'], $meta);
+        $this->assertEquals(['bar', 'foo'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertEquals('bar', $obj->b);
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectMixedArgs()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['arg', 1],
+                ['property', 'b'],
+                ['arg', 0],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], ['baz', 'qux'], $meta);
+        $this->assertEquals(['qux', 'bar', 'baz'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertFalse(isset($obj->b));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectRelations()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'relations'=>[
+                'rel1'=>['one', 'from'=>'foo'],
+                'rel2'=>['one', 'from'=>'bar'],
+            ],
+            'constructorArgs'=>[
+                ['property', 'rel1'],
+                ['property', 'rel2'],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo'], null, $meta);
+        $this->assertEquals(['yep', 'woo'], $obj->args);
+        $this->assertEquals('foo', $obj->a);
+        $this->assertEquals('bar', $obj->b);
+        $this->assertFalse(isset($obj->rel1));
+        $this->assertFalse(isset($obj->rel2));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectDefaultConstructor()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
         $meta = new \Amiss\Meta($class, 'test_table', [
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $obj = $mapper->toObject(['a'=>'foo'], null, $meta);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);
@@ -282,17 +375,18 @@ class MapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Base::createObject
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
      */
     public function testCreateObjectStaticConstructor()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
         $meta = new \Amiss\Meta($class, 'test_table', [
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
             'constructor'=>'staticConstruct',
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $obj = $mapper->toObject(['a'=>'foo'], null, $meta);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);
@@ -304,16 +398,19 @@ class TestCreateObject
 {
     public $constructCalled = false;
     public $staticConstructCalled = false;
+    public $args;
 
     public function __construct()
     {
         $this->constructCalled = true;
+        $this->args = func_get_args();
     }
 
     public static function staticConstruct()
     {
         $o = new static;
         $o->staticConstructCalled = true;
+        $o->args = func_get_args();
         return $o;
     }
 }

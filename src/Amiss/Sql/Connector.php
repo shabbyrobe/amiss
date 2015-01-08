@@ -84,6 +84,11 @@ class Connector
         $this->connectionStatements = $connectionStatements ?: array();
     }
     
+    public function __destruct()
+    {
+        $this->pdo = null;
+    }
+
     /**
      * @ignore
      */
@@ -106,26 +111,31 @@ class Connector
         
         foreach ($params as $k=>$v) {
             $k = strtolower($k);
-            if (strpos($k, "host")===0 || $k == 'server' || $k == 'sys')
+            if (strpos($k, "host")===0 || $k == 'server' || $k == 'sys') {
                 $host = $v;
-            elseif ($k=='port')
+            } elseif ($k=='port') {
                 $port = $v;
-            elseif ($k=="database" || strpos($k, "db")===0)
+            } elseif ($k=="database" || strpos($k, "db")===0) {
                 $database = $v;
-            elseif ($k[0] == 'p')
+            } elseif ($k[0] == 'p') {
                 $password = $v;
-            elseif ($k[0] == 'u')
+            } elseif ($k[0] == 'u') {
                 $user = $v;
-            elseif ($k=='options' || $k=='driveroptions')
+            } elseif ($k=='options' || $k=='driveroptions') {
                 $options = $v;
-            elseif ($k=='connectionstatements' || $k=='statements')
+            } elseif ($k=='connectionstatements' || $k=='statements') {
                 $connectionStatements = $v;
+            }
         }
        
         if (!isset($params['dsn'])) {
             $dsn = (isset($params['engine']) ? $params['engine'] : 'mysql').":host={$host};";
-            if ($port) $dsn .= "port=".$port.';';
-            if (!empty($database)) $dsn .= "dbname={$database};";
+            if ($port) {
+                $dsn .= "port=".$port.';';
+            }
+            if (!empty($database)) {
+                $dsn .= "dbname={$database};";
+            }
         }
         else {
             $dsn = $params['dsn'];
@@ -146,12 +156,13 @@ class Connector
     {
         $pdo = new \PDO($this->dsn, $this->username, $this->password, $this->driverOptions);
         
-        if (!isset($this->attributes[\PDO::ATTR_ERRMODE]))
+        if (!isset($this->attributes[\PDO::ATTR_ERRMODE])) {
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        
+        }
         if ($this->attributes) {
-            foreach ($this->attributes as $k=>$v)
+            foreach ($this->attributes as $k=>$v) {
                 $pdo->setAttribute($k, $v);
+            }
         }
         $this->attributes = null;
         
@@ -169,7 +180,9 @@ class Connector
     
     public function ensurePDO()
     {
-        if ($this->pdo == null) throw new \PDOException("Not connected");
+        if ($this->pdo == null) {
+            throw new \PDOException("Not connected");
+        }
     }
 
     public function connect()
@@ -264,14 +277,20 @@ class Connector
 
     public function execAll($statements, $transaction=false)
     {
-        if (!$statements)
+        if (!$statements) {
             throw new \InvalidArgumentException();
+        }
 
         $out = [];
-        if ($transaction) $this->beginTransaction();
-        foreach ($statements as $k=>$statement)
+        if ($transaction) {
+            $this->beginTransaction();
+        }
+        foreach ($statements as $k=>$statement) {
             $out[$k] = $this->getPDO()->exec($statement);
-        if ($transaction) $this->commit();
+        }
+        if ($transaction) {
+            $this->commit();
+        }
         return $out;
     }
     

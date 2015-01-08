@@ -67,12 +67,12 @@ class TestTypeHandler implements \Amiss\Type\Handler
         $this->garbage = $garbage;
     }
     
-    public function prepareValueForDb($value, $object, array $fieldInfo)
+    public function prepareValueForDb($value, array $fieldInfo)
     {
         return $this->garbage.'HANDLED'.$this->garbage;
     }
     
-    public function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    public function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return $this->garbage.$value.$this->garbage;
     }
@@ -100,12 +100,12 @@ class TestCustomFieldTypeRecord extends \Amiss\Sql\ActiveRecord
 
 class TestCustomFieldTypeHandler implements \Amiss\Type\Handler
 {
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         return "db-$value";
     }
     
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return "value-$value"; 
     }

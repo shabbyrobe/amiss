@@ -30,7 +30,6 @@ class Note extends \Amiss\Mapper\Base
         if ($this->cache) {
             $meta = $this->cache->get($class);
         }
-        
         if (!$meta) {
             $meta = $this->loadMeta($class);
             if ($this->cache) {
@@ -45,8 +44,9 @@ class Note extends \Amiss\Mapper\Base
     {
         $ref = new \ReflectionClass($class);
         
-        if (!$this->parser)
+        if (!$this->parser) {
             $this->parser = new \Amiss\Note\Parser;
+        }
         
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
@@ -65,14 +65,25 @@ class Note extends \Amiss\Mapper\Base
             'relations'=>array(),
             'ext'=>isset($classNotes['ext']) ? $classNotes['ext'] : null,
             'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
+            'constructor'=>null,
+            'constructorArgs'=>[],
         );
 
         if (isset($classNotes['index'])) {
             $info['indexes'] = $classNotes['index'];
         }
-
-        if (isset($classNotes['constructor']))
-            $info['constructor'] = $classNotes['constructor'];
+        if (isset($classNotes['constructor'])) {
+            if (is_string($classNotes['constructor'])) {
+                $info['constructor'] = $classNotes['constructor'];
+            }
+            elseif (is_array($classNotes['constructor'])) {
+                $info['constructor'] = $classNotes['constructor']['name'];
+                $info['constructorArgs'] = $this->parseConstructorArgs($classNotes['constructor']['args']);
+            }
+            else {
+                throw new \Exception("Constructor annotation for class {$class} must be string or array");
+            }
+        }
 
         $setters = array();
         
@@ -81,73 +92,83 @@ class Note extends \Amiss\Mapper\Base
         $fieldIndexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
+                $key = null;
                 $field = null;
                 $relationNote = null;
-                
-                if (isset($itemNotes['field']))
-                    $field = $itemNotes['field'] !== true ? $itemNotes['field'] : false;
-                
-                if (isset($itemNotes['has']))
-                    $relationNote = $itemNotes['has'];
 
-                if (isset($itemNotes['index'])) {
+                if (isset($itemNotes['field'])) {
+                    $field = $itemNotes['field'] !== true ? $itemNotes['field'] : true;
+                }
+                if (isset($itemNotes['primary']) && !$field) {
+                    $field = true;
+                }
+
+                // $key is set by this block
+                if ($field !== null) {
+                    $fieldInfo = array();
+
+                    if ($type == 'method') {
+                        list ($key, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
+                    } else {
+                        $key = $name;
+                    }
+                    if ($field !== true) {
+                        $fieldInfo['name'] = $field;
+                    }
+                    $fieldInfo['type'] = isset($itemNotes['type']) 
+                        ? $itemNotes['type'] 
+                        : null
+                    ;
+                    $info['fields'][$key] = $fieldInfo;
+                }
+
+                if ($key && isset($itemNotes['primary'])) {
+                    $info['primary'][] = $key;
+                }
+
+                if ($key && isset($itemNotes['index'])) {
                     $indexNote = $itemNotes['index'];
                     if ($indexNote === true) {
-                        $indexNote = [$name=>true];
+                        $indexNote = [$key=>true];
                     }
                     elseif (is_string($indexNote)) {
                         $indexNote = [$indexNote=>true];
                     }
 
                     foreach ($indexNote as $k=>$seq) {
-                        if ($seq === true)
-                            $seq = 0;
-                        else
-                            $seq = (int) $seq;
+                        $seq = $seq === true ? 0 : (int)$seq;
 
-                        if (isset($info['indexes'][$k]['fields'][$seq]))
+                        if (isset($info['indexes'][$k]['fields'][$seq])) {
                             throw new Exception("Duplicate sequence $seq for index $k");
-
+                        }
                         // hacky increment even if the key doesn't exist
                         $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
-                        $info['indexes'][$k]['fields'][$seq] = $name;
+                        $info['indexes'][$k]['fields'][$seq] = $key;
                     }
                 }
                 
-                if (isset($itemNotes['primary'])) {
-                    $info['primary'][] = $name;
-                    if (!$field) $field = $name;
-                }
-                
-                if ($field !== null) {
-                    $fieldInfo = array();
-                    
-                    if ($type == 'method') {
-                        list($name, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
-                    }
-                    
-                    if ($field && $field != $name) {
-                        $fieldInfo['name'] = $field;
+                if (isset($itemNotes['has'])) {
+                    if ($field) {
+                        throw new \UnexpectedValueException(
+                            "Invalid class {$class}: relation and a field declared together on {$name}"
+                        );
                     }
 
-                    $fieldInfo['type'] = isset($itemNotes['type']) 
-                        ? $itemNotes['type'] 
-                        : null
-                    ;
-
-                    $info['fields'][$name] = $fieldInfo;
-                }
-                
-                if ($relationNote !== null) {
-                    if ($field)
-                        throw new \UnexpectedValueException("Invalid class {$class}: relation and a field declared together on {$name}");
-                    
-                    if ($type == 'method') {
-                        if (!isset($itemNotes['getter'])) {
-                            $itemNotes['getter'] = $name;
-                        }
+                    if ($type == 'method' && (!isset($itemNotes['getter']) || !$itemNotes['getter'])) {
+                        $itemNotes['getter'] = $name;
                     }
                     $relationNotes[$name] = $itemNotes;
+                }
+
+                // look for the constructor!
+                if ($type == 'method' && isset($itemNotes['constructor'])) {
+                    if ($info['constructor']) {
+                        throw new \UnexpectedValueException("Constructor already declared: {$info['constructor']}");
+                    }
+                    $info['constructor'] = $name;
+                    if (isset($itemNotes['constructor']['args'])) {
+                        $info['constructorArgs'] = $this->parseConstructorArgs($itemNotes['constructor']['args']);
+                    }
                 }
             }
         }
@@ -170,6 +191,19 @@ class Note extends \Amiss\Mapper\Base
         
         return new \Amiss\Meta($class, $table, $info, $parent);
     }
+
+    protected function parseConstructorArgs($constructorArgs)
+    {
+        $args = [];
+        foreach ($constructorArgs as $idx=>$arg) {
+            $split = preg_split('/:\s*/', $arg, 2);
+            if (!$split[0] || !isset($split[1]) || $split[1] === null || $split[1] === '') {
+                throw new \UnexpectedValueException("Invalid arg specification. Expected 'type:id', found '$arg'");
+            }
+            $args[$idx] = [$split[0], $split[1]];
+        }
+        return $args;
+    }
     
     protected function findGetterSetter($name, $itemNotes, $readOnlyAllowed=false)
     {
@@ -177,11 +211,11 @@ class Note extends \Amiss\Mapper\Base
         $methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
         $name = lcfirst($methodWithoutPrefix);
 
-        if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNotes['readonly'])))
+        if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNotes['readonly']))) {
             $setter = false;
-        else
+        } else {
             $setter = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
-        
+        }
         return array($name, $getter, $setter);
     }
     
@@ -189,9 +223,9 @@ class Note extends \Amiss\Mapper\Base
     {
         $relations = array();
         
-        if (!$this->parser)
+        if (!$this->parser) {
             $this->parser = new \Amiss\Note\Parser;
-        
+        }
         foreach ($relationNotes as $name=>$info) {
             $relation = $info['has'];
             if (is_string($relation)) {
@@ -202,10 +236,10 @@ class Note extends \Amiss\Mapper\Base
                 $relation = current($relation);
                 array_unshift($relation, $id);
             }
-                
-            if (isset($info['getter']))
+
+            if (isset($info['getter'])) {
                 list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info, !'readOnly');
-            
+            }
             $relations[$name] = $relation;
         }
         return $relations;

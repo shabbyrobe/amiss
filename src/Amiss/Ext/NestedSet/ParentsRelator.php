@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Ext\NestedSet;
 
+use Amiss\Sql\Query\Criteria;
+use Amiss\Meta;
+
 class ParentsRelator extends Relator
 {
     public $nestedSetManager;
@@ -10,7 +13,12 @@ class ParentsRelator extends Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelated($source, $relationName, $criteria=null, $stack=[])
+    function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null)
+    {
+        throw new \Exception('not implemented');
+    }
+    
+    function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
         if ($criteria)
             throw new \InvalidArgumentException("Can't use criteria with parents relator");

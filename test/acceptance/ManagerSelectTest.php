@@ -293,7 +293,7 @@ class ManagerSelectTest extends \ModelDataTestCase
         $this->manager->connector->expects($this->never())->method('prepare');
         $artist = $this->manager->get('Artist', array('limit'=>2));
     }
-    
+
     /**
      * @group acceptance
      * @group manager

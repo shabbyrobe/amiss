@@ -2,8 +2,8 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\Query\Criteria;
-
 use Amiss\Demo;
+use Amiss\Functions;
 
 /**
  * @group acceptance
@@ -60,6 +60,9 @@ class ManagerRelationTest extends \ModelDataTestCase
         // TODO: improve checking
     }
  
+    /**
+     * @group relator-assoc
+     */
     public function testGetRelatedAssocForSingle()
     {
         $event = $this->manager->get('Event', 'eventId=1');
@@ -75,6 +78,9 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertEquals(array(1, 2, 3, 4, 5, 7), $ids);
     }
     
+    /**
+     * @group relator-assoc
+     */
     public function testGetRelatedAssocForList()
     {
         $events = $this->manager->getList('Event');
@@ -96,6 +102,9 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertEquals($expected, $ids);
     }
     
+    /**
+     * @group relator-assoc
+     */
     public function testGetRelatedAssocWithCriteria()
     { 
         $event = $this->manager->get('Event', 'eventId=1');
@@ -159,6 +168,9 @@ class ManagerRelationTest extends \ModelDataTestCase
         }
     }
 
+    /**
+     * @group relator-assoc
+     */
     public function testAssignRelatedDeepThroughAssocToSingle()
     {
         $event = $this->manager->getById('Event', 1);
@@ -167,7 +179,7 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->manager->assignRelated($event, 'artists');
         
         // Relation 2: populate each Artist object's artistType property
-        $this->manager->assignRelated($this->manager->getChildren($event, 'artists'), 'artistType');
+        $this->manager->assignRelated(Functions::getChildren($event, 'artists'), 'artistType');
         
         $this->assertInstanceOf('Amiss\Demo\Event', $event);
         $this->assertGreaterThan(0, count($event->artists));

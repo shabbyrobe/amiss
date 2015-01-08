@@ -117,6 +117,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     
     /**
      * @field
+     * @index
      */
     public $venueId;
     
@@ -148,7 +149,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     
     /**
      * @has.one.of VenueRecord
-     * @has.one.on venueId
+     * @has.one.from venueId
      */
     public function getVenue()
     {
@@ -211,7 +212,7 @@ class PlannedEvent extends EventRecord
     
     /**
      * @has.one.of VenueRecord
-     * @has.one.on venueId
+     * @has.one.from venueId
      * Note: relations are not inherited by the note mapper
      */
     public function getVenue()
@@ -229,6 +230,7 @@ class EventArtist extends \Amiss\Sql\ActiveRecord
     
     /**
      * @primary
+     * @index
      */
     public $artistId;
     
@@ -249,14 +251,13 @@ class EventArtist extends \Amiss\Sql\ActiveRecord
     
     /**
      * @has.one.of EventRecord
-     * @has.one.on eventId
      * @var Amiss\Demo\Active\EventRecord
      */
     public $event;
     
     /**
      * @has.one.of ArtistRecord
-     * @has.one.on artistId
+     * @has.one.from artistId
      * @var Amiss\Demo\Active\ArtistRecord
      */
     public $artist;

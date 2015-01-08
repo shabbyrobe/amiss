@@ -1,23 +1,17 @@
 <?php
 namespace Amiss\Test\Unit;
 
-use Amiss\Sql\Manager;
+use Amiss\Functions;
 
 /**
  * @group unit
  */
-class ManagerGetChildrenTest extends \CustomTestCase
+class FunctionsGetChildrenTest extends \CustomTestCase
 {
-    public function setUp()
-    {
-        parent::setUp();
-        $this->manager = new Manager(array(), new \Amiss\Mapper\Note);
-    }
-    
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetFirstLevelScalarChildrenWithStringPath()
     {
@@ -25,14 +19,14 @@ class ManagerGetChildrenTest extends \CustomTestCase
             (object)array('foo'=>(object)array('bar'=>'baz')),
             (object)array('foo'=>(object)array('bar'=>'qux')),
         );
-        $children = $this->manager->getChildren($objects, 'foo');
+        $children = Functions::getChildren($objects, 'foo');
         $this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
     }
     
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetFirstLevelScalarChildrenWithArrayPath()
     {
@@ -40,14 +34,14 @@ class ManagerGetChildrenTest extends \CustomTestCase
             (object)array('foo'=>(object)array('bar'=>'baz')),
             (object)array('foo'=>(object)array('bar'=>'qux')),
         );
-        $children = $this->manager->getChildren($objects, array('foo'));
+        $children = Functions::getChildren($objects, array('foo'));
         $this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
     }
     
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetSecondLevelScalarChildrenWithStringPath()
     {
@@ -55,14 +49,14 @@ class ManagerGetChildrenTest extends \CustomTestCase
             (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'qux'))),
             (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'doink'))),
         );
-        $children = $this->manager->getChildren($objects, 'foo/bar');
+        $children = Functions::getChildren($objects, 'foo/bar');
         $this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
     }
     
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetSecondLevelScalarChildrenWithArrayPath()
     {
@@ -70,14 +64,14 @@ class ManagerGetChildrenTest extends \CustomTestCase
             (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'qux'))),
             (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'doink'))),
         );
-        $children = $this->manager->getChildren($objects, array('foo', 'bar'));
+        $children = Functions::getChildren($objects, array('foo', 'bar'));
         $this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
     }
     
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetFirstLevelArrayChildren()
     {
@@ -85,14 +79,14 @@ class ManagerGetChildrenTest extends \CustomTestCase
             (object)array('foo'=>array((object)array('bar'=>'baz'),   (object)array('bar'=>'qux'))),
             (object)array('foo'=>array((object)array('bar'=>'doink'), (object)array('bar'=>'boing'))),
         );
-        $children = $this->manager->getChildren($objects, 'foo');
+        $children = Functions::getChildren($objects, 'foo');
         $this->assertEquals(array($objects[0]->foo[0], $objects[0]->foo[1], $objects[1]->foo[0], $objects[1]->foo[1]), $children);
     }
     
     /**
      * @group manager
      * 
-     * @covers Amiss\Sql\Manager::getChildren
+     * @covers Amiss\Functions::getChildren
      */
     public function testGetMultiLevelArrayChildren()
     {
@@ -118,7 +112,7 @@ class ManagerGetChildrenTest extends \CustomTestCase
             ))),
         );
         
-        $children = $this->manager->getChildren($objects, 'foo/bar');
+        $children = Functions::getChildren($objects, 'foo/bar');
         $this->assertEquals($result, $children);
     }
 }

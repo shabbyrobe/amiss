@@ -29,10 +29,11 @@ abstract class ActiveRecord
     public function save()
     {
         $manager = static::getDependency('manager');
-        if ($manager->shouldInsert($this))
+        if ($manager->shouldInsert($this)) {
             $this->insert();
-        else
+        } else {
             $this->update();
+        }
     }
     
     public function insert()
@@ -60,17 +61,20 @@ abstract class ActiveRecord
      */
     public static function getDependency($id, $class=null)
     {
-        if (!$class)
+        if (!$class) {
             $class = get_called_class();
+        }
         
         if (!isset(self::$services[$id][$class])) {
             $parent = get_parent_class($class);
-            if ($parent)
+            if ($parent) {
                 self::$services[$id][$class] = static::getDependency($id, $parent);
+            }
         }
         
-        if (!isset(self::$services[$id][$class]))
+        if (!isset(self::$services[$id][$class])) {
             throw new Exception("No manager defined against $class or any parent thereof");
+        }
         
         return self::$services[$id][$class];
     }
@@ -94,9 +98,9 @@ abstract class ActiveRecord
     public static function getMeta($class=null)
     {
         $class = $class ?: get_called_class();
-        if (!isset(self::$meta[$class]))
+        if (!isset(self::$meta[$class])) {
             self::$meta[$class] = static::getDependency('manager')->getMeta($class);
-        
+        }
         return self::$meta[$class];
     }
     
@@ -124,10 +128,11 @@ abstract class ActiveRecord
             array_unshift($args, $this);
         }
         
-        if ($exists)
+        if ($exists) {
             return call_user_func_array(array($manager, $name), $args);
-        else
+        } else {
             throw new \BadMethodCallException("Unknown method $name on class ".get_class($this));
+        }
     }
     
     /**
@@ -150,10 +155,11 @@ abstract class ActiveRecord
             $exists = true;
         }
         
-        if ($exists)
+        if ($exists) {
             return call_user_func_array(array($manager, $name), $args);
-        else
+        } else {
             throw new \BadMethodCallException("Unknown method $name");
+        }
     }
     
     /**

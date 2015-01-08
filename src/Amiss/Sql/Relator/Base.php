@@ -19,12 +19,15 @@ abstract class Base implements \Amiss\Sql\Relator
             $key = array();
             foreach ($on as $l=>$r) {
                 $lField = $lFields[$l];
-                $lValue = !isset($lField['getter']) ? $object->$l : call_user_func(array($object, $lField['getter']));
+                $lValue = $object instanceof \stdClass || !isset($lField['getter']) 
+                    ? $object->$l 
+                    : call_user_func(array($object, $lField['getter']));
                 
                 $key[] = $lValue;
                 
-                if (!isset($rFields[$r]))
+                if (!isset($rFields[$r])) {
                     throw new Exception("Field $r does not exist against relation for ".get_class($object));
+                }
                 
                 if (!isset($ids[$l])) {
                     $ids[$l] = array(
@@ -39,8 +42,9 @@ abstract class Base implements \Amiss\Sql\Relator
             
             $key = !isset($key[1]) ? $key[0] : implode('|', $key);
             
-            if (!isset($resultIndex[$key]))
+            if (!isset($resultIndex[$key])) {
                 $resultIndex[$key] = array();
+            }
             
             $resultIndex[$key][$idx] = $object;
         }
@@ -53,18 +57,21 @@ abstract class Base implements \Amiss\Sql\Relator
     // to be interfered with yet.
     protected function createOn($meta, $fromIndex, $relatedMeta, $toIndex)
     {
-        if (!isset($meta->indexes[$fromIndex]))
+        if (!isset($meta->indexes[$fromIndex])) {
             throw new Exception("Index $fromIndex does not exist on {$meta->class}");
-        if (!isset($relatedMeta->indexes[$toIndex]))
+        }
+        if (!isset($relatedMeta->indexes[$toIndex])) {
             throw new Exception("Index $toIndex does not exist on {$relatedMeta->class}");
+        }
 
         $on = [];
 
         // If an index exists, you don't need to join on all of it.
         // This assumes that the indexes are properly numbered. If not, BOOM!
         foreach ($meta->indexes[$fromIndex]['fields'] as $idx=>$fromField) {
-            if (!isset($relatedMeta->indexes[$toIndex]['fields'][$idx]))
+            if (!isset($relatedMeta->indexes[$toIndex]['fields'][$idx])) {
                 break;
+            }
             $on[$fromField] = $relatedMeta->indexes[$toIndex]['fields'][$idx];
         }
 
@@ -87,44 +94,14 @@ abstract class Base implements \Amiss\Sql\Relator
 
     protected function resolveInverse($relation, $relatedMeta)
     {
-        if (!isset($relatedMeta->relations[$relation['inverse']]))
+        if (!isset($relatedMeta->relations[$relation['inverse']])) {
             throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");
-        
+        }
+
         $inverseRel = $relatedMeta->relations[$relation['inverse']];
         $to = isset($inverseRel['from']) ? $inverseRel['from'] : 'primary';
         $from = isset($inverseRel['to']) ? $inverseRel['to'] : 'primary';
         
         return [$from, $to];
-    }
-
-    public function assignRelated(array $source, array $result, $relation)
-    {
-        $relatedMeta = null;
-
-        // if the relation is a many relation and the inverse property is
-        // specified, we want to populate the 'one' side of the relation
-        // with the source
-        if (isset($relation['inverse']) && $relation[0] == 'many') {
-            $relatedMeta = $this->manager->getMeta($relation['of']);
-            $relatedRelation = $relatedMeta->relations[$relation['inverse']];
-        }
-
-        foreach ($result as $idx=>$item) {
-            // no read only support... why would you be assigning relations to
-            // a read only object?
-            if (!isset($relation['setter']))
-                $source[$idx]->{$relation['name']} = $item;
-            else
-                call_user_func(array($source[$idx], $relation['setter']), $item);
-
-            if ($relatedMeta) {
-                foreach ($item as $i) {
-                    if (!isset($relatedRelation['setter']))
-                        $i->{$relatedRelation['name']} = $source[$idx];
-                    else
-                        call_user_func(array($i, $relatedRelation['setter']), $i);
-                }
-            }
-        }
     }
 }

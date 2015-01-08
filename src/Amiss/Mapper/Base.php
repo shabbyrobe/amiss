@@ -6,7 +6,7 @@ use Amiss\Meta;
 /**
  * @package Mapper
  */
-abstract class Base implements \Amiss\Mapper
+abstract class Base extends \Amiss\Mapper
 {
     public $unnamedPropertyTranslator;
     
@@ -27,8 +27,14 @@ abstract class Base implements \Amiss\Mapper
     
     public function getMeta($class)
     {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+        if (!is_string($class)) {
+            throw new \InvalidArgumentException();
+        }
         if (!isset($this->meta[$class])) {
-            $resolved = $this->resolveObjectname($class);
+            $resolved = $this->resolveObjectName($class);
             $this->meta[$class] = $this->createMeta($resolved);
         }
         return $this->meta[$class];
@@ -38,7 +44,7 @@ abstract class Base implements \Amiss\Mapper
 
     public function addTypeHandler($handler, $types)
     {
-        if (!is_array($types)) $types = array($types);
+        if (!is_array($types)) { $types = array($types); }
         
         foreach ($types as $type) {
             $type = strtolower($type);
@@ -55,19 +61,25 @@ abstract class Base implements \Amiss\Mapper
         return $this;
     }
 
-    public function fromObject($meta, $object, $context=null)
+    public function fromObject($object, $meta=null, $context=null)
     {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $object);
+            if (!$meta) {
+                throw new \InvalidArgumentException();
+            }
+        }
 
         $output = array();
         
         $defaultType = $meta->getDefaultFieldType();
         
         foreach ($meta->getFields() as $prop=>$field) {
-            if (!isset($field['getter']))
+            if (!isset($field['getter'])) {
                 $value = $object->$prop;
-            else
+            } else {
                 $value = call_user_func(array($object, $field['getter']));
+            }
             
             $type = $field['type'] ?: $defaultType;
             $typeId = $type['id'];
@@ -77,128 +89,20 @@ abstract class Base implements \Amiss\Mapper
                     $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
                 if ($this->typeHandlerMap[$typeId]) {
-                    $value = $this->typeHandlerMap[$typeId]->prepareValueForDb($value, $object, $field);
+                    $value = $this->typeHandlerMap[$typeId]->prepareValueForDb($value, $field);
                 }
             }
             
             // don't allow array_merging. it breaks mongo compatibility and is pretty 
             // confused anyway.
-            if (!$this->skipNulls || $value !== null) 
+            if (!$this->skipNulls || $value !== null) {
                 $output[$field['name']] = $value;
+            }
         }
         
         return $output;
     }
 
-    function fromObjects($meta, $input, $context=null)
-    {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-
-        $out = array();
-        if ($input) {
-            foreach ($input as $key=>$item) {
-                $out[$key] = $this->fromObject($meta, $item, $context);
-            }
-        }
-        return $out;
-    }
-    
-    function toObject($meta, $input, $args=null)
-    {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-
-        $object = $this->createObject($meta, $input, $args);
-        $this->populateObject($meta, $object, $input);
-        return $object;
-    }
-    
-    function toObjects($meta, $input, $args=null)
-    {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-
-        $out = array();
-        if ($input) {
-            foreach ($input as $item) {
-                $obj = $this->toObject($meta, $item);
-                $out[] = $obj;
-            }
-        }
-        return $out;
-    }
-
-    public function createObject($meta, $input, $args=null)
-    {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-
-        $object = null;
-        if ($meta->constructor == '__construct') {
-            if ($args) {
-                $rc = new \ReflectionClass($meta->class);
-                $object = $rc->newInstanceArgs($args);
-            }
-            else {
-                $cname = $meta->class;
-                $object = new $cname;
-            }
-        }
-        else {
-            $rc = new \ReflectionClass($meta->class);
-            $method = $rc->getMethod($meta->constructor);
-            $object = $method->invokeArgs(null, $args ?: $input);
-        }
-
-        if (!$object instanceof $meta->class) {
-            throw new \UnexpectedValueException(
-                "Constructor {$meta->constructor} did not return instance of {$meta->class}"
-            );
-        }
-
-        return $object;
-    }
-    
-    public function populateObject($meta, $object, $input)
-    {
-        if (!$meta instanceof Meta) $meta = $this->getMeta($meta);
-
-        $defaultType = null;
-        
-        $fields = $meta->getFields();
-        $map = $meta->getColumnToPropertyMap();
-        foreach ($input as $col=>$value) {
-            if (!isset($map[$col]))
-                continue; // throw exception?
-            
-            $prop = $map[$col];
-            $field = $fields[$prop];
-            $type = $field['type'];
-            if (!$type) {
-                if ($defaultType === null)
-                    $defaultType = $meta->getDefaultFieldType() ?: false;
-                
-                $type = $defaultType;
-            }
-            
-            if ($type) {
-                $typeId = $type['id'];
-                if (!isset($this->typeHandlerMap[$typeId])) {
-                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
-                }
-                if ($this->typeHandlerMap[$typeId]) {
-                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $object, $field, $input);
-                }
-            }
-            
-            if (!isset($field['setter'])) {
-                $object->{$prop} = $value;
-            }
-            else {
-                // false setter means read only
-                if ($field['setter'] !== false)
-                    call_user_func(array($object, $field['setter']), $value);
-            }
-        }
-    }
-    
     public function determineTypeHandler($type)
     {
         // this splits off any extra crap that you may have defined
@@ -233,10 +137,11 @@ abstract class Base implements \Amiss\Mapper
     {
         $table = null;
         if ($this->defaultTableNameTranslator) {
-            if ($this->defaultTableNameTranslator instanceof \Amiss\Name\Translator) 
+            if ($this->defaultTableNameTranslator instanceof \Amiss\Name\Translator) {
                 $table = $this->defaultTableNameTranslator->translate($class);
-            else
+            } else {
                 $table = call_user_func($this->defaultTableNameTranslator, $class);
+            }
         }
         
         if ($table === null) {
@@ -253,8 +158,9 @@ abstract class Base implements \Amiss\Mapper
     {
         $table = $class;
         
-        if ($pos = strrpos($table, '\\')) $table = substr($table, $pos+1);
-                
+        if ($pos = strrpos($table, '\\')) {
+            $table = substr($table, $pos+1);
+        }
         $table = trim(preg_replace_callback('/[A-Z]/', function($match) {
             return "_".strtolower($match[0]);
         }, str_replace('_', '', $table)), '_');
@@ -266,13 +172,15 @@ abstract class Base implements \Amiss\Mapper
     {
         $unnamed = array();
         foreach ($fields as $prop=>$f) {
-            if (!isset($f['name']) || !$f['name']) $unnamed[$prop] = $prop;
+            if (!isset($f['name']) || !$f['name']) {
+                $unnamed[$prop] = $prop;
+            }
         }
         
         if ($unnamed) {
-            if ($this->unnamedPropertyTranslator)
+            if ($this->unnamedPropertyTranslator) {
                 $unnamed = $this->unnamedPropertyTranslator->translate($unnamed);
-            
+            }
             foreach ($unnamed as $name=>$field) {
                 $fields[$name]['name'] = $field;
             }

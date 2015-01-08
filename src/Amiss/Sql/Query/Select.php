@@ -10,15 +10,15 @@ class Select extends Criteria
     public $fields;
     public $order = array();
     public $forUpdate = false;
+    public $follow = true;
     public $with = [];
-    public $stack = [];
-    
+
     public function getLimitOffset()
     {
-        if ($this->limit) 
-            return array($this->limit, $this->offset);
-        else {
-            return array($this->page[1], ($this->page[0] - 1) * $this->page[1]); 
+        if ($this->limit) {
+            return [$this->limit, $this->offset];
+        } else {
+            return [$this->page[1], ($this->page[0] - 1) * $this->page[1]]; 
         }
     }
 
@@ -78,7 +78,7 @@ class Select extends Criteria
             if (is_array($order)) {
                 $oClauses = array();
                 foreach ($order as $field=>$dir) {
-                    if (is_numeric($field)) {
+                    if (!($field == 0 && $field !== 0)) { // is_numeric($field)
                         $field = $dir; $dir = 'asc';
                     }
                     

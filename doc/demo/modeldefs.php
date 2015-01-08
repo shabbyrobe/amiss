@@ -80,11 +80,17 @@ class Event extends Object
     private $subName;
     
     private $slug;
-    
-    /** @field */
+
+    /**
+     * @field
+     * @type datetime
+     */
     public $dateStart;
-    
-    /** @field */
+
+    /**
+     * @field
+     * @type datetime
+     */
     public $dateEnd;
     
     /**

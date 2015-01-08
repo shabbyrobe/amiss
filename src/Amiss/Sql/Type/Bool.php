@@ -3,12 +3,12 @@ namespace Amiss\Sql\Type;
 
 class Bool implements \Amiss\Type\Handler
 {
-    function handleValueFromDb($value, $object, array $fieldInfo, $row)
+    function handleValueFromDb($value, array $fieldInfo, $row)
     {
         return $value >= 1;
     }
     
-    function prepareValueForDb($value, $object, array $fieldInfo)
+    function prepareValueForDb($value, array $fieldInfo)
     {
         return $value == true;
     }

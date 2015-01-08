@@ -1,8 +1,8 @@
 <?php
 namespace Amiss\Sql\Relator;
 
+use Amiss\Meta;
 use Amiss\Sql\Query;
-use Amiss\Sql\RelatorContext;
 use Amiss\Exception;
 
 /**
@@ -23,28 +23,53 @@ use Amiss\Exception;
  */
 class Association extends Base
 {
-    public function getRelated($source, $relationName, $criteria=null, $stack=[])
+    public function getRelatedForList(Meta $meta, $source, array $relation, Query\Criteria $criteria=null)
     {
-        if (!$source) return;
+        if (!$source) { return; }
+
+        list ($list, $ids, $resultIndex) = $this->fetchRelated($meta, $source, $relation, $criteria);
+
+        $result = array();
+        foreach ($list as $idx=>$related) {
+            $id = $ids[$idx];
+            $key = !isset($id[1]) ? $id[0] : implode('|', $id['id']);
+            
+            foreach ($resultIndex[$key] as $idx=>$lObj) {
+                if (!isset($result[$idx])) {
+                    $result[$idx] = array();
+                }
+                $result[$idx][] = $related;
+            }
+        }
         
-        if ($criteria && !$criteria->paramsAreNamed())
+        return $result;
+    }
+
+    public function getRelated(Meta $meta, $source, array $relation, Query\Criteria $criteria=null)
+    {
+        if (!$source) { return; }
+
+        list ($list, $result, $resultIndex) = $this->fetchRelated($meta, $source, $relation, $criteria);
+
+        return $list; 
+    }
+
+    private function fetchRelated($meta, $source, $relation, $criteria)
+    {
+        if ($criteria && $criteria->params && !$criteria->paramsAreNamed()) {
             throw new \InvalidArgumentException("Association mapper criteria requires named parameters");
+        }
+        if ($relation[0] != 'assoc') {
+            throw new \InvalidArgumentException("This relator only works with 'assoc' as the type");
+        }
         
         // find the source object details
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
-        if (!$sourceIsArray) $source = array($source);
-        
-        $class = !is_object($source[0]) ? $source[0] : get_class($source[0]);
-        $meta = $this->manager->getMeta($class);
-        if (!isset($meta->relations[$relationName]))
-            throw new Exception("Unknown relation $relationName on $class");
-        
-        $relation = $meta->relations[$relationName];
-        if ($relation[0] != 'assoc')
-            throw new \InvalidArgumentException("This relator only works with 'assoc' as the type");
+        if (!$sourceIsArray) {
+            $source = array($source);
+        }
         
         $sourceFields = $meta->getFields();
-        
         
         // find all the necessary metadata
         $relatedMeta = $this->manager->getMeta($relation['of']);
@@ -57,8 +82,9 @@ class Association extends Base
         $viaToDestRelationName = null;
         $viaToDestRelation = null;
 
-        if ($sourceToViaRelationName)
+        if ($sourceToViaRelationName) {
             $sourceToViaRelation = $viaMeta->relations[$relation];
+        }
 
         foreach ($viaMeta->relations as $k=>$v) {
             // inefficient. consider requiring this to be specified rather than inferred
@@ -75,18 +101,13 @@ class Association extends Base
                     $viaToDestRelationName = $k;
                 }
             }
-            if ($viaToDestRelation && $sourceToViaRelation) break;
+            if ($viaToDestRelation && $sourceToViaRelation) {
+                break;
+            }
         }
         
-        if (!$sourceToViaRelation || !$viaToDestRelation)
+        if (!$sourceToViaRelation || !$viaToDestRelation) {
             throw new Exception("Could not find relation between {$meta->class} and {$relation['via']} for relation $relationName");
-
-        { // can be removed eventually. sanity check for old versions.
-            if (isset($sourceToViaRelation['on']))
-                throw new Exception("Relation $sourceToViaRelationName used 'on' in class {$meta->class}. Please use 'from' and/or 'to'");
-
-            if (isset($viaToDestRelation['on']))
-                throw new Exception("Relation $viaToDestRelationName used 'on' in class {$viaMeta->class}. Please use 'from' and/or 'to'");
         }
 
         { // resolve relation field connections
@@ -100,15 +121,17 @@ class Association extends Base
         // get the source ids, prepare an index to link the relationships
         list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         
-        list($query, $params, $sourcePkFields) = $this->buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria);
-        
+        list($query, $params, $sourcePkFields) = $this->buildQuery(
+            $ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
+        );
+
         $stmt = $this->manager->execute($query, $params);
         ++$this->manager->queries;
         
         $list = array();
         $ids = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->manager->mapper->toObject($relatedMeta, $row, array());
+            $object = $this->manager->mapper->toObject($row, array(), $relatedMeta);
             
             $list[] = $object;
             $id = array();
@@ -117,26 +140,8 @@ class Association extends Base
             }
             $ids[] = $id;
         }
-        
-        // prepare the result
-        $result = null;
-        if (!$sourceIsArray) {
-            $result = $list;
-        }
-        else {
-            $result = array();
-            foreach ($list as $idx=>$related) {
-                $id = $ids[$idx];
-                $key = !isset($id[1]) ? $id[0] : implode('|', $id['id']);
-                
-                foreach ($resultIndex[$key] as $idx=>$lObj) {
-                    if (!isset($result[$idx])) $result[$idx] = array();
-                    $result[$idx][] = $related;
-                }
-            }
-        }
-        
-        return $result;
+
+        return [$list, $ids, $resultIndex];
     }
     
     protected function buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria)
@@ -170,8 +175,10 @@ class Association extends Base
         list ($where, $params) = $query->buildClause(null);
         if ($criteria) {
             list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
-            $params = array_merge($cParams, $params);
-            $where .= ' AND ('.$cWhere.')';
+			if ($cWhere) {
+                $params = array_merge($cParams, $params);
+                $where .= ' AND ('.$cWhere.')';
+            }
         }
         
         $sql = "

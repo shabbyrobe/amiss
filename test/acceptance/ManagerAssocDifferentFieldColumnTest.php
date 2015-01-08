@@ -3,6 +3,9 @@ namespace Amiss\Test\Acceptance
 {
     use \Amiss\Sql\TableBuilder;
 
+    /**
+     * @group relator-assoc
+     */
     class ManagerAssocDifferentFieldColumnTest extends \ModelDataTestCase
     {
         public function setUp()
