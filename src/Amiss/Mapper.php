@@ -23,7 +23,7 @@ abstract class Mapper
 {
     /**
      * Get the metadata for the class
-     * @param string Class name
+     * @param mixed  String class name or object
      * @return \Amiss\Meta
      */
     public abstract function getMeta($class);
@@ -32,13 +32,15 @@ abstract class Mapper
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function toObject($meta, $input, $args=null)
+    public function toObject($input, $args=null, $meta=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $input);
+        }
 
-        $mapped = $this->mapValues($meta, $input);
+        $mapped = $this->mapValues($input, $meta);
         $object = $this->createObject($meta, $mapped, $args);
-        $this->populateObject($meta, $object, $mapped);
+        $this->populateObject($object, $mapped, $meta);
 
         return $object;
     }
@@ -46,22 +48,31 @@ abstract class Mapper
     /**
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function toObjects($meta, $input, $args=null)
+    public function toObjects($input, $args=null, $meta=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $input);
+        }
 
         $out = array();
         if ($input) {
             foreach ($input as $item) {
-                $obj = $this->toObject($meta, $item);
+                $obj = $this->toObject($item, $args, $meta);
                 $out[] = $obj;
             }
         }
         return $out;
     }
 
-    public function mapValues($meta, $input, $fieldMap=null)
+    public function mapValues($input, $meta=null, $fieldMap=null)
     {
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $input);
+            if (!$meta) {
+                throw new \InvalidArgumentException();
+            }
+        }
+
         if (!$fieldMap) { $fieldMap = $meta->getColumnToPropertyMap(); }
 
         $mapped = [];
@@ -112,7 +123,7 @@ abstract class Mapper
      * 
      * @return array
      */
-    public abstract function fromObject($meta, $input, $context=null);
+    public abstract function fromObject($input, $meta=null, $context=null);
 
     /**
      * Get row values from a list of objects
@@ -122,15 +133,17 @@ abstract class Mapper
      *
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function fromObjects($meta, $input, $context=null)
+    public function fromObjects($input, $meta=null, $context=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$input) { return []; }
 
-        $out = array();
-        if ($input) {
-            foreach ($input as $key=>$item) {
-                $out[$key] = $this->fromObject($meta, $item, $context);
-            }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: current($input));
+        }
+
+        $out = [];
+        foreach ($input as $key=>$item) {
+            $out[$key] = $this->fromObject($item, $meta, $context);
         }
         return $out;
     }
@@ -147,7 +160,9 @@ abstract class Mapper
      */
     public function createObject($meta, $mapped, $args=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
 
         $object = null;
         if ($meta->constructorArgs) {
@@ -209,9 +224,14 @@ abstract class Mapper
      * @param array  $mapped Input after mappiing to property names and type handling
      * @return void
      */
-    public function populateObject($meta, $object, \stdClass $mapped)
+    public function populateObject($object, \stdClass $mapped, $meta=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $object);
+            if (!$meta) {
+                throw new \InvalidArgumentException();
+            }
+        }
 
         $properties = $meta->getProperties();
         foreach ($mapped as $prop=>$value) {

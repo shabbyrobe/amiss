@@ -78,9 +78,9 @@ class TestMapper extends \Amiss\Mapper
 
     function createObject($meta, $row, $args=null) {}
     
-    function populateObject($meta, $object, \stdClass $mapped) {}
+    function populateObject($object, \stdClass $mapped, $meta=null) {}
 
-    function fromObject($meta, $object, $context=null) {}
+    function fromObject($object, $meta=null, $context=null) {}
     
     function determineTypeHandler($type) {}
 }    

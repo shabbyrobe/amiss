@@ -10,14 +10,10 @@ class MapperTest extends \ModelDataTestCase
     public function testMapperToObjectMeta()
     {
         $mapper = $this->getMapper();
-        $obj = $mapper->toObject('Amiss\Demo\Artist', [
-            'artistId'=>1,
-        ]);
+        $obj = $mapper->toObject(['artistId'=>1], null, 'Amiss\Demo\Artist');
         $this->assertInstanceOf('Amiss\Demo\Artist', $obj);
 
-        $obj = $mapper->toObject($mapper->getMeta('Amiss\Demo\Artist'), [
-            'artistId'=>1,
-        ]);
+        $obj = $mapper->toObject(['artistId'=>1], null, $mapper->getMeta('Amiss\Demo\Artist'));
         $this->assertInstanceOf('Amiss\Demo\Artist', $obj);
     }
 
@@ -30,10 +26,10 @@ class MapperTest extends \ModelDataTestCase
         $mapper = $this->getMapper();
         $a = new \Amiss\Demo\Artist();
         $a->artistId = 1;
-        $array = $mapper->fromObject('Amiss\Demo\Artist', $a);
+        $array = $mapper->fromObject($a, 'Amiss\Demo\Artist');
         $this->assertInternalType('array', $array);
 
-        $array = $mapper->fromObject($mapper->getMeta('Amiss\Demo\Artist'), $a);
+        $array = $mapper->fromObject($a, $mapper->getMeta('Amiss\Demo\Artist'));
         $this->assertInternalType('array', $array);
     }
 }

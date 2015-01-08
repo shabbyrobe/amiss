@@ -19,7 +19,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('fromObject');
-        $mapper->fromObjects('foo', array('a', 'b'), null);
+        $mapper->fromObjects(array('a', 'b'), null, 'foo');
     }
     
     /**
@@ -32,7 +32,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->never())->method('fromObject');
-        $mapper->fromObjects('foo', null, null);
+        $mapper->fromObjects(null, null, 'foo');
     }
 
     /**
@@ -57,7 +57,7 @@ class MapperTest extends \CustomTestCase
             ],
         ]);
         $obj = (object)['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
-        $row = $mapper->fromObject($meta, $obj);
+        $row = $mapper->fromObject($obj, $meta);
         $this->assertEquals(['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0], $row);
     }
  
@@ -84,7 +84,7 @@ class MapperTest extends \CustomTestCase
         ]);
         $input = ['a'=>'abcd', 'b'=>'efgh', 'c'=>false, 'd'=>0, 'e'=>null, 'f'=>null];
         $obj = (object)$input;
-        $row = $mapper->fromObject($meta, $obj);
+        $row = $mapper->fromObject($obj, $meta);
         $this->assertEquals($input, $row);
     }
 
@@ -98,7 +98,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('toObject');
-        $mapper->toObjects('foo', array('a', 'b'), null);
+        $mapper->toObjects(array('a', 'b'), null, 'foo');
     }
     
     /**
@@ -259,7 +259,7 @@ class MapperTest extends \CustomTestCase
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ]
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
         $this->assertInstanceOf('stdClass', $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -281,7 +281,7 @@ class MapperTest extends \CustomTestCase
                 ['property', 'a'],
             ],
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
         $this->assertEquals(['bar', 'foo'], $obj->args);
         $this->assertFalse(isset($obj->a));
         $this->assertFalse(isset($obj->b));
@@ -299,7 +299,7 @@ class MapperTest extends \CustomTestCase
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar'], ['bar', 'foo']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], ['bar', 'foo'], $meta);
         $this->assertEquals(['bar', 'foo'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -322,7 +322,7 @@ class MapperTest extends \CustomTestCase
                 ['arg', 0],
             ],
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar'], ['baz', 'qux']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], ['baz', 'qux'], $meta);
         $this->assertEquals(['qux', 'bar', 'baz'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertFalse(isset($obj->b));
@@ -348,7 +348,7 @@ class MapperTest extends \CustomTestCase
                 ['property', 'rel2'],
             ],
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo']);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo'], null, $meta);
         $this->assertEquals(['yep', 'woo'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -367,7 +367,7 @@ class MapperTest extends \CustomTestCase
         $meta = new \Amiss\Meta($class, 'test_table', [
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $obj = $mapper->toObject(['a'=>'foo'], null, $meta);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);
@@ -386,7 +386,7 @@ class MapperTest extends \CustomTestCase
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
             'constructor'=>'staticConstruct',
         ]);
-        $obj = $mapper->toObject($meta, ['a'=>'foo']);
+        $obj = $mapper->toObject(['a'=>'foo'], null, $meta);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);

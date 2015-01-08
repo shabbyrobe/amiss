@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Ext\NestedSet;
 
+use Amiss\Sql\Query\Criteria;
+use Amiss\Meta;
+
 class TreeRelator extends Relator
 {
     public $nestedSetManager;
@@ -10,7 +13,12 @@ class TreeRelator extends Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelated($source, $relationName, $criteria=null, $stack=[])
+    function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null)
+    {
+        throw new \Exception('not implemented');
+    }
+
+    function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
         $treeMeta = $this->nestedSetManager->getTreeMeta($source);
         $meta = $treeMeta->meta;

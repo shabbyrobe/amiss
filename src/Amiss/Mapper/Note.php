@@ -197,7 +197,7 @@ class Note extends \Amiss\Mapper\Base
         $args = [];
         foreach ($constructorArgs as $idx=>$arg) {
             $split = preg_split('/:\s*/', $arg, 2);
-            if (!$split[0] || !isset($split[1]) || !$split[1]) {
+            if (!$split[0] || !isset($split[1]) || $split[1] === null || $split[1] === '') {
                 throw new \UnexpectedValueException("Invalid arg specification. Expected 'type:id', found '$arg'");
             }
             $args[$idx] = [$split[0], $split[1]];

@@ -27,6 +27,12 @@ abstract class Base extends \Amiss\Mapper
     
     public function getMeta($class)
     {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+        if (!is_string($class)) {
+            throw new \InvalidArgumentException();
+        }
         if (!isset($this->meta[$class])) {
             $resolved = $this->resolveObjectName($class);
             $this->meta[$class] = $this->createMeta($resolved);
@@ -55,9 +61,14 @@ abstract class Base extends \Amiss\Mapper
         return $this;
     }
 
-    public function fromObject($meta, $object, $context=null)
+    public function fromObject($object, $meta=null, $context=null)
     {
-        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $object);
+            if (!$meta) {
+                throw new \InvalidArgumentException();
+            }
+        }
 
         $output = array();
         

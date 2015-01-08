@@ -91,7 +91,7 @@ class Manager
             if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $mappedRow = $mapper->mapValues($meta, $row);
+            $mappedRow = $mapper->mapValues($row, $meta);
         }
 
         if ($mappedRow) {
@@ -115,7 +115,7 @@ class Manager
                 }
             }
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
-            $mapper->populateObject($meta, $object, $mappedRow);
+            $mapper->populateObject($object, $mappedRow, $meta);
         }
 
         return $object;
@@ -139,13 +139,14 @@ class Manager
         $mappedRows = [];
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->mapValues($meta, $row);
+            $mappedRow = $mapper->mapValues($row, $meta);
             $mappedRows[] = $mappedRow;
         }
 
         $objects = [];
-        if (!$mappedRows)
+        if (!$mappedRows) {
             return $objects;
+        }
 
         $relations = [];
         $relators = [];
@@ -176,7 +177,7 @@ class Manager
                 $mappedRow->{$relId} = $objs[$idx];
             }
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
-            $mapper->populateObject($meta, $object, $mappedRow);
+            $mapper->populateObject($object, $mappedRow, $meta);
             $objects[] = $object;
         }
         return $objects;
@@ -361,13 +362,7 @@ class Manager
         }
         
         $relation = $meta->relations[$relationName];
-        if (!isset($this->relators[$relation[0]])) {
-            throw new Exception("Relator {$relation[0]} not found");
-        }
-        $relator = $this->relators[$relation[0]];
-        if (!$relator instanceof Relator) {
-            $relator = $this->relators[$relation[0]] = call_user_func($relator, $this);
-        }
+        $relator = $this->getRelator($relation);
         
         if ($query) {
             $query = $this->createQueryFromArgs([$query], 'Amiss\Sql\Query\Criteria');
@@ -417,7 +412,7 @@ class Manager
             $query = $args[1] instanceof Query\Insert ? $args[1] : new Query\Insert(['values'=>$args[1]]);
         }
         if ($object && !$query->values) {
-            $query->values = $this->mapper->fromObject($meta, $object, 'insert');
+            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
         }
         if (!$query->table) {
             $query->table = $meta->table;
@@ -485,7 +480,7 @@ class Manager
             $class = get_class($first);
             $meta = $this->getMeta($class);
             $query = new Query\Update();
-            $query->set = $this->mapper->fromObject($meta, $first, 'update');
+            $query->set = $this->mapper->fromObject($first, $meta, 'update');
             $query->where = $meta->getPrimaryValue($first);
         }
 

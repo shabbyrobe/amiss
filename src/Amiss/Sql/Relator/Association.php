@@ -121,7 +121,9 @@ class Association extends Base
         // get the source ids, prepare an index to link the relationships
         list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         
-        list($query, $params, $sourcePkFields) = $this->buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria);
+        list($query, $params, $sourcePkFields) = $this->buildQuery(
+            $ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
+        );
 
         $stmt = $this->manager->execute($query, $params);
         ++$this->manager->queries;
@@ -129,7 +131,7 @@ class Association extends Base
         $list = array();
         $ids = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->manager->mapper->toObject($relatedMeta, $row, array());
+            $object = $this->manager->mapper->toObject($row, array(), $relatedMeta);
             
             $list[] = $object;
             $id = array();
