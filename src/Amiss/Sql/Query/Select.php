@@ -42,7 +42,7 @@ class Select extends Criteria
         return array($query, $params);
     }
     
-    public function buildFields($meta, $prefix=null)
+    public function buildFields($meta, $tablePrefix=null, $fieldAliasPrefix=null)
     {
         $metaFields = $meta ? $meta->getFields() : null;
         
@@ -55,14 +55,18 @@ class Select extends Criteria
             $fNames = array();
             foreach ($fields as $f) {
                 $name = (isset($metaFields[$f]) ? $metaFields[$f]['name'] : $f);
-                $fNames[] = ($prefix ? $prefix.'.' : '').'`'.$name.'`';
+                $fName = ($tablePrefix ? $tablePrefix.'.' : '').'`'.$name.'`';
+                if ($fieldAliasPrefix)
+                    $fName .= ' as `'.$fieldAliasPrefix.$name.'`';
+
+                $fNames[] = $fName;
             }
             $fields = implode(', ', $fNames);
         }
         
         return $fields;
     }
-    
+
     // damn, this is pretty much identical to the above.
     public function buildOrder($meta)
     {
