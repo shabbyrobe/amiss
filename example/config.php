@@ -1,14 +1,9 @@
 <?php
-
-$amissPath = __DIR__.'/../src';
-
-require_once($amissPath.'/Amiss.php');
-
-Amiss::register();
+require_once __DIR__.'/../vendor/autoload.php';
 
 // temporary: preload classes to avoid autoloads distorting performance numbers
-Amiss::load('Amiss\Sql\Relator\OneMany');
-Amiss::load('Amiss\Sql\Relator\Association');
+class_exists('Amiss\Sql\Relator\OneMany');
+class_exists('Amiss\Sql\Relator\Association');
 
 function e($val) {
     return htmlspecialchars($val, ENT_QUOTES, 'UTF-8');

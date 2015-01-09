@@ -14,7 +14,7 @@ class TableBuilderCreateTest extends \DataTestCase
             return $this->markTestSkipped();
         
         parent::setUp();
-        $this->manager = \Amiss::createSqlManager(new \Amiss\Sql\Connector('sqlite::memory:'));
+        $this->manager = \Amiss\Factory::createSqlManager(new \Amiss\Sql\Connector('sqlite::memory:'));
     }
     
     /**

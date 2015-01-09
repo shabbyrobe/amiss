@@ -61,7 +61,7 @@ a manager:
 
     <?php
     $mapper = new Amiss\Mapper\Arrays($mapping);
-    $manager = Amiss::createSqlManager($db, $mapper);
+    $manager = Amiss\Factory::createSqlManager($db, $mapper);
 
 
 Mapping

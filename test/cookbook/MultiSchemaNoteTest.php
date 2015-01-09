@@ -17,7 +17,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
         $this->connector->exec("CREATE TABLE schema_one.table_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");
         $this->connector->exec("CREATE TABLE schema_two.table_two(id INTEGER PRIMARY KEY AUTOINCREMENT, twoName STRING)");
         
-        $this->manager = \Amiss::createSqlManager($this->connector);
+        $this->manager = \Amiss\Factory::createSqlManager($this->connector);
         $this->mapper = $this->manager->mapper;
         $this->mapper->objectNamespace = __NAMESPACE__;
     }

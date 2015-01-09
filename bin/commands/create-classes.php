@@ -1,8 +1,7 @@
 <?php
 
-require_once(__DIR__.'/../../src/Amiss.php');
-require_once(__DIR__.'/../lib/functions.php');
-Amiss::register();
+require_once __DIR__.'/../../vendor/autoload.php';
+require_once __DIR__.'/../lib/functions.php';
 
 $usage = "amiss create-classes [OPTIONS] OUTDIR
 

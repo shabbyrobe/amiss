@@ -1,5 +1,7 @@
 <?php
-class Amiss
+namespace Amiss;
+
+class Factory
 {
     public static function createSqlManager($connector, $config=null)
     {
@@ -63,7 +65,7 @@ class Amiss
         }
         else {
             $handlers['date'] = $handlers['datetime'] = $handlers['timestamp'] = $handlers['unixtime'] = function() {
-                throw new \UnexpectedValueException("Please pass dbTimeZone (and optionally appTimeZone) with your \$config when using Amiss::createSqlManager(), Amiss::createSqlMapper() or Amiss::createSqlTypeHandlers()");
+                throw new \UnexpectedValueException("Please pass dbTimeZone (and optionally appTimeZone) with your \$config when using Amiss\Factory::createSqlManager(), Amiss\Factory::createSqlMapper() or Amiss\Factory::createSqlTypeHandlers()");
             };
         }
         

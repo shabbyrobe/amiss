@@ -1,26 +1,12 @@
 Configuring
 ===========
 
-Autoloading
------------
-
-Amiss follows the :term:`PSR-0` standard and should work with any :term:`PSR-0` compatible
-autoloader, but it also comes with its own classmap-based autoloader which you can use if you'd
-prefer:
-
-.. code-block:: php
-
-    <?php
-    $amissPath = '/path/to/amiss/src';
-    require_once $amissPath.'/Amiss.php';
-    Amiss::register();
-
-
 Basics
 ------
 
-The main class Amiss requires to do its business is ``Amiss\Sql\Manager``. It requires a way to
-connect to the database and a class that can map your objects to the database and back.
+The main class Amiss requires to do its business is ``Amiss\Sql\Manager``. It requires a
+way to connect to the database and a class that can map your objects to the database and
+back.
 
 .. warning:: 
 
@@ -38,7 +24,7 @@ Creating an ``Amiss\Sql\Manager`` with the default mapping options is simple:
         'user'=>'user', 
         'password'=>'password',
     );
-    $manager = new \Amiss::createSqlManager($db);
+    $manager = new \Amiss\Factory::createSqlManager($db);
 
 
 This will also create an instance of ``Amiss\Mapper\Note`` with a default set of :doc:`mapper/types`
@@ -49,7 +35,7 @@ argument to ``createSqlManager()``. The  mapper must implement the ``Amiss\Mappe
 
     <?php
     $mapper = new \Amiss\Mapper\Arrays();
-    $manager = \Amiss::createSqlManager($db, $mapper);
+    $manager = \Amiss\Factory::createSqlManager($db, $mapper);
 
 
 If the default options are not desirable, you can create an instance of ``Amiss\Sql\Manager``
@@ -59,7 +45,7 @@ yourself by hand, though it will not come with any :ref:`relators` unless you ad
 
     <?php
     $manager = new \Amiss\Sql\Manager($db);
-    $manager->relators = Amiss::createSqlRelators();
+    $manager->relators = \Amiss\Factory::createSqlRelators();
 
 
 For more information on customising the mapping, please read the :doc:`mapper/mapping` section.
@@ -68,8 +54,9 @@ For more information on customising the mapping, please read the :doc:`mapper/ma
 Options
 -------
 
-``Amiss::createSqlManager()`` accepts either an instance of ``Amiss\Mapper`` or an array of 
-configuration options as the second parameter. The following options are supported:
+``Amiss\Factory::createSqlManager()`` accepts either an instance of ``Amiss\Mapper`` or an
+array of configuration options as the second parameter. The following options are
+supported:
 
 .. py:attribute:: mapper
 

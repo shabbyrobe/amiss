@@ -13,7 +13,7 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
         parent::setUp();
         
         $this->connector = new \TestConnector('mysql:xx');
-        $this->mapper = \Amiss::createSqlMapper();
+        $this->mapper = \Amiss\Factory::createSqlMapper();
         $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
         $this->class = __NAMESPACE__.'\TestCreateWithCustomType';
     }

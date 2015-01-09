@@ -13,7 +13,7 @@
     ],
     "homepage": "http://k3jw.com/code/amiss/",
     "autoload": {
-        "psr-0": { "Amiss": "src/" }
+        "psr-4": { "Amiss\\": "src/" }
     },
     "require": {
         "php": ">=5.4.0"

@@ -1,18 +1,18 @@
 Annotation Mapper
 =================
 
-``Amiss::createSqlManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types` preconfigured by 
-default. This should be used as a default starting point. You can access the mapper for further 
-configuration after you create the manager like so:
+``Amiss\Factory::createSqlManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types`
+preconfigured by default. This should be used as a default starting point. You can access
+the mapper for further configuration after you create the manager like so:
 
 .. code-block:: php
 
     <?php
-    $manager = \Amiss::createSqlManager($db, array('cache'=>$cache));
+    $manager = \Amiss\Factory::createSqlManager($db, array('cache'=>$cache));
     $mapper = $manager->mapper;
 
-This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance already
-assigned. The mapper will have the following :doc:`types` pre-configured:
+This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance
+already assigned. The mapper will have the following :doc:`types` pre-configured:
 
 - autoinc
 - bool
@@ -492,11 +492,11 @@ getter and setter as the first two arguments, then pass it as the first construc
     $cache = new \Amiss\Cache('eaccelerator_get', 'eaccelerator_put');
     
     // when using the SQL manager's default note mapper:
-    $manager = \Amiss::createSqlManager($db, array('cache'=>$cache));
+    $manager = \Amiss\Factory::createSqlManager($db, array('cache'=>$cache));
     
     // when creating the mapper by hand
     $mapper = new \Amiss\Mapper\Note($cache);
-    $manager = \Amiss::createSqlManager($db, $mapper);
+    $manager = \Amiss\Factory::createSqlManager($db, $mapper);
 
 
 By default, no TTL or expiration information will be passed by the mapper. In the case of

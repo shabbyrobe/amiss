@@ -53,7 +53,7 @@ pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
 
     <?php
     $conn = new Amiss\Sql\Connector('sqlite::memory:');
-    $manager = Amiss::createManager($conn);
+    $manager = Amiss\Factory::createManager($conn);
     Amiss\Sql\ActiveRecord::setManager($manager);
     
     // test it out

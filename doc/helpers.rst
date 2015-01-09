@@ -100,9 +100,9 @@ relation gymnastics.
         var_dump($objects[0] == $indexed['a']); // will output true
 
 
-    If you have more than one object with the same property value, ``indexBy`` will merrily
-    overwrite an existing key. Pass ``Amiss::INDEX_DUPE_FAIL`` as the third parameter if you would
-    prefer an exception on a duplicate key:
+    If you have more than one object with the same property value, ``indexBy`` will
+    merrily overwrite an existing key. Pass ``Amiss\Helper::INDEX_DUPE_FAIL`` as the third
+    parameter if you would prefer an exception on a duplicate key:
 
     .. code-block:: php
 
@@ -113,7 +113,7 @@ relation gymnastics.
             (object)array('foo'=>'b'),
         );
         $manager = new Amiss\Sql\Manager(...);
-        $indexed = $manager->indexBy($objects, 'foo', Amiss::INDEX_DUPE_FAIL);
+        $indexed = $manager->indexBy($objects, 'foo', Amiss\Helper::INDEX_DUPE_FAIL);
 
     BZZT! ``UnexpectedValueException``!
 
