@@ -35,14 +35,14 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager
      */
-    public function testUpdateTableAllowsNonKeyedArraySet()
+    public function testUpdateTableAllowsStringSet()
     {
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', array('set'=>array('priority=priority+10'), 'where'=>'1=1'));
+        $this->manager->update('EventArtist', array('set'=>'priority=priority+10', 'where'=>'1=1'));
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
@@ -53,7 +53,25 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager
      */
-    public function testUpdateTableAllowsNonKeyedItemMixedInWithParameterForSet()
+    public function testUpdateTableAllowsStringSetWithArrayWhere()
+    {
+        $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
+        $stmt->execute();
+        $min = $stmt->fetchColumn();
+        $this->assertEquals(1, $min);
+        
+        $this->manager->update('EventArtist', 'priority=priority+10', ['where'=>'priority>=3']);
+        $stmt = $this->manager->getConnector()->prepare("SELECT MAX(priority) FROM event_artist");
+        $stmt->execute();
+        $min = $stmt->fetchColumn();
+        $this->assertEquals(2010, $min);
+    }
+    
+    /**
+     * @group acceptance
+     * @group manager
+     */
+    public function testUpdateTableAllowsStringSetWithStringWhereParameters()
     {
         $count = $this->manager->count('EventArtist');
         $this->assertGreaterThan(0, $count);
@@ -63,16 +81,11 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', array('set'=>array('priority=priority+10', 'sequence'=>15001), 'where'=>'1=1'));
-        $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
+        $this->manager->update('EventArtist', 'priority=priority+?', 'priority>=?', 10, 3);
+        $stmt = $this->manager->getConnector()->prepare("SELECT priority, COUNT(priority) as cnt FROM event_artist GROUP BY priority");
         $stmt->execute();
-        $min = $stmt->fetchColumn();
-        $this->assertEquals(11, $min);
-        
-        $stmt = $this->manager->getConnector()->prepare("SELECT COUNT(*) FROM event_artist WHERE sequence=15001");
-        $stmt->execute();
-        $min = $stmt->fetchColumn();
-        $this->assertEquals($count, $min);
+        $priorities = $stmt->fetchAll(\PDO::FETCH_NUM);
+        $this->assertEquals([[1, 5], [2, 1], [13, 2], [2010, 1]], $priorities);
     }
 
     /**
@@ -82,7 +95,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableFailsWithNoWhereClause()
     {
-        $this->manager->update('EventArtist', array('set'=>array('priority=priority+10')));
+        $this->manager->update('EventArtist', array('set'=>'priority=priority+10'));
     }
     
     /**

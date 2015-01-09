@@ -36,7 +36,7 @@ class ManagerRelationTest extends \ModelDataTestCase
         $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
         $this->assertEquals('the-sonic-manipulator', $eventArtist->artist->slug);
-        $this->assertEquals(3, $this->manager->queries);
+        $this->assertEquals(3, $this->db->queries);
     }
  
     public function testAssignListSourceToMultipleOneRelations()

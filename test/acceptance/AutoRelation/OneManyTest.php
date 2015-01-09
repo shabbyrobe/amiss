@@ -10,29 +10,19 @@ class OneManyTest extends \CustomTestCase
     public function setUp()
     {
         $this->db = new \Amiss\Sql\Connector('sqlite::memory:');
-    }
-
-    public function getManager()
-    {
-        if (!$this->manager) {
-            $this->mapper = $this->createDefaultMapper();
-            $this->mapper->objectNamespace = __NAMESPACE__;
-            $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
-            $this->manager->relators = \Amiss::createSqlRelators();
-            foreach ($this->mapper->arrayMap as $class=>$meta) {
-                TableBuilder::create($this->manager->connector, $this->mapper, $class);
-            }
-            $this->createDefaultData();
+        $this->mapper = $this->createDefaultMapper();
+        $this->mapper->objectNamespace = __NAMESPACE__;
+        $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
+        $this->manager->relators = \Amiss::createSqlRelators();
+        foreach ($this->mapper->arrayMap as $class=>$meta) {
+            TableBuilder::create($this->manager->connector, $this->mapper, $class);
         }
-        return $this->manager;
-    }
-
-    public function createDefaultData()
-    {
         $this->manager->connector->exec("INSERT INTO test_child VALUES(1, 1)");
         $this->manager->connector->exec("INSERT INTO test_child VALUES(2, 1)");
         $this->manager->connector->exec("INSERT INTO test_parent VALUES(1, 1)");
         $this->manager->connector->exec("INSERT INTO test_grand_parent VALUES(1)");
+
+        $this->db->queries = 0;
     }
 
     public function createDefaultMapper()
@@ -84,7 +74,7 @@ class OneManyTest extends \CustomTestCase
 
     public function testAutoOne()
     {
-        $manager = $this->getManager();
+        $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent');
 
         $child = $manager->getById('TestChild', 1);
@@ -93,21 +83,25 @@ class OneManyTest extends \CustomTestCase
 
     public function testAutoOneDoesntCycle()
     {
-        $manager = $this->getManager();
+        $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
 
         $child = $manager->getById('TestChild', 1);
+        $this->assertEquals(2, $this->db->queries);
+
         $this->assertTrue($child->parent instanceof TestParent);
         $this->assertNull($child->parent->children);
     }
 
     public function testAutoOneDoesntCycleDeep()
     {
-        $manager = $this->getManager();
+        $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
         $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
 
         $child = $manager->getById('TestChild', 1);
+        $this->assertEquals(3, $this->db->queries);
+
         $this->assertTrue($child->parent instanceof TestParent);
         $this->assertTrue($child->parent->grandParent instanceof TestGrandParent);
         $this->assertNull($child->parent->children);
@@ -115,11 +109,9 @@ class OneManyTest extends \CustomTestCase
 
     public function testAutoMany()
     {
-        $manager = $this->getManager();
+        $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
         $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
-
-        $manager = $this->getManager();
 
         $parent = $manager->getById('TestParent', 1);
         $this->assertTrue($parent->children[0] instanceof TestChild);
@@ -127,7 +119,7 @@ class OneManyTest extends \CustomTestCase
 
     public function testAutoManyDoesntCycle()
     {
-        $manager = $this->getManager();
+        $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
         $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
 

@@ -82,6 +82,17 @@ if ($testMysql) {
     ));
     suite_add_dir($mysqlSuite, $testPath.'/acceptance/');
     $suite->addTest($mysqlSuite);
+
+    $mysqlPersistentSuite = new DatabaseSuite(array(
+        'engine'=>'mysql',
+        'dsn'=>"mysql:host={$config['mysql']['host']};port={$config['mysql']['port']}",
+        'user'=>$config['mysql']['user'],
+        'password'=>$config['mysql']['password'],
+        'dbName'=>'amiss_test_'.time(),
+        'options'=>[\PDO::ATTR_PERSISTENT => true],
+    ));
+    suite_add_dir($mysqlPersistentSuite, $testPath.'/acceptance/');
+    $suite->addTest($mysqlPersistentSuite);
 }
 
 if ($testPgsql) {

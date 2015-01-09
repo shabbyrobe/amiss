@@ -2,6 +2,7 @@
 namespace Amiss\Sql\Query;
 
 use Amiss\Sql;
+use Amiss\Exception;
 
 class Insert extends Sql\Query
 {

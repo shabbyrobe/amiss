@@ -56,8 +56,11 @@ class ManagerSaveTest extends \ModelDataTestCase
 
     function testUpdateRowCount()
     {
-        // there are 3 artist types in the test data, this should only affect 2 of them
-        $this->assertEquals(2, $this->manager->update('ArtistType', ['type'=>'Band'], '1=1'));
+        // there are 3 artist types in the test data
+        // with MySQL, only changed ones are counted but with Sqlite, all
+        // rows matched by the clause are counted
+        $expected = $this->db->engine == 'sqlite' ? 3 : 2;
+        $this->assertEquals($expected, $this->manager->update('ArtistType', ['type'=>'Band'], '1=1'));
     }
 
     /**

@@ -1,11 +1,10 @@
 <?php
-require_once __DIR__.'/../vendor/autoload.php';
-
 date_default_timezone_set('Australia/Melbourne');
 
-require_once(__DIR__.'/../doc/demo/model.php');
-require_once(__DIR__.'/../doc/demo/ar.php');
-require_once(__DIR__.'/lib.php');
+require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/../doc/demo/model.php';
+require_once __DIR__.'/../doc/demo/ar.php';
+require_once __DIR__.'/lib.php';
 
 class TestConnector extends \Amiss\Sql\Connector
 {
@@ -52,6 +51,7 @@ class TestStatement
     {
         $this->connector->calls[] = array($this->queryString, $this->params);
         $this->params = array();
+        return $this;
     }
     
     public function fetchColumn()

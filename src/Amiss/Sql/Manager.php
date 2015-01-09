@@ -14,15 +14,9 @@ use Amiss\Sql\Query\Criteria;
 class Manager
 {
     /**
-     * @var Amiss\Sql\Connector|\PDO|PDO-esque
+     * @var Amiss\Sql\Connector
      */
     public $connector;
-    
-    /**
-     * Number of queries performed by the manager. May not be accurate.
-     * @var int
-     */
-    public $queries = 0;
     
     /**
      * @var Amiss\Mapper
@@ -35,13 +29,16 @@ class Manager
     public $relators = [];
     
     /**
-     * @param Amiss\Sql\Connector|\PDO|array  Database connector
+     * @param Amiss\Sql\Connector|array  Database connector
      * @param Amiss\Mapper
      */
     public function __construct($connector, $mapper)
     {
         if (is_array($connector)) {
             $connector = Connector::create($connector);
+        }
+        if (!$connector instanceof Connector) {
+            throw new \InvalidArgumentException();
         }
         $this->connector = $connector;
         $this->mapper = $mapper;
@@ -62,6 +59,8 @@ class Manager
     public function getMeta($class)
     {
         // Do not put any logic in here at all. this is just syntactic sugar.
+        // If you override this, nothing will actually call it - this class
+        // uses $this->mapper->getMeta() internally
         return $this->mapper->getMeta($class);
     }
 
@@ -83,9 +82,8 @@ class Manager
         
         list ($sql, $params) = $query->buildQuery($meta);
         
-        $stmt = $this->getConnector()->prepare($sql);
-        $this->execute($stmt, $params);
-        
+        $stmt = $this->getConnector()->prepare($sql)->execute($params);
+
         $mappedRow = null;
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             if ($mappedRow) {
@@ -133,9 +131,8 @@ class Manager
         }
 
         list ($sql, $params) = $query->buildQuery($meta);
-        $stmt = $this->getConnector()->prepare($sql);
-        $this->execute($stmt, $params);
-        
+        $stmt = $this->getConnector()->prepare($sql)->execute($params);
+
         $mappedRows = [];
     
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -195,7 +192,7 @@ class Manager
     public function count($class, $query=null)
     {
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->getMeta($class);
+        $meta = $this->mapper->getMeta($class);
         
         $table = $query->table ?: $meta->table;
         
@@ -210,9 +207,8 @@ class Manager
         $query = "SELECT COUNT($field) FROM $table "
             .($where  ? "WHERE $where" : '')
         ;
-        
-        $stmt = $this->getConnector()->prepare($query);
-        $this->execute($stmt, $params);
+
+        $stmt = $this->getConnector()->prepare($query)->execute($params);
         return (int)$stmt->fetchColumn();
     }
     
@@ -233,7 +229,7 @@ class Manager
             $source = array($source);
         }
 
-        $meta = $this->getMeta(get_class($source[0]));
+        $meta = $this->mapper->getMeta($source[0]);
         if (!$relationNames) {
             if ($meta->autoRelations) {
                 $relationNames = $meta->autoRelations;
@@ -282,7 +278,7 @@ class Manager
         // specified, we want to populate the 'one' side of the relation
         // with the source
         if (isset($relation['inverse'])) {
-            $relatedMeta = $this->getMeta($relation['of']);
+            $relatedMeta = $this->mapper->getMeta($relation['of']);
             $relatedRelation = $relatedMeta->relations[$relation['inverse']];
         }
 
@@ -356,7 +352,7 @@ class Manager
 
         $class = !is_object($test) ? $test : get_class($test);
         
-        $meta = $this->getMeta($class);
+        $meta = $this->mapper->getMeta($class);
         if (!isset($meta->relations[$relationName])) {
             throw new Exception("Unknown relation $relationName on $class");
         }
@@ -383,34 +379,27 @@ class Manager
     /**
      * Insert an object into the database, or values into a table
      * 
+     * Supports the following signatures:
+     *   insert($model)
+     *   insert($className, $propertyValues);
+     * 
      * @return int|null
      */
-    public function insert()
+    public function insert($model, $query=null)
     {
-        $args = func_get_args();
-        $argc = func_num_args();
-        $meta = null;
+        $meta = $this->mapper->getMeta($model);
         $object = null;
 
-        if ($argc < 1 || $argc > 2) {
-            throw new \InvalidArgumentException();
-        }
-
-        if (is_object($args[0])) {
-            $object = $args[0];
-            $meta = $this->getMeta(get_class($object));
+        if ($query) {
+            $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
         }
         else {
-            $meta = $this->getMeta($args[0]);
-        }
-
-        if ($argc == 1) {
+            $object = $model;
+            $model = null;
             $query = new Query\Insert;
             $query->table = $meta->table;
         }
-        elseif ($argc == 2) {
-            $query = $args[1] instanceof Query\Insert ? $args[1] : new Query\Insert(['values'=>$args[1]]);
-        }
+
         if ($object && !$query->values) {
             $query->values = $this->mapper->fromObject($object, $meta, 'insert');
         }
@@ -421,7 +410,6 @@ class Manager
         list ($sql, $params) = $query->buildQuery();
 
         $stmt = $this->getConnector()->prepare($sql);
-        ++$this->queries;
         $stmt->execute($params);
         
         $lastInsertId = null;
@@ -478,7 +466,7 @@ class Manager
         if (is_object($first)) {
         // Object update mode
             $class = get_class($first);
-            $meta = $this->getMeta($class);
+            $meta = $this->mapper->getMeta($class);
             $query = new Query\Update();
             $query->set = $this->mapper->fromObject($first, $meta, 'update');
             $query->where = $meta->getPrimaryValue($first);
@@ -491,8 +479,11 @@ class Manager
             }
             $query = $this->createTableUpdateQuery($args);
             $class = $first;
-            $meta = $this->getMeta($class);
-            $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
+            $meta = $this->mapper->getMeta($class);
+
+            if (is_array($query->set)) {
+                $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
+            }
         }
         else {
             throw new \InvalidArgumentException();
@@ -500,9 +491,7 @@ class Manager
         
         list ($sql, $params) = $query->buildQuery($meta);
         
-        $stmt = $this->getConnector()->prepare($sql);
-        ++$this->queries;
-        return $stmt->execute($params);
+        return $this->getConnector()->prepare($sql)->execute($params);
     }
     
     /**
@@ -522,7 +511,7 @@ class Manager
         
         $first = array_shift($args);
         if (is_object($first)) {
-            $class = $this->getMeta(get_class($first));
+            $class = $this->mapper->getMeta(get_class($first));
             $criteria = new Query\Criteria();
             $criteria->where = $class->getIndexValue($first);
         }
@@ -554,7 +543,7 @@ class Manager
      */
     public function shouldInsert($object)
     {
-        $meta = $this->getMeta(get_class($object));
+        $meta = $this->mapper->getMeta(get_class($object));
         $nope = false;
         if (!$meta->primary || count($meta->primary) > 1) {
             $nope = true;
@@ -588,27 +577,7 @@ class Manager
             $this->update($object);
         }
     }
-  
-    /**
-     * @param string|\PDOStatement $stmt
-     * @param array $params
-     * @return \PDOStatement
-     * @throws \InvalidArgumentException
-     */
-    public function execute($stmt, $params=null)
-    {
-        if (is_string($stmt)) {
-            $stmt = $this->getConnector()->prepare($stmt);
-        }
-        if (!isset($stmt->queryString)) {
-            throw new \InvalidArgumentException("Statement didn't look like a PDOStatement");
-        }
-        ++$this->queries;
-        $stmt->execute($params);
-        
-        return $stmt;
-    }
-    
+
     /**
      * Creates an array criteria for a primary key
      * @param string Class name to create criteria for
@@ -619,7 +588,7 @@ class Manager
      */
     protected function createIdCriteria($class, $id)
     {
-        $meta = $this->getMeta($class);
+        $meta = $this->mapper->getMeta($class);
         $primary = $meta->primary;
         if (!$primary) {
             throw new Exception("Can't use {$meta->class} by primary - none defined.");
@@ -654,9 +623,9 @@ class Manager
             if ($cnt == 1) {
                 $query = new Query\Update($args[0]);
             }
-            elseif ($cnt >= 2 && $cnt < 4) {
-                if (!is_array($args[0])) {
-                    throw new \InvalidArgumentException("Set must be an array");
+            elseif ($cnt >= 2) {
+                if (!is_array($args[0]) && !is_string($args[0])) {
+                    throw new \InvalidArgumentException("Set must be an array or string");
                 }
                 $query = new Query\Update();
                 $query->set = array_shift($args);
@@ -672,7 +641,7 @@ class Manager
     protected function executeDelete($meta, Query\Criteria $criteria)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta);
+            $meta = $this->mapper->getMeta($meta);
             if (!$meta instanceof Meta) {
                 throw new \InvalidArgumentException();
             }
@@ -686,9 +655,7 @@ class Manager
         }
 
         $sql = "DELETE FROM $table WHERE $whereClause";
-        $stmt = $this->getConnector()->prepare($sql);
-        ++$this->queries;
-        $stmt->execute($whereParams);
+        $stmt = $this->getConnector()->prepare($sql)->execute($whereParams);
     }
     
     /**

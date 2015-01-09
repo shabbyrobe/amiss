@@ -99,7 +99,7 @@ abstract class ActiveRecord
     {
         $class = $class ?: get_called_class();
         if (!isset(self::$meta[$class])) {
-            self::$meta[$class] = static::getDependency('manager')->getMeta($class);
+            self::$meta[$class] = static::getDependency('manager')->mapper->getMeta($class);
         }
         return self::$meta[$class];
     }

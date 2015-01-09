@@ -65,8 +65,12 @@ class Connector
      * @var array
      */
     public $connectionStatements;
+
+    public $queries = 0;
     
     private $attributes=array();
+
+    private $persistent = false;
     
     public function __clone()
     {
@@ -154,6 +158,15 @@ class Connector
     
     public function createPDO()
     {
+        if (isset($this->driverOptions[\PDO::ATTR_PERSISTENT])) {
+            $this->persistent = $this->driverOptions[\PDO::ATTR_PERSISTENT];
+        }
+        if (!$this->persistent) {
+            $this->attributes[\PDO::ATTR_STATEMENT_CLASS] = ['Amiss\Sql\Statement', [$this]];
+        } else  {
+            unset($this->attributes[\PDO::ATTR_STATEMENT_CLASS]);
+        }
+
         $pdo = new \PDO($this->dsn, $this->username, $this->password, $this->driverOptions);
         
         if (!isset($this->attributes[\PDO::ATTR_ERRMODE])) {
@@ -270,9 +283,19 @@ class Connector
         return $this->getPDO()->errorInfo();
     }
     
-    public function exec($statement)
+    public function exec($sql)
     {
-        return $this->getPDO()->exec($statement);
+        ++$this->queries;
+        return $this->getPDO()->exec($sql);
+    }
+
+    /**
+     * PDO calls it 'exec'. PDOStatement calls it 'execute'. Crazy!
+     */
+    public function execute($sql)
+    {
+        ++$this->queries;
+        return $this->getPDO()->exec($sql);
     }
 
     public function execAll($statements, $transaction=false)
@@ -286,6 +309,7 @@ class Connector
             $this->beginTransaction();
         }
         foreach ($statements as $k=>$statement) {
+            ++$this->queries;
             $out[$k] = $this->getPDO()->exec($statement);
         }
         if ($transaction) {
@@ -294,23 +318,20 @@ class Connector
         return $out;
     }
     
-    /**
-     * PDO calls it 'exec'. PDOStatement calls it 'execute'. Crazy!
-     */
-    public function execute($statement)
-    {
-        return $this->exec($statement);
-    }
-    
     public function lastInsertId()
     {
         $this->ensurePDO();
         return $this->getPDO()->lastInsertId();
     }
     
-    public function prepare($statement, array $driverOptions=array())
+    public function prepare($sql, array $driverOptions=array())
     {
-        return $this->getPDO()->prepare($statement, $driverOptions);
+        $stmt = $this->getPDO()->prepare($sql, $driverOptions);
+        if ($stmt instanceof \PDOStatement) {
+            return $this->persistent ? new PersistentStatement($this, $stmt) : $stmt;
+        } else {
+            return $stmt;
+        }
     }
     
     public function query()
@@ -318,7 +339,13 @@ class Connector
         $pdo = $this->getPDO();
         $args = func_get_args();
     
-        return call_user_func_array(array($pdo, 'query'), $args);
+        $stmt = call_user_func_array(array($pdo, 'query'), $args);
+        if ($stmt instanceof \PDOStatement) {
+            ++$this->queries;
+            return $this->persistent ? new PersistentStatement($this, $stmt) : $stmt;
+        } else {
+            return $stmt;
+        }
     }
     
     public function quote($string, $parameterType=null)

@@ -47,7 +47,10 @@ class ManagerInsertObjectTest extends \ModelDataTestCase
         
         $this->assertGreaterThan(0, $venue->venueId);
         
-        $row = $this->manager->execute("SELECT * from venue WHERE venueId=?", array($venue->venueId))->fetch(\PDO::FETCH_ASSOC);
+        $row = $this->manager->connector->prepare("SELECT * from venue WHERE venueId=?")
+            ->execute(array($venue->venueId))
+            ->fetch(\PDO::FETCH_ASSOC);
+
         $this->assertEquals($venue->venueName, $row['name']);
         $this->assertEquals($venue->venueSlug, $row['slug']);
         $this->assertEquals($venue->venueAddress, $row['address']);

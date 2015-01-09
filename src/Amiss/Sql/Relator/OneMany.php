@@ -10,13 +10,13 @@ class OneMany extends Base
     private function fetchRelated(Meta $meta, $source, $relation, $criteria)
     {
         if (!$source) { return; }
-        
+
         $type = $relation[0];
         
         if ($type != 'one' && $type != 'many') {
             throw new Exception("This relator only works with 'one' or 'many' as the type");
         }
-        $relatedMeta = $this->manager->getMeta($relation['of']);
+        $relatedMeta = $this->manager->mapper->getMeta($relation['of']);
 
         list ($from, $to) = $this->resolveFromTo($relation, $relatedMeta);
 

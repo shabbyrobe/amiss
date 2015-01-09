@@ -219,6 +219,8 @@ class ModelDataTestCase extends DataTestCase
         $this->db = $this->getConnector();
         $this->db->exec($this->readSqlFile(__DIR__.'/../doc/demo/schema.{engine}.sql'));
         $this->db->exec($this->readSqlFile(__DIR__.'/../doc/demo/testdata.sql'));
+
+        $this->db->queries = 0;
         
         $this->mapper = $this->getMapper();
         $this->manager = $this->getManager();

@@ -125,9 +125,8 @@ class Association extends Base
             $ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
         );
 
-        $stmt = $this->manager->execute($query, $params);
-        ++$this->manager->queries;
-        
+        $stmt = $this->manager->connector->prepare($query)->execute($params);
+
         $list = array();
         $ids = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
