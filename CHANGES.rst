@@ -1,8 +1,37 @@
 Changelog
 =========
 
-v4.1.0 to v4.2.0
-----------------
+v5.0.0
+------
+
+- Mapper API has changed significantly::
+
+    +    function createObject($meta, $mapped, $args=null)
+    -    function createObject($meta, $row, $args=null)
+
+    +    function fromObject($input, $meta=null, $context=null)
+    -    function fromObject($meta, $input, $context=null)
+
+    +    function fromObjects($input, $meta=null, $context=null)
+    -    function fromObjects($meta, $input, $context=null)
+
+    +    function populateObject($object, \stdClass $mapped, $meta=null)
+    -    function populateObject($meta, $object, $row)
+
+    +    function toObject($input, $args=null, $meta=null)
+    -    function toObject($meta, $input, $args=null)
+
+    +    function toObjects($input, $args=null, $meta=null)
+    -    function toObjects($meta, $input, $args=null)
+
+- Relations can now be automatically populated
+
+- Objects can now use properties and auto relations as constructor arguments
+
+
+
+v4.2.0
+------
 
 - Active Records support ``deleteById`` as a static method.
 
@@ -15,8 +44,8 @@ v4.1.0 to v4.2.0
 - Moved to packagist
 
 
-v4.0.x to v4.1.0
-----------------
+v4.1.0
+------
 
 New features
 ~~~~~~~~~~~~
@@ -42,8 +71,8 @@ Static constructor support added to mapper, receives unmapped input as argument 
     }
 
 
-v3.0.x to v4.0
---------------
+v4.0
+----
 
 New features:
 

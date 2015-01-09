@@ -491,7 +491,7 @@ class Manager
         
         list ($sql, $params) = $query->buildQuery($meta);
         
-        return $this->getConnector()->prepare($sql)->execute($params);
+        return $this->getConnector()->exec($sql, $params);
     }
     
     /**

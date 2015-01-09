@@ -54,12 +54,6 @@ class Connector
     public $driverOptions;
     
     /**
-     * Transaction depth
-     * @var int
-     */
-    public $transactionDepth=0;
-    
-    /**
      * List of statements to run when the connection is established
      * This is mostly here to allow you to set the connection encoding.
      * @var array
@@ -75,7 +69,6 @@ class Connector
     public function __clone()
     {
         $this->pdo = null;
-        $this->transactionDepth = 0;
     }
     
     public function __construct($dsn, $username=null, $password=null, array $driverOptions=null, array $connectionStatements=null)
@@ -249,8 +242,6 @@ class Connector
      */
     public function beginTransaction()
     {
-        $pdo = $this->getPDO();
-        ++$this->transactionDepth;
         return $this->getPDO()->beginTransaction();
     }
     
@@ -259,15 +250,11 @@ class Connector
      */
     public function commit()
     {
-        $this->ensurePDO();
-        --$this->transactionDepth;
         return $this->getPDO()->commit();
     }
     
     public function rollBack()
     {
-        $this->ensurePDO();
-        --$this->transactionDepth;
         return $this->getPDO()->rollBack();
     }
     
@@ -283,19 +270,25 @@ class Connector
         return $this->getPDO()->errorInfo();
     }
     
-    public function exec($sql)
+    public function exec($sql, $params=null)
     {
         ++$this->queries;
-        return $this->getPDO()->exec($sql);
+        if (!$params) {
+            return $this->getPDO()->exec($sql);
+        }
+        else {
+            $stmt = $this->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->rowCount();
+        }
     }
 
     /**
      * PDO calls it 'exec'. PDOStatement calls it 'execute'. Crazy!
      */
-    public function execute($sql)
+    public function execute($sql, $params=null)
     {
-        ++$this->queries;
-        return $this->getPDO()->exec($sql);
+        return $this->exec($sql, $params);
     }
 
     public function execAll($statements, $transaction=false)

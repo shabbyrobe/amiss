@@ -22,6 +22,7 @@ class TypeAutoGuidTest extends \CustomTestCase
         $this->db = new \Amiss\Sql\Connector('sqlite::memory:');
         $this->db->exec("CREATE TABLE type_auto_guid_foo(guid STRING PRIMARY KEY, name STRING);");
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
+        $this->db->queries = 0;
     }
     
     public function testInsertWithEmptyGuidGenerates()

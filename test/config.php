@@ -10,7 +10,7 @@ class TestConnector extends \Amiss\Sql\Connector
 {
     public $calls = array();
     
-    public function exec($statement)
+    public function exec($statement, $params=null)
     {
         $this->calls[] = array($statement, array());
     }
