@@ -122,8 +122,15 @@ class Meta
 
     private function setConstructorArgs($args)
     {
+        $checkProperties = [];
         foreach ($args as $arg) {
             $this->constructorArgs[] = $arg;
+            if ($arg[0] == 'property') {
+                $checkProperties[] = $arg[1];
+            }
+        }
+        if ($diff = array_diff($checkProperties, array_keys($this->getProperties() ?: []))) {
+            throw new Exception("Unknown constructor properties ".implode(', ', $diff));
         }
     }
 

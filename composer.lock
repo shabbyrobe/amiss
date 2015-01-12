@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "shabbyrobe/pdok",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shabbyrobe/pdok.git",
-                "reference": "5baea4f9d2558b9c3396be818f77758ac0c1928d"
+                "reference": "d913af1312a4a1612c9d2383602068bc895b3d6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shabbyrobe/pdok/zipball/5baea4f9d2558b9c3396be818f77758ac0c1928d",
-                "reference": "5baea4f9d2558b9c3396be818f77758ac0c1928d",
+                "url": "https://api.github.com/repos/shabbyrobe/pdok/zipball/d913af1312a4a1612c9d2383602068bc895b3d6b",
+                "reference": "d913af1312a4a1612c9d2383602068bc895b3d6b",
                 "shasum": ""
             },
             "require": {
@@ -48,7 +48,7 @@
                 "pdo",
                 "sql"
             ],
-            "time": "2015-01-12 01:42:28"
+            "time": "2015-01-12 04:53:56"
         }
     ],
     "packages-dev": [

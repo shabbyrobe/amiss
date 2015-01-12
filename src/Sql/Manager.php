@@ -172,7 +172,7 @@ class Manager
         
         foreach ($mappedRows as $idx=>$mappedRow) {
             foreach ($related as $relId=>$objs) {
-                $mappedRow->{$relId} = $objs[$idx];
+				$mappedRow->{$relId} = isset($objs[$idx]) ? $objs[$idx] : null;
             }
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
             $mapper->populateObject($object, $mappedRow, $meta);
