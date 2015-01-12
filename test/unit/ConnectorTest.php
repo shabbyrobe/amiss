@@ -23,9 +23,9 @@ class ConnectorTest extends \CustomTestCase
     public function testConnect()
     {
         $c = new Connector('sqlite::memory:');
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
         $c->exec("SELECT * FROM sqlite_master WHERE type='table'");
-        $this->assertNotNull($c->pdo);
+        $this->assertNotNull($this->getProtected($c, 'pdo'));
     }
     
     /**
@@ -35,9 +35,9 @@ class ConnectorTest extends \CustomTestCase
     {
         $c = new Connector('sqlite::memory:');
         $c->query("SELECT 1");
-        $this->assertNotNull($c->pdo);
+        $this->assertNotNull($this->getProtected($c, 'pdo'));
         $c->disconnect();
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
     }
     
     /**
@@ -46,10 +46,10 @@ class ConnectorTest extends \CustomTestCase
     public function testDisconnectedSetAttribute()
     {
         $c = new Connector('sqlite::memory:');
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
         
         $c->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
         $this->assertEquals(array(\PDO::ATTR_DEFAULT_FETCH_MODE=>\PDO::FETCH_ASSOC), $this->getProtected($c, 'attributes'));
     }
 
@@ -67,7 +67,7 @@ class ConnectorTest extends \CustomTestCase
             $this->equalTo(\PDO::ERRMODE_EXCEPTION)
         );
         $c = new Connector('sqlite::memory:');
-        $c->pdo = $pdo;
+        $this->setProtected($c, 'pdo', $pdo);
         $c->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
     
@@ -78,10 +78,10 @@ class ConnectorTest extends \CustomTestCase
     {
         $c = new Connector('sqlite::memory:');
         $this->setProtected($c, 'attributes', array(\PDO::ATTR_DEFAULT_FETCH_MODE=>\PDO::FETCH_ASSOC));
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
         
         $attr = $c->getAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE);
-        $this->assertNull($c->pdo);
+        $this->assertNull($this->getProtected($c, 'pdo'));
         $this->assertEquals($attr, \PDO::FETCH_ASSOC);
     }
 
@@ -100,7 +100,7 @@ class ConnectorTest extends \CustomTestCase
         ;
         
         $c = new Connector('sqlite::memory:');
-        $c->pdo = $pdo;
+        $this->setProtected($c, 'pdo', $pdo);
         $this->assertEquals(\PDO::ERRMODE_EXCEPTION, $c->getAttribute(\PDO::ATTR_ERRMODE));
     }
 
@@ -116,7 +116,7 @@ class ConnectorTest extends \CustomTestCase
         $pdo->expects($this->once())->method('errorInfo');
         
         $c = new Connector('sqlite::memory:');
-        $c->pdo = $pdo;
+        $this->setProtected($c, 'pdo', $pdo);
         $c->errorInfo();
     }
     
@@ -141,7 +141,7 @@ class ConnectorTest extends \CustomTestCase
         $pdo->expects($this->once())->method('errorCode');
         
         $c = new Connector('sqlite::memory:');
-        $c->pdo = $pdo;
+        $this->setProtected($c, 'pdo', $pdo);
         $c->errorCode();
     }
     

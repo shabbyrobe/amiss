@@ -204,15 +204,13 @@ class Connector
      * This is an alternative to the standard PDO way of nulling all 
      * references to the PDO object, which also works with PDOConnector.
      * 
-     * <code>
-     * // Regular PDO way (also works with PDOConnector)
-     * $pdoConnector = null;
+     * Regular PDO way (also works with Connector):
+     *   $pdoConnector = null;
      * 
-     * // using disconnect()
-     * $pdoConnector->disconnect();
-     * // creates a new connection before executing 
-     * $pdoConnector->query("SHOW PROCESSLIST");
-     * </code>
+     * Using disconnect():
+     *   $pdoConnector->query("SHOW PROCESSLIST");
+     *   $pdoConnector->disconnect();
+     *   $pdoConnector->query("SHOW PROCESSLIST");
      */
     public function disconnect()
     {
@@ -231,10 +229,11 @@ class Connector
     
     public function getAttribute($attribute)
     {
-        if ($this->pdo == null)
+        if ($this->pdo == null) {
             return isset($this->attributes[$attribute]) ? $this->attributes[$attribute] : null;
-        else
+        } else {
             return $this->pdo->getAttribute($attribute);
+        }
     }
     
     /**
@@ -242,7 +241,10 @@ class Connector
      */
     public function beginTransaction()
     {
-        return $this->getPDO()->beginTransaction();
+        if (!$this->pdo) {
+            $this->connect();
+        }
+        return $this->pdo->beginTransaction();
     }
     
     /**
@@ -250,31 +252,44 @@ class Connector
      */
     public function commit()
     {
-        return $this->getPDO()->commit();
+        if (!$this->pdo) {
+            $this->connect();
+        }
+        return $this->pdo->commit();
     }
     
     public function rollBack()
     {
-        return $this->getPDO()->rollBack();
+        if (!$this->pdo) {
+            $this->connect();
+        }
+        return $this->pdo->rollBack();
     }
     
     public function errorCode()
     {
-        if ($this->pdo == null) return null;
-        return $this->getPDO()->errorCode();
+        if ($this->pdo == null) {
+            return null;
+        }
+        return $this->pdo->errorCode();
     }
     
     public function errorInfo()
     {
-        if ($this->pdo == null) return null;
-        return $this->getPDO()->errorInfo();
+        if ($this->pdo == null) {
+            return null;
+        }
+        return $this->pdo->errorInfo();
     }
     
     public function exec($sql, $params=null)
     {
+        if (!$this->pdo) {
+            $this->connect();
+        }
         ++$this->queries;
         if (!$params) {
-            return $this->getPDO()->exec($sql);
+            return $this->pdo->exec($sql);
         }
         else {
             $stmt = $this->prepare($sql);
@@ -296,6 +311,9 @@ class Connector
         if (!$statements) {
             throw new \InvalidArgumentException();
         }
+        if (!$this->pdo) {
+            $this->connect();
+        }
 
         $out = [];
         if ($transaction) {
@@ -303,7 +321,7 @@ class Connector
         }
         foreach ($statements as $k=>$statement) {
             ++$this->queries;
-            $out[$k] = $this->getPDO()->exec($statement);
+            $out[$k] = $this->pdo->exec($statement);
         }
         if ($transaction) {
             $this->commit();
@@ -314,14 +332,17 @@ class Connector
     public function lastInsertId()
     {
         $this->ensurePDO();
-        return $this->getPDO()->lastInsertId();
+        return $this->pdo->lastInsertId();
     }
     
     public function prepare($sql, array $driverOptions=array())
     {
-        $stmt = $this->getPDO()->prepare($sql, $driverOptions);
+        if (!$this->pdo) {
+            $this->connect();
+        }
+        $stmt = $this->pdo->prepare($sql, $driverOptions);
         if ($stmt instanceof \PDOStatement) {
-            return $this->persistent ? new PersistentStatement($this, $stmt) : $stmt;
+            return $this->persistent ? new StatementWrapper($this, $stmt) : $stmt;
         } else {
             return $stmt;
         }
@@ -329,13 +350,15 @@ class Connector
     
     public function query()
     {
-        $pdo = $this->getPDO();
+        if (!$this->pdo) {
+            $this->connect();
+        }
         $args = func_get_args();
     
-        $stmt = call_user_func_array(array($pdo, 'query'), $args);
+        $stmt = call_user_func_array(array($this->pdo, 'query'), $args);
         if ($stmt instanceof \PDOStatement) {
             ++$this->queries;
-            return $this->persistent ? new PersistentStatement($this, $stmt) : $stmt;
+            return $this->persistent ? new StatementWrapper($this, $stmt) : $stmt;
         } else {
             return $stmt;
         }
@@ -343,6 +366,9 @@ class Connector
     
     public function quote($string, $parameterType=null)
     {
-        return $this->getPDO()->quote($string, $parameterType);
+        if (!$this->pdo) {
+            $this->connect();
+        }
+        return $this->pdo->quote($string, $parameterType);
     }
 }

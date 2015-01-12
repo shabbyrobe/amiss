@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Sql;
 
-class PersistentStatement
+class StatementWrapper
 {
 	public $statement;
     private $connector;

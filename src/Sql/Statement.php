@@ -30,7 +30,7 @@ class Statement extends \PDOStatement
         return ($ret = parent::closeCursor()) ? $this : $ret;
 	}
 
-	function execute($inputParameters=[]) 
+	function execute($inputParameters=null) 
 	{
         ++$this->connector->queries;
         return ($ret = parent::execute($inputParameters)) ? $this : $ret;
@@ -39,7 +39,7 @@ class Statement extends \PDOStatement
     /**
      * It's called exec on PDO, but execute on PDOStatement. Go figure.
      */
-	function exec($inputParameters=[]) 
+	function exec($inputParameters=null) 
 	{
         ++$this->connector->queries;
         return ($ret = parent::execute($inputParameters)) ? $this : $ret;
