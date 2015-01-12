@@ -371,4 +371,14 @@ class Connector
         }
         return $this->pdo->quote($string, $parameterType);
     }
+
+	public function quoteIdentifier($name)
+	{
+        switch ($this->engine) {
+        case 'mysql': case 'sqlite': $quote = '`'; break;
+        case 'pgsql': $quote = '"'; break;
+        default: throw new \PDOException("Unsupported engine {$this->engine}");
+        }
+		return $quote.str_replace($quote, '', $name).$quote;
+	}
 }
