@@ -14,7 +14,7 @@ class TableBuilderCreateTest extends \DataTestCase
             return $this->markTestSkipped();
         
         parent::setUp();
-        $this->manager = \Amiss\Factory::createSqlManager(new \Amiss\Sql\Connector('sqlite::memory:'));
+        $this->manager = \Amiss\Factory::createSqlManager(new \PDOK\Connector('sqlite::memory:'));
     }
     
     /**
@@ -129,7 +129,7 @@ class TableBuilderCreateTest extends \DataTestCase
     /**
      * @group tablebuilder
      */
-    public function testCreateTableFailsWhenConnectorIsNotAmissConnector()
+    public function testCreateTableFailsWhenConnectorIsNotPDOKConnector()
     {
         $this->manager->connector = new \PDO('sqlite::memory:');
         $this->setExpectedException('PHPUnit_Framework_Error');

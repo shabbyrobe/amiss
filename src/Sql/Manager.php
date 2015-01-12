@@ -5,6 +5,7 @@ use Amiss\Exception;
 use Amiss\Mapper;
 use Amiss\Meta;
 use Amiss\Sql\Query\Criteria;
+use PDOK\Connector;
 
 /**
  * Amiss query manager. This is the core of Amiss' functionality.
@@ -14,7 +15,7 @@ use Amiss\Sql\Query\Criteria;
 class Manager
 {
     /**
-     * @var Amiss\Sql\Connector
+     * @var PDOK\Connector
      */
     public $connector;
     
@@ -29,7 +30,7 @@ class Manager
     public $relators = [];
     
     /**
-     * @param Amiss\Sql\Connector|array  Database connector
+     * @param PDOK\Connector|array  Database connector
      * @param Amiss\Mapper
      */
     public function __construct($connector, $mapper)
@@ -45,7 +46,7 @@ class Manager
     }
 
     /**
-     * @return \Amiss\Sql\Connector|\PDO
+     * @return PDOK\Connector
      */
     public function getConnector()
     {

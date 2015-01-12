@@ -289,7 +289,7 @@ class ManagerSelectTest extends \ModelDataTestCase
      */
     public function testSelectSingleObjectFailsWithoutIssuingQueryWhenLimitSetButNotOne()
     {
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('prepare'), array(''));
+        $this->manager->connector = $this->getMock('PDOK\Connector', array('prepare'), array(''));
         $this->manager->connector->expects($this->never())->method('prepare');
         $artist = $this->manager->get('Artist', array('limit'=>2));
     }

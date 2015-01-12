@@ -3,8 +3,8 @@ namespace Amiss\Sql;
 
 use Amiss\Exception;
 use Amiss\Meta;
-use Amiss\Sql\Connector;
 use Amiss\Mapper;
+use PDOK\Connector;
 
 abstract class TableBuilder
 {

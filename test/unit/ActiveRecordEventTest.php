@@ -12,7 +12,7 @@ class ActiveRecordEventTest extends \CustomTestCase
     {
         parent::setUp();
         
-        $this->connector = $this->getMock('Amiss\Sql\Connector', array(), array(), '', !'callOriginalConstructor');
+        $this->connector = $this->getMock('PDOK\Connector', array(), array(), '', !'callOriginalConstructor');
         
         $this->mapper = new \Amiss\Mapper\Note;
         

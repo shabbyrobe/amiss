@@ -11,7 +11,7 @@ class ManagerTest extends \CustomTestCase
         parent::setUp();
         
         $this->manager = new \Amiss\Sql\Manager(
-            new \Amiss\Sql\Connector('sqlite::memory:'),
+            new \PDOK\Connector('sqlite::memory:'),
             new \Amiss\Mapper\Note
         );
     }

@@ -13,7 +13,7 @@ class RelatedGetterTest extends \CustomTestCase
 {
     function setUp()
     {
-        $this->db = new \Amiss\Sql\Connector('sqlite::memory:');
+        $this->db = new \PDOK\Connector('sqlite::memory:');
         $this->db->exec("CREATE TABLE child(id INTEGER, parentId INTEGER)");
         $this->db->exec("CREATE TABLE parent(id INTEGER)");
         $this->db->exec("INSERT INTO child VALUES(1, 1)");

@@ -138,17 +138,21 @@ if (!$mapper) {
     echo "Please pass the --mapper parameter or define a mapper in a bootstrap file\n\n".$usage; exit(1);
 }
 
-if (!$connector)
-    $connector = new Amiss\Sql\Connector($dsn, $user, $password);
+if (!$connector) {
+    $connector = new \PDOK\Connector($dsn, $user, $password);
+}
 
-if (!$manager)
-    $manager = new Amiss\Sql\Manager(new Amiss\Sql\Connector($engine.':blahblah'), $mapper);
+if (!$manager) {
+    $manager = new \Amiss\Sql\Manager(new \PDOK\Connector($engine.':blahblah'), $mapper);
+}
 
 $toCreate = find_classes($input);
-if ($namespaces)
+if ($namespaces) {
     $toCreate = filter_classes_by_namespaces($toCreate, $namespaces);
-if ($notes)
+}
+if ($notes) {
     $toCreate = filter_classes_by_notes($toCreate, $notes);
+}
 
 foreach ($toCreate as $class) {
     $builder = new Amiss\Sql\TableBuilder($manager, $class);

@@ -16,7 +16,8 @@
         "psr-4": { "Amiss\\": "src/" }
     },
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "shabbyrobe/pdok": "1.0.*"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*"

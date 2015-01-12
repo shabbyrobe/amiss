@@ -12,7 +12,7 @@ class RelatorOneManyTest extends \CustomTestCase
         
         $this->mapper = new \TestMapper;
         
-        $this->db = $this->getMockBuilder('Amiss\Sql\Connector')
+        $this->db = $this->getMockBuilder('PDOK\Connector')
             ->disableOriginalConstructor()
             ->getMock()
         ;

@@ -140,7 +140,7 @@ class DataTestCase extends CustomTestCase
     public function getConnector()
     {
         $connection = $this->getConnectionInfo();
-        $connector = \Amiss\Sql\Connector::create($connection);
+        $connector = \PDOK\Connector::create($connection);
         $hash = spl_object_hash($connector);
         if (isset($this->connections[$hash])) {
             throw new \UnexpectedValueException();

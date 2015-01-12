@@ -4,8 +4,53 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "70745a6443baab8ae371d9cc1266e349",
-    "packages": [],
+    "hash": "7844b53c198615ccfef9a28bed296fbb",
+    "packages": [
+        {
+            "name": "shabbyrobe/pdok",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shabbyrobe/pdok.git",
+                "reference": "5baea4f9d2558b9c3396be818f77758ac0c1928d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shabbyrobe/pdok/zipball/5baea4f9d2558b9c3396be818f77758ac0c1928d",
+                "reference": "5baea4f9d2558b9c3396be818f77758ac0c1928d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PDOK\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Blake Williams",
+                    "email": "code@k3jw.com"
+                }
+            ],
+            "description": "Improved PDO interface",
+            "homepage": "http://k3jw.com/code/pdok/",
+            "keywords": [
+                "pdo",
+                "sql"
+            ],
+            "time": "2015-01-12 01:42:28"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",
@@ -803,6 +848,7 @@
     "minimum-stability": "stable",
     "stability-flags": [],
     "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": {
         "php": ">=5.4.0"
     },

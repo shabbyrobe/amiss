@@ -127,7 +127,7 @@ foreach ($wtmp as $w) {
 
 $words = array_unique($words);
 
-$connector = new Amiss\Sql\Connector($dsn, $user, $password);
+$connector = new \PDOK\Connector($dsn, $user, $password);
 $stmt = $connector->query("SHOW TABLES");
 while ($table = $stmt->fetchColumn()) {
     $oname = strtr($table, $words);
