@@ -3,6 +3,7 @@ namespace Amiss;
 
 class Meta
 {
+    public $readOnly = false;
     public $class;
     public $table;
     public $primary;
@@ -68,6 +69,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
+            'readOnly',
         ); 
     }
 
@@ -100,7 +102,10 @@ class Meta
         if (!$this->constructor) {
             $this->constructor = '__construct';
         }
-        
+        if (isset($info['readOnly'])) {
+            $this->readOnly = !!$info['readOnly'];
+        }
+
         $this->defaultFieldType = null;
         if (isset($info['defaultFieldType'])) {
             $ft = $info['defaultFieldType'];

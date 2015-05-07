@@ -69,6 +69,10 @@ class Note extends \Amiss\Mapper\Base
             'constructorArgs'=>[],
         );
 
+        if (isset($classNotes['readOnly']) && $classNotes['readOnly']) {
+            $info['readOnly'] = true;
+        }
+
         if (isset($classNotes['index'])) {
             foreach ($classNotes['index'] as $key=>$index) {
                 if ($index === true) {

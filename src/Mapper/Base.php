@@ -73,7 +73,7 @@ abstract class Base extends \Amiss\Mapper
         $output = array();
         
         $defaultType = $meta->getDefaultFieldType();
-        
+
         foreach ($meta->getFields() as $prop=>$field) {
             if (!isset($field['getter'])) {
                 $value = $object->$prop;

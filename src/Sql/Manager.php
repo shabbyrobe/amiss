@@ -415,6 +415,10 @@ class Manager
     public function insert($model, $query=null)
     {
         $meta = $this->mapper->getMeta($model);
+        if ($meta->readOnly) {
+            throw new Exception("Cannot insert read only class {$meta->class}");
+        }
+
         $object = null;
 
         if ($query) {
@@ -494,6 +498,10 @@ class Manager
         // Object update mode
             $class = get_class($first);
             $meta = $this->mapper->getMeta($class);
+            if ($meta->readOnly) {
+                throw new Exception("Cannot update read only class {$meta->class}");
+            }
+
             $query = new Query\Update();
             $query->set = $this->mapper->fromObject($first, $meta, 'update');
             $query->where = $meta->getPrimaryValue($first);
