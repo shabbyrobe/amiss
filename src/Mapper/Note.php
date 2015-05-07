@@ -70,8 +70,14 @@ class Note extends \Amiss\Mapper\Base
         );
 
         if (isset($classNotes['index'])) {
-            $info['indexes'] = $classNotes['index'];
+            foreach ($classNotes['index'] as $key=>$index) {
+                if ($index === true) {
+                    $index = ['fields'=>[$key]];
+                }
+                $info['indexes'][$key] = $index;
+            }
         }
+
         if (isset($classNotes['constructor'])) {
             if (is_string($classNotes['constructor'])) {
                 $info['constructor'] = $classNotes['constructor'];
@@ -84,10 +90,29 @@ class Note extends \Amiss\Mapper\Base
                 throw new \Exception("Constructor annotation for class {$class} must be string or array");
             }
         }
-
-        $setters = array();
         
         $relationNotes = array();
+
+        class_relations: {
+            if (isset($classNotes['relation'])) {
+                foreach ($classNotes['relation'] as $key=>$def) {
+                    if (!is_array($def)) {
+                        throw new \Exception("Relation $key was not valid in class $class");
+                    }
+                    $type = key($def);
+                    if (!is_array($def[$type])) {
+                        throw new \Exception("Relation $key was not valid in class $class");
+                    }
+                    if (isset($def[$type]['mode'])) {
+                        throw new \Exception("Mode {$def['mode']} not valid for class-level relation {$key}");
+                    }
+                    $def[$type]['mode'] = 'class';
+                    $relationNotes[$key] = ['has'=>$def];
+                }
+            }
+        }
+
+        $setters = array();
         
         $fieldIndexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
@@ -156,6 +181,10 @@ class Note extends \Amiss\Mapper\Base
 
                     if ($type == 'method' && (!isset($itemNotes['getter']) || !$itemNotes['getter'])) {
                         $itemNotes['getter'] = $name;
+                    }
+
+                    if (isset($relationNotes[$name])) {
+                        throw new \UnexpectedValueException("Duplicate relation {$name} on class {$class}");
                     }
                     $relationNotes[$name] = $itemNotes;
                 }

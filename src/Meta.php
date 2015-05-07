@@ -12,21 +12,26 @@ class Meta
     /**
      * Array of relation arrays, hashed by property name
      * 
-     * Relation arrays *must* contain at least a type at index 0. All other
-     * values in the array are defined by the relator except 'name', which 
-     * Meta will assign. The meta only cares about the type and name.
+     * Relation arrays *must* contain at least a type at index 0. 
      * 
-     * For e.g.
-     * $meta->relations = array(
+     * The meta also looks for the following keys:
+     * - name (will be assigned by this class)
+     * - mode (default, auto, class)
+     * 
+     * All other values in the array are ignored by the meta and passed 
+     * directly to the relator.
+     * 
+     * Example:
+     *   $meta->relations = array(
      *     // the 'of' and 'on' keys are required by Amiss\Sql\Relator\OneMany
      *     'foo'=>array('one', 'of'=>'Artist', 'on'=>'artistId'),
      *     
      *     // the blahblah relator has different ideas
      *     'bar'=>array('blahblah', 'fee'=>'fi', 'fo'=>'fum'),
-     * );
+     *   );
      */
     public $relations = [];
-    
+
     /**
      * Additional metadata found but not explicitly handled by the mapper
      */
@@ -113,10 +118,15 @@ class Meta
                 throw new Exception("Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to'");
             }
             $r['name'] = $id;
-            $this->relations[$id] = $r;
-            if (isset($r['auto']) && $r['auto']) {
-                $this->autoRelations[] = $id;
+            if (isset($r['mode'])) {
+                if ($r['mode'] == 'auto') {
+                    $this->autoRelations[] = $id;
+                }
             }
+            else {
+                $r['mode'] = 'default';
+            }
+            $this->relations[$id] = $r;
         }
     }
 
@@ -190,8 +200,10 @@ class Meta
                 $this->properties[$name] = $field;
             }
             foreach ($this->relations as $name=>$relation) {
-                $field['source'] = 'relation';
-                $this->properties[$name] = $relation;
+                if ($relation['mode'] != 'class') {
+                    $field['source'] = 'relation';
+                    $this->properties[$name] = $relation;
+                }
             }
         }
         return $this->properties;

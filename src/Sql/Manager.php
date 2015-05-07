@@ -70,6 +70,7 @@ class Manager
         $mapper = $this->mapper;
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $meta = $mapper->getMeta($class);
+        $object = null;
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
@@ -206,13 +207,32 @@ class Manager
         }
         
         $query = "SELECT COUNT($field) FROM $table "
-            .($where  ? "WHERE $where" : '')
-        ;
+            .($where  ? "WHERE $where" : '');
 
         $stmt = $this->getConnector()->prepare($query)->execute($params);
         return (int)$stmt->fetchColumn();
     }
-    
+
+    public function exists($class, $id)
+    {
+        $criteria = $this->createIdCriteria($class, $id);
+        $query = new \Amiss\Sql\Query\Criteria;
+        $this->populateWhereAndParamsFromArgs($query, [$criteria]);
+        $meta = $this->mapper->getMeta($class);
+        if (!$meta->primary) {
+            throw new \InvalidArgumentException();
+        }
+
+        list ($where, $params) = $query->buildClause($meta);
+
+        $fields = implode(', ', array_values($meta->primary));
+        $query = "SELECT COUNT($fields) FROM {$meta->table} "
+            .($where  ? "WHERE $where" : '');
+
+        $stmt = $this->getConnector()->prepare($query)->execute($params);
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
+
     /**
      * Retrieve related objects from the database and assign them to the source
      * if the source field is not yet populated.
@@ -239,17 +259,23 @@ class Manager
             }
         }
 
-        $done = [];
+        $relationMap = [];
         foreach ((array)$relationNames as $relationName) {
+            if (!isset($meta->relations[$relationName])) {
+                throw new Exception("Unknown relation $relationName on {$meta->class}");
+            }
+            $relationMap[$relationName] = $rel = $meta->relations[$relationName];
+            if ($rel['mode'] == 'class') {
+                throw new Exception("Relation $relationName is not assignable for class {$meta->class}");
+            }
+        }
+
+        $done = [];
+        foreach ($relationMap as $relationName=>$relation) {
             if (isset($done[$relationName])) {
                 continue;
             }
             $done[$relationName] = true;
-
-            if (!isset($meta->relations[$relationName])) {
-                throw new Exception("Unknown relation $relationName on {$meta->class}");
-            }
-            $relation = $meta->relations[$relationName];
 
             $missing = [];
             foreach ($source as $idx=>$item) {

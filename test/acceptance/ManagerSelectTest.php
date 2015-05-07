@@ -18,6 +18,26 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
+    public function testExists()
+    {
+        $a = $this->manager->exists('Artist', 1);
+        $this->assertTrue($a);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
+    public function testExistsFalse()
+    {
+        $a = $this->manager->exists('Artist', PHP_INT_MAX);
+        $this->assertFalse($a);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
     public function testGetByIdMultiPositional()
     {
         $a = $this->manager->getById('EventArtist', array(2, 1));
