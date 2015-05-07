@@ -3,7 +3,6 @@ namespace Amiss;
 
 class Meta
 {
-    public $readOnly = false;
     public $class;
     public $table;
     public $primary;
@@ -41,7 +40,11 @@ class Meta
     public $autoRelations = [];
 
     public $indexes;
-    
+
+    public $canInsert = true;
+    public $canUpdate = true;
+    public $canDelete = true;
+
     /**
      * Array of fields, hashed by property name
      */
@@ -69,7 +72,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'readOnly',
+            'canInsert', 'canUpdate', 'canDelete',
         ); 
     }
 
@@ -102,8 +105,22 @@ class Meta
         if (!$this->constructor) {
             $this->constructor = '__construct';
         }
+
         if (isset($info['readOnly'])) {
-            $this->readOnly = !!$info['readOnly'];
+            $this->canInsert = false; 
+            $this->canUpdate = false; 
+            $this->canDelete = false; 
+        }
+        else {
+            if (isset($info['canInsert'])) {
+                $this->canInsert = !!$info['canInsert'];
+            }
+            if (isset($info['canUpdate'])) {
+                $this->canUpdate = !!$info['canUpdate'];
+            }
+            if (isset($info['canDelete'])) {
+                $this->canDelete = !!$info['canDelete'];
+            }
         }
 
         $this->defaultFieldType = null;

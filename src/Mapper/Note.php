@@ -72,6 +72,15 @@ class Note extends \Amiss\Mapper\Base
         if (isset($classNotes['readOnly']) && $classNotes['readOnly']) {
             $info['readOnly'] = true;
         }
+        if (isset($classNotes['canInsert'])) {
+            $info['canInsert'] = !!$classNotes['canInsert'];
+        }
+        if (isset($classNotes['canUpdate'])) {
+            $info['canUpdate'] = !!$classNotes['canUpdate'];
+        }
+        if (isset($classNotes['canDelete'])) {
+            $info['canDelete'] = !!$classNotes['canDelete'];
+        }
 
         if (isset($classNotes['index'])) {
             foreach ($classNotes['index'] as $key=>$index) {

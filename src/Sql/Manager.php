@@ -415,8 +415,8 @@ class Manager
     public function insert($model, $query=null)
     {
         $meta = $this->mapper->getMeta($model);
-        if ($meta->readOnly) {
-            throw new Exception("Cannot insert read only class {$meta->class}");
+        if (!$meta->canInsert) {
+            throw new Exception("Class {$meta->class} prohibits insert");
         }
 
         $object = null;
@@ -498,9 +498,6 @@ class Manager
         // Object update mode
             $class = get_class($first);
             $meta = $this->mapper->getMeta($class);
-            if ($meta->readOnly) {
-                throw new Exception("Cannot update read only class {$meta->class}");
-            }
 
             $query = new Query\Update();
             $query->set = $this->mapper->fromObject($first, $meta, 'update');
@@ -524,6 +521,10 @@ class Manager
             throw new \InvalidArgumentException();
         }
         
+        if (!$meta->canUpdate) {
+            throw new Exception("Class {$meta->class} prohibits update");
+        }
+
         list ($sql, $params) = $query->buildQuery($meta);
         
         return $this->getConnector()->exec($sql, $params);
@@ -680,6 +681,10 @@ class Manager
             if (!$meta instanceof Meta) {
                 throw new \InvalidArgumentException();
             }
+        }
+
+        if (!$meta->canDelete) {
+            throw new Exception("Class {$meta->class} prohibits delete");
         }
 
         $table = $criteria->table ?: $meta->table;
