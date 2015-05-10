@@ -81,7 +81,9 @@ abstract class Mapper
             if (!($propId == 0 && $propId !== 0)) {
                 continue;
             }
-
+            if (!isset($properties[$propId])) {
+                throw new \UnexpectedValueException("Unknown property '$propId' for meta {$meta->class}");
+            }
             $property = $properties[$propId];
             $type = isset($property['type']) ? $property['type'] : null;
             if (!$type) {

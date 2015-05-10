@@ -109,6 +109,7 @@ class Manager
                     $relator = isset($relators[$relation[0]]) 
                         ? $relators[$relation[0]] 
                         : ($relators[$relation[0]] = $this->getRelator($relation));
+
                     $relQuery->stack = $query->stack;
                     $relQuery->stack[$meta->class] = true;
                     $mappedRow->{$relationId} = $relator->getRelated($meta, $mappedRow, $relation);
@@ -407,33 +408,62 @@ class Manager
      * Insert an object into the database, or values into a table
      * 
      * Supports the following signatures:
-     *   insert($model)
-     *   insert($className, $propertyValues);
+     *   insert($object)
+     *   insert($object, $tableOrMeta)
+     *   insert($classNameOrMeta, $propertyValues);
      * 
      * @return int|null
      */
-    public function insert($model, $query=null)
+    public function insert()
     {
-        $meta = $this->mapper->getMeta($model);
+        $meta = null;
+        $query = null;
+        $object = null;
+
+        argument_handling: {
+            $args = func_get_args();
+            if (!$args) {
+                throw new \InvalidArgumentException();
+            }
+
+            if (is_object($args[0]) && !$args[0] instanceof Meta) {
+            // Object insertion mode
+                $object = $args[0];
+                $query = new Query\Insert;
+
+                if (isset($args[1])) {
+                    if ($args[1] instanceof Meta) {
+                        // Signature: insert($object, Meta $meta)
+                        $meta = $args[1];
+                    } elseif (is_string($args[1])) {
+                        // Signature: insert($object, $table)
+                        $query->table = $args[1];
+                    }
+                }
+                if (!$meta) {
+                    $meta = $this->mapper->getMeta($object);
+                }
+                $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+            }
+            else {
+            // Table insertion mode
+                if ($args[0] instanceof Meta) {
+                    // Signature: insert($meta, $propertyValues);
+                    list ($meta, $query) = $args;
+                }
+                else {
+                    // Signature: insert($meta, $propertyValues);
+                    list ($class, $query) = $args;
+                    $meta = $this->mapper->getMeta($class);
+                }
+                $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
+            }
+        }
+
         if (!$meta->canInsert) {
             throw new Exception("Class {$meta->class} prohibits insert");
         }
 
-        $object = null;
-
-        if ($query) {
-            $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-        }
-        else {
-            $object = $model;
-            $model = null;
-            $query = new Query\Insert;
-            $query->table = $meta->table;
-        }
-
-        if ($object && !$query->values) {
-            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
-        }
         if (!$query->table) {
             $query->table = $meta->table;
         }
@@ -448,7 +478,7 @@ class Manager
             $lastInsertId = $this->getConnector()->lastInsertId();
         }
         
-        // we need to be careful with "lastInsertId": SQLLite generates one even without a PRIMARY
+        // we need to be careful with "lastInsertId": SQLite generates one even without a PRIMARY
         if ($object && $meta->primary && $lastInsertId) {
             if (($count = count($meta->primary)) != 1) {
                 throw new Exception(
@@ -485,33 +515,54 @@ class Manager
     /**
      * Update an object in the database, or update a table by criteria.
      * 
+     * Supports the following signatures:
+     *   update($object)
+     *   update($object, $tableOrMeta)
+     *   update($classNameOrMeta, $values, $criteria...);
+     * 
      * @return void
      */
     public function update()
     {
         $args = func_get_args();
-        $count = count($args);
-        
-        $first = array_shift($args);
-        
-        if (is_object($first)) {
-        // Object update mode
-            $class = get_class($first);
-            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        if (!$args) {
+            throw new \InvalidArgumentException();
+        }
+        $first = $args[0];
 
+        $query = null;
+        $meta = null;
+        
+        if (is_object($first) && !$first instanceof Meta) {
+        // Object update mode
+            $object = $first;
             $query = new Query\Update();
-            $query->set = $this->mapper->fromObject($first, $meta, 'update');
-            $query->where = $meta->getPrimaryValue($first);
+
+            if (isset($args[1])) {
+                if ($args[1] instanceof Meta) {
+                    // Signature: update($object, Meta $meta)
+                    $meta = $args[1];
+                }
+                elseif (is_string($args[1])) {
+                    // Signature: update($object, $table)
+                    $query->table = $args[1];
+                }
+            }
+            if (!$meta) {
+                $meta = $this->mapper->getMeta($object);
+            }
+
+            $query->set = $this->mapper->fromObject($object, $meta, 'update');
+            $query->where = $meta->getPrimaryValue($object);
         }
 
-        elseif (is_string($first)) {
+        elseif (is_string($first) || $first instanceof Meta) {
         // Table update mode
-            if ($count < 2) {
+            $meta = $first instanceof Meta ? $first : $this->mapper->getMeta($first);
+            if (!isset($args[1])) {
                 throw new \InvalidArgumentException("Query missing for table update");
             }
-            $query = $this->createTableUpdateQuery($args);
-            $class = $first;
-            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+            $query = $this->createTableUpdateQuery(array_slice($args, 1));
 
             if (is_array($query->set)) {
                 $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
@@ -533,32 +584,48 @@ class Manager
     /**
      * Delete an object from the database, or delete objects from a table by criteria.
      * 
+     * Supports the following signatures:
+     *   delete($object)
+     *   delete($object, $tableOrMeta)
+     *   delete($classNameOrMeta, $criteria...);
+     * 
      * @return void
      */
     public function delete()
     {
         $args = func_get_args();
         $meta = null;
-        $class = null;
-        
+        $criteria = null;
+
         if (!$args) {
             throw new \InvalidArgumentException();
         }
         
-        $first = array_shift($args);
+        $first = $args[0];
         if (is_object($first) && !$first instanceof Meta) {
-            $class = get_class($first);
-            $meta = $this->mapper->getMeta($class);
+            $object = $first;
             $criteria = new Query\Criteria();
-            $criteria->where = $meta->getIndexValue($first);
+            if (isset($args[1])) {
+                if ($args[1] instanceof Meta) {
+                    // Signature: delete($object, Meta $meta)
+                    $meta = $args[1];
+                }
+                elseif (is_string($args[1])) {
+                    // Signature: delete($object, $table)
+                    $query->table = $args[1];
+                }
+            }
+            if (!$meta) {
+                $meta = $this->mapper->getMeta(get_class($object));
+            }
+            $criteria->where = $meta->getIndexValue($object);
         }
         else {
-            if (!$args) {
+            if (!isset($args[1])) {
                 throw new \InvalidArgumentException("Cannot delete from table without a condition");
             }
-            $class = $first;
-            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
-            $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Query\Criteria');
+            $meta = !$first instanceof Meta ? $this->mapper->getMeta($first) : $first;
+            $criteria = $this->createQueryFromArgs(array_slice($args, 1), 'Amiss\Sql\Query\Criteria');
         }
 
         return $this->executeDelete($meta, $criteria);
@@ -579,9 +646,9 @@ class Manager
      * @param object The object to check
      * @return boolean
      */
-    public function shouldInsert($object)
+    public function shouldInsert($object, Meta $meta=null)
     {
-        $meta = $this->mapper->getMeta(get_class($object));
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
         $nope = false;
         if (!$meta->primary || count($meta->primary) > 1) {
             $nope = true;
@@ -605,14 +672,16 @@ class Manager
      * 
      * @return void
      */
-    public function save($object)
+    public function save($object, Meta $meta=null)
     {
-        $shouldInsert = $this->shouldInsert($object);
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
+
+        $shouldInsert = $this->shouldInsert($object, $meta);
         
         if ($shouldInsert) {
-            $this->insert($object);
+            $this->insert($object, $meta);
         } else {
-            $this->update($object);
+            $this->update($object, $meta);
         }
     }
 
