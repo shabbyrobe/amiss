@@ -69,7 +69,7 @@ class Manager
     {
         $mapper = $this->mapper;
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $object = null;
 
         // Hack to stop circular references in auto relations
@@ -125,7 +125,7 @@ class Manager
     {
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
         $mapper = $this->mapper;
-        $meta = $mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
@@ -194,7 +194,7 @@ class Manager
     public function count($class, $query=null)
     {
         $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         
         $table = $query->table ?: $meta->table;
         
@@ -215,10 +215,10 @@ class Manager
 
     public function exists($class, $id)
     {
-        $criteria = $this->createIdCriteria($class, $id);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $criteria = $this->createIdCriteria($meta, $id);
         $query = new \Amiss\Sql\Query\Criteria;
         $this->populateWhereAndParamsFromArgs($query, [$criteria]);
-        $meta = $this->mapper->getMeta($class);
         if (!$meta->primary) {
             throw new \InvalidArgumentException();
         }
@@ -379,9 +379,9 @@ class Manager
 
         $class = !is_object($test) ? $test : get_class($test);
         
-        $meta = $this->mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         if (!isset($meta->relations[$relationName])) {
-            throw new Exception("Unknown relation $relationName on $class");
+            throw new Exception("Unknown relation $relationName on {$meta->class}");
         }
         
         $relation = $meta->relations[$relationName];
@@ -497,7 +497,7 @@ class Manager
         if (is_object($first)) {
         // Object update mode
             $class = get_class($first);
-            $meta = $this->mapper->getMeta($class);
+            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
 
             $query = new Query\Update();
             $query->set = $this->mapper->fromObject($first, $meta, 'update');
@@ -511,7 +511,7 @@ class Manager
             }
             $query = $this->createTableUpdateQuery($args);
             $class = $first;
-            $meta = $this->mapper->getMeta($class);
+            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
 
             if (is_array($query->set)) {
                 $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
@@ -546,20 +546,22 @@ class Manager
         }
         
         $first = array_shift($args);
-        if (is_object($first)) {
-            $class = $this->mapper->getMeta(get_class($first));
+        if (is_object($first) && !$first instanceof Meta) {
+            $class = get_class($first);
+            $meta = $this->mapper->getMeta($class);
             $criteria = new Query\Criteria();
-            $criteria->where = $class->getIndexValue($first);
+            $criteria->where = $meta->getIndexValue($first);
         }
         else {
             if (!$args) {
                 throw new \InvalidArgumentException("Cannot delete from table without a condition");
             }
             $class = $first;
+            $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
             $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Query\Criteria');
         }
 
-        return $this->executeDelete($class, $criteria);
+        return $this->executeDelete($meta, $criteria);
     }
     
     /** 
@@ -624,7 +626,7 @@ class Manager
      */
     protected function createIdCriteria($class, $id)
     {
-        $meta = $this->mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $primary = $meta->primary;
         if (!$primary) {
             throw new Exception("Can't use {$meta->class} by primary - none defined.");
