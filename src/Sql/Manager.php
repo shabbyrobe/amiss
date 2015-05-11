@@ -241,16 +241,17 @@ class Manager
      * @param string|array The name of the relation(s) to assign
      * @return void
      */
-    public function assignRelated($source, $relationNames=null, $stack=[])
+    public function assignRelated($source, $relationNames=null, Meta $meta=null)
     {
         if (!$source) { return; }
 
+        $stack = [];
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray) {
             $source = array($source);
         }
+        $meta = $meta ?: $this->mapper->getMeta($source[0]);
 
-        $meta = $this->mapper->getMeta($source[0]);
         if (!$relationNames) {
             if ($meta->autoRelations) {
                 $relationNames = $meta->autoRelations;
@@ -365,7 +366,7 @@ class Manager
      * @param query Optional criteria to limit the result
      * @return object[]
      */
-    public function getRelated($source, $relationName, $query=null)
+    public function getRelated($source, $relationName, $query=null, Meta $meta=null)
     {
         if (!$source) { return; }
 
@@ -377,7 +378,7 @@ class Manager
             $test = $test[0];
         }
 
-        $meta = $this->mapper->getMeta(get_class($test));
+        $meta = $meta ?: $this->mapper->getMeta(get_class($test));
         if (!isset($meta->relations[$relationName])) {
             throw new Exception("Unknown relation $relationName on {$meta->class}");
         }
