@@ -81,7 +81,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', 'priority=priority+?', 'priority>=?', 10, 3);
+        $this->manager->update('EventArtist', 'priority=priority+?', 'priority>=?', [10, 3]);
         $stmt = $this->manager->getConnector()->prepare("SELECT priority, COUNT(priority) as cnt FROM event_artist GROUP BY priority");
         $stmt->execute();
         $priorities = $stmt->fetchAll(\PDO::FETCH_NUM);
@@ -107,11 +107,11 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableWithArraySetAndPositionalWhere()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=?', 2);
+        $this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=?', [2]);
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
     
     
@@ -124,11 +124,11 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableWithArraySetAndNamedWhere()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
         $this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
     
     /**
@@ -140,11 +140,11 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableWithArrayCriteria()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
         $this->manager->update('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
     
     /**
@@ -156,12 +156,12 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableWithObjectCriteria()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
         $criteria = new Update(array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
         $this->manager->update('Artist', $criteria);
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', 1));
+        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
 
     public function testUpdateTableValuesUseTypeHandlers()

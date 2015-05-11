@@ -147,7 +147,7 @@ See :doc:`selecting` for more details.
 
     // Get an event named foobar with a clause written in raw SQL. Property names wrapped in
     // curly braces get translated to field names by the mapper.
-    $event = $manager->get('Event', '{name}=?', 'foobar');
+    $event = $manager->get('Event', '{name}=?', ['foobar']);
 
     // Get all events
     $events = $manager->getList('Event');

@@ -149,7 +149,7 @@ with an autoincrement column.
     $amiss->save($obj, 'artistId');
     // INSERT INTO artist (name) VALUES ('foo baz')
     
-    $obj = $amiss->get('Artist', '{artistId}=?', 1);
+    $obj = $amiss->get('Artist', '{artistId}=?', array(1));
     $obj->name = 'foo baz';
     $amiss->save($obj, 'artistId');
     // UPDATE artist SET name='foo baz' WHERE artistId=1

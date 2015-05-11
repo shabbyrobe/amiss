@@ -244,7 +244,7 @@ Amiss provides two methods for retrieving and populating relations:
 
         <?php
         $artistType = $manager->getById('ArtistType', 1);
-        $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', '%foo%');
+        $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', array('%foo%'));
 
 
 .. py:function:: Amiss\\Sql\\Manager::assignRelated( $into , $relationName )

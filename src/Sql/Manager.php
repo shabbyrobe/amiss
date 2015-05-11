@@ -217,9 +217,8 @@ class Manager
     public function exists($class, $id)
     {
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
-        $criteria = $this->createIdCriteria($meta, $id);
         $query = new \Amiss\Sql\Query\Criteria;
-        $this->populateWhereAndParamsFromArgs($query, [$criteria]);
+        $query->setParams([$this->createIdCriteria($meta, $id)]);
         if (!$meta->primary) {
             throw new \InvalidArgumentException();
         }
@@ -378,9 +377,7 @@ class Manager
             $test = $test[0];
         }
 
-        $class = !is_object($test) ? $test : get_class($test);
-        
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = $this->mapper->getMeta(get_class($test));
         if (!isset($meta->relations[$relationName])) {
             throw new Exception("Unknown relation $relationName on {$meta->class}");
         }
@@ -736,7 +733,7 @@ class Manager
                 }
                 $query = new Query\Update();
                 $query->set = array_shift($args);
-                $this->populateWhereAndParamsFromArgs($query, $args);
+                $query->setParams($args);
             }
             else {
                 throw new \InvalidArgumentException("Unknown args count $cnt");
@@ -783,40 +780,12 @@ class Manager
         }
         else {
             $query = new $type();
-            $this->populateWhereAndParamsFromArgs($query, $args);
+            $query->setParams($args);
         }
         
         return $query;
     }
-    
-    /**
-     * Allows functions to have different query syntaxes:
-     * get('Name', 'pants=? AND foo=?', 'pants', 'foo')
-     * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
-     * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
-     */
-    protected function populateWhereAndParamsFromArgs(Query\Criteria $query, $args)
-    {
-        if (count($args) == 1 && is_array($args[0])) {
-        // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
-            $query->populate($args[0]);
-        }
 
-        elseif (!is_array($args[0])) {
-        // Args criteria: $manager->get('class', 'a=? AND b=?', 'a', 'b');
-            $query->where = $args[0];
-            if (isset($args[1]) && is_array($args[1])) {
-                $query->params = $args[1];
-            }
-            elseif (isset($args[1])) {
-                $query->params = array_slice($args, 1);
-            }
-        } 
-        else {
-            throw new \InvalidArgumentException("Couldn't parse arguments");
-        }
-    }
-    
     /**
      * @ignore
      */

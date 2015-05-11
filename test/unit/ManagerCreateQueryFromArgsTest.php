@@ -26,7 +26,7 @@ class ManagerCreateQueryFromArgsTest extends \CustomTestCase
      */
     public function testHandlePositionalShorthandUnrolled()
     {
-        $args = array('pants=? AND foo=?', 'pants', 'foo');
+        $args = array('pants=? AND foo=?', ['pants', 'foo']);
         $criteria = $this->callProtected($this->manager, 'createQueryFromArgs', $args);
         
         $this->assertEquals(array('pants', 'foo'), $criteria->params);

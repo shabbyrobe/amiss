@@ -11,6 +11,37 @@ class Criteria extends Sql\Query
 
     // this hack is for the auto relations circular ref hack
     public $stack = [];
+
+    /**
+     * Allows functions to have different query syntaxes:
+     * get('Name', 'pants=? AND foo=?', ['pants', 'foo'])
+     * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
+     * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
+     */
+    public function setParams($args)
+    {
+        // the class name / meta has already been eaten from the args by this point
+
+        if (!isset($args[1]) && is_array($args[0])) {
+        // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
+            $this->populate($args[0]);
+        }
+
+        elseif (!is_array($args[0])) {
+        // Args criteria: $manager->get('class', 'a=? AND b=?', ['a', 'b']);
+        // Args criteria: $manager->get('class', 'a=:a AND b=:a', ['a'=>'a', 'b'=>'b']);
+            $this->where = $args[0];
+            if (isset($args[1])) {
+                if (!is_array($args[1])) {
+                    throw new \InvalidArgumentException("This is no longer variadic");
+                }
+                $this->params = $args[1];
+            }
+        } 
+        else {
+            throw new \InvalidArgumentException("Couldn't parse arguments");
+        }
+    }
     
     public function buildClause($meta)
     {

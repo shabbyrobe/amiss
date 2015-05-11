@@ -7,7 +7,7 @@ class ManagerDeleteObjectTest extends \ModelDataTestCase
     {
         parent::setUp();
         
-        $this->artist = $this->manager->get('Artist', 'artistId=?', 1);
+        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
         if (!$this->artist)
             throw new \UnexpectedValueException("Unexpected test data");
     }

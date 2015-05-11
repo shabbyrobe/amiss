@@ -64,7 +64,7 @@ class ManagerSelectTest extends \ModelDataTestCase
      */
     public function testSingleObjectPositionalParametersShorthand()
     {
-        $a = $this->manager->get('Artist', 'slug=?', 'limozeen');
+        $a = $this->manager->get('Artist', 'slug=?', ['limozeen']);
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
     }

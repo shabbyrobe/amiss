@@ -25,14 +25,14 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
 
     public function testGetByPositionalWhere()
     {
-        $obj = Active\ArtistRecord::get('artistId=?', 1);
+        $obj = Active\ArtistRecord::get('artistId=?', [1]);
         $this->assertTrue($obj instanceof Active\ArtistRecord);
         $this->assertEquals(1, $obj->artistId);
     }
 
     public function testGetByPositionalWhereMulti()
     {
-        $obj = Active\ArtistRecord::get('artistId=? AND artistTypeId=?', 1, 1);
+        $obj = Active\ArtistRecord::get('artistId=? AND artistTypeId=?', [1, 1]);
         $this->assertTrue($obj instanceof Active\ArtistRecord);
         $this->assertEquals(1, $obj->artistId);
     }
