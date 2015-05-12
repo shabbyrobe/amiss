@@ -5,12 +5,28 @@ use Amiss\Sql;
 
 class Criteria extends Sql\Query
 {
-    public $table;
     public $where;
     public $params=array();
 
     // this hack is for the auto relations circular ref hack
     public $stack = [];
+
+    public static function fromParamArgs(array $args)
+    {
+        $c = get_called_class();
+        if ($args && $args[0] instanceof Sql\Query) {
+            if (!$args[0] instanceof $c) {
+                throw new \InvalidArgumentException();
+            }
+            return $args[0];
+        }
+
+        $q = new $c;
+        if ($args) {
+            $q->setParams($args);
+        }
+        return $q;
+    }
 
     /**
      * Allows functions to have different query syntaxes:
@@ -18,7 +34,7 @@ class Criteria extends Sql\Query
      * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
      * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
      */
-    public function setParams($args)
+    public function setParams(array $args)
     {
         // the class name / meta has already been eaten from the args by this point
 

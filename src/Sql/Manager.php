@@ -4,6 +4,7 @@ namespace Amiss\Sql;
 use Amiss\Exception;
 use Amiss\Mapper;
 use Amiss\Meta;
+use Amiss\Sql\Query;
 use Amiss\Sql\Query\Criteria;
 use PDOK\Connector;
 
@@ -65,10 +66,11 @@ class Manager
         return $this->mapper->getMeta($class);
     }
 
-    public function get($class)
+    public function get($class, ...$args)
     {
         $mapper = $this->mapper;
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $object = null;
 
@@ -122,9 +124,9 @@ class Manager
         return $object;
     }
 
-    public function getList($class)
+    public function getList($class, ...$args)
     {
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
         $mapper = $this->mapper;
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
 
@@ -192,9 +194,9 @@ class Manager
         return $this->get($class, $query);
     }
     
-    public function count($class, $query=null)
+    public function count($class, ...$args)
     {
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         
         $table = $query->table ?: $meta->table;
@@ -387,7 +389,7 @@ class Manager
         $relator = $this->getRelator($relation);
         
         if ($query) {
-            $query = $this->createQueryFromArgs([$query], 'Amiss\Sql\Query\Criteria');
+            $query = Query\Criteria::fromParamArgs([$query]);
             $stack = $query->stack;
         }
         else {
@@ -589,28 +591,22 @@ class Manager
      * 
      * @return void
      */
-    public function delete()
+    public function delete($first, ...$args)
     {
-        $args = func_get_args();
         $meta = null;
         $criteria = null;
-
-        if (!$args) {
-            throw new \InvalidArgumentException();
-        }
-        
-        $first = $args[0];
+ 
         if (is_object($first) && !$first instanceof Meta) {
             $object = $first;
             $criteria = new Query\Criteria();
-            if (isset($args[1])) {
-                if ($args[1] instanceof Meta) {
+            if (isset($args[0])) {
+                if ($args[0] instanceof Meta) {
                     // Signature: delete($object, Meta $meta)
-                    $meta = $args[1];
+                    $meta = $args[0];
                 }
-                elseif (is_string($args[1])) {
+                elseif (is_string($args[0])) {
                     // Signature: delete($object, $table)
-                    $query->table = $args[1];
+                    $query->table = $args[0];
                 }
             }
             if (!$meta) {
@@ -619,11 +615,11 @@ class Manager
             $criteria->where = $meta->getIndexValue($object);
         }
         else {
-            if (!isset($args[1])) {
+            if (!isset($args[0])) {
                 throw new \InvalidArgumentException("Cannot delete from table without a condition");
             }
             $meta = !$first instanceof Meta ? $this->mapper->getMeta($first) : $first;
-            $criteria = $this->createQueryFromArgs(array_slice($args, 1), 'Amiss\Sql\Query\Criteria');
+            $criteria = $args[0] instanceof Query\Criteria ? $args[0] : Query\Criteria::fromParamArgs($args);
         }
 
         return $this->executeDelete($meta, $criteria);
@@ -765,26 +761,6 @@ class Manager
 
         $sql = "DELETE FROM $table WHERE $whereClause";
         $stmt = $this->getConnector()->prepare($sql)->execute($whereParams);
-    }
-    
-    /**
-     * Parses remaining function arguments into a query object
-     * @return \Amiss\Sql\Query\Criteria
-     */
-    protected function createQueryFromArgs($args, $type='Amiss\Sql\Query\Select')
-    {
-        if (!$args) {
-            $query = new $type();
-        }
-        elseif ($args[0] instanceof $type) {
-            $query = $args[0];
-        }
-        else {
-            $query = new $type();
-            $query->setParams($args);
-        }
-        
-        return $query;
     }
 
     /**
