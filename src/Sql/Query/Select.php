@@ -55,10 +55,14 @@ class Select extends Criteria
             $fNames = array();
             foreach ($fields as $f) {
                 $name = (isset($metaFields[$f]) ? $metaFields[$f]['name'] : $f);
-                $fName = ($tablePrefix ? $tablePrefix.'.' : '').'`'.$name.'`';
-                if ($fieldAliasPrefix)
+                if (isset($this->aliases[$name])) {
+                    $name = $this->aliases[$name];
+                }
+                $qname = $name[0] == '`' ? $name : '`'.$name.'`';
+                $fName = ($tablePrefix ? $tablePrefix.'.' : '').$qname;
+                if ($fieldAliasPrefix) {
                     $fName .= ' as `'.$fieldAliasPrefix.$name.'`';
-
+                }
                 $fNames[] = $fName;
             }
             $fields = implode(', ', $fNames);
@@ -83,7 +87,11 @@ class Select extends Criteria
                     }
                     
                     $name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
-                    $oClauses[] = '`'.$name.'`'.($dir == 'asc' ? '' : ' desc');
+                    if (isset($this->aliases[$name])) {
+                        $name = $this->aliases[$name];
+                    }
+                    $qname = $name[0] == '`' ? $name : '`'.$name.'`';
+                    $oClauses[] = $qname.($dir == 'asc' ? '' : ' desc');
                 }
                 $order = implode(', ', $oClauses);
             }

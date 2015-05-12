@@ -287,13 +287,16 @@ class Manager
                 // that may be unpopulated. it might lazy load if it's an active
                 // record, or it might throw an exception because the 'set' hasn't
                 // been called.
-                if (isset($relation['getter']) || !$item->{$relationName}) {
+
+                // check for isset as well as falsey for the situation where we're using
+                // stdClasses as the response object
+                if (isset($relation['getter']) || !isset($item->{$relationName}) || !$item->{$relationName}) {
                     $missing[$idx] = $item;
                 }
             }
 
             if ($missing) {
-                $result = $this->getRelated($missing, $relationName, ['stack'=>$stack]);
+                $result = $this->getRelated($missing, $relationName, ['stack'=>$stack], $meta);
                 $relator = $this->getRelator($meta, $relationName);
                 $this->populateObjectsWithRelated($missing, $result, $relation);
             }
@@ -363,9 +366,13 @@ class Manager
     /**
      * Get related objects from the database
      * 
-     * @param object|array Source objects to get relations for
-     * @param string The name of the relation to assign
-     * @param query Optional criteria to limit the result
+     * Supports the following signatures:
+     * 
+     * - getRelated( object|array $source , string $relationName )
+     * - getRelated( object|array $source , string $relationName , $query )
+     * - getRelated( object|array $source , string $relationName , Meta $meta )
+     * - getRelated( object|array $source , string $relationName , $query, Meta $meta )
+     *
      * @return object[]
      */
     public function getRelated($source, $relationName, $query=null, Meta $meta=null)
@@ -380,7 +387,14 @@ class Manager
             $test = $test[0];
         }
 
-        $meta = $meta ?: $this->mapper->getMeta(get_class($test));
+        if (!$meta) {
+            if ($query instanceof Meta) {
+                list ($meta, $query) = [$query, null];
+            } else {
+                $meta = $this->mapper->getMeta(get_class($test));
+            }
+        }
+
         if (!isset($meta->relations[$relationName])) {
             throw new Exception("Unknown relation $relationName on {$meta->class}");
         }

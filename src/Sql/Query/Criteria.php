@@ -7,6 +7,7 @@ class Criteria extends Sql\Query
 {
     public $where;
     public $params=array();
+    public $aliases=array();
 
     // this hack is for the auto relations circular ref hack
     public $stack = [];
@@ -73,8 +74,12 @@ class Criteria extends Sql\Query
             foreach ($where as $k=>$v) {
                 if (isset($fields[$k])) {
                     $k = $fields[$k]['name'];
+                    if (isset($this->aliases[$k])) {
+                        $k = $this->aliases[$k];
+                    }
                 }
-                $wh[] = '`'.str_replace('`', '', $k).'`=:'.$k;
+                $qk = $k[0] != '`' ?  '`'.str_replace('`', '', $k).'`' : $k;
+                $wh[] = "$qk=:$k";
                 $params[':'.$k] = $v;
             }
             $where = implode(' AND ', $wh);
@@ -129,7 +134,13 @@ class Criteria extends Sql\Query
     {
         $tokens = array();
         foreach ($fields as $k=>$v) {
-            $tokens['{'.$k.'}'] = '`'.$v['name'].'`';
+            $repl = null;
+            if (isset($this->aliases[$v['name']])) {
+                $repl = $this->aliases[$v['name']];
+            } else {
+                $repl = '`'.$v['name'].'`';
+            }
+            $tokens['{'.$k.'}'] = $repl;
         }
         $clause = strtr($clause, $tokens);
         
