@@ -16,7 +16,7 @@ class Criteria extends Sql\Query
         $c = get_called_class();
         if ($args && $args[0] instanceof Sql\Query) {
             if (!$args[0] instanceof $c) {
-                throw new \InvalidArgumentException();
+                throw new \InvalidArgumentException("Expected $c, found ".get_class($args[0]));
             }
             return $args[0];
         }
