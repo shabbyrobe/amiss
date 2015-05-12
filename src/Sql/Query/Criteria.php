@@ -11,9 +11,9 @@ class Criteria extends Sql\Query
     // this hack is for the auto relations circular ref hack
     public $stack = [];
 
-    public static function fromParamArgs(array $args)
+    public static function fromParamArgs(array $args, $class=null)
     {
-        $c = get_called_class();
+        $c = $class ?: get_called_class();
         if ($args && $args[0] instanceof Sql\Query) {
             if (!$args[0] instanceof $c) {
                 throw new \InvalidArgumentException("Expected $c, found ".get_class($args[0]));
@@ -30,22 +30,22 @@ class Criteria extends Sql\Query
 
     /**
      * Allows functions to have different query syntaxes:
-     * get('Name', 'pants=? AND foo=?', ['pants', 'foo'])
-     * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
-     * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
+     * func(..., 'pants=? AND foo=?', ['pants', 'foo'])
+     * func(..., 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
+     * func(..., array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
      */
     public function setParams(array $args)
     {
         // the class name / meta has already been eaten from the args by this point
 
         if (!isset($args[1]) && is_array($args[0])) {
-        // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
+        // Array criteria: func(..., ['where'=>'', 'params'=>'']);
             $this->populate($args[0]);
         }
 
         elseif (!is_array($args[0])) {
-        // Args criteria: $manager->get('class', 'a=? AND b=?', ['a', 'b']);
-        // Args criteria: $manager->get('class', 'a=:a AND b=:a', ['a'=>'a', 'b'=>'b']);
+        // Args criteria: func(..., 'a=? AND b=?',   ['a', 'b']);
+        // Args criteria: func(..., 'a=:a AND b=:a', ['a'=>'a', 'b'=>'b']);
             $this->where = $args[0];
             if (isset($args[1])) {
                 if (!is_array($args[1])) {

@@ -5,6 +5,30 @@ class Update extends Criteria
 {
     public $set = array();
 
+    public static function fromParamArgs(array $args, $class=null)
+    {
+        if (!$args) {
+            throw new \InvalidArgumentException();
+        }
+
+        $cnt = count($args);
+        if ($cnt == 1) {
+            return $args[0] instanceof self ? $args[0] : new Update($args[0]);
+        }
+        elseif ($cnt == 2 || $cnt == 3) {
+            if (!is_array($args[0]) && !is_string($args[0])) {
+                throw new \InvalidArgumentException("Set must be an array or string");
+            }
+            $query = new Update();
+            $query->set = array_shift($args);
+            $query->setParams($args);
+            return $query;
+        }
+        else {
+            throw new \InvalidArgumentException("Unknown args count $cnt");
+        }
+    }
+
     public function buildSet($meta)
     {
         $params = array();

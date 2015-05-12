@@ -522,14 +522,8 @@ class Manager
      * 
      * @return void
      */
-    public function update()
+    public function update($first, ...$args)
     {
-        $args = func_get_args();
-        if (!$args) {
-            throw new \InvalidArgumentException();
-        }
-        $first = $args[0];
-
         $query = null;
         $meta = null;
         
@@ -538,14 +532,14 @@ class Manager
             $object = $first;
             $query = new Query\Update();
 
-            if (isset($args[1])) {
-                if ($args[1] instanceof Meta) {
+            if (isset($args[0])) {
+                if ($args[0] instanceof Meta) {
                     // Signature: update($object, Meta $meta)
-                    $meta = $args[1];
+                    $meta = $args[0];
                 }
-                elseif (is_string($args[1])) {
+                elseif (is_string($args[0])) {
                     // Signature: update($object, $table)
-                    $query->table = $args[1];
+                    $query->table = $args[0];
                 }
             }
             if (!$meta) {
@@ -559,10 +553,10 @@ class Manager
         elseif (is_string($first) || $first instanceof Meta) {
         // Table update mode
             $meta = $first instanceof Meta ? $first : $this->mapper->getMeta($first);
-            if (!isset($args[1])) {
+            if (!isset($args[0])) {
                 throw new \InvalidArgumentException("Query missing for table update");
             }
-            $query = $this->createTableUpdateQuery(array_slice($args, 1));
+            $query = Query\Update::fromParamArgs($args);
 
             if (is_array($query->set)) {
                 $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
@@ -709,36 +703,7 @@ class Manager
         
         return array('where'=>$where);
     }
-    
-    /**
-     * @return \Amiss\Sql\Query\Update
-     */
-    protected function createTableUpdateQuery($args)
-    {
-        $query = null;
-        if ($args[0] instanceof Query\Update) {
-            $query = $args[0];
-        }
-        else {
-            $cnt = count($args);
-            if ($cnt == 1) {
-                $query = new Query\Update($args[0]);
-            }
-            elseif ($cnt >= 2) {
-                if (!is_array($args[0]) && !is_string($args[0])) {
-                    throw new \InvalidArgumentException("Set must be an array or string");
-                }
-                $query = new Query\Update();
-                $query->set = array_shift($args);
-                $query->setParams($args);
-            }
-            else {
-                throw new \InvalidArgumentException("Unknown args count $cnt");
-            }
-        }
-        return $query;
-    }
-    
+
     protected function executeDelete($meta, Query\Criteria $criteria)
     {
         if (!$meta instanceof Meta) {
