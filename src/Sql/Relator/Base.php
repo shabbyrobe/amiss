@@ -78,7 +78,7 @@ abstract class Base implements \Amiss\Sql\Relator
         return $on;
     }
 
-    protected function resolveFromTo($relation, $relatedMeta)
+    public function resolveFromTo($relation, $relatedMeta)
     {
         if (isset($relation['inverse'])) {
             $fromTo = $this->resolveInverse($relation, $relatedMeta);
@@ -92,7 +92,7 @@ abstract class Base implements \Amiss\Sql\Relator
         return $fromTo;
     }
 
-    protected function resolveInverse($relation, $relatedMeta)
+    public function resolveInverse($relation, $relatedMeta)
     {
         if (!isset($relatedMeta->relations[$relation['inverse']])) {
             throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");

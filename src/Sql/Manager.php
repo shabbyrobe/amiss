@@ -96,15 +96,19 @@ class Manager
             $mappedRow = $mapper->toProperties($row, $meta);
         }
 
-        if ($mappedRow) {
-            $relations = [];
-            $relators = [];
+        if (!$mappedRow) {
+            return null;
+        }
 
+        auto_relations: {
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
             }
             if ($rel) {
+                $relations = [];
+                $relators = [];
+
                 $relQuery = new Criteria;
                 foreach ((array) $rel as $relationId) {
                     $relation = $meta->relations[$relationId];
@@ -117,6 +121,9 @@ class Manager
                     $mappedRow->{$relationId} = $relator->getRelated($meta, $mappedRow, $relation);
                 }
             }
+        }
+
+        create: {
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
             $mapper->populateObject($object, $mappedRow, $meta);
         }
@@ -150,30 +157,33 @@ class Manager
             return $objects;
         }
 
-        $relations = [];
-        $relators = [];
         $related = [];
 
-        $rel = $query->with;
-        if ($meta->autoRelations && $query->follow) {
-            $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
-        }
-        if ($rel) {
-            $relQuery = new Criteria;
-            foreach ((array) $rel as $relationId) {
-                $relation = $meta->relations[$relationId];
-                $relator = isset($relators[$relation[0]]) 
-                    ? $relators[$relation[0]] 
-                    : ($relators[$relation[0]] = $this->getRelator($relation));
-                $relQuery->stack = $query->stack;
-                $relQuery->stack[$meta->class] = true;
-                $cur = $relator->getRelatedForList($meta, $mappedRows, $relation, $relQuery);
-                if ($cur) {
-                    $related[$relationId] = $cur;
+        auto_relations: {
+            $relations = [];
+            $relators = [];
+            $rel = $query->with;
+            if ($meta->autoRelations && $query->follow) {
+                $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
+            }
+            if ($rel) {
+                $relQuery = new Criteria;
+                foreach ((array) $rel as $relationId) {
+                    $relation = $meta->relations[$relationId];
+                    $relator = isset($relators[$relation[0]]) 
+                        ? $relators[$relation[0]] 
+                        : ($relators[$relation[0]] = $this->getRelator($relation));
+
+                    $relQuery->stack = $query->stack;
+                    $relQuery->stack[$meta->class] = true;
+                    $cur = $relator->getRelatedForList($meta, $mappedRows, $relation, $relQuery);
+                    if ($cur) {
+                        $related[$relationId] = $cur;
+                    }
                 }
             }
         }
-        
+
         foreach ($mappedRows as $idx=>$mappedRow) {
             foreach ($related as $relId=>$objs) {
 				$mappedRow->{$relId} = isset($objs[$idx]) ? $objs[$idx] : null;
