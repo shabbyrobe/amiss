@@ -144,6 +144,12 @@ class Criteria extends Sql\Query
         }
         $clause = strtr($clause, $tokens);
         
+        // cheapie hacko way to make sure tokens are substituted - not ideal.
+        // may use Tempe once the C version is done.
+        if (preg_match_all('/\{[A-Za-z\d-\_]+\}/', $clause, $matches)) {
+            throw new \UnexpectedValueException("Unsubstituted tokens left in clause: ".implode(", ", $matches[0]));
+        }
+
         return $clause;
     }
 }
