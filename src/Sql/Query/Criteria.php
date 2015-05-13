@@ -65,13 +65,15 @@ class Criteria extends Sql\Query
         $where = $this->where;
         $params = array();
         $namedParams = $this->paramsAreNamed(); 
+        $properties = [];
         
         $fields = null;
         if ($meta) $fields = $meta->getFields();
         
         if (is_array($where)) {
             $wh = array();
-            foreach ($where as $k=>$v) {
+            foreach ($where as $p=>$v) {
+                $k = $p;
                 if (isset($fields[$k])) {
                     $k = $fields[$k]['name'];
                     if (isset($this->aliases[$k])) {
@@ -80,6 +82,7 @@ class Criteria extends Sql\Query
                 }
                 $qk = $k[0] != '`' ?  '`'.str_replace('`', '', $k).'`' : $k;
                 $wh[] = "$qk=:$k";
+                $properties[$p] = ':'.$k;
                 $params[':'.$k] = $v;
             }
             $where = implode(' AND ', $wh);
@@ -90,12 +93,15 @@ class Criteria extends Sql\Query
                 $where = $this->replaceFieldTokens($fields, $where);
             }
         }
-        
+
         if ($namedParams) {
-            foreach ($this->params as $k=>$v) {
-                // ($k == 0 && $k !== 0) == !is_numeric($k)
-                if (($k == 0 && $k !== 0) && $k[0] != ':') {
-                    $k = ':'.$k;
+            foreach ($this->params as $p=>$v) {
+                if (($p == 0 && $p !== 0) && $p[0] != ':') { // !is_numeric($k)
+                    $k = ':'.$p;
+                    $fields && isset($fields[$p]) && $properties[$p] = $k;
+                }
+                else {
+                    $k = $p;
                 }
                 if (is_array($v)) {
                     $inparms = array();
@@ -115,7 +121,8 @@ class Criteria extends Sql\Query
         else {
             $params = $this->params;
         }
-        return array($where, $params);
+
+        return array($where, $params, $properties);
     }
     
     public function paramsAreNamed()

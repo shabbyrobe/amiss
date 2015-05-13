@@ -84,7 +84,10 @@ class Manager
             throw new Exception("Limit must be one or zero");
         }
         
-        list ($sql, $params) = $query->buildQuery($meta);
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
         
         $stmt = $this->getConnector()->prepare($sql)->execute($params);
 
@@ -142,11 +145,14 @@ class Manager
             return;
         }
 
-        list ($sql, $params) = $query->buildQuery($meta);
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
+
         $stmt = $this->getConnector()->prepare($sql)->execute($params);
 
         $mappedRows = [];
-    
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $mappedRow = $mapper->toProperties($row, $meta);
             $mappedRows[] = $mappedRow;
@@ -211,7 +217,10 @@ class Manager
         
         $table = $query->table ?: $meta->table;
         
-        list ($where, $params) = $query->buildClause($meta);
+        list ($where, $params, $props) = $query->buildClause($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
         
         $field = '*';
         if ($meta->primary && count($meta->primary) == 1) {
@@ -235,7 +244,10 @@ class Manager
             throw new \InvalidArgumentException();
         }
 
-        list ($where, $params) = $query->buildClause($meta);
+        list ($where, $params, $props) = $query->buildClause($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
 
         $fields = implode(', ', array_values($meta->primary));
         $query = "SELECT COUNT($fields) FROM {$meta->table} "
@@ -444,6 +456,8 @@ class Manager
         $query = null;
         $object = null;
 
+        $objectMode = true; 
+
         argument_handling: {
             $args = func_get_args();
             if (!$args) {
@@ -452,6 +466,8 @@ class Manager
 
             if (is_object($args[0]) && !$args[0] instanceof Meta) {
             // Object insertion mode
+                $objectMode = true;
+
                 $object = $args[0];
                 $query = new Query\Insert;
 
@@ -471,12 +487,14 @@ class Manager
             }
             else {
             // Table insertion mode
+                $objectMode = false;
+
                 if ($args[0] instanceof Meta) {
                     // Signature: insert($meta, $propertyValues);
                     list ($meta, $query) = $args;
                 }
                 else {
-                    // Signature: insert($meta, $propertyValues);
+                    // Signature: insert($className, $propertyValues);
                     list ($class, $query) = $args;
                     $meta = $this->mapper->getMeta($class);
                 }
@@ -492,7 +510,10 @@ class Manager
             $query->table = $meta->table;
         }
 
-        list ($sql, $params) = $query->buildQuery();
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if (!$objectMode && $props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
 
         $stmt = $this->getConnector()->prepare($sql);
         $stmt->execute($params);
@@ -550,6 +571,7 @@ class Manager
     {
         $query = null;
         $meta = null;
+        $objectMode = true;
         
         if (is_object($first) && !$first instanceof Meta) {
         // Object update mode
@@ -576,6 +598,8 @@ class Manager
 
         elseif (is_string($first) || $first instanceof Meta) {
         // Table update mode
+            $objectMode = false;
+
             $meta = $first instanceof Meta ? $first : $this->mapper->getMeta($first);
             if (!isset($args[0])) {
                 throw new \InvalidArgumentException("Query missing for table update");
@@ -594,8 +618,10 @@ class Manager
             throw new Exception("Class {$meta->class} prohibits update");
         }
 
-        list ($sql, $params) = $query->buildQuery($meta);
-        
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if (!$objectMode && $props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
         return $this->getConnector()->exec($sql, $params);
     }
     
@@ -743,9 +769,12 @@ class Manager
 
         $table = $criteria->table ?: $meta->table;
 
-        list ($whereClause, $whereParams) = $criteria->buildClause($meta);
+        list ($whereClause, $whereParams, $whereProps) = $criteria->buildClause($meta);
         if (!$whereClause) {
             throw new \UnexpectedValueException("Empty where clause");
+        }
+        if ($whereProps) {
+            $whereParams = $this->mapper->formatParams($meta, $whereProps, $whereParams);
         }
 
         $sql = "DELETE FROM $table WHERE $whereClause";

@@ -26,7 +26,7 @@ class Select extends Criteria
     {
         $table = $this->table ?: $meta->table;
         
-        list ($where, $params) = $this->buildClause($meta);
+        list ($where, $params, $properties) = $this->buildClause($meta);
         $order = $this->buildOrder($meta);
         list ($limit, $offset) = $this->getLimitOffset();
         
@@ -39,7 +39,7 @@ class Select extends Criteria
             .($this->forUpdate ? 'FOR UPDATE' : '')
         ;
         
-        return array($query, $params);
+        return array($query, $params, $properties);
     }
     
     public function buildFields($meta, $tablePrefix=null, $fieldAliasPrefix=null)

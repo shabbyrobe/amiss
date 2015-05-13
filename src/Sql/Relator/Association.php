@@ -121,9 +121,12 @@ class Association extends Base
         // get the source ids, prepare an index to link the relationships
         list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         
-        list($query, $params, $sourcePkFields) = $this->buildQuery(
+        list($query, $params, $sourcePkFields, $props) = $this->buildQuery(
             $ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
         );
+        if ($props) {
+            $params = $this->manager->mapper->formatParams($meta, $props, $params);
+        }
 
         $stmt = $this->manager->connector->prepare($query)->execute($params);
 
@@ -171,11 +174,12 @@ class Association extends Base
         }
         $joinOn = implode(' AND ', $joinOn);
         
-        list ($where, $params) = $query->buildClause(null);
+        list ($where, $params, $props) = $query->buildClause(null);
         if ($criteria) {
-            list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
+            list ($cWhere, $cParams, $cProps) = $criteria->buildClause($relatedMeta);
 			if ($cWhere) {
                 $params = array_merge($cParams, $params);
+                $props = array_merge($props, $cProps);
                 $where .= ' AND ('.$cWhere.')';
             }
         }
@@ -192,6 +196,6 @@ class Association extends Base
                 $where
         ";
         
-        return array($sql, $params, $sourcePkFields);
+        return array($sql, $params, $sourcePkFields, $props);
     }
 }

@@ -45,6 +45,11 @@ abstract class Mapper
         return $object;
     }
 
+    public function formatParams(Meta $meta, $propertyParamMap, $params)
+    {
+        return $params;
+    }
+
     /**
      * @param $meta Amiss\Meta or string used to call getMeta()
      */

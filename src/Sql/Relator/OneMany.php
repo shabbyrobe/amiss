@@ -103,7 +103,7 @@ class OneMany extends Base
         }
 
         $list = $this->manager->getList($relation['of'], $query);
-        
+
         return $list;
     }
 }
