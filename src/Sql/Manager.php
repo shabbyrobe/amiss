@@ -730,7 +730,7 @@ class Manager
      * @throws \InvalidArgumentException
      * @return array
      */
-    protected function createIdCriteria($class, $id)
+    public function createIdCriteria($class, $id)
     {
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $primary = $meta->primary;

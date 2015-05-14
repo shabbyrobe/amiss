@@ -11,6 +11,10 @@ class Criteria extends Sql\Query
 
     // this hack is for the auto relations circular ref hack
     public $stack = [];
+    
+    // hack to ensure property indexes never collide when building multiple
+    // clauses for the same query.
+    private static $fidx = 0;
 
     public static function fromParamArgs(array $args, $class=null)
     {
@@ -81,9 +85,10 @@ class Criteria extends Sql\Query
                     }
                 }
                 $qk = $k[0] != '`' ?  '`'.str_replace('`', '', $k).'`' : $k;
-                $wh[] = "$qk=:$k";
-                $properties[$p] = ':'.$k;
-                $params[':'.$k] = $v;
+                $pidx = 'p_'.self::$fidx++;
+                $wh[] = "$qk=:$pidx";
+                $properties[$p] = ":$pidx";
+                $params[":$pidx"] = $v;
             }
             $where = implode(' AND ', $wh);
             $namedParams = true;

@@ -49,7 +49,7 @@ abstract class Base extends \Amiss\Mapper
 
         foreach ($propertyParamMap as $prop=>$param) {
             if (!isset($fields[$prop])) {
-                throw new \Exception();
+                throw new \UnexpectedValueException("Field $prop does not exist for class {$meta->class}");
             }
             $field = $fields[$prop];
 
