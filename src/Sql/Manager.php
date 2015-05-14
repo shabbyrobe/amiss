@@ -619,9 +619,8 @@ class Manager
         }
 
         list ($sql, $params, $props) = $query->buildQuery($meta);
-        if (!$objectMode && $props) {
-            $params = $this->mapper->formatParams($meta, $props, $params);
-        }
+        // don't need to do formatParams - it's already covered by the fromProperties call in
+        // table update mode
         return $this->getConnector()->exec($sql, $params);
     }
     

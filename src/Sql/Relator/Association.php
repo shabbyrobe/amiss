@@ -49,7 +49,7 @@ class Association extends Base
     {
         if (!$source) { return; }
 
-        list ($list, $result, $resultIndex) = $this->fetchRelated($meta, $source, $relation, $criteria);
+        list ($list, $ids, $resultIndex) = $this->fetchRelated($meta, $source, $relation, $criteria);
 
         return $list; 
     }
@@ -119,10 +119,10 @@ class Association extends Base
         } 
 
         // get the source ids, prepare an index to link the relationships
-        list($ids, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
+        list($index, $resultIndex) = $this->indexSource($source, $sourceToViaOn, $sourceFields, $viaFields);
         
         list($query, $params, $sourcePkFields, $props) = $this->buildQuery(
-            $ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
+            $index, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
         );
         if ($props) {
             $params = $this->manager->mapper->formatParams($meta, $props, $params);
@@ -146,21 +146,15 @@ class Association extends Base
         return [$list, $ids, $resultIndex];
     }
     
-    protected function buildQuery($ids, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria)
+    protected function buildQuery($index, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria)
     {
         $viaFields = $viaMeta->getFields();
         $relatedFields = $relatedMeta->getFields();
         
         $query = new Query\Select();
         
-        $where = array();
-        foreach ($ids as $l=>$idInfo) {
-            $rName = $idInfo['rField']['name'];
-            $query->params[$rName] = array_keys($idInfo['values']);
-            $where[] = 't2.`'.str_replace('`', '', $rName).'` IN(:'.$idInfo['param'].')';
-        }
-        $query->where = implode(' AND ', $where);
-        
+        list($query->where, $query->params) = $this->buildRelatedClause($index, 't2');
+
         $queryFields = $query->buildFields($relatedMeta, 't1');
         $sourcePkFields = array();
         foreach ($sourceToViaOn as $l=>$r) {

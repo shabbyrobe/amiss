@@ -12,11 +12,16 @@ abstract class Base implements \Amiss\Sql\Relator
     
     protected function indexSource($source, $on, $lFields, $rFields)
     {
-        $resultIndex = array();
-        $ids = array();
+        $index = (object)[
+            'rFields'=>[],
+            'params'=>[],
+            'ids'=>[],
+        ];
+        $resultIndex = [];
 
         foreach ($source as $idx=>$object) {
-            $key = array();
+            $key = [];
+            $id = [];
             foreach ($on as $l=>$r) {
                 $lField = $lFields[$l];
                 $lValue = $object instanceof \stdClass || !isset($lField['getter']) 
@@ -28,19 +33,16 @@ abstract class Base implements \Amiss\Sql\Relator
                 if (!isset($rFields[$r])) {
                     throw new Exception("Field $r does not exist against relation for ".get_class($object));
                 }
-                
-                if (!isset($ids[$l])) {
-                    $ids[$l] = array(
-                        'values'=>array(), 
-                        'rField'=>$rFields[$r], 
-                        'param'=>preg_replace('/[^A-Za-z0-9_]/', '', $rFields[$r]['name'])
-                    );
+                if (!isset($index->params[$l])) {
+                    $index->params[$l] = preg_replace('/[^A-Za-z0-9_]/', '', $rFields[$r]['name']);
+                    $index->rFields[$l] = $rFields[$r];
                 }
                 
-                $ids[$l]['values'][$lValue] = true;
+                $id[$l] = $lValue;
             }
-            
+
             $key = !isset($key[1]) ? $key[0] : implode('|', $key);
+            $index->ids[$key] = $id;
             
             if (!isset($resultIndex[$key])) {
                 $resultIndex[$key] = array();
@@ -49,7 +51,43 @@ abstract class Base implements \Amiss\Sql\Relator
             $resultIndex[$key][$idx] = $object;
         }
         
-        return array($ids, $resultIndex);
+        return array($index, $resultIndex);
+    }
+
+    protected function buildRelatedClause($index, $prefix='', &$paramIdx=0)
+    {
+        $where = '';
+        $params = [];
+        $tableAlias  = ($prefix ? "{$prefix}." : "");
+        $paramPrefix = ($prefix ? "{$prefix}_" : "");
+
+        $firstId = true;
+        foreach ($index->ids as $id) {
+            if ($firstId) {
+                $firstId = false;
+            } else {
+                $where .= ' OR ';
+            }
+
+            $where .= '(';
+
+            $firstValue = true;
+            foreach ($id as $l=>$v) {
+                if ($firstValue) {
+                    $firstValue = false;
+                } else {
+                    $where .= ' AND ';
+                }
+
+                $rName = $index->rFields[$l]['name'];
+                $param = ":r_{$paramPrefix}{$index->params[$l]}_".$paramIdx++;
+                $where .= $tableAlias.'`'.$rName.'`='.$param;
+                $params[$param] = $v;
+            }
+            $where .= ')';
+        }
+
+        return [$where, $params];
     }
 
     // Transitional - allows OneMany and Assoc to turn 'from' and 'to'

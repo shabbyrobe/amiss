@@ -25,16 +25,16 @@ class OneMany extends Base
 
         // find query values in source object(s)
         $relatedFields = $relatedMeta->getFields();
-        list ($ids, $resultIndex) = $this->indexSource($source, $on, $meta->getFields(), $relatedFields);
+        list ($index, $resultIndex) = $this->indexSource($source, $on, $meta->getFields(), $relatedFields);
 
-        $list = $this->runQuery($ids, $relation, $relatedMeta, $criteria);
-        return [$list, $relatedMeta, $relatedFields, $on, $ids, $resultIndex];
+        $list = $this->runQuery($index, $relation, $relatedMeta, $criteria);
+        return [$list, $relatedMeta, $relatedFields, $on, $index, $resultIndex];
     }
 
     public function getRelated(Meta $meta, $source, array $relation, Query\Criteria $criteria=null)
     {
         $source = [$source];
-        list ($result, $relatedMeta, $relatedFields, $on, $ids, $resultIndex) = $this->fetchRelated(
+        list ($result, $relatedMeta, $relatedFields, $on, $index, $resultIndex) = $this->fetchRelated(
             $meta, $source, $relation, $criteria
         );
         if ($relation[0] == 'one' && $result) {
@@ -47,7 +47,7 @@ class OneMany extends Base
     {
         $type = $relation[0];
 
-        list ($relatedList, $relatedMeta, $relatedFields, $on, $ids, $resultIndex) = $this->fetchRelated(
+        list ($relatedList, $relatedMeta, $relatedFields, $on, $index, $resultIndex) = $this->fetchRelated(
             $meta, $source, $relation, $criteria
         );
 
@@ -78,17 +78,11 @@ class OneMany extends Base
         return $result;
     }
     
-    private function runQuery($ids, $relation, $relatedMeta, $criteria)
+    private function runQuery($index, $relation, $relatedMeta, $criteria)
     {
         $query = new Query\Select;
-        $where = array();
+        list ($query->where, $query->params) = $this->buildRelatedClause($index);
 
-        foreach ($ids as $l=>$idInfo) {
-            $rName = $idInfo['rField']['name'];
-            $query->params['r_'.$rName] = array_keys($idInfo['values']);
-            $where[] = '`'.str_replace('`', '', $rName).'` IN(:r_'.$idInfo['param'].')';
-        }
-        $query->where = implode(' AND ', $where);
 		if (isset($criteria->args)) {
 			$query->args = $criteria->args;
 		}
