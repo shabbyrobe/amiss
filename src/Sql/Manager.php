@@ -192,7 +192,7 @@ class Manager
 
         foreach ($mappedRows as $idx=>$mappedRow) {
             foreach ($related as $relId=>$objs) {
-				$mappedRow->{$relId} = isset($objs[$idx]) ? $objs[$idx] : null;
+                $mappedRow->{$relId} = isset($objs[$idx]) ? $objs[$idx] : null;
             }
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
             $mapper->populateObject($object, $mappedRow, $meta);
@@ -347,8 +347,8 @@ class Manager
             }
 
             if ($relatedMeta) {
-				if ($relation[0] == 'one') {
-					$item = [$item];
+                if ($relation[0] == 'one') {
+                    $item = [$item];
                 }
                 foreach ($item as $i) {
                     if (!isset($relatedRelation['setter'])) {
@@ -425,7 +425,13 @@ class Manager
         $relator = $this->getRelator($relation);
         
         if ($query) {
-            $query = Query\Criteria::fromParamArgs([$query]);
+            // need to support both Query\Criteria and Query\Select
+            // this is a cheeky hack - the API doesn't declare support for
+            // Select in Relators because it carries promises of things like 
+            // 'fields' and whatnot that we'll never be able to satisfy. 
+            // That whole hierarchy needs to be cleaned
+            // up into a bunch of traits so we can have RelatorCriteria or something.
+            $query = $query instanceof Query\Criteria ? $query : Query\Select::fromParamArgs([$query]);
             $stack = $query->stack;
         }
         else {
@@ -573,9 +579,6 @@ class Manager
         $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
-        }
-        if (!$args) {
-            throw new \InvalidArgumentException("Query missing for table update");
         }
 
         $query = Query\Update::fromParamArgs($args);

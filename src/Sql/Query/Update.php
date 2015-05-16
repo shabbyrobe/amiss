@@ -8,7 +8,7 @@ class Update extends Criteria
     public static function fromParamArgs(array $args, $class=null)
     {
         if (!$args) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException("Args missing for update");
         }
 
         $cnt = count($args);

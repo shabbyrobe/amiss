@@ -163,12 +163,12 @@ class DateTest extends \CustomTestCase
 
 class PantsDateTime extends \DateTime
 {
-	public static function createFromFormat($format, $time, $object=null)
+    public static function createFromFormat($format, $time, $object=null)
     {
-		$dateTime = \DateTime::createFromFormat($format, $time, $object);
-		$dt = new static('@'.$dateTime->getTimeStamp(), new \DateTimeZone('UTC'));
-		$dt->setTimeZone($dateTime->getTimeZone());
-		return $dt;
+        $dateTime = \DateTime::createFromFormat($format, $time, $object);
+        $dt = new static('@'.$dateTime->getTimeStamp(), new \DateTimeZone('UTC'));
+        $dt->setTimeZone($dateTime->getTimeZone());
+        return $dt;
     }
 }
 

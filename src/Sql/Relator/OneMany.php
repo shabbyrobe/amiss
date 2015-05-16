@@ -83,16 +83,21 @@ class OneMany extends Base
         $query = new Query\Select;
         list ($query->where, $query->params) = $this->buildRelatedClause($index);
 
-		if (isset($criteria->args)) {
-			$query->args = $criteria->args;
-		}
+        if ($criteria instanceof Query\Select) {
+            $query->page      = $criteria->page;
+            $query->limit     = $criteria->limit;
+            $query->args      = $criteria->args;
+            $query->offset    = $criteria->offset;
+            $query->order     = $criteria->order;
+            $query->forUpdate = $criteria->forUpdate;
+        }
 
         if ($criteria) {
             list ($cWhere, $cParams) = $criteria->buildClause($relatedMeta);
-			if ($cWhere) {
-				$query->params = array_merge($cParams, $query->params);
-				$query->where .= ' AND ('.$cWhere.')';
-			}
+            if ($cWhere) {
+                $query->params = array_merge($cParams, $query->params);
+                $query->where .= ' AND ('.$cWhere.')';
+            }
             $query->stack = $criteria->stack;
         }
 

@@ -288,7 +288,7 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
      */
     public function __construct($string)
     {
-		parent::__construct($string);
+        parent::__construct($string);
         $this->string = $string;
     }
 

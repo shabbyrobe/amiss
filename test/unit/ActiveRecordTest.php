@@ -212,14 +212,38 @@ class ActiveRecordTest extends \DataTestCase
      */
     public function testUpdateTable()
     {
-        $manager = $this->getMock('Amiss\Sql\Manager', array('update'), array($this->db, $this->mapper), 'PHPUnitGotcha_RecordTest_'.__FUNCTION__);
-        $manager->expects($this->once())->method('update')->with(
-            $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
+        $manager = $this->getMock(
+            'Amiss\Sql\Manager', 
+            array('updateTable'), 
+            array($this->db, $this->mapper), 
+            'PHPUnitGotcha_RecordTest_'.__FUNCTION__
+        );
+        $manager->expects($this->once())->method('updateTable')->with(
+            $this->equalTo($this->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
             $this->equalTo(array('pants'=>1)),
             $this->equalTo(1)
         );
         TestActiveRecord1::setManager($manager);
         TestActiveRecord1::updateTable(array('pants'=>1), '1');
+    }
+
+    /**
+     * @group active
+     */
+    public function testInsertTable()
+    {
+        $manager = $this->getMock(
+            'Amiss\Sql\Manager', 
+            array('insertTable'), 
+            array($this->db, $this->mapper), 
+            'PHPUnitGotcha_RecordTest_'.__FUNCTION__
+        );
+        $manager->expects($this->once())->method('insertTable')->with(
+            $this->equalTo($this->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
+            $this->equalTo(array('pants'=>1))
+        );
+        TestActiveRecord1::setManager($manager);
+        TestActiveRecord1::insertTable(array('pants'=>1));
     }
 }
 

@@ -143,7 +143,7 @@ class Criteria extends Sql\Query
         }
     }
     
-    protected function replaceFieldTokens($fields, $clause)
+    protected function replaceFieldTokens($fields, $clause, $tableAlias=null)
     {
         $tokens = array();
         foreach ($fields as $k=>$v) {
@@ -152,6 +152,9 @@ class Criteria extends Sql\Query
                 $repl = $this->aliases[$v['name']];
             } else {
                 $repl = '`'.$v['name'].'`';
+                if ($tableAlias) {
+                    $repl = "$tableAlias.$repl";
+                }
             }
             $tokens['{'.$k.'}'] = $repl;
         }

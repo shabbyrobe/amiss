@@ -49,7 +49,7 @@ abstract class ActiveRecord
         $this->beforeSave();
         return static::getDependency('manager')->update($this);
     }
-    
+
     public function delete()
     {
         $this->beforeDelete();
@@ -104,15 +104,20 @@ abstract class ActiveRecord
         return self::$meta[$class];
     }
     
-    public static function updateTable()
+    public static function insertTable(...$args)
     {
         $manager = static::getDependency('manager');
         $meta = static::getMeta();
-        
-        $args = func_get_args();
-        array_unshift($args, $meta->class);
-        
-        return call_user_func_array(array($manager, 'update'), $args);
+        array_unshift($args, $meta);
+        return call_user_func_array(array($manager, 'insertTable'), $args);
+    }
+
+    public static function updateTable(...$args)
+    {
+        $manager = static::getDependency('manager');
+        $meta = static::getMeta();
+        array_unshift($args, $meta);
+        return call_user_func_array(array($manager, 'updateTable'), $args);
     }
     
     /**

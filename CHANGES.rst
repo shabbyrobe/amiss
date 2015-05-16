@@ -4,6 +4,15 @@ Changelog
 v5.0.0
 ------
 
+- Object and table modes for ``update``, ``insert`` and ``delete`` have been broken into
+  separate methods, ``updateTable``, ``insertTable`` and ``deleteTable`` respectively.
+
+- Permissions: ``@readOnly`` objects, also ``@canUpdate 0``, ``@canDelete 0`` and
+  ``@canInsert 0``. These are easily bypassed with some fiddling, but they're a useful
+  guide and safety feature.
+
+- Issue #14 - Order By support for getRelated
+
 - Mapper API has changed significantly::
 
     +    function createObject($meta, $mapped, $args=null)

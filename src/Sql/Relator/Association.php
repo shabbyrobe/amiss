@@ -125,7 +125,7 @@ class Association extends Base
             $index, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria
         );
         if ($props) {
-            $params = $this->manager->mapper->formatParams($meta, $props, $params);
+            $params = $this->manager->mapper->formatParams($relatedMeta, $props, $params);
         }
 
         $stmt = $this->manager->connector->prepare($query)->execute($params);
@@ -154,6 +154,14 @@ class Association extends Base
         $query = new Query\Select();
         
         list($query->where, $query->params) = $this->buildRelatedClause($index, 't2');
+        if ($criteria instanceof Query\Select) {
+            $query->page      = $criteria->page;
+            $query->limit     = $criteria->limit;
+            $query->args      = $criteria->args;
+            $query->offset    = $criteria->offset;
+            $query->order     = $criteria->order;
+            $query->forUpdate = $criteria->forUpdate;
+        }
 
         $queryFields = $query->buildFields($relatedMeta, 't1');
         $sourcePkFields = array();
@@ -171,13 +179,16 @@ class Association extends Base
         list ($where, $params, $props) = $query->buildClause(null);
         if ($criteria) {
             list ($cWhere, $cParams, $cProps) = $criteria->buildClause($relatedMeta);
-			if ($cWhere) {
+            if ($cWhere) {
                 $params = array_merge($cParams, $params);
                 $props = array_merge($props, $cProps);
                 $where .= ' AND ('.$cWhere.')';
             }
         }
         
+        $order = $query->buildOrder($relatedMeta, 't1');
+        list ($limit, $offset) = $query->getLimitOffset();
+
         $sql = "
             SELECT 
                 $queryFields, t2.".'`'.implode('`, t2.`', $sourcePkFields).'`'."
@@ -186,9 +197,13 @@ class Association extends Base
             INNER JOIN
                 {$relatedMeta->table} t1
                 ON  ({$joinOn})
-            WHERE 
-                $where
-        ";
+            WHERE $where "
+            .($order  ? "ORDER BY $order "         : '').' '
+            .($limit  ? "LIMIT  ".(int)$limit." "  : '').' '
+            .($offset ? "OFFSET ".(int)$offset." " : '').' '
+
+            .($query->forUpdate ? 'FOR UPDATE' : '')
+        ;
         
         return array($sql, $params, $sourcePkFields, $props);
     }

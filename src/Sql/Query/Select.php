@@ -72,7 +72,7 @@ class Select extends Criteria
     }
 
     // damn, this is pretty much identical to the above.
-    public function buildOrder($meta)
+    public function buildOrder($meta, $tableAlias=null)
     {
         $metaFields = $meta ? $meta->getFields() : null;
         
@@ -91,13 +91,15 @@ class Select extends Criteria
                         $name = $this->aliases[$name];
                     }
                     $qname = $name[0] == '`' ? $name : '`'.$name.'`';
+                    $qname = ($tableAlias ? $tableAlias.'.' : '').$qname;
                     $oClauses[] = $qname.($dir == 'asc' ? '' : ' desc');
                 }
                 $order = implode(', ', $oClauses);
             }
             else {
-                if ($metaFields && strpos($order, '{')!==false)
-                    $order = $this->replaceFieldTokens($metaFields, $order);
+                if ($metaFields && strpos($order, '{')!==false) {
+                    $order = $this->replaceFieldTokens($metaFields, $order, $tableAlias);
+                }
             }
         }
         
