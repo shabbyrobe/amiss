@@ -21,8 +21,8 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = new Meta('Foo', 'foo', array());
         list($sql, $params) = $uq->buildQuery($meta);
-        $this->assertEquals('UPDATE foo SET `c`=:set_c WHERE `a`=:a', $sql);
-        $this->assertEquals(array(':set_c'=>'d', ':a'=>'b'), $params);
+        $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE `a`=:zp_1', $sql);
+        $this->assertEquals(array(':zs_0'=>'d', ':zp_1'=>'b'), $params);
     }
 
     /**
@@ -37,8 +37,8 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = new Meta('Foo', 'foo', array());
         list($sql, $params) = $uq->buildQuery($meta);
-        $this->assertEquals('UPDATE foo SET `c`=:set_c WHERE foo=:bar', $sql);
-        $this->assertEquals(array(':set_c'=>'d', ':bar'=>'ding'), $params);
+        $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE foo=:bar', $sql);
+        $this->assertEquals(array(':zs_0'=>'d', ':bar'=>'ding'), $params);
     }
 
     /**
@@ -68,8 +68,8 @@ class UpdateQueryTest extends \CustomTestCase
         $uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux');
         
         list ($clause, $params) = $uq->buildSet(null);
-        $this->assertEquals('`foo_foo`=:set_foo_foo, `baz_baz`=:set_baz_baz', $clause);
-        $this->assertEquals(array(':set_foo_foo'=>'bar', ':set_baz_baz'=>'qux'), $params);
+        $this->assertEquals('`foo_foo`=:zs_0, `baz_baz`=:zs_1', $clause);
+        $this->assertEquals(array(':zs_0'=>'bar', ':zs_1'=>'qux'), $params);
     }
 
     /**
@@ -83,8 +83,8 @@ class UpdateQueryTest extends \CustomTestCase
         $uq->set = array('foo_foo'=>'bar', 'baz_baz'=>'qux', 'dingdong=dangdung+1');
         
         list ($clause, $params) = $uq->buildSet(null);
-        $this->assertEquals('`foo_foo`=:set_foo_foo, `baz_baz`=:set_baz_baz, dingdong=dangdung+1', $clause);
-        $this->assertEquals(array(':set_foo_foo'=>'bar', ':set_baz_baz'=>'qux'), $params);
+        $this->assertEquals('`foo_foo`=:zs_0, `baz_baz`=:zs_1, dingdong=dangdung+1', $clause);
+        $this->assertEquals(array(':zs_0'=>'bar', ':zs_1'=>'qux'), $params);
     }
     
     /**
@@ -114,8 +114,8 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = $this->createGenericMeta();
         list ($clause, $params) = $uq->buildSet($meta);
-        $this->assertEquals('`foo_field`=:set_fooFoo, `bar_field`=:set_barBar', $clause);
-        $this->assertEquals(array(':set_fooFoo'=>'baz', ':set_barBar'=>'qux'), $params);
+        $this->assertEquals('`foo_field`=:zs_0, `bar_field`=:zs_1', $clause);
+        $this->assertEquals(array(':zs_0'=>'baz', ':zs_1'=>'qux'), $params);
     }
     
     /**

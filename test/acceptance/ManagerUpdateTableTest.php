@@ -42,7 +42,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', array('set'=>'priority=priority+10', 'where'=>'1=1'));
+        $this->manager->updateTable('EventArtist', array('set'=>'priority=priority+10', 'where'=>'1=1'));
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
@@ -60,7 +60,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', 'priority=priority+10', ['where'=>'priority>=3']);
+        $this->manager->updateTable('EventArtist', 'priority=priority+10', ['where'=>'priority>=3']);
         $stmt = $this->manager->getConnector()->prepare("SELECT MAX(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
@@ -81,7 +81,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->update('EventArtist', 'priority=priority+?', 'priority>=?', [10, 3]);
+        $this->manager->updateTable('EventArtist', 'priority=priority+?', 'priority>=?', [10, 3]);
         $stmt = $this->manager->getConnector()->prepare("SELECT priority, COUNT(priority) as cnt FROM event_artist GROUP BY priority");
         $stmt->execute();
         $priorities = $stmt->fetchAll(\PDO::FETCH_NUM);
@@ -95,7 +95,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
      */
     public function testUpdateTableFailsWithNoWhereClause()
     {
-        $this->manager->update('EventArtist', array('set'=>'priority=priority+10'));
+        $this->manager->updateTable('EventArtist', array('set'=>'priority=priority+10'));
     }
     
     /**
@@ -109,7 +109,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=?', [2]);
+        $this->manager->updateTable('Artist', array('artistTypeId'=>1), 'artistTypeId=?', [2]);
         
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
@@ -126,7 +126,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->update('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
+        $this->manager->updateTable('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
         
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
@@ -142,7 +142,7 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->update('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
+        $this->manager->updateTable('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
         
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
@@ -159,14 +159,14 @@ class ManagerUpdateTableTest extends \ModelDataTestCase
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
         $criteria = new Update(array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
-        $this->manager->update('Artist', $criteria);
+        $this->manager->updateTable('Artist', $criteria);
         
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
 
     public function testUpdateTableValuesUseTypeHandlers()
     {
-        $this->manager->update(
+        $this->manager->updateTable(
             'Event', 
             [
                 'dateStart'=>new \DateTime('2030-01-01 11:11'),

@@ -60,7 +60,7 @@ class ManagerSaveTest extends \ModelDataTestCase
         // with MySQL, only changed ones are counted but with Sqlite, all
         // rows matched by the clause are counted
         $expected = $this->db->engine == 'sqlite' ? 3 : 2;
-        $this->assertEquals($expected, $this->manager->update('ArtistType', ['type'=>'Band'], '1=1'));
+        $this->assertEquals($expected, $this->manager->updateTable('ArtistType', ['type'=>'Band'], '1=1'));
     }
 
     /**

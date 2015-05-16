@@ -558,6 +558,42 @@ class Manager
         
         return $lastInsertId;
     }
+
+    /**
+     * Update a table by criteria.
+     * 
+     * Supports the following signatures:
+     *   update($classNameOrMeta, array $values, $criteria...);
+     *   update($classNameOrMeta, Query\Update $query, $criteria...);
+     * 
+     * @return void
+     */
+    public function updateTable($meta, ...$args)
+    {
+        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
+        if (!$meta->canUpdate) {
+            throw new Exception("Class {$meta->class} prohibits update");
+        }
+        if (!$args) {
+            throw new \InvalidArgumentException("Query missing for table update");
+        }
+
+        $query = Query\Update::fromParamArgs($args);
+        if (!$query->set) {
+            throw new \InvalidArgumentException();
+        }
+
+        list ($sql, $params, $setProps, $whereProps) = $query->buildQuery($meta);
+        if ($setProps) {
+            $params = $this->mapper->formatParams($meta, $setProps, $params);
+        }
+        if ($whereProps) {
+            $params = $this->mapper->formatParams($meta, $whereProps, $params);
+        }
+
+        return $this->getConnector()->exec($sql, $params);
+    }
+    
     
     /**
      * Update an object in the database, or update a table by criteria.
@@ -565,64 +601,40 @@ class Manager
      * Supports the following signatures:
      *   update($object)
      *   update($object, $tableOrMeta)
-     *   update($classNameOrMeta, $values, $criteria...);
      * 
      * @return void
      */
-    public function update($first, ...$args)
+    public function update($object, $arg=null)
     {
-        $query = null;
         $meta = null;
-        $objectMode = true;
-        
-        if (is_object($first) && !$first instanceof Meta) {
-        // Object update mode
-            $object = $first;
-            $query = new Query\Update();
 
-            if (isset($args[0])) {
-                if ($args[0] instanceof Meta) {
-                    // Signature: update($object, Meta $meta)
-                    $meta = $args[0];
-                }
-                elseif (is_string($args[0])) {
-                    // Signature: update($object, $table)
-                    $query->table = $args[0];
-                }
-            }
-            if (!$meta) {
-                $meta = $this->mapper->getMeta($object);
-            }
-
-            $query->set = $this->mapper->fromObject($object, $meta, 'update');
-            $query->where = $meta->getPrimaryValue($object);
+        $query = new Query\Update();
+        if (!is_object($object)) {
+            throw new \BadMethodCallException("Please use updateTable()");
+        } 
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
+            $query->table = $arg;
+        } 
+        elseif ($arg) {
+            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
         }
-
-        elseif (is_string($first) || $first instanceof Meta) {
-        // Table update mode
-            $objectMode = false;
-
-            $meta = $first instanceof Meta ? $first : $this->mapper->getMeta($first);
-            if (!isset($args[0])) {
-                throw new \InvalidArgumentException("Query missing for table update");
-            }
-            $query = Query\Update::fromParamArgs($args);
-
-            if (is_array($query->set)) {
-                $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
-            }
+         
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($object);
         }
-        else {
-            throw new \InvalidArgumentException();
-        }
-        
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
 
+        $query->set = $this->mapper->fromObject($object, $meta, 'update');
+        $query->where = $meta->getPrimaryValue($object);
+        
         list ($sql, $params, $props) = $query->buildQuery($meta);
         // don't need to do formatParams - it's already covered by the fromProperties call in
         // table update mode
+
         return $this->getConnector()->exec($sql, $params);
     }
     
@@ -671,18 +683,15 @@ class Manager
     }
     
     /** 
-     * @param string The class name to delete
-     * @param mixed The primary key
+     * @param mixed $meta Class name or Amiss\Meta
      */
-    public function deleteById($class, $id)
+    public function deleteById($meta, $id)
     {
-        return $this->delete($class, $this->createIdCriteria($class, $id));
+        return $this->delete($meta, $this->createIdCriteria($meta, $id));
     }
 
     /**
      * This is a hack to allow active record to intercept saving and fire events.
-     * 
-     * @param object The object to check
      * @return boolean
      */
     public function shouldInsert($object, Meta $meta=null)
@@ -726,15 +735,12 @@ class Manager
 
     /**
      * Creates an array criteria for a primary key
-     * @param string Class name to create criteria for
-     * @param mixed Primary key
-     * @throws Exception
-     * @throws \InvalidArgumentException
-     * @return array
+     * @param mixed $meta Meta or class name
+     * @return array Criteria
      */
-    public function createIdCriteria($class, $id)
+    public function createIdCriteria($meta, $id)
     {
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         $primary = $meta->primary;
         if (!$primary) {
             throw new Exception("Can't use {$meta->class} by primary - none defined.");

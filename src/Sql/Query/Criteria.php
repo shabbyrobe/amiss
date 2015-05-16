@@ -12,10 +12,6 @@ class Criteria extends Sql\Query
     // this hack is for the auto relations circular ref hack
     public $stack = [];
     
-    // hack to ensure property indexes never collide when building multiple
-    // clauses for the same query.
-    private static $fidx = 0;
-
     public static function fromParamArgs(array $args, $class=null)
     {
         $c = $class ?: get_called_class();
@@ -64,7 +60,7 @@ class Criteria extends Sql\Query
         }
     }
     
-    public function buildClause($meta)
+    public function buildClause($meta, &$fidx=0)
     {
         $where = $this->where;
         $params = array();
@@ -85,7 +81,7 @@ class Criteria extends Sql\Query
                     }
                 }
                 $qk = $k[0] != '`' ?  '`'.str_replace('`', '', $k).'`' : $k;
-                $pidx = 'p_'.self::$fidx++;
+                $pidx = 'zp_'.$fidx++;
                 $wh[] = "$qk=:$pidx";
                 $properties[$p] = ":$pidx";
                 $params[":$pidx"] = $v;
@@ -111,13 +107,17 @@ class Criteria extends Sql\Query
                 }
                 if (is_array($v)) {
                     $inparms = array();
-                    $cnt = 0;
                     $v = array_unique($v);
                     foreach ($v as $val) {
-                        $inparms[$k.'_'.$cnt++] = $val;
+                        $inparms[':zp_'.$fidx++] = $val;
                     }
                     $params = array_merge($params, $inparms);
-                    $where = preg_replace("@IN\s*\($k\)@i", "IN(".implode(',', array_keys($inparms)).")", $where);
+                    $qk = preg_quote($k, '@');
+                    $where = preg_replace(
+                        " @ IN \s* \( \s* ($qk) \s* \) @ix", 
+                        "IN(".implode(',', array_keys($inparms)).")",
+                        $where
+                    );
                 }
                 else {
                     $params[$k] = $v;

@@ -18,8 +18,8 @@ class QueryTest extends \CustomTestCase
         $criteria->where = 'bar IN(:foo)';
         
         list ($where, $params) = $criteria->buildClause(null);
-        $this->assertEquals('bar IN(:foo_0,:foo_1,:foo_2)', $where);
-        $this->assertEquals(array(':foo_0'=>1, ':foo_1'=>2, ':foo_2'=>3), $params);
+        $this->assertEquals('bar IN(:zp_0,:zp_1,:zp_2)', $where);
+        $this->assertEquals(array(':zp_0'=>1, ':zp_1'=>2, ':zp_2'=>3), $params);
     }
 
     /**
@@ -38,8 +38,8 @@ class QueryTest extends \CustomTestCase
         $criteria->where = '{bar} IN(:foo)';
         
         list ($where, $params) = $criteria->buildClause($meta);
-        $this->assertEquals('`bar_field` IN(:foo_0,:foo_1,:foo_2)', $where);
-        $this->assertEquals(array(':foo_0'=>1, ':foo_1'=>2, ':foo_2'=>3), $params);
+        $this->assertEquals('`bar_field` IN(:zp_0,:zp_1,:zp_2)', $where);
+        $this->assertEquals(array(':zp_0'=>1, ':zp_1'=>2, ':zp_2'=>3), $params);
     }
     
     /**
@@ -53,8 +53,8 @@ class QueryTest extends \CustomTestCase
         $criteria->where = $clause;
         
         list ($where, $params) = $criteria->buildClause(null);
-        $this->assertRegexp('@bar\s+IN\(:foo_0,:foo_1,:foo_2\)@', $where);
-        $this->assertEquals(array(':foo_0'=>1, ':foo_1'=>2, ':foo_2'=>3), $params);
+        $this->assertRegexp('@bar\s+IN\(:zp_0,:zp_1,:zp_2\)@', $where);
+        $this->assertEquals(array(':zp_0'=>1, ':zp_1'=>2, ':zp_2'=>3), $params);
     }
     
     public function dataForInClauseReplacementTolerance()
@@ -62,6 +62,8 @@ class QueryTest extends \CustomTestCase
         return array(
             array("bar IN(:foo)"),
             array("bar in (:foo)"),
+            array("bar in ( :foo )"),
+            array("bar in ( \n :foo \n )"),
             array("bar\nin\n(:foo)"),
         );
     }
@@ -79,37 +81,26 @@ class QueryTest extends \CustomTestCase
         $criteria->where = 'bar IN(:foo) AND qux IN(:baz)';
         
         list ($where, $params) = $criteria->buildClause(null);
-        $this->assertEquals('bar IN(:foo_0,:foo_1) AND qux IN(:baz_0,:baz_1)', $where);
-        $this->assertEquals(array(':foo_0'=>1, ':foo_1'=>2, ':baz_0'=>4, ':baz_1'=>5), $params);
+        $this->assertEquals('bar IN(:zp_0,:zp_1) AND qux IN(:zp_2,:zp_3)', $where);
+        $this->assertEquals(array(':zp_0'=>1, ':zp_1'=>2, ':zp_2'=>4, ':zp_3'=>5), $params);
     }
-    
+
     /**
-     * @group faulty
      * @covers Amiss\Sql\Query\Criteria::buildClause
-     * @dataProvider dataForInClauseDoesNotRuinString
      */
-    public function testInClauseDoesNotRuinString($where, $result)
+    public function testMultipleFieldSameIn()
     {
         $criteria = new Query\Criteria;
         $criteria->params = array(
             ':foo'=>array(1, 2),
-            ':bar'=>array(3, 4),
         );
-        $criteria->where = $where;
+        $criteria->where = 'bar IN(:foo) AND qux IN(:foo)';
         
         list ($where, $params) = $criteria->buildClause(null);
-        $this->assertEquals($result, $where);
-        $this->assertEquals(array(':foo_0'=>1, ':foo_1'=>2, ':bar_0'=>3, ':bar_1'=>4), $params);
+        $this->assertEquals('bar IN(:zp_0,:zp_1) AND qux IN(:zp_0,:zp_1)', $where);
+        $this->assertEquals(array(':zp_0'=>1, ':zp_1'=>2), $params);
     }
-    
-    public function dataForInClauseDoesNotRuinString()
-    {
-        return array(
-            array('foo IN (:foo) AND bar="hey :bar"',      'foo IN(:foo_0,:foo_1) AND bar="hey :bar"'),
-            array('foo IN (:foo) AND bar="hey IN(:bar)"',  'foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"'),
-        );
-    }
-    
+
     /**
      * @covers Amiss\Sql\Query\Criteria::buildClause
      */
@@ -133,8 +124,8 @@ class QueryTest extends \CustomTestCase
         $criteria->where = array('bar'=>'yep', 'qux'=>'sub');
         
         list ($where, $params) = $criteria->buildClause(null);
-        $this->assertEquals(array(':bar'=>'yep', ':qux'=>'sub'), $params);
-        $this->assertEquals('`bar`=:bar AND `qux`=:qux', $where);
+        $this->assertEquals(array(':zp_0'=>'yep', ':zp_1'=>'sub'), $params);
+        $this->assertEquals('`bar`=:zp_0 AND `qux`=:zp_1', $where);
     }
 
     /**
@@ -188,10 +179,10 @@ class QueryTest extends \CustomTestCase
     {
         return array(
             // with two properties
-            array(array('foo'=>'foo', 'bar'=>'bar'), '`foo_field`=:foo_field AND `bar_field`=:bar_field'),
+            array(array('foo'=>'foo', 'bar'=>'bar'), '`foo_field`=:zp_0 AND `bar_field`=:zp_1'),
             
             // with one explicit column and one property
-            array(array('foo_fieldy'=>'foo', 'bar'=>'bar'), '`foo_fieldy`=:foo_fieldy AND `bar_field`=:bar_field'),
+            array(array('foo_fieldy'=>'foo', 'bar'=>'bar'), '`foo_fieldy`=:zp_0 AND `bar_field`=:zp_1'),
         );
     }
     

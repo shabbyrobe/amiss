@@ -29,7 +29,7 @@ class Update extends Criteria
         }
     }
 
-    public function buildSet($meta)
+    public function buildSet($meta, &$fidx=0)
     {
         $params = array();
         $clause = null;
@@ -53,7 +53,7 @@ class Update extends Criteria
                     $field = ($fieldSet = isset($fields[$name]) ? $fields[$name]['name'] : $name);
 
                     if ($named) {
-                        $param = ':set_'.$name;
+                        $param = ':zs_'.$fidx++;
                         $clause[] = '`'.$field.'`='.$param;
                         $params[$param] = $value;
                         if ($fieldSet) {
@@ -71,13 +71,13 @@ class Update extends Criteria
         return array($clause, $params, $properties);
     }
     
-    public function buildQuery($meta)
+    public function buildQuery($meta, &$fidx=0)
     {
         $table = $this->table ?: $meta->table;
-        
-        list ($setClause,   $setParams,   $setProps)   = $this->buildSet($meta);
-        list ($whereClause, $whereParams, $whereProps) = $this->buildClause($meta);
-        
+
+        list ($setClause,   $setParams,   $setProps)   = $this->buildSet($meta, $fidx);
+        list ($whereClause, $whereParams, $whereProps) = $this->buildClause($meta, $fidx);
+
         $params = array_merge($setParams, $whereParams);
         if (count($params) != count($setParams) + count($whereParams)) {
             $intersection = array_intersect(array_keys($setParams), array_keys($whereParams));
