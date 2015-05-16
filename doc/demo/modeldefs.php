@@ -18,7 +18,10 @@ class Artist extends Object
     /** @field */
     public $name;
     
-    /** @field */
+    /**
+     * @field
+     * @key.slug
+     */
     public $slug;
     
     /**

@@ -201,9 +201,18 @@ class Manager
         return $objects;
     }
 
+    public function getByKey($class, $key, $id, $args=null)
+    {
+        $query = $this->createKeyCriteria($class, $id, $key);
+        if ($args) {
+            $query['args'] = $args; 
+        }
+        return $this->get($class, $query);
+    }
+
     public function getById($class, $id, $args=null)
     {
-        $query = $this->createIdCriteria($class, $id);
+        $query = $this->createKeyCriteria($class, $id);
         if ($args) {
             $query['args'] = $args; 
         }
@@ -239,7 +248,7 @@ class Manager
     {
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $query = new \Amiss\Sql\Query\Criteria;
-        $query->setParams([$this->createIdCriteria($meta, $id)]);
+        $query->setParams([$this->createKeyCriteria($meta, $id)]);
         if (!$meta->primary) {
             throw new \InvalidArgumentException();
         }
@@ -690,7 +699,7 @@ class Manager
      */
     public function deleteById($meta, $id)
     {
-        return $this->delete($meta, $this->createIdCriteria($meta, $id));
+        return $this->delete($meta, $this->createKeyCriteria($meta, $id));
     }
 
     /**
@@ -737,23 +746,26 @@ class Manager
     }
 
     /**
-     * Creates an array criteria for a primary key
+     * Creates an array criteria for a key index
      * @param mixed $meta Meta or class name
      * @return array Criteria
      */
-    public function createIdCriteria($meta, $id)
+    public function createKeyCriteria($meta, $id, $indexId='primary')
     {
         $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
-        $primary = $meta->primary;
-        if (!$primary) {
-            throw new Exception("Can't use {$meta->class} by primary - none defined.");
+        if (!isset($meta->indexes[$indexId])) {
+            throw new Exception("Index $indexId does not exist on class {$meta->class}");
+        }
+        $index = $meta->indexes[$indexId];
+        if (!$index['key']) {
+            throw new Exception("Index $indexId is not a key index for class {$meta->class}");
         }
         if (!is_array($id)) {
             $id = array($id);
         }
         $where = array();
         
-        foreach ($primary as $idx=>$p) {
+        foreach ($index['fields'] as $idx=>$p) {
             $idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
             if (!$idVal) {
                 throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by id");

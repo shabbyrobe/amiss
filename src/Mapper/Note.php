@@ -164,12 +164,18 @@ class Note extends \Amiss\Mapper\Base
                     $info['primary'][] = $key;
                 }
 
-                if ($key && isset($itemNotes['index'])) {
-                    $indexNote = $itemNotes['index'];
+                if ($key && (isset($itemNotes['index']) || isset($itemNotes['key']))) {
+                    $indexNote = isset($itemNotes['index']) ? $itemNotes['index'] : null;
+                    $keyNote   = isset($itemNotes['key'])   ? $itemNotes['key']   : null;
+
+                    $indexNote = $indexNote ?: $keyNote;
+
                     if ($indexNote === true) {
+                        // Supports '@index' where index name comes from field name
                         $indexNote = [$key=>true];
                     }
                     elseif (is_string($indexNote)) {
+                        // Supporst '@index' indexName
                         $indexNote = [$indexNote=>true];
                     }
 
@@ -182,6 +188,9 @@ class Note extends \Amiss\Mapper\Base
                         // hacky increment even if the key doesn't exist
                         $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
                         $info['indexes'][$k]['fields'][$seq] = $key;
+                    }
+                    if ($keyNote) {
+                        $info['indexes'][$k]['key'] = true;
                     }
                 }
                 
