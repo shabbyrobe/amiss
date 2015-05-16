@@ -219,6 +219,8 @@ class TestCreateWithIndexedSingleOnRelation
 
 /**
  * @table bar
+ * @index.myFoo.fields[] myFooId
+ * @index.myFoo.fields[] myOtherFooId
  */
 class TestCreateWithIndexedMultiOnRelation
 {
@@ -230,13 +232,11 @@ class TestCreateWithIndexedMultiOnRelation
     
     /**
      * @field
-     * @index.myFoo 0
      */
     public $myFooId;
     
     /**
      * @field
-     * @index.myFoo 1
      */
     public $myOtherFooId;
     

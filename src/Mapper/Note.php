@@ -167,31 +167,26 @@ class Note extends \Amiss\Mapper\Base
                 if ($key && (isset($itemNotes['index']) || isset($itemNotes['key']))) {
                     $indexNote = isset($itemNotes['index']) ? $itemNotes['index'] : null;
                     $keyNote   = isset($itemNotes['key'])   ? $itemNotes['key']   : null;
+                    if ($indexNote && $keyNote) {
+                        throw new Exception();
+                    }
 
                     $indexNote = $indexNote ?: $keyNote;
-
+                    $indexName = null;
                     if ($indexNote === true) {
-                        // Supports '@index' where index name comes from field name
-                        $indexNote = [$key=>true];
+                        $indexName = $key;
+                    } elseif (is_string($indexNote)) {
+                        $indexName = $indexNote;
+                    } else {
+                        throw new Exception();
                     }
-                    elseif (is_string($indexNote)) {
-                        // Supporst '@index' indexName
-                        $indexNote = [$indexNote=>true];
+                    if (isset($info['indexes'][$indexName])) {
+                        throw new Exception("Index $indexName already defined");
                     }
-
-                    foreach ($indexNote as $k=>$seq) {
-                        $seq = $seq === true ? 0 : (int)$seq;
-
-                        if (isset($info['indexes'][$k]['fields'][$seq])) {
-                            throw new Exception("Duplicate sequence $seq for index $k");
-                        }
-                        // hacky increment even if the key doesn't exist
-                        $c = &$fieldIndexLengths[$k]; $c = ((int)$c) + 1;
-                        $info['indexes'][$k]['fields'][$seq] = $key;
-                    }
-                    if ($keyNote) {
-                        $info['indexes'][$k]['key'] = true;
-                    }
+                    $info['indexes'][$indexName] = [
+                        'fields'=>[$key],
+                        'key'=>$keyNote == true,
+                    ];
                 }
                 
                 if (isset($itemNotes['has'])) {
