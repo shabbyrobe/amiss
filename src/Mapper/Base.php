@@ -42,6 +42,94 @@ abstract class Base extends \Amiss\Mapper
     
     abstract protected function createMeta($class);
 
+    public function fromProperties($input, $meta=null)
+    {
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $input);
+            if (!$meta) { throw new \InvalidArgumentException(); }
+        }
+
+        $defaultType = null;
+        $properties = $meta->getProperties();
+        $fields = [];
+        foreach ($input as $propId=>$value) {
+            if (!($propId == 0 && $propId !== 0)) {
+                continue;
+            }
+            if (!isset($properties[$propId])) {
+                throw new \UnexpectedValueException("Unknown property '$propId' for meta {$meta->class}");
+            }
+            $property = $properties[$propId];
+            $type = isset($property['type']) ? $property['type'] : null;
+            if (!$type) {
+                if ($defaultType === null) {
+                    $defaultType = $meta->getDefaultFieldType() ?: false;
+                }
+                $type = $defaultType;
+            }
+            
+            if ($type) {
+                $typeId = $type['id'];
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
+                }
+                if ($this->typeHandlerMap[$typeId]) {
+                    $value = $this->typeHandlerMap[$typeId]->prepareValueForDb($value, $property, $input);
+                }
+            }
+            $fields[$property['name']] = $value;
+        }
+
+        return $fields;
+    }
+
+    public function toProperties($input, $meta=null, $fieldMap=null)
+    {
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $input);
+            if (!$meta) { throw new \InvalidArgumentException(); }
+        }
+
+        if (!$fieldMap) { $fieldMap = $meta->getColumnToPropertyMap(); }
+
+        $mapped = [];
+        $properties = $meta->getProperties();
+        $defaultType = null;
+
+        foreach ($input as $col=>$value) {
+            $propId = isset($fieldMap[$col]) ? $fieldMap[$col] : $col;
+            if (!isset($properties[$propId])) {
+                continue;
+            }
+
+            $property = $properties[$propId];
+            $type = isset($property['type']) ? $property['type'] : null;
+            if (!$type) {
+                if ($defaultType === null) {
+                    $defaultType = $meta->getDefaultFieldType() ?: false;
+                }
+                $type = $defaultType;
+            }
+            
+            if ($type) {
+                $typeId = $type['id'];
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
+                }
+                if ($this->typeHandlerMap[$typeId]) {
+                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $property, $input);
+                }
+            }
+
+            if (isset($mapped[$propId])) {
+                throw new \UnexpectedValueException();
+            }
+            $mapped[$propId] = $value;
+        }
+
+        return (object) $mapped;
+    }
+
     public function formatParams(Meta $meta, $propertyParamMap, $params)
     {
         $fields = $meta->getFields();

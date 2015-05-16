@@ -3,7 +3,7 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
 
-class ManagerInsertObjectTest extends \ModelDataTestCase
+class ManagerInsertTest extends \ModelDataTestCase
 {
     /**
      * Ensures the signature for object insertion works
@@ -64,11 +64,11 @@ class ManagerInsertObjectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager
      */
-    public function testInsertToTable()
+    public function testInsertTable()
     {
         $this->assertEquals(0, $this->manager->count('Artist', 'slug="insert-table-test"'));
         
-        $id = $this->manager->insert('Artist', array(
+        $id = $this->manager->insertTable('Artist', array(
             'name'=>'Insert Table Test',
             'slug'=>'insert-table-test',
             'artistTypeId'=>1,

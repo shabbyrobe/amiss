@@ -441,90 +441,92 @@ class Manager
     }
     
     /**
-     * Insert an object into the database, or values into a table
+     * Insert values into a table
      * 
      * Supports the following signatures:
-     *   insert($object)
-     *   insert($object, $tableOrMeta)
-     *   insert($classNameOrMeta, $propertyValues);
+     *   insert($meta, array $propertyValues);
+     *   insert($meta, Query\Insert $query);
+     * 
+     * - $meta can be an instance of Amiss\Meta or a class name.
+     * - Property keys must exist in the corresponding Meta.
      * 
      * @return int|null
      */
-    public function insert()
+    public function insertTable($meta, $query)
     {
-        $meta = null;
-        $query = null;
-        $object = null;
-
-        $objectMode = true; 
-
-        argument_handling: {
-            $args = func_get_args();
-            if (!$args) {
-                throw new \InvalidArgumentException();
-            }
-
-            if (is_object($args[0]) && !$args[0] instanceof Meta) {
-            // Object insertion mode
-                $objectMode = true;
-
-                $object = $args[0];
-                $query = new Query\Insert;
-
-                if (isset($args[1])) {
-                    if ($args[1] instanceof Meta) {
-                        // Signature: insert($object, Meta $meta)
-                        $meta = $args[1];
-                    } elseif (is_string($args[1])) {
-                        // Signature: insert($object, $table)
-                        $query->table = $args[1];
-                    }
-                }
-                if (!$meta) {
-                    $meta = $this->mapper->getMeta($object);
-                }
-                $query->values = $this->mapper->fromObject($object, $meta, 'insert');
-            }
-            else {
-            // Table insertion mode
-                $objectMode = false;
-
-                if ($args[0] instanceof Meta) {
-                    // Signature: insert($meta, $propertyValues);
-                    list ($meta, $query) = $args;
-                }
-                else {
-                    // Signature: insert($className, $propertyValues);
-                    list ($class, $query) = $args;
-                    $meta = $this->mapper->getMeta($class);
-                }
-                $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-            }
-        }
-
+        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
         if (!$meta->canInsert) {
             throw new Exception("Class {$meta->class} prohibits insert");
         }
 
+        $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
         if (!$query->table) {
             $query->table = $meta->table;
         }
 
         list ($sql, $params, $props) = $query->buildQuery($meta);
-        if (!$objectMode && $props) {
+        if ($props) {
             $params = $this->mapper->formatParams($meta, $props, $params);
         }
 
         $stmt = $this->getConnector()->prepare($sql);
         $stmt->execute($params);
+        $lastInsertId = $this->getConnector()->lastInsertId();
+        return $lastInsertId;
+    }
+
+    /**
+     * Insert an object into the database, or values into a table
+     * 
+     * Supports the following signatures:
+     *   insert($object)
+     *   insert($object, string $table)
+     *   insert($object, Meta $meta)
+     * 
+     * @return int|null
+     */
+    public function insert($object, $arg=null)
+    {
+        $meta = null;
+        $query = new Query\Insert;
+
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
+            $query->table = $arg;
+        } elseif (is_array($arg)) {
+            throw new \BadMethodCallException("Please use insertTable()");
+        } elseif ($arg) {
+            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
+        }
+
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($object);
+        }
+        if (!$meta->canInsert) {
+            throw new Exception("Class {$meta->class} prohibits insert");
+        }
+
+        $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+        if (!$query->table) {
+            $query->table = $meta->table;
+        }
+
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+
+        $stmt = $this->getConnector()->prepare($sql);
+        $stmt->execute($params);
         
         $lastInsertId = null;
-        if (($object && $meta->primary) || !$object) {
-            $lastInsertId = $this->getConnector()->lastInsertId();
-        }
-        
+
         // we need to be careful with "lastInsertId": SQLite generates one even without a PRIMARY
-        if ($object && $meta->primary && $lastInsertId) {
+        if ($object && $meta->primary) {
+            $lastInsertId = $this->getConnector()->lastInsertId();
+
+            if (!$lastInsertId) {
+                throw new \UnexpectedValueException();
+            }
+
             if (($count = count($meta->primary)) != 1) {
                 throw new Exception(
                     "Last insert ID $lastInsertId found for class {$meta->class}. ".

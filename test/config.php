@@ -80,6 +80,10 @@ class TestMapper extends \Amiss\Mapper
     
     function populateObject($object, \stdClass $mapped, $meta=null) {}
 
+    public function toProperties($input, $meta=null, $fieldMap=null) {}
+
+    public function fromProperties($input, $meta=null) {}
+
     function fromObject($object, $meta=null, $context=null) {}
     
     function determineTypeHandler($type) {}
