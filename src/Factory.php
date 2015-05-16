@@ -19,10 +19,11 @@ class Factory
     
     public static function createSqlMapper($config=null)
     {
-        if ($config === null) {
-            $config = array();
-        }
-        $mapper = new \Amiss\Mapper\Note(isset($config['cache']) ? $config['cache'] : null);
+        $keyPrefix = isset($config['keyPrefix']) ? $config['keyPrefix'] : null; // 'amiss.';
+        $mapper = new \Amiss\Mapper\Note(
+            isset($config['cache']) ? $config['cache'] : null,
+            $keyPrefix ? new \Amiss\Note\Parser(['keyPrefix'=>$keyPrefix]) : null
+        );
         $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createSqlTypeHandlers($config);
         return $mapper;
     }
