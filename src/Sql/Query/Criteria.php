@@ -41,7 +41,7 @@ class Criteria extends Sql\Query
         
         if ($namedParams) {
             foreach ($this->params as $k=>$v) {
-                // ($k == 0 && $k !== 0) == !is_numeric($k)
+                // ($k == 0 && $k !== 0) == !is_numeric($k) (mostly. (string)"0" and (string)"0.0" don't work)
                 if (($k == 0 && $k !== 0) && $k[0] != ':') {
                     $k = ':'.$k;
                 }

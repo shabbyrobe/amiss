@@ -27,8 +27,8 @@ relation gymnastics.
         var_dump($children == $expected);
 
     
-    ``$path`` can be a single string containing a property name, like the above example, or it can
-    be a path expression allowing you to traverse multiple levels:
+    ``$path`` can be a single string containing a property name, like the above example,
+    or it can be a path expression allowing you to traverse multiple levels:
 
     .. code-block:: php
         
@@ -101,8 +101,8 @@ relation gymnastics.
 
 
     If you have more than one object with the same property value, ``indexBy`` will
-    merrily overwrite an existing key. Pass ``Amiss\Helper::INDEX_DUPE_FAIL`` as the third
-    parameter if you would prefer an exception on a duplicate key:
+    merrily overwrite an existing key. Pass ``Amiss\Functions::INDEX_DUPE_FAIL`` as the
+    third parameter if you would prefer an exception on a duplicate key:
 
     .. code-block:: php
 
@@ -113,18 +113,18 @@ relation gymnastics.
             (object)array('foo'=>'b'),
         );
         $manager = new Amiss\Sql\Manager(...);
-        $indexed = $manager->indexBy($objects, 'foo', Amiss\Helper::INDEX_DUPE_FAIL);
+        $indexed = $manager->indexBy($objects, 'foo', Amiss\Functions::INDEX_DUPE_FAIL);
 
     BZZT! ``UnexpectedValueException``!
 
 
 .. py:function:: Amiss\Sql\Manager::keyValue()
 
-    ``keyValue`` scans an array of objects or arrays and selects a property for the key and a
-    property for the value.
+    ``keyValue`` scans an array of objects or arrays and selects a property for the key
+    and a property for the value.
 
-    ``keyValue`` works in two ways. Firstly, you can feed it the result of a query with two columns
-    and it'll make the first column the key and the second column the value:
+    ``keyValue`` works in two ways. Firstly, you can feed it the result of a query with
+    two columns and it'll make the first column the key and the second column the value:
 
     .. code-block:: php
 
@@ -136,8 +136,9 @@ relation gymnastics.
 
     Et voila! Array of key/value pairs from your query.
 
-    The other way is to feed it a list of objects and tell it which properties to use. This will
-    produce the same array as the previous example (albeit way less efficiently):
+    The other way is to feed it a list of objects and tell it which properties to use.
+    This will produce the same array as the previous example (albeit way less
+    efficiently):
 
     .. code-block:: php
 
