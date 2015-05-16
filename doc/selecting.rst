@@ -367,7 +367,38 @@ You can use this with ``Amiss\Sql\Manager`` easily:
         foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
 
     This is because Amiss does no parsing of your WHERE clause. It does a fairly naive
-    regex substitution that is more than adequate if you heed this warning.
+    regex substitution that is more than adequate if you heed this warning (and
+    substantially faster).
+
+    You can get around this limitation easily (and arguably this is how you should do
+    something like that anyway):
+
+    .. code-block:: php
+
+        <?php
+        $criteria = new \Amiss\Sql\Query\Criteria;
+        $criteria->params = array(
+            ':foo'=>array(1, 2),
+            ':otre'=>'hey IN (:bar)',
+        );
+        $criteria->where = 'foo IN (:foo) AND bar=:otre';
+        list ($where, $params) = $criteria->buildClause();
+
+    Substitution will only happen if you are trying to substitute an array parameter.  If
+    not, this warning does not apply. The following works fine::
+
+    .. code-block:: php
+
+        <?php
+        $criteria = new \Amiss\Sql\Query\Criteria;
+        $criteria->params = array(
+            // note that this is not an array(), so IN substitution does not
+            // ever kick in
+            ':foo'=>1
+        );
+        // consequently, the "hey IN(:foo)" is preserved
+        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:foo)"';
+        
 
 
 Constructor Arguments
