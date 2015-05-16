@@ -101,7 +101,7 @@ if (!$mapper) {
 }
 
 if (!$manager)
-    $manager = new Amiss\Sql\Manager(new Amiss\Sql\Connector($engine.':blahblah'), $mapper);
+    $manager = new Amiss\Sql\Manager(new \PDOK\Connector($engine.':blahblah'), $mapper);
 
 $toCreate = find_classes($input);
 if ($namespaces) {

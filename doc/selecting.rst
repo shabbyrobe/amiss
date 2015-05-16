@@ -10,13 +10,13 @@ The selection methods are:
 
 .. py:method:: Amiss\\Sql\\Manager::getById( $model , $primaryKeyValue )
 
-    Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
+Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
 
     .. code-block:: php
-        
+    
         <?php
         $event = $manager->getById('Event', 5);
-    
+        
     If the primary key is a multi-column primary key, you can pass an array containing the
     values in the same order as the metadata defines the primary key's properties:
 
@@ -42,7 +42,7 @@ The selection methods are:
     .. code-block:: php
 
         <?php
-        $event = $manager->get('Venue', '{venueSlug}=?', $slug);
+        $event = $manager->get('Venue', '{venueSlug}=?', array($slug));
 
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
@@ -73,7 +73,7 @@ names:
     <?php
     // The Artist class has a property called 'artistTypeId' that maps to a 
     // column with the same name:
-    $artists = $manager->getList('Artist', 'artistTypeId=?', 1);
+    $artists = $manager->getList('Artist', 'artistTypeId=?', array(1));
 
 
 When your table's column names are exactly the same as your property names, this is the
@@ -87,7 +87,7 @@ metadata:
     <?php
     // The Venue class has a property called 'venueName' that maps to a column
     // called 'venue_name'
-    $venue = $manager->get('Venue', '{venueName}=?', 'foo');
+    $venue = $manager->get('Venue', '{venueName}=?', array('foo'));
 
 In the above example, ``{venueName}`` is replaced with the field ``venue_name``, resulting
 in the following query::
@@ -130,14 +130,14 @@ Shorthand
 
 The "where" clause and parameters can be passed using a shorthand format that consists of
 a SQL expression with positional PDO-style placeholders (question marks) and each
-corresponding value in subsequent arguments::
+corresponding value in an array::
 
-    ( $criteria... ) == ( string $positionalWhere, scalar $param1 [, scalar $param2... ] )
+    ( $criteria... ) == ( string $positionalWhere, [scalar $param... ] )
 
 .. code-block:: php
 
     <?php
-    $badNews = $manager->get('Event', 'name=? AND slug=?', 'Bad News', 'bad-news-2');
+    $badNews = $manager->get('Event', 'name=? AND slug=?', array('Bad News', 'bad-news-2'));
     $bands = $manager->getList('Artist', 'artistTypeId=1');
 
 
@@ -281,7 +281,7 @@ count rows:
 
     <?php
     // positional parameters
-    $dukeCount = $manager->count('Artist', '{slug}=?', 'duke-nukem');
+    $dukeCount = $manager->count('Artist', '{slug}=?', array('duke-nukem'));
 
     // named parameters, shorthand:
     $dukeCount = $manager->count('Artist', '{slug}=:slug', array(':slug'=>'duke-nukem'));

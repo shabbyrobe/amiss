@@ -42,6 +42,32 @@ abstract class Base extends \Amiss\Mapper
     
     abstract protected function createMeta($class);
 
+    public function formatParams(Meta $meta, $propertyParamMap, $params)
+    {
+        $fields = $meta->getFields();
+        $defaultType = $meta->getDefaultFieldType();
+
+        foreach ($propertyParamMap as $prop=>$param) {
+            if (!isset($fields[$prop])) {
+                throw new \UnexpectedValueException("Field $prop does not exist for class {$meta->class}");
+            }
+            $field = $fields[$prop];
+
+            $type = $field['type'] ?: $defaultType;
+            $typeId = $type['id'];
+            
+            if ($type) {
+                if (!isset($this->typeHandlerMap[$typeId])) {
+                    $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
+                }
+                if ($this->typeHandlerMap[$typeId]) {
+                    $params[$param] = $this->typeHandlerMap[$typeId]->prepareValueForDb($params[$param], $field);
+                }
+            }
+        }
+        return $params;
+    }
+
     public function addTypeHandler($handler, $types)
     {
         if (!is_array($types)) { $types = array($types); }
@@ -73,7 +99,7 @@ abstract class Base extends \Amiss\Mapper
         $output = array();
         
         $defaultType = $meta->getDefaultFieldType();
-        
+
         foreach ($meta->getFields() as $prop=>$field) {
             if (!isset($field['getter'])) {
                 $value = $object->$prop;

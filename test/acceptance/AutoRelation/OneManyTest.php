@@ -9,7 +9,7 @@ class OneManyTest extends \CustomTestCase
 
     public function setUp()
     {
-        $this->db = new \Amiss\Sql\Connector('sqlite::memory:');
+        $this->db = new \PDOK\Connector('sqlite::memory:');
         $this->mapper = $this->createDefaultMapper();
         $this->mapper->objectNamespace = __NAMESPACE__;
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);

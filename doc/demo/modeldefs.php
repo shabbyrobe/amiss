@@ -107,7 +107,6 @@ class Event extends Object
 
     /**
      * @has.many.of Ticket
-     * @has.many.inverse event
      */
     public $tickets;
     
@@ -166,9 +165,16 @@ class Event extends Object
     }
 }
 
+/**
+ * @relation[event].one.of Event
+ * @relation[event].one.from eventId
+ */
 class Ticket
 {
-    /** @primary */
+    /**
+     * @primary
+     * @type autoinc
+     */
     public $ticketId;
 
     /**
@@ -188,12 +194,25 @@ class Ticket
 
     /** @field */
     public $numSold;
+}
 
+class PlannedEvent extends Event
+{
     /**
-     * @has.one.of Event
-     * @has.one.from eventId
+     * @field
+     * @type tinyint
      */
-    public $event;
+    public $completeness;
+    
+    /**
+     * @has.one.of VenueRecord
+     * @has.one.from venueId
+     * Note: relations are not inherited by the note mapper
+     */
+    public function getVenue()
+    {
+        return parent::getVenue();
+    }
 }
 
 class EventArtist

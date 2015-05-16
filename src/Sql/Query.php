@@ -3,6 +3,7 @@ namespace Amiss\Sql;
 
 abstract class Query
 {
+    // this probably doesn't belong here, but 'count()' makes use of it
     public $table;
 
     public function __construct(array $criteria=null)

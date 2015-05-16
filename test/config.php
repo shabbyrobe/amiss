@@ -6,7 +6,7 @@ require_once __DIR__.'/../doc/demo/model.php';
 require_once __DIR__.'/../doc/demo/ar.php';
 require_once __DIR__.'/lib.php';
 
-class TestConnector extends \Amiss\Sql\Connector
+class TestConnector extends \PDOK\Connector
 {
     public $calls = array();
     

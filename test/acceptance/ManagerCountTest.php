@@ -29,7 +29,7 @@ class ManagerCountTest extends \ModelDataTestCase
      */
     public function testCountObjectsPositionalParametersShorthand()
     {
-        $count = $this->manager->count('Artist', 'artistTypeId=?', 1);
+        $count = $this->manager->count('Artist', 'artistTypeId=?', [1]);
         $this->assertEquals(9, $count);
     }
     

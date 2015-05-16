@@ -2,7 +2,7 @@
 
 require_once($amissPath.'/../doc/demo/model.php');
 
-$connector = new Amiss\Sql\Connector('sqlite::memory:');
+$connector = new \PDOK\Connector('sqlite::memory:');
 $manager = Amiss\Factory::createSqlManager($connector, array(
     'cache'=>get_note_cache(),
     'typeHandlers'=>array(),

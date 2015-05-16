@@ -18,6 +18,26 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
+    public function testExists()
+    {
+        $a = $this->manager->exists('Artist', 1);
+        $this->assertTrue($a);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
+    public function testExistsFalse()
+    {
+        $a = $this->manager->exists('Artist', PHP_INT_MAX);
+        $this->assertFalse($a);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
     public function testGetByIdMultiPositional()
     {
         $a = $this->manager->getById('EventArtist', array(2, 1));
@@ -44,7 +64,7 @@ class ManagerSelectTest extends \ModelDataTestCase
      */
     public function testSingleObjectPositionalParametersShorthand()
     {
-        $a = $this->manager->get('Artist', 'slug=?', 'limozeen');
+        $a = $this->manager->get('Artist', 'slug=?', ['limozeen']);
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
     }
@@ -289,7 +309,7 @@ class ManagerSelectTest extends \ModelDataTestCase
      */
     public function testSelectSingleObjectFailsWithoutIssuingQueryWhenLimitSetButNotOne()
     {
-        $this->manager->connector = $this->getMock('Amiss\Sql\Connector', array('prepare'), array(''));
+        $this->manager->connector = $this->getMock('PDOK\Connector', array('prepare'), array(''));
         $this->manager->connector->expects($this->never())->method('prepare');
         $artist = $this->manager->get('Artist', array('limit'=>2));
     }

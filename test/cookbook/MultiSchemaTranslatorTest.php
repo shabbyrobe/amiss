@@ -11,7 +11,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
     {
         parent::setUp();
         
-        $this->connector = new \Amiss\Sql\Connector('sqlite::memory:');
+        $this->connector = new \PDOK\Connector('sqlite::memory:');
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_one;");
         $this->connector->exec("ATTACH DATABASE ':memory:' AS schema_two;");
         $this->connector->exec("CREATE TABLE schema_one.multi_schema_translator_test_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");

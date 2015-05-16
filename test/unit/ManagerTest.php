@@ -11,7 +11,7 @@ class ManagerTest extends \CustomTestCase
         parent::setUp();
         
         $this->manager = new \Amiss\Sql\Manager(
-            new \Amiss\Sql\Connector('sqlite::memory:'),
+            new \PDOK\Connector('sqlite::memory:'),
             new \Amiss\Mapper\Note
         );
     }
@@ -46,27 +46,5 @@ class ManagerTest extends \CustomTestCase
         $source = new \stdClass;
         $this->setExpectedException("Amiss\Exception", "Relator wahey not found");
         $this->manager->getRelated($source, 'a');
-    }
-
-    public function testPopulateSelectQueryFromArrayArgs()
-    {
-        $params = [
-            'where'=>'foo',
-            'params'=>['a', 'b'],
-            'forUpdate'=>true,
-            'order'=>'order!',
-            'page'=>'1',
-            'limit'=>'2',
-            'offset'=>'3',
-        ];
-        $query = $this->callProtected($this->manager, 'createQueryFromArgs', [$params]);
-        $this->assertTrue($query instanceof \Amiss\Sql\Query\Select);
-        $this->assertEquals($params['where'], $query->where);
-        $this->assertEquals($params['params'], $query->params);
-        $this->assertEquals($params['forUpdate'], $query->forUpdate);
-        $this->assertEquals($params['order'], $query->order);
-        $this->assertEquals($params['page'], $query->page);
-        $this->assertEquals($params['limit'], $query->limit);
-        $this->assertEquals($params['offset'], $query->offset);
     }
 }

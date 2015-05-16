@@ -5,10 +5,35 @@ class Update extends Criteria
 {
     public $set = array();
 
+    public static function fromParamArgs(array $args, $class=null)
+    {
+        if (!$args) {
+            throw new \InvalidArgumentException();
+        }
+
+        $cnt = count($args);
+        if ($cnt == 1) {
+            return $args[0] instanceof self ? $args[0] : new Update($args[0]);
+        }
+        elseif ($cnt == 2 || $cnt == 3) {
+            if (!is_array($args[0]) && !is_string($args[0])) {
+                throw new \InvalidArgumentException("Set must be an array or string");
+            }
+            $query = new Update();
+            $query->set = array_shift($args);
+            $query->setParams($args);
+            return $query;
+        }
+        else {
+            throw new \InvalidArgumentException("Unknown args count $cnt");
+        }
+    }
+
     public function buildSet($meta)
     {
         $params = array();
         $clause = null;
+        $properties = [];
         
         $fields = $meta ? $meta->getFields() : null;
         $named = $this->paramsAreNamed();
@@ -21,15 +46,19 @@ class Update extends Criteria
             foreach ($this->set as $name=>$value) {
                 if (!($name == 0 && $name !== 0)) { // is_numeric($name)
                     // this allows arrays of manual "set"s, i.e. array('foo=foo+10', 'bar=baz')
+                    // TODO: integrate {property} substitution
                     $clause[] = $value;
                 }
                 else {
-                    $field = (isset($fields[$name]) ? $fields[$name]['name'] : $name);
+                    $field = ($fieldSet = isset($fields[$name]) ? $fields[$name]['name'] : $name);
 
                     if ($named) {
                         $param = ':set_'.$name;
                         $clause[] = '`'.$field.'`='.$param;
                         $params[$param] = $value;
+                        if ($fieldSet) {
+                            $properties[$name] = $param;
+                        }
                     }
                     else {
                         $clause[] = '`'.$field.'`=?';
@@ -39,15 +68,15 @@ class Update extends Criteria
             }
             $clause = implode(', ', $clause);
         }
-        return array($clause, $params);
+        return array($clause, $params, $properties);
     }
     
     public function buildQuery($meta)
     {
         $table = $this->table ?: $meta->table;
         
-        list ($setClause,   $setParams)   = $this->buildSet($meta);
-        list ($whereClause, $whereParams) = $this->buildClause($meta);
+        list ($setClause,   $setParams,   $setProps)   = $this->buildSet($meta);
+        list ($whereClause, $whereParams, $whereProps) = $this->buildClause($meta);
         
         $params = array_merge($setParams, $whereParams);
         if (count($params) != count($setParams) + count($whereParams)) {
@@ -60,6 +89,6 @@ class Update extends Criteria
         
         $sql = "UPDATE $table SET $setClause WHERE $whereClause";
         
-        return array($sql, $params);
+        return array($sql, $params, $setProps, $whereProps);
     }
 }

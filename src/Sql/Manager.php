@@ -4,7 +4,9 @@ namespace Amiss\Sql;
 use Amiss\Exception;
 use Amiss\Mapper;
 use Amiss\Meta;
+use Amiss\Sql\Query;
 use Amiss\Sql\Query\Criteria;
+use PDOK\Connector;
 
 /**
  * Amiss query manager. This is the core of Amiss' functionality.
@@ -14,7 +16,7 @@ use Amiss\Sql\Query\Criteria;
 class Manager
 {
     /**
-     * @var Amiss\Sql\Connector
+     * @var PDOK\Connector
      */
     public $connector;
     
@@ -29,7 +31,7 @@ class Manager
     public $relators = [];
     
     /**
-     * @param Amiss\Sql\Connector|array  Database connector
+     * @param PDOK\Connector|array  Database connector
      * @param Amiss\Mapper
      */
     public function __construct($connector, $mapper)
@@ -45,7 +47,7 @@ class Manager
     }
 
     /**
-     * @return \Amiss\Sql\Connector|\PDO
+     * @return PDOK\Connector
      */
     public function getConnector()
     {
@@ -64,11 +66,13 @@ class Manager
         return $this->mapper->getMeta($class);
     }
 
-    public function get($class)
+    public function get($class, ...$args)
     {
         $mapper = $this->mapper;
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $mapper->getMeta($class);
+
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $object = null;
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
@@ -80,7 +84,10 @@ class Manager
             throw new Exception("Limit must be one or zero");
         }
         
-        list ($sql, $params) = $query->buildQuery($meta);
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
         
         $stmt = $this->getConnector()->prepare($sql)->execute($params);
 
@@ -92,10 +99,75 @@ class Manager
             $mappedRow = $mapper->toProperties($row, $meta);
         }
 
-        if ($mappedRow) {
+        if (!$mappedRow) {
+            return null;
+        }
+
+        auto_relations: {
+            $rel = $query->with;
+            if ($meta->autoRelations && $query->follow) {
+                $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
+            }
+            if ($rel) {
+                $relations = [];
+                $relators = [];
+
+                $relQuery = new Criteria;
+                foreach ((array) $rel as $relationId) {
+                    $relation = $meta->relations[$relationId];
+                    $relator = isset($relators[$relation[0]]) 
+                        ? $relators[$relation[0]] 
+                        : ($relators[$relation[0]] = $this->getRelator($relation));
+
+                    $relQuery->stack = $query->stack;
+                    $relQuery->stack[$meta->class] = true;
+                    $mappedRow->{$relationId} = $relator->getRelated($meta, $mappedRow, $relation);
+                }
+            }
+        }
+
+        create: {
+            $object = $mapper->createObject($meta, $mappedRow, $query->args);
+            $mapper->populateObject($object, $mappedRow, $meta);
+        }
+
+        return $object;
+    }
+
+    public function getList($class, ...$args)
+    {
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
+        $mapper = $this->mapper;
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+
+        // Hack to stop circular references in auto relations
+        if (isset($query->stack[$meta->class])) {
+            return;
+        }
+
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
+
+        $stmt = $this->getConnector()->prepare($sql)->execute($params);
+
+        $mappedRows = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $mappedRow = $mapper->toProperties($row, $meta);
+            $mappedRows[] = $mappedRow;
+        }
+
+        $objects = [];
+        if (!$mappedRows) {
+            return $objects;
+        }
+
+        $related = [];
+
+        auto_relations: {
             $relations = [];
             $relators = [];
-
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
@@ -107,71 +179,20 @@ class Manager
                     $relator = isset($relators[$relation[0]]) 
                         ? $relators[$relation[0]] 
                         : ($relators[$relation[0]] = $this->getRelator($relation));
+
                     $relQuery->stack = $query->stack;
                     $relQuery->stack[$meta->class] = true;
-                    $mappedRow->{$relationId} = $relator->getRelated($meta, $mappedRow, $relation);
-                }
-            }
-            $object = $mapper->createObject($meta, $mappedRow, $query->args);
-            $mapper->populateObject($object, $mappedRow, $meta);
-        }
-
-        return $object;
-    }
-
-    public function getList($class)
-    {
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $mapper = $this->mapper;
-        $meta = $mapper->getMeta($class);
-
-        // Hack to stop circular references in auto relations
-        if (isset($query->stack[$meta->class])) {
-            return;
-        }
-
-        list ($sql, $params) = $query->buildQuery($meta);
-        $stmt = $this->getConnector()->prepare($sql)->execute($params);
-
-        $mappedRows = [];
-    
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->toProperties($row, $meta);
-            $mappedRows[] = $mappedRow;
-        }
-
-        $objects = [];
-        if (!$mappedRows) {
-            return $objects;
-        }
-
-        $relations = [];
-        $relators = [];
-        $related = [];
-
-        $rel = $query->with;
-        if ($meta->autoRelations && $query->follow) {
-            $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
-        }
-        if ($rel) {
-            $relQuery = new Criteria;
-            foreach ((array) $rel as $relationId) {
-                $relation = $meta->relations[$relationId];
-                $relator = isset($relators[$relation[0]]) 
-                    ? $relators[$relation[0]] 
-                    : ($relators[$relation[0]] = $this->getRelator($relation));
-                $relQuery->stack = $query->stack;
-                $relQuery->stack[$meta->class] = true;
-                $cur = $relator->getRelatedForList($meta, $mappedRows, $relation, $relQuery);
-                if ($cur) {
-                    $related[$relationId] = $cur;
+                    $cur = $relator->getRelatedForList($meta, $mappedRows, $relation, $relQuery);
+                    if ($cur) {
+                        $related[$relationId] = $cur;
+                    }
                 }
             }
         }
-        
+
         foreach ($mappedRows as $idx=>$mappedRow) {
             foreach ($related as $relId=>$objs) {
-                $mappedRow->{$relId} = $objs[$idx];
+				$mappedRow->{$relId} = isset($objs[$idx]) ? $objs[$idx] : null;
             }
             $object = $mapper->createObject($meta, $mappedRow, $query->args);
             $mapper->populateObject($object, $mappedRow, $meta);
@@ -189,14 +210,17 @@ class Manager
         return $this->get($class, $query);
     }
     
-    public function count($class, $query=null)
+    public function count($class, ...$args)
     {
-        $query = $this->createQueryFromArgs(array_slice(func_get_args(), 1));
-        $meta = $this->mapper->getMeta($class);
+        $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         
         $table = $query->table ?: $meta->table;
         
-        list ($where, $params) = $query->buildClause($meta);
+        list ($where, $params, $props) = $query->buildClause($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
         
         $field = '*';
         if ($meta->primary && count($meta->primary) == 1) {
@@ -205,13 +229,34 @@ class Manager
         }
         
         $query = "SELECT COUNT($field) FROM $table "
-            .($where  ? "WHERE $where" : '')
-        ;
+            .($where  ? "WHERE $where" : '');
 
         $stmt = $this->getConnector()->prepare($query)->execute($params);
         return (int)$stmt->fetchColumn();
     }
-    
+
+    public function exists($class, $id)
+    {
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $query = new \Amiss\Sql\Query\Criteria;
+        $query->setParams([$this->createIdCriteria($meta, $id)]);
+        if (!$meta->primary) {
+            throw new \InvalidArgumentException();
+        }
+
+        list ($where, $params, $props) = $query->buildClause($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
+
+        $fields = implode(', ', array_values($meta->primary));
+        $query = "SELECT COUNT($fields) FROM {$meta->table} "
+            .($where  ? "WHERE $where" : '');
+
+        $stmt = $this->getConnector()->prepare($query)->execute($params);
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
+
     /**
      * Retrieve related objects from the database and assign them to the source
      * if the source field is not yet populated.
@@ -220,16 +265,17 @@ class Manager
      * @param string|array The name of the relation(s) to assign
      * @return void
      */
-    public function assignRelated($source, $relationNames=null, $stack=[])
+    public function assignRelated($source, $relationNames=null, Meta $meta=null)
     {
         if (!$source) { return; }
 
+        $stack = [];
         $sourceIsArray = is_array($source) || $source instanceof \Traversable;
         if (!$sourceIsArray) {
             $source = array($source);
         }
+        $meta = $meta ?: $this->mapper->getMeta($source[0]);
 
-        $meta = $this->mapper->getMeta($source[0]);
         if (!$relationNames) {
             if ($meta->autoRelations) {
                 $relationNames = $meta->autoRelations;
@@ -238,17 +284,23 @@ class Manager
             }
         }
 
-        $done = [];
+        $relationMap = [];
         foreach ((array)$relationNames as $relationName) {
+            if (!isset($meta->relations[$relationName])) {
+                throw new Exception("Unknown relation $relationName on {$meta->class}");
+            }
+            $relationMap[$relationName] = $rel = $meta->relations[$relationName];
+            if ($rel['mode'] == 'class') {
+                throw new Exception("Relation $relationName is not assignable for class {$meta->class}");
+            }
+        }
+
+        $done = [];
+        foreach ($relationMap as $relationName=>$relation) {
             if (isset($done[$relationName])) {
                 continue;
             }
             $done[$relationName] = true;
-
-            if (!isset($meta->relations[$relationName])) {
-                throw new Exception("Unknown relation $relationName on {$meta->class}");
-            }
-            $relation = $meta->relations[$relationName];
 
             $missing = [];
             foreach ($source as $idx=>$item) {
@@ -257,13 +309,16 @@ class Manager
                 // that may be unpopulated. it might lazy load if it's an active
                 // record, or it might throw an exception because the 'set' hasn't
                 // been called.
-                if (isset($relation['getter']) || !$item->{$relationName}) {
+
+                // check for isset as well as falsey for the situation where we're using
+                // stdClasses as the response object
+                if (isset($relation['getter']) || !isset($item->{$relationName}) || !$item->{$relationName}) {
                     $missing[$idx] = $item;
                 }
             }
 
             if ($missing) {
-                $result = $this->getRelated($missing, $relationName, ['stack'=>$stack]);
+                $result = $this->getRelated($missing, $relationName, ['stack'=>$stack], $meta);
                 $relator = $this->getRelator($meta, $relationName);
                 $this->populateObjectsWithRelated($missing, $result, $relation);
             }
@@ -333,12 +388,16 @@ class Manager
     /**
      * Get related objects from the database
      * 
-     * @param object|array Source objects to get relations for
-     * @param string The name of the relation to assign
-     * @param query Optional criteria to limit the result
+     * Supports the following signatures:
+     * 
+     * - getRelated( object|array $source , string $relationName )
+     * - getRelated( object|array $source , string $relationName , $query )
+     * - getRelated( object|array $source , string $relationName , Meta $meta )
+     * - getRelated( object|array $source , string $relationName , $query, Meta $meta )
+     *
      * @return object[]
      */
-    public function getRelated($source, $relationName, $query=null)
+    public function getRelated($source, $relationName, $query=null, Meta $meta=null)
     {
         if (!$source) { return; }
 
@@ -350,18 +409,23 @@ class Manager
             $test = $test[0];
         }
 
-        $class = !is_object($test) ? $test : get_class($test);
-        
-        $meta = $this->mapper->getMeta($class);
+        if (!$meta) {
+            if ($query instanceof Meta) {
+                list ($meta, $query) = [$query, null];
+            } else {
+                $meta = $this->mapper->getMeta(get_class($test));
+            }
+        }
+
         if (!isset($meta->relations[$relationName])) {
-            throw new Exception("Unknown relation $relationName on $class");
+            throw new Exception("Unknown relation $relationName on {$meta->class}");
         }
         
         $relation = $meta->relations[$relationName];
         $relator = $this->getRelator($relation);
         
         if ($query) {
-            $query = $this->createQueryFromArgs([$query], 'Amiss\Sql\Query\Criteria');
+            $query = Query\Criteria::fromParamArgs([$query]);
             $stack = $query->stack;
         }
         else {
@@ -380,34 +444,76 @@ class Manager
      * Insert an object into the database, or values into a table
      * 
      * Supports the following signatures:
-     *   insert($model)
-     *   insert($className, $propertyValues);
+     *   insert($object)
+     *   insert($object, $tableOrMeta)
+     *   insert($classNameOrMeta, $propertyValues);
      * 
      * @return int|null
      */
-    public function insert($model, $query=null)
+    public function insert()
     {
-        $meta = $this->mapper->getMeta($model);
+        $meta = null;
+        $query = null;
         $object = null;
 
-        if ($query) {
-            $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-        }
-        else {
-            $object = $model;
-            $model = null;
-            $query = new Query\Insert;
-            $query->table = $meta->table;
+        $objectMode = true; 
+
+        argument_handling: {
+            $args = func_get_args();
+            if (!$args) {
+                throw new \InvalidArgumentException();
+            }
+
+            if (is_object($args[0]) && !$args[0] instanceof Meta) {
+            // Object insertion mode
+                $objectMode = true;
+
+                $object = $args[0];
+                $query = new Query\Insert;
+
+                if (isset($args[1])) {
+                    if ($args[1] instanceof Meta) {
+                        // Signature: insert($object, Meta $meta)
+                        $meta = $args[1];
+                    } elseif (is_string($args[1])) {
+                        // Signature: insert($object, $table)
+                        $query->table = $args[1];
+                    }
+                }
+                if (!$meta) {
+                    $meta = $this->mapper->getMeta($object);
+                }
+                $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+            }
+            else {
+            // Table insertion mode
+                $objectMode = false;
+
+                if ($args[0] instanceof Meta) {
+                    // Signature: insert($meta, $propertyValues);
+                    list ($meta, $query) = $args;
+                }
+                else {
+                    // Signature: insert($className, $propertyValues);
+                    list ($class, $query) = $args;
+                    $meta = $this->mapper->getMeta($class);
+                }
+                $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
+            }
         }
 
-        if ($object && !$query->values) {
-            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+        if (!$meta->canInsert) {
+            throw new Exception("Class {$meta->class} prohibits insert");
         }
+
         if (!$query->table) {
             $query->table = $meta->table;
         }
 
-        list ($sql, $params) = $query->buildQuery();
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if (!$objectMode && $props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
 
         $stmt = $this->getConnector()->prepare($sql);
         $stmt->execute($params);
@@ -417,7 +523,7 @@ class Manager
             $lastInsertId = $this->getConnector()->lastInsertId();
         }
         
-        // we need to be careful with "lastInsertId": SQLLite generates one even without a PRIMARY
+        // we need to be careful with "lastInsertId": SQLite generates one even without a PRIMARY
         if ($object && $meta->primary && $lastInsertId) {
             if (($count = count($meta->primary)) != 1) {
                 throw new Exception(
@@ -454,32 +560,51 @@ class Manager
     /**
      * Update an object in the database, or update a table by criteria.
      * 
+     * Supports the following signatures:
+     *   update($object)
+     *   update($object, $tableOrMeta)
+     *   update($classNameOrMeta, $values, $criteria...);
+     * 
      * @return void
      */
-    public function update()
+    public function update($first, ...$args)
     {
-        $args = func_get_args();
-        $count = count($args);
+        $query = null;
+        $meta = null;
+        $objectMode = true;
         
-        $first = array_shift($args);
-        
-        if (is_object($first)) {
+        if (is_object($first) && !$first instanceof Meta) {
         // Object update mode
-            $class = get_class($first);
-            $meta = $this->mapper->getMeta($class);
+            $object = $first;
             $query = new Query\Update();
-            $query->set = $this->mapper->fromObject($first, $meta, 'update');
-            $query->where = $meta->getPrimaryValue($first);
+
+            if (isset($args[0])) {
+                if ($args[0] instanceof Meta) {
+                    // Signature: update($object, Meta $meta)
+                    $meta = $args[0];
+                }
+                elseif (is_string($args[0])) {
+                    // Signature: update($object, $table)
+                    $query->table = $args[0];
+                }
+            }
+            if (!$meta) {
+                $meta = $this->mapper->getMeta($object);
+            }
+
+            $query->set = $this->mapper->fromObject($object, $meta, 'update');
+            $query->where = $meta->getPrimaryValue($object);
         }
 
-        elseif (is_string($first)) {
+        elseif (is_string($first) || $first instanceof Meta) {
         // Table update mode
-            if ($count < 2) {
+            $objectMode = false;
+
+            $meta = $first instanceof Meta ? $first : $this->mapper->getMeta($first);
+            if (!isset($args[0])) {
                 throw new \InvalidArgumentException("Query missing for table update");
             }
-            $query = $this->createTableUpdateQuery($args);
-            $class = $first;
-            $meta = $this->mapper->getMeta($class);
+            $query = Query\Update::fromParamArgs($args);
 
             if (is_array($query->set)) {
                 $query->set = (array) $this->mapper->fromProperties($query->set, $meta);
@@ -489,41 +614,58 @@ class Manager
             throw new \InvalidArgumentException();
         }
         
-        list ($sql, $params) = $query->buildQuery($meta);
-        
+        if (!$meta->canUpdate) {
+            throw new Exception("Class {$meta->class} prohibits update");
+        }
+
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        // don't need to do formatParams - it's already covered by the fromProperties call in
+        // table update mode
         return $this->getConnector()->exec($sql, $params);
     }
     
     /**
      * Delete an object from the database, or delete objects from a table by criteria.
      * 
+     * Supports the following signatures:
+     *   delete($object)
+     *   delete($object, $tableOrMeta)
+     *   delete($classNameOrMeta, $criteria...);
+     * 
      * @return void
      */
-    public function delete()
+    public function delete($first, ...$args)
     {
-        $args = func_get_args();
         $meta = null;
-        $class = null;
-        
-        if (!$args) {
-            throw new \InvalidArgumentException();
-        }
-        
-        $first = array_shift($args);
-        if (is_object($first)) {
-            $class = $this->mapper->getMeta(get_class($first));
+        $criteria = null;
+ 
+        if (is_object($first) && !$first instanceof Meta) {
+            $object = $first;
             $criteria = new Query\Criteria();
-            $criteria->where = $class->getIndexValue($first);
+            if (isset($args[0])) {
+                if ($args[0] instanceof Meta) {
+                    // Signature: delete($object, Meta $meta)
+                    $meta = $args[0];
+                }
+                elseif (is_string($args[0])) {
+                    // Signature: delete($object, $table)
+                    $query->table = $args[0];
+                }
+            }
+            if (!$meta) {
+                $meta = $this->mapper->getMeta(get_class($object));
+            }
+            $criteria->where = $meta->getIndexValue($object);
         }
         else {
-            if (!$args) {
+            if (!isset($args[0])) {
                 throw new \InvalidArgumentException("Cannot delete from table without a condition");
             }
-            $class = $first;
-            $criteria = $this->createQueryFromArgs($args, 'Amiss\Sql\Query\Criteria');
+            $meta = !$first instanceof Meta ? $this->mapper->getMeta($first) : $first;
+            $criteria = $args[0] instanceof Query\Criteria ? $args[0] : Query\Criteria::fromParamArgs($args);
         }
 
-        return $this->executeDelete($class, $criteria);
+        return $this->executeDelete($meta, $criteria);
     }
     
     /** 
@@ -541,9 +683,9 @@ class Manager
      * @param object The object to check
      * @return boolean
      */
-    public function shouldInsert($object)
+    public function shouldInsert($object, Meta $meta=null)
     {
-        $meta = $this->mapper->getMeta(get_class($object));
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
         $nope = false;
         if (!$meta->primary || count($meta->primary) > 1) {
             $nope = true;
@@ -567,14 +709,16 @@ class Manager
      * 
      * @return void
      */
-    public function save($object)
+    public function save($object, Meta $meta=null)
     {
-        $shouldInsert = $this->shouldInsert($object);
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
+
+        $shouldInsert = $this->shouldInsert($object, $meta);
         
         if ($shouldInsert) {
-            $this->insert($object);
+            $this->insert($object, $meta);
         } else {
-            $this->update($object);
+            $this->update($object, $meta);
         }
     }
 
@@ -586,9 +730,9 @@ class Manager
      * @throws \InvalidArgumentException
      * @return array
      */
-    protected function createIdCriteria($class, $id)
+    public function createIdCriteria($class, $id)
     {
-        $meta = $this->mapper->getMeta($class);
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $primary = $meta->primary;
         if (!$primary) {
             throw new Exception("Can't use {$meta->class} by primary - none defined.");
@@ -608,36 +752,7 @@ class Manager
         
         return array('where'=>$where);
     }
-    
-    /**
-     * @return \Amiss\Sql\Query\Update
-     */
-    protected function createTableUpdateQuery($args)
-    {
-        $query = null;
-        if ($args[0] instanceof Query\Update) {
-            $query = $args[0];
-        }
-        else {
-            $cnt = count($args);
-            if ($cnt == 1) {
-                $query = new Query\Update($args[0]);
-            }
-            elseif ($cnt >= 2) {
-                if (!is_array($args[0]) && !is_string($args[0])) {
-                    throw new \InvalidArgumentException("Set must be an array or string");
-                }
-                $query = new Query\Update();
-                $query->set = array_shift($args);
-                $this->populateWhereAndParamsFromArgs($query, $args);
-            }
-            else {
-                throw new \InvalidArgumentException("Unknown args count $cnt");
-            }
-        }
-        return $query;
-    }
-    
+
     protected function executeDelete($meta, Query\Criteria $criteria)
     {
         if (!$meta instanceof Meta) {
@@ -647,65 +762,24 @@ class Manager
             }
         }
 
+        if (!$meta->canDelete) {
+            throw new Exception("Class {$meta->class} prohibits delete");
+        }
+
         $table = $criteria->table ?: $meta->table;
 
-        list ($whereClause, $whereParams) = $criteria->buildClause($meta);
+        list ($whereClause, $whereParams, $whereProps) = $criteria->buildClause($meta);
         if (!$whereClause) {
             throw new \UnexpectedValueException("Empty where clause");
+        }
+        if ($whereProps) {
+            $whereParams = $this->mapper->formatParams($meta, $whereProps, $whereParams);
         }
 
         $sql = "DELETE FROM $table WHERE $whereClause";
         $stmt = $this->getConnector()->prepare($sql)->execute($whereParams);
     }
-    
-    /**
-     * Parses remaining function arguments into a query object
-     * @return \Amiss\Sql\Query\Criteria
-     */
-    protected function createQueryFromArgs($args, $type='Amiss\Sql\Query\Select')
-    {
-        if (!$args) {
-            $query = new $type();
-        }
-        elseif ($args[0] instanceof $type) {
-            $query = $args[0];
-        }
-        else {
-            $query = new $type();
-            $this->populateWhereAndParamsFromArgs($query, $args);
-        }
-        
-        return $query;
-    }
-    
-    /**
-     * Allows functions to have different query syntaxes:
-     * get('Name', 'pants=? AND foo=?', 'pants', 'foo')
-     * get('Name', 'pants=:pants AND foo=:foo', array('pants'=>'pants', 'foo'=>'foo'))
-     * get('Name', array('where'=>'pants=:pants AND foo=:foo', 'params'=>array('pants'=>'pants', 'foo'=>'foo')))
-     */
-    protected function populateWhereAndParamsFromArgs(Query\Criteria $query, $args)
-    {
-        if (count($args) == 1 && is_array($args[0])) {
-        // Array criteria: $manager->get('class', ['where'=>'', 'params'=>'']);
-            $query->populate($args[0]);
-        }
 
-        elseif (!is_array($args[0])) {
-        // Args criteria: $manager->get('class', 'a=? AND b=?', 'a', 'b');
-            $query->where = $args[0];
-            if (isset($args[1]) && is_array($args[1])) {
-                $query->params = $args[1];
-            }
-            elseif (isset($args[1])) {
-                $query->params = array_slice($args, 1);
-            }
-        } 
-        else {
-            throw new \InvalidArgumentException("Couldn't parse arguments");
-        }
-    }
-    
     /**
      * @ignore
      */

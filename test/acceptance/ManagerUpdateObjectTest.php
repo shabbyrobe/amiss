@@ -7,7 +7,7 @@ class ManagerUpdateObjectTest extends \ModelDataTestCase
     {
         parent::setUp();
         
-        $this->artist = $this->manager->get('Artist', 'artistId=?', 1);
+        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
         $this->assertEquals('Limozeen', $this->artist->name);
     }
     
@@ -56,7 +56,7 @@ class ManagerUpdateObjectTest extends \ModelDataTestCase
         
         $this->manager->update($this->artist);
         
-        $this->artist = $this->manager->get('Artist', 'artistId=?', 1);
+        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
         $this->assertEquals('Foobar', $this->artist->name);
         
         $this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));

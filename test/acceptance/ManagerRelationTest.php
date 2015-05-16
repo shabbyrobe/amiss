@@ -13,7 +13,7 @@ class ManagerRelationTest extends \ModelDataTestCase
 {
     public function testGetRelatedSingle()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
+        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
         $event = $this->manager->getRelated($eventArtist, 'event');
         
         $this->assertTrue($event instanceof Demo\Event);
@@ -22,7 +22,7 @@ class ManagerRelationTest extends \ModelDataTestCase
     
     public function testAssignSingleSourceToOneRelation()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
+        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
         $this->manager->assignRelated($eventArtist, 'event');
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
@@ -30,7 +30,7 @@ class ManagerRelationTest extends \ModelDataTestCase
 
     public function testAssignSingleSourceToMultipleOneRelations()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', 2, 6);
+        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
         $this->manager->assignRelated($eventArtist, ['event', 'artist']);
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
@@ -41,7 +41,7 @@ class ManagerRelationTest extends \ModelDataTestCase
  
     public function testAssignListSourceToMultipleOneRelations()
     {
-        $eventArtist = $this->manager->getList('EventArtist', 'eventId=?', 1);
+        $eventArtist = $this->manager->getList('EventArtist', 'eventId=?', [1]);
         $this->manager->assignRelated($eventArtist, ['event', 'artist']);
         
         $current = current($eventArtist);

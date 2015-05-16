@@ -293,7 +293,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar', 'name'=>'bar'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar', 'name'=>'bar', 'mode'=>'default'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -347,7 +347,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar', 'name'=>'bar'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar', 'name'=>'bar', 'mode'=>'default'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -379,7 +379,7 @@ class NoteMapperTest extends \CustomTestCase
         ");
         $meta = $mapper->getMeta($class1);
         $expected = array(
-            'class2'=>array('many', 'of'=>"Class2", 'name'=>'class2')
+            'class2'=>array('many', 'of'=>"Class2", 'name'=>'class2', 'mode'=>'default')
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -399,7 +399,7 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($name);
         $expected = array(
-            'test'=>array('test', 'name'=>'test')
+            'test'=>array('test', 'name'=>'test', 'mode'=>'default')
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -711,5 +711,22 @@ class NoteMapperTest extends \CustomTestCase
         ');
         $meta = $mapper->getMeta($name);
         $this->assertEquals(['name'=>'bar', 'type'=>null], $meta->getField('foo'));
+    }
+
+    public function testClassRelations()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $name = $this->createFnScopeClass('Test', '
+            /**
+             * @relation[foo].one.of Pants
+             */
+            class Test {
+            }
+        ');
+        $meta = $mapper->getMeta($name);
+        $expected = ['foo'=>[
+            'one', 'of'=>'Pants', 'mode'=>'class', 'name'=>'foo',
+        ]];
+        $this->assertEquals($expected, $meta->relations);
     }
 }

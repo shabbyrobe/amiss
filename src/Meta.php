@@ -12,21 +12,26 @@ class Meta
     /**
      * Array of relation arrays, hashed by property name
      * 
-     * Relation arrays *must* contain at least a type at index 0. All other
-     * values in the array are defined by the relator except 'name', which 
-     * Meta will assign. The meta only cares about the type and name.
+     * Relation arrays *must* contain at least a type at index 0. 
      * 
-     * For e.g.
-     * $meta->relations = array(
+     * The meta also looks for the following keys:
+     * - name (will be assigned by this class)
+     * - mode (default, auto, class)
+     * 
+     * All other values in the array are ignored by the meta and passed 
+     * directly to the relator.
+     * 
+     * Example:
+     *   $meta->relations = array(
      *     // the 'of' and 'on' keys are required by Amiss\Sql\Relator\OneMany
      *     'foo'=>array('one', 'of'=>'Artist', 'on'=>'artistId'),
      *     
      *     // the blahblah relator has different ideas
      *     'bar'=>array('blahblah', 'fee'=>'fi', 'fo'=>'fum'),
-     * );
+     *   );
      */
     public $relations = [];
-    
+
     /**
      * Additional metadata found but not explicitly handled by the mapper
      */
@@ -35,7 +40,11 @@ class Meta
     public $autoRelations = [];
 
     public $indexes;
-    
+
+    public $canInsert = true;
+    public $canUpdate = true;
+    public $canDelete = true;
+
     /**
      * Array of fields, hashed by property name
      */
@@ -63,6 +72,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
+            'canInsert', 'canUpdate', 'canDelete',
         ); 
     }
 
@@ -95,7 +105,24 @@ class Meta
         if (!$this->constructor) {
             $this->constructor = '__construct';
         }
-        
+
+        if (isset($info['readOnly'])) {
+            $this->canInsert = false; 
+            $this->canUpdate = false; 
+            $this->canDelete = false; 
+        }
+        else {
+            if (isset($info['canInsert'])) {
+                $this->canInsert = !!$info['canInsert'];
+            }
+            if (isset($info['canUpdate'])) {
+                $this->canUpdate = !!$info['canUpdate'];
+            }
+            if (isset($info['canDelete'])) {
+                $this->canDelete = !!$info['canDelete'];
+            }
+        }
+
         $this->defaultFieldType = null;
         if (isset($info['defaultFieldType'])) {
             $ft = $info['defaultFieldType'];
@@ -113,17 +140,29 @@ class Meta
                 throw new Exception("Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to'");
             }
             $r['name'] = $id;
-            $this->relations[$id] = $r;
-            if (isset($r['auto']) && $r['auto']) {
-                $this->autoRelations[] = $id;
+            if (isset($r['mode'])) {
+                if ($r['mode'] == 'auto') {
+                    $this->autoRelations[] = $id;
+                }
             }
+            else {
+                $r['mode'] = 'default';
+            }
+            $this->relations[$id] = $r;
         }
     }
 
     private function setConstructorArgs($args)
     {
+        $checkProperties = [];
         foreach ($args as $arg) {
             $this->constructorArgs[] = $arg;
+            if ($arg[0] == 'property') {
+                $checkProperties[] = $arg[1];
+            }
+        }
+        if ($diff = array_diff($checkProperties, array_keys($this->getProperties() ?: []))) {
+            throw new Exception("Unknown constructor properties ".implode(', ', $diff));
         }
     }
 
@@ -183,8 +222,10 @@ class Meta
                 $this->properties[$name] = $field;
             }
             foreach ($this->relations as $name=>$relation) {
-                $field['source'] = 'relation';
-                $this->properties[$name] = $relation;
+                if ($relation['mode'] != 'class') {
+                    $field['source'] = 'relation';
+                    $this->properties[$name] = $relation;
+                }
             }
         }
         return $this->properties;

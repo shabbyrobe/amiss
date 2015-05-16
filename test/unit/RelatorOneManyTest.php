@@ -12,7 +12,7 @@ class RelatorOneManyTest extends \CustomTestCase
         
         $this->mapper = new \TestMapper;
         
-        $this->db = $this->getMockBuilder('Amiss\Sql\Connector')
+        $this->db = $this->getMockBuilder('PDOK\Connector')
             ->disableOriginalConstructor()
             ->getMock()
         ;
@@ -42,8 +42,8 @@ class RelatorOneManyTest extends \CustomTestCase
 
         list ($class, $query) = $this->captureRelatedQuery($meta, $source, $meta->relations['parent']);
         $this->assertEquals('DummyParent', $class);
-        $this->assertEquals('`parent_id` IN(:r_parent_id)', $query->where);
-        $this->assertEquals(array('r_parent_id'=>array(2)), $query->params);
+        $this->assertEquals('(`parent_id`=:r_parent_id_0)', $query->where);
+        $this->assertEquals(array(':r_parent_id_0'=>2), $query->params);
     }
     
     public function testGetOneToMany()
@@ -55,8 +55,8 @@ class RelatorOneManyTest extends \CustomTestCase
         
         list ($class, $query) = $this->captureRelatedQuery($meta, $source, $meta->relations['children']);
         $this->assertEquals('DummyChild', $class);
-        $this->assertEquals('`child_parent_id` IN(:r_child_parent_id)', $query->where);
-        $this->assertEquals(array('r_child_parent_id'=>array(1)), $query->params);
+        $this->assertEquals('(`child_parent_id`=:r_child_parent_id_0)', $query->where);
+        $this->assertEquals(array(':r_child_parent_id_0'=>1), $query->params);
     }
 
     protected function captureRelatedQuery($meta, $source, $relation)

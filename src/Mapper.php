@@ -45,6 +45,11 @@ abstract class Mapper
         return $object;
     }
 
+    public function formatParams(Meta $meta, $propertyParamMap, $params)
+    {
+        return $params;
+    }
+
     /**
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
@@ -81,7 +86,9 @@ abstract class Mapper
             if (!($propId == 0 && $propId !== 0)) {
                 continue;
             }
-
+            if (!isset($properties[$propId])) {
+                throw new \UnexpectedValueException("Unknown property '$propId' for meta {$meta->class}");
+            }
             $property = $properties[$propId];
             $type = isset($property['type']) ? $property['type'] : null;
             if (!$type) {
@@ -205,20 +212,20 @@ abstract class Mapper
         }
 
         $object = null;
+        $args = $args ? array_values($args) : [];
+        $argc = $args ? count($args) : 0;
+
         if ($meta->constructorArgs) {
             $actualArgs = [];
             foreach ($meta->constructorArgs as list($type, $id)) {
                 switch ($type) {
                 case 'property':
-                    if (!isset($mapped->{$id})) {
-                        throw new Exception("Missing constructor arg property $id when building class {$meta->class}");
-                    }
-                    $actualArgs[] = $mapped->{$id};
+                    $actualArgs[] = isset($mapped->{$id}) ? $mapped->{$id} : null;
                     unset($mapped->{$id});
                 break;
 
                 case 'arg':
-                    if (!isset($args[$id])) {
+                    if ($id >= $argc) {
                         throw new Exception("Class {$meta->class} requires argument at index $id - please use Select->\$args");
                     }
                     $actualArgs[] = $args[$id];

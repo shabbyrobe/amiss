@@ -334,6 +334,48 @@ class MapperTest extends \CustomTestCase
      * @covers Amiss\Mapper::createObject
      * @group constructor
      */
+    public function testCreateObjectArgsNull()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['arg', 1],
+                ['arg', 0],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>'foo', 'b'=>'bar'], [null, 'qux'], $meta);
+        $this->assertEquals(['qux', null], $obj->args);
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
+    public function testCreateObjectPropertyNull()
+    {
+        $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+            'fields'=>[
+                'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
+            ],
+            'constructorArgs'=>[
+                ['property', 'b'],
+                ['property', 'a'],
+            ],
+        ]);
+        $obj = $mapper->toObject(['a'=>null, 'b'=>'bar'], null, $meta);
+        $this->assertEquals(['bar', null], $obj->args);
+        $this->assertFalse(isset($obj->a));
+        $this->assertFalse(isset($obj->b));
+    }
+
+    /**
+     * @covers Amiss\Mapper::createObject
+     * @group constructor
+     */
     public function testCreateObjectRelations()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper')->getMockForAbstractClass();

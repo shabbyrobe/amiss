@@ -26,7 +26,7 @@ class Select extends Criteria
     {
         $table = $this->table ?: $meta->table;
         
-        list ($where, $params) = $this->buildClause($meta);
+        list ($where, $params, $properties) = $this->buildClause($meta);
         $order = $this->buildOrder($meta);
         list ($limit, $offset) = $this->getLimitOffset();
         
@@ -39,7 +39,7 @@ class Select extends Criteria
             .($this->forUpdate ? 'FOR UPDATE' : '')
         ;
         
-        return array($query, $params);
+        return array($query, $params, $properties);
     }
     
     public function buildFields($meta, $tablePrefix=null, $fieldAliasPrefix=null)
@@ -55,10 +55,14 @@ class Select extends Criteria
             $fNames = array();
             foreach ($fields as $f) {
                 $name = (isset($metaFields[$f]) ? $metaFields[$f]['name'] : $f);
-                $fName = ($tablePrefix ? $tablePrefix.'.' : '').'`'.$name.'`';
-                if ($fieldAliasPrefix)
+                if (isset($this->aliases[$name])) {
+                    $name = $this->aliases[$name];
+                }
+                $qname = $name[0] == '`' ? $name : '`'.$name.'`';
+                $fName = ($tablePrefix ? $tablePrefix.'.' : '').$qname;
+                if ($fieldAliasPrefix) {
                     $fName .= ' as `'.$fieldAliasPrefix.$name.'`';
-
+                }
                 $fNames[] = $fName;
             }
             $fields = implode(', ', $fNames);
@@ -83,7 +87,11 @@ class Select extends Criteria
                     }
                     
                     $name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
-                    $oClauses[] = '`'.$name.'`'.($dir == 'asc' ? '' : ' desc');
+                    if (isset($this->aliases[$name])) {
+                        $name = $this->aliases[$name];
+                    }
+                    $qname = $name[0] == '`' ? $name : '`'.$name.'`';
+                    $oClauses[] = $qname.($dir == 'asc' ? '' : ' desc');
                 }
                 $order = implode(', ', $oClauses);
             }
