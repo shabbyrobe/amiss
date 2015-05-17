@@ -19,7 +19,12 @@ class Parser
         
         $doc = $class->getDocComment();
         if ($doc) {
-            $info->notes = $this->parse($this->stripDocComment($doc));
+            try {
+                $info->notes = $this->parse($this->stripDocComment($doc));
+            }
+            catch (ParseException $ex) {
+                throw new ParseException("Failed parsing class docblock {$class->name}: ".$ex->getMessage(), null, $ex);
+            }
         }
 
         $info->methods = $this->parseReflectors($class->getMethods());
@@ -36,10 +41,13 @@ class Parser
             $name = $r->name;
             if ($comment) {
                 try {
-                    $notes[$name] = $this->parse($this->stripDocComment($comment));
+                    $curNotes = $this->parse($this->stripDocComment($comment));
+                    if ($curNotes) {
+                        $notes[$name] = $curNotes;
+                    }
                 }
-                catch (\Exception $ex) {
-                    throw new \RuntimeException("Failed parsing reflector {$r->name}: ".$ex->getMessage(), null, $ex);
+                catch (ParseException $ex) {
+                    throw new ParseException("Failed parsing reflector {$r->name}: ".$ex->getMessage(), null, $ex);
                 }
             }
         }
@@ -70,16 +78,16 @@ class Parser
             }
             elseif ($state == self::S_NAME) {
                 if ($tok == '=') {
+                    if (!$curName) {
+                        throw new ParseException("Unexpected token '=', expected annotation name");
+                    }
                     $state = self::S_JSON_START;
                 }
                 elseif ($curName) {
-                    throw new \Exception("Already got a name");
+                    throw new ParseException("Annotation already has a name: '$curName'");
                 }
                 else {
                     $curName = trim($tok);
-                    if (!$curName) {
-                        throw new \Exception("Empty name");
-                    }
                 }
             }
             elseif ($state == self::S_JSON_START) {
@@ -87,7 +95,7 @@ class Parser
                     continue;
                 }
                 elseif ($tok != '{') {
-                    throw new \Exception();
+                    throw new ParseException("Unexpected token '".trim($tok)."', expected JSON start '{'");
                 }
                 $jsonBuf = '{';
                 $jsonDepth = 1;
@@ -120,15 +128,18 @@ class Parser
             }
         }
 
-        if ($curName || $jsonBuf) {
-            throw new \Exception("Unexpected end of JSON for key $curName");
+        if ($state == self::S_JSON) {
+            throw new ParseException("Unexpected end of JSON for key $curName");
+        }
+        elseif ($state != self::S_NONE) {
+            throw new ParseException("Unexpected end of definition for key '$curName'");
         }
 
         $out = [];
         foreach ($parsed as $key=>$json) {
             $cur = json_decode($json, !!'assoc');
             if ($cur === null && ($err = json_last_error())) {
-                throw new \Exception("JSON parsing failed for $key: ".json_last_error_msg());
+                throw new ParseException("JSON parsing failed for $key: ".json_last_error_msg());
             }
             $out[$key] = $cur;
         }

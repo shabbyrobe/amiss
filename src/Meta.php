@@ -87,7 +87,14 @@ class Meta
             $this->primary = array($this->primary);
         }
         $this->setIndexes(isset($info['indexes']) ? $info['indexes'] : array());
+
+        // set indexes first: setFields is reliant on them 
         $this->setFields(isset($info['fields']) ? $info['fields'] : array());
+
+        // must happen after setFields - setFields can influence the primary
+        if ($this->primary) {
+            $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
+        }
 
         if (isset($info['relations'])) {
             $this->setRelations($info['relations']);
@@ -169,6 +176,9 @@ class Meta
     private function setIndexes($indexes)
     {
         foreach ($indexes as $name=>&$index) {
+            if (isset($this->indexes[$name])) {
+                throw new Exception("Duplicate index name $indexName on {$this->class}");
+            }
             if (!isset($index['key'])) {
                 $index['key'] = false;
             }
@@ -176,24 +186,56 @@ class Meta
                 throw new \UnexpectedValueException("Misconfigured index $name");
             }
             $index['fields'] = (array)$index['fields'];
+            $this->indexes[$name] = $index;
         }
-        $this->indexes = $indexes;
-        if ($this->primary) {
-            $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
+
+        // special sauce
+        if (isset($this->indexes['primary'])) {
+            throw new \UnexpectedValueException();
         }
     }
 
     private function setFields($fields)
     {
+        $primary = [];
+        $indexes = [];
         foreach ($fields as $name=>&$field) {
+            if (!is_array($field)) {
+                throw new \UnexpectedValueException();
+            }
             if (!isset($field['name'])) {
                 $field['name'] = $name;
             }
             if (isset($field['type']) && !is_array($field['type'])) {
                 $field['type'] = array('id'=>$field['type']);
             }
+            if (isset($field['primary'])) {
+                $primary[] = $name;
+            }
+            if (isset($field['index'])) {
+                $index = $field['index'];
+                if ($index === true) {
+                    $index = [];
+                } elseif (!is_array($index)) {
+                    throw new Exception();
+                }
+                $indexName = $name;
+                if (!isset($index['fields'])) {
+                    $index['fields'] = [$name];
+                }
+                $indexes[$indexName] = $index;
+            }
         }
         $this->fields = $fields;
+        if ($primary) {
+            if ($this->primary) {
+                throw new \Exception();
+            }
+            $this->primary = $primary;
+        }
+        if ($indexes) {
+            $this->setIndexes($indexes);
+        }
         return $this;
     }
     

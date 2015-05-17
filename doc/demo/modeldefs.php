@@ -3,79 +3,67 @@ namespace Amiss\Demo;
 
 class Artist extends Object
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": {"primary": true, "type": "autoinc"}} */
     public $artistId;
     
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}} */
     public $artistTypeId;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public $name;
     
-    /**
-     * @field
-     * @key
-     */
+    /** :amiss = {"field": {"index": {"key": true}}} */
     public $slug;
     
-    /**
-     * @field
-     * @type LONGTEXT
-     */
+    /** :amiss = {"field": {"type": "LONGTEXT"}} */
     public $bio;
     
-    /** 
-     * @has.one.of ArtistType
-     * @has.one.from artistTypeId
+    /**
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "ArtistType",
+     *     "from": "artistTypeId"
+     * }}
      */
     public $artistType;
     
     /**
-     * @has.assoc.of Event
-     * @has.assoc.via EventArtist
+     * :amiss = {"has": {
+     *     "type": "assoc",
+     *     "of"  : "Event",
+     *     "via" : "EventArtist"
+     * }}
      */
     public $events;
 }
 
 class ArtistType extends Object
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
     public $artistTypeId;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public $type;
     
-    /**
-     * @field
-     * @readOnly
-     */
+    /** :amiss = {"field": {"readOnly": true}} */
     public function getSlug()
     {
         return trim(preg_replace('/[^a-z\d]+/', '-', strtolower($this->type)), '-');
     }
     
     /**
-     * @has.many.of Artist
-     * @has.many.inverse artistType
+     * :amiss = {"has": {
+     *     "type"   : "many",
+     *     "of"     : "Artist",
+     *     "inverse": "artistType"
+     * }}
      */
     public $artists = array();
 }
 
 class Event extends Object
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
     public $eventId;
     
     private $name;
@@ -84,48 +72,44 @@ class Event extends Object
     
     private $slug;
 
-    /**
-     * @field
-     * @type datetime
-     */
+    /** :amiss = {"field": {"type": "datetime"}} */
     public $dateStart;
 
-    /**
-     * @field
-     * @type datetime
-     */
+    /** :amiss = {"field": {"type": "datetime"}} */
     public $dateEnd;
     
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}} */
     public $venueId;
     
     /**
-     * @has.many.of EventArtist
-     * @has.many.inverse event
+     * :amiss = {"has": {
+     *     "type"   : "many",
+     *     "of"     : "EventArtist",
+     *     "inverse": "event"
+     * }}
      */
     public $eventArtists;
 
     /**
-     * @has.many.of Ticket
+     * :amiss = {"has": {"type": "many", "of": "Ticket"}}
      */
     public $tickets;
     
     /**
-     * @has.one.of Venue
-     * @has.one.from venueId
+     * :amiss = {"has": {"type": "one", "of": "Venue", "from": "venueId"}}
      */
     public $venue;
     
     /** 
-     * @has.assoc.of Artist
-     * @has.assoc.via EventArtist
+     * :amiss = {"has": {
+     *     "type": "assoc",
+     *     "of"  : "Artist",
+     *     "via" : "EventArtist"
+     * }}
      */
     public $artists;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public function getSlug()
     {
         return $this->slug;
@@ -135,8 +119,8 @@ class Event extends Object
     {
         $this->slug = $value;
     }
-    
-    /** @field */
+
+    /** :amiss = {"field": true} */
     public function getName()
     {
         return $this->name;
@@ -154,8 +138,7 @@ class Event extends Object
     }
     
     /**
-     * @field sub_name
-     * @setter setTheSubName
+     * :amiss = {"field": {"name": "sub_name", "setter": "setTheSubName"}}
      */
     public function getSubName()
     {
@@ -169,84 +152,71 @@ class Event extends Object
 }
 
 /**
- * @relation[event].one.of Event
- * @relation[event].one.from eventId
+ * :amiss = {
+ *     "relations": {
+ *         "event": {"type": "one", "of"  : "Event", "from": "eventId"}
+ *     }
+ * }
  */
 class Ticket
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
     public $ticketId;
 
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": { "index": true }} */
     public $eventId;
 
-    /** @field */
+    /** :amiss = {"field": true} */
     public $name;
 
-    /** @field */
+    /** :amiss = {"field": true} */
     public $cost;
 
-    /** @field */
+    /** :amiss = {"field": true} */
     public $numAvailable;
 
-    /** @field */
+    /** :amiss = {"field": true} */
     public $numSold;
 }
 
 class PlannedEvent extends Event
 {
-    /**
-     * @field
-     * @type tinyint
-     */
+    /** :amiss = {"field": {"type": "tinyint"}} */
     public $completeness;
-    
-    /**
-     * @has.one.of VenueRecord
-     * @has.one.from venueId
-     * Note: relations are not inherited by the note mapper
-     */
-    public function getVenue()
-    {
-        return parent::getVenue();
-    }
 }
 
 class EventArtist
 {
-    /** @primary */
+    /** :amiss = {"field": { "primary": true }} */
     public $eventId;
     
-    /**
-     * @primary
-     * @index
-     */
+    /** :amiss = {"field": { "primary": true, "index": true }} */
     public $artistId;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public $priority;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public $sequence;
     
-    /** @field */
+    /** :amiss = {"field": true} */
     public $eventArtistName;
     
     /**
-     * @has.one.of Event
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "Event"
+     * }}
      * @var Amiss\Demo\Event
      */
     public $event;
     
     /**
-     * @has.one.of Artist
-     * @has.one.from artistId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "Artist",
+     *     "from": "artistId"
+     * }}
      * @var Amiss\Demo\Artist
      */
     public $artist;
@@ -254,27 +224,24 @@ class EventArtist
 
 class Venue extends Object
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
     public $venueId;
     
-    /** @field name */
+    /** :amiss = {"field": "name"} */
     public $venueName;
     
-    /** @field slug */
+    /** :amiss = {"field": "slug"} */
     public $venueSlug;
     
-    /** @field address */
+    /** :amiss = {"field": "address"} */
     public $venueAddress;
     
-    /** @field shortAddress */
+    /** :amiss = {"field": "shortAddress"} */
     public $venueShortAddress;
     
-    /** @field latitude */
+    /** :amiss = {"field": "latitude"} */
     public $venueLatitude;
     
-    /** @field longitude */
+    /** :amiss = {"field": "longitude"} */
     public $venueLongitude;
 }

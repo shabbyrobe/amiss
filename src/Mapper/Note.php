@@ -52,7 +52,7 @@ class Note extends \Amiss\Mapper\Base
         $classNotes = $notes->notes;
 
         $info = isset($classNotes['amiss']) ? $classNotes['amiss'] : [];
-        
+
         table: {
             $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
             unset($info['table']);
@@ -88,89 +88,66 @@ class Note extends \Amiss\Mapper\Base
             }
             unset($idxDef);
         }
-
-        $setters = array();
-        $relationNotes = array();
-        
-        foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
+ 
+        foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $noteType=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
+                if (!isset($itemNotes['amiss'])) {
+                    continue;
+                }
+
                 $itemNotes = $itemNotes['amiss'];
 
-                $key = null;
-                $field = null;
-                $relationNote = null;
-
-                if (isset($itemNotes['field'])) {
-                    $field = $itemNotes['field'] !== true ? $itemNotes['field'] : true;
-                }
-                if (isset($itemNotes['primary']) && !$field) {
-                    $field = true;
-                }
-
-                key_find: if ($field !== null) {
-                    // $key is set by this block
-                    $fieldInfo = array();
-
-                    if ($type == 'method') {
-                        list ($key, $fieldInfo['getter'], $fieldInfo['setter']) = $this->findGetterSetter($name, $itemNotes, !!'readOnly'); 
+                field: if (isset($itemNotes['field'])) {
+                    $field = $itemNotes['field'];
+                    if ($field === true) {
+                        $field = [];
+                    } elseif (is_string($field)) {
+                        $field = ['name'=>$field];
+                    } elseif (!is_array($field)) {
+                        throw new \UnexpectedValueException();
+                    }
+                    
+                    if ($noteType == 'method') {
+                        $key = $this->fillGetterSetter($name, $field, !!'readOnly'); 
                     } else {
                         $key = $name;
                     }
-                    if ($field !== true) {
-                        $fieldInfo['name'] = $field;
-                    }
-                    $fieldInfo['type'] = isset($itemNotes['type']) 
-                        ? $itemNotes['type'] 
-                        : null
-                    ;
-                    $info['fields'][$key] = $fieldInfo;
-                }
-
-                field_primary: if ($key && isset($itemNotes['primary'])) {
-                    $info['primary'][] = $key;
-                }
-
-                field_index: if ($key && (isset($itemNotes['index']) || isset($itemNotes['key']))) {
-                    $indexNote = isset($itemNotes['index']) ? $itemNotes['index'] : null;
-                    $keyNote   = isset($itemNotes['key'])   ? $itemNotes['key']   : null;
-                    if ($indexNote && $keyNote) {
-                        throw new Exception("Invalid field $key: cannot specify both index and key");
+                    
+                    if (!isset($field['name'])) {
+                        $field['name'] = $key;
                     }
 
-                    $indexNote = $indexNote ?: $keyNote;
-                    $indexName = null;
-                    if ($indexNote === true) {
-                        $indexName = $key;
-                    } elseif (is_string($indexNote)) {
-                        $indexName = $indexNote;
-                    } else {
-                        throw new Exception();
-                    }
-                    if (isset($info['indexes'][$indexName])) {
-                        throw new Exception("Index $indexName already defined");
-                    }
-                    $info['indexes'][$indexName] = [
-                        'fields'=>[$key],
-                        'key'=>$keyNote == true,
-                    ];
+                    $info['fields'][$key] = $field;
                 }
                 
                 field_relation: if (isset($itemNotes['has'])) {
-                    if ($field) {
+                    if (isset($itemNotes['field'])) {
                         throw new \UnexpectedValueException(
                             "Invalid class {$class}: relation and a field declared together on {$name}"
                         );
                     }
-                    if ($type == 'method' && (!isset($itemNotes['getter']) || !$itemNotes['getter'])) {
-                        $itemNotes['getter'] = $name;
+                    $relation = $itemNotes['has'];
+                    if (is_string($relation)) {
+                        $relation = [$relation];
+                    } elseif (!isset($relation['type'])) {
+                        throw new \UnexpectedValueException("Relation $name missing 'type'");
                     }
-                    if (isset($relationNotes[$name])) {
+                    $type = $relation['type'];
+                    unset($relation['type']);
+                    array_unshift($relation, $type);
+
+                    if ($noteType == 'method') {
+                        $key = $this->fillGetterSetter($name, $relation, !!'readOnly'); 
+                    } else {
+                        $key = $name;
+                    }
+                    if (isset($info['relations'][$key])) {
                         throw new \UnexpectedValueException("Duplicate relation {$name} on class {$class}");
                     }
-                    $relationNotes[$name] = $itemNotes;
+                    $info['relations'][$key] = $relation;
                 }
 
-                constructor: if ($type == 'method' && isset($itemNotes['constructor'])) {
+                constructor: if ($noteType == 'method' && isset($itemNotes['constructor'])) {
                     if ($info['constructor']) {
                         throw new \UnexpectedValueException("Constructor already declared: {$info['constructor']}");
                     }
@@ -182,56 +159,30 @@ class Note extends \Amiss\Mapper\Base
             }
         }
 
-        if ($relationNotes) {
-            foreach ($this->buildRelations($relationNotes) as $relKey=>$relDef) {
-                if (isset($info['relations'][$relKey])) {
-                    throw new \UnexpectedValueException();
-                }
-                $info['relations'][$relKey] = $relDef;
-            }
+        if (isset($info['fields'])) {
+            $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
-        
-        $info['fields'] = $this->resolveUnnamedFields($info['fields']);
-        
+
         return new \Amiss\Meta($class, $table, $info, $parent);
     }
 
-    protected function findGetterSetter($name, $itemNotes, $readOnlyAllowed=false)
+    protected function fillGetterSetter($name, &$itemNotes, $readOnlyAllowed=false)
     {
-        $getter = $name;
-        $methodWithoutPrefix = $name[0] == 'g' && $name[1] == 'e' && $name[2] == 't' ? substr($name, 3) : $name;
-        $name = !isset($itemNotes['name']) ? lcfirst($methodWithoutPrefix) : $itemNotes['name'];
+        $itemNotes['getter'] = $name;
+        $methodWithoutPrefix = $name;
+        if ($name[0] == 'g' && $name[1] == 'e' && $name[2] == 't') {
+            $methodWithoutPrefix = substr($name, 3);
+        } elseif ($name[0] == 'i' && $name[1] == 's') {
+            $methodWithoutPrefix = substr($name, 2);
+        }
+
+        $name = lcfirst($methodWithoutPrefix);
 
         if ($readOnlyAllowed && (isset($itemNotes['readOnly']) || isset($itemNotes['readonly']))) {
-            $setter = false;
+            $itemNotes['setter'] = false;
         } else {
-            $setter = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
+            $itemNotes['setter'] = !isset($itemNotes['setter']) ? 'set'.$methodWithoutPrefix : $itemNotes['setter'];
         }
-        return array($name, $getter, $setter);
-    }
-    
-    protected function buildRelations($relationNotes)
-    {
-        $relations = array();
-        
-        foreach ($relationNotes as $name=>$info) {
-            $relation = $info['has'];
-            if (is_string($relation)) {
-                $relation = [$relation];
-            }
-            else {
-                if (!isset($relation['type'])) {
-                    throw new \UnexpectedValueException("Relation $name missing 'type'");
-                }
-                $type = $relation['type'];
-                unset($relation['type']);
-                array_unshift($relation, $type);
-            }
-            if (isset($info['getter'])) {
-                list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info, !'readOnly');
-            }
-            $relations[$name] = $relation;
-        }
-        return $relations;
-    }
+        return $name;
+    }    
 }

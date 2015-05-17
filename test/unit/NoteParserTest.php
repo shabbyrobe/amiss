@@ -20,16 +20,17 @@ class NoteParserTest extends \CustomTestCase
     {
         $info = $this->parser->parseClass(new \ReflectionClass(__NAMESPACE__.'\ParserTestClass'));
         $expected = (object)array(
-            'notes'=>array('classNote'=>true),
+            'notes'=>array('c1'=>['cv1'=>true], 'c2'=>['cv2'=>true]),
             'methods'=>array(
-                'method'=>array('methodNote'=>true),
-                'casedMethod'=>array('methodNote'=>true),
+                'method1'=>array('m1'=>['mv1'=>true], 'm2'=>['mv2'=>true]),
+                'method2'=>array('m3'=>['mv3'=>true], 'm4'=>['mv4'=>true]),
             ),
             'properties'=>array(
-                'property'=>array('propertyNote'=>true),
+                'property1'=>array('p1'=>['pv1'=>true], 'p2'=>['pv2'=>true]),
+                'property2'=>array('p3'=>['pv3'=>true], 'p4'=>['pv4'=>true]),
             ),
         );
-        
+
         $this->assertEquals($expected, $info);
     }
     
@@ -38,288 +39,161 @@ class NoteParserTest extends \CustomTestCase
      */
     public function testParseSingleValuelessNote()
     {
-        $parsed = $this->parser->parse('@ab');
-        $this->assertEquals(array('ab'=>true), $parsed);
+        $parsed = $this->parser->parse(':note = {}');
+        $this->assertEquals(array('note'=>[]), $parsed);
     }
-    
-    /**
-     * @covers Amiss\Note\Parser::parse
-     */
-    public function testParseSingleValuelessNoteWithAlternativeDefaultValue()
-    {
-        $this->parser->defaultValue = 'ding';
-        $parsed = $this->parser->parse('@ab');
-        $this->assertEquals(array('ab'=>'ding'), $parsed);
-    }
-    
+ 
     /**
      * @covers Amiss\Note\Parser::parse
      */
     public function testParseSingleValueNote()
     {
-        $parsed = $this->parser->parse('@ab yep');
-        $this->assertEquals(array('ab'=>'yep'), $parsed);
+        $parsed = $this->parser->parse(':note = {"foo": "bar"}');
+        $this->assertEquals(array('note'=>["foo"=>"bar"]), $parsed);
     }
 
     /**
      * @covers Amiss\Note\Parser::parse
      */
-    public function testParseManyValuelessNotes()
+    public function testParseManyNotesMultiline()
     {
-        $parsed = $this->parser->parse("@ab\n@bc\n@cd\n");
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
+        $parsed = $this->parser->parse(
+            ":one = {}\n".
+            ":two = {}\n"
+        );
+        $this->assertEquals(array("one"=>[], "two"=>[]), $parsed);
     }
 
     /**
-     * @covers Amiss\Note\Parser::parseDocComment
+     * @covers Amiss\Note\Parser::stripDocComment
      */
-    public function testParseManyNotesInDocComment()
+    public function testStripDocCommentMultiline()
     {
-        $parsed = $this->parser->parseDocComment(
-            '/**'.PHP_EOL.' * @ab'.PHP_EOL.' * @bc'.PHP_EOL.' * @cd'.PHP_EOL.' */'
-        );
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
+        $parsed = $this->parser->stripDocComment(implode("\n", [
+            "/**",
+            " * foo",
+            "   *     bar",
+            "baz",
+            "*/",
+        ]));
+
+        // only the first whitespace after the * is stripped:
+        $expected = "foo\n    bar\nbaz";
+        $this->assertEquals($expected, $parsed);
     }
 
     /**
-     * @covers Amiss\Note\Parser::parseDocComment
+     * @covers Amiss\Note\Parser::stripDocComment
      */
-    public function testParseManyNotesInDocCommentWithIrregularMargin()
+    public function testStripDocCommentFromNonDocblock()
     {
-        $parsed = $this->parser->parseDocComment(
-            '/**'.PHP_EOL.'     * @ab'.PHP_EOL.'*    @bc'.PHP_EOL.' @cd'.PHP_EOL.' */'
+        // /* */ instead of /** */
+        $parsed = $this->parser->stripDocComment(
+            "/*\n * foo\n*/"
         );
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
+        $this->assertEquals("foo", $parsed);
+    }
+    
+    /**
+     * @covers Amiss\Note\Parser::stripDocComment
+     */
+    public function testStripDocCommentWorksWhenInputIsNotComment()
+    {
+        $data = "foo\nbar\nbaz";
+        $parsed = $this->parser->stripDocComment($data);
+        $this->assertEquals($data, $parsed);
+    }
+
+    public function testParseIgnoresEscapedKey()
+    {
+        $in = "\:foo = {}";
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals([], $parsed);
+    }
+
+    public function testParseIgnoresKeyInsideLine()
+    {
+        $in = "This is how you do it: :foo = {}";
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals([], $parsed);
+    }
+
+    public function testParseAllowsHwspBeforeKey()
+    {
+        $in = "      \t\t\t    :foo = {}";
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(['foo'=>[]], $parsed);
+    }
+
+    public function testParseDoubleNameFails()
+    {
+        $in = ":foo = :bar = {}";
+        $this->setExpectedException(
+            \Amiss\Note\ParseException::class, 
+            "Unexpected token ':bar', expected JSON start '{'"
+        );
+        $parsed = $this->parser->parse($in);
     }
 
     /**
-     * @covers Amiss\Note\Parser::parseDocComment
+     * @dataProvider dataEmptyName
      */
-    public function testParsingWorksWhenCommentIsNotDocblock()
+    public function testParseEmptyNameFails($emptyName)
     {
-        $parsed = $this->parser->parseDocComment(
-            '/*'.PHP_EOL.'     * @ab'.PHP_EOL.'*    @bc'.PHP_EOL.' @cd'.PHP_EOL.' */'
+        $in = ": = {}";
+        $this->setExpectedException(
+            \Amiss\Note\ParseException::class, 
+            "Unexpected token '=', expected annotation name"
         );
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
+        $parsed = $this->parser->parse($in);
     }
-    
-    /**
-     * @covers Amiss\Note\Parser::parseDocComment
-     */
-    public function testParsingByDocCommentWorksWhenInputIsNotComment()
+
+    function dataEmptyName()
     {
-        $parsed = $this->parser->parse(
-            '@ab'.PHP_EOL.'@bc'.PHP_EOL.'@cd'.PHP_EOL
-        );
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
+        return [
+            [': = {}'],
+            [':= {}'],
+        ];
     }
-    
-    /**
-     * @covers Amiss\Note\Parser::parse
-     */
-    public function testParsingIgnoresEmailAddresses()
+
+    public function testParseEndsExpectingEqualsFailure()
     {
-        $parsed = $this->parser->parse(
-            'If you have problems with this jazz, contact foo@bar.com'.PHP_EOL.
-            '@ab'.PHP_EOL.'@bc'.PHP_EOL.'@cd'.PHP_EOL
+        $in = ":foo";
+        $this->setExpectedException(
+            \Amiss\Note\ParseException::class, 
+            "Unexpected end of definition for key 'foo'"
         );
-        $this->assertEquals(array('ab'=>true, 'bc'=>true, 'cd'=>true), $parsed);
-    }
-    
-    public function testNoteBecomesArrayWhenMultipleValuesPresent()
-    {
-        $parsed = $this->parser->parse(
-            "@ab one\n".
-            "@ab two\n".
-            "@ab three\n"
-        );
-        $this->assertEquals(array('ab'=>array('one', 'two', 'three')), $parsed);
-    }
-    
-    public function testSingleValueArrayCoercionWithExplicitZeroIndex()
-    {
-        $parsed = $this->parser->parse("@ab.0 one\n");
-        $this->assertEquals(array('ab'=>array('one')), $parsed);
-    }
-    
-    public function testSingleValueArrayCoercionWithEmptyIndex()
-    {
-        $parsed = $this->parser->parse("@ab. one\n");
-        $this->assertEquals(array('ab'=>array('one')), $parsed);
-    }
-    
-    public function testMultipleValueArrayCoercionWithEmptyIndex()
-    {
-        $parsed = $this->parser->parse(
-            "@ab. one\n".
-            "@ab. two\n"
-        );
-        $this->assertEquals(array('ab'=>array('one', 'two')), $parsed);
-    }
-    
-    public function testSingleValueArrayCoercionWithPHPArrayNotation()
-    {
-        $parsed = $this->parser->parse("@ab[] one\n");
-        $this->assertEquals(array('ab'=>array('one')), $parsed);
-    }
-    
-    public function testMultipleValueArrayCoercionWithPHPArrayNotation()
-    {
-        $parsed = $this->parser->parse(
-            "@ab[] one\n".
-            "@ab[] two\n"
-        );
-        $this->assertEquals(array('ab'=>array('one', 'two')), $parsed);
-    }
-    
-    public function testAssoc()
-    {
-        $parsed = $this->parser->parse(
-            "@ab.foo one\n".
-            "@ab.bar two\n"
-        );
-        $expected = array(
-            'ab'=>array(
-                'foo'=>'one', 
-                'bar'=>'two'
-            )
-        );
-        $this->assertEquals($expected, $parsed);
-    }
-    
-    public function testAssocWithPHPArrayNotation()
-    {
-        $parsed = $this->parser->parse(
-            "@ab[foo] one\n".
-            "@ab[bar] two\n"
-        );
-        $expected = array(
-            'ab'=>array(
-                'foo'=>'one', 
-                'bar'=>'two'
-            )
-        );
-        $this->assertEquals($expected, $parsed);
-    }
-    
-    public function testNestedAssoc()
-    {
-        $parsed = $this->parser->parse(
-            "@ab.foo.a one\n".
-            "@ab.foo.b two\n".
-            "@ab.bar.a three\n"
-        );
-        $expected = array(
-            'ab'=>array(
-                'foo'=>array(
-                    'a'=>'one',
-                    'b'=>'two'
-                ),
-                'bar'=>array(
-                    'a'=>'three'
-                )
-            )
-        );
-        $this->assertEquals($expected, $parsed);
-    }
-    
-    public function testNestedAssocWithPHPArrayNotation()
-    {
-        $parsed = $this->parser->parse(
-            "@ab[foo][a] one\n".
-            "@ab[foo][b] two\n".
-            "@ab[bar][a] three\n"
-        );
-        $expected = array(
-            'ab'=>array(
-                'foo'=>array(
-                    'a'=>'one',
-                    'b'=>'two'
-                ),
-                'bar'=>array(
-                    'a'=>'three'
-                )
-            )
-        );
-        $this->assertEquals($expected, $parsed);
-    }
-    
-    public function testMixedNestedAssoc()
-    {
-        $parsed = $this->parser->parse(
-            "@ab.foo[a] one\n".
-            "@ab[foo].b two\n".
-            "@ab[bar].a three\n"
-        );
-        $expected = array(
-            'ab'=>array(
-                'foo'=>array(
-                    'a'=>'one',
-                    'b'=>'two'
-                ),
-                'bar'=>array(
-                    'a'=>'three'
-                )
-            )
-        );
-        $this->assertEquals($expected, $parsed);
-    }
-    
-    public function testInvalidTypeReassignment()
-    {
-        $this->setExpectedException('UnexpectedValueException', 'Key at path ab already had non-array value, tried to set key foo');
-        $parsed = $this->parser->parse(
-            "@ab one\n".
-            "@ab.foo quack\n"
-        );
-    }
-    
-    public function testKeyPrefix()
-    {
-        $this->parser->keyPrefix = 'amiss.';
-        
-        $parsed = $this->parser->parse(
-            "@amiss.yep\n".
-            "@amiss.yep2 pants\n".
-            "@nup\n".
-            "@amiss.ab.foo[a] one\n".
-            "@amiss.ab[foo].b two\n".
-            "@amiss.ab[bar].a three\n"
-        );
-        $expected = array(
-            'yep'=>true,
-            'yep2'=>'pants',
-            'ab'=>array(
-                'foo'=>array(
-                    'a'=>'one',
-                    'b'=>'two'
-                ),
-                'bar'=>array(
-                    'a'=>'three'
-                )
-            )
-        );
-        $this->assertEquals($expected, $parsed);
+        $parsed = $this->parser->parse($in);
     }
 }
 
 /**
- * @classNote
+ * :c1 = {"cv1": true}
+ * :c2 = {"cv2": true}
  */
 class ParserTestClass
 {
     /**
-     * @propertyNote
+     * :p1 = {"pv1": true}
+     * :p2 = {"pv2": true}
      */
-    public $property;
+    public $property1;
     
     /**
-     * @methodNote
+     * :p3 = {"pv3": true}
+     * :p4 = {"pv4": true}
      */
-    public function method() {}
-    
+    public $property2;
+
     /**
-     * @methodNote
+     * :m1 = {"mv1": true}
+     * :m2 = {"mv2": true}
      */
-    public function casedMethod() {}
+    public function method1() {}
+
+    /**
+     * :m3 = {"mv3": true}
+     * :m4 = {"mv4": true}
+     */
+    public function method2() {}
 }

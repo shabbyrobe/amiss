@@ -39,7 +39,7 @@ function note()
     require_once AMISS_BASE_PATH.'/doc/demo/model.php';
 
     foreach (get_declared_classes() as $class) {
-        if (strpos($class, 'Amiss\Demo')===0) {
+        if (strpos($class, 'Amiss\Demo\\')===0 && strpos($class, 'Amiss\Demo\Active\\')!==0) {
             $rc = new \ReflectionClass($class);
             if (!$rc->isAbstract()) {
                 \Amiss\Sql\TableBuilder::create($manager->connector, $manager->mapper, $class);
@@ -47,6 +47,30 @@ function note()
         }
     }
     $connector->exec(file_get_contents(AMISS_BASE_PATH.'/doc/demo/testdata.sql'));
+    return $manager;
+}
+
+function ar()
+{
+    $connector = new \PDOK\Connector('sqlite::memory:');
+    $manager = Amiss\Factory::createSqlManager($connector, [
+        'dbTimeZone'=>date_default_timezone_get(),
+    ]);
+
+    $manager->mapper->objectNamespace = 'Amiss\Demo';
+
+    require_once AMISS_BASE_PATH.'/doc/demo/ar.php';
+
+    foreach (get_declared_classes() as $class) {
+        if (strpos($class, 'Amiss\Demo\Active')===0) {
+            $rc = new \ReflectionClass($class);
+            if (!$rc->isAbstract()) {
+                \Amiss\Sql\TableBuilder::create($manager->connector, $manager->mapper, $class);
+            }
+        }
+    }
+    $connector->exec(file_get_contents(AMISS_BASE_PATH.'/doc/demo/testdata.sql'));
+    \Amiss\Sql\ActiveRecord::setManager($manager);
     return $manager;
 }
 
