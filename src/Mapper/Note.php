@@ -50,40 +50,37 @@ class Note extends \Amiss\Mapper\Base
         
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
-        if (!isset($classNotes['amiss'])) {
-            throw new \Exception();
-        }
 
-        $info = $classNotes['amiss'];
+        $info = isset($classNotes['amiss']) ? $classNotes['amiss'] : [];
         
-        $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
-        unset($info['table']);
-
-        $parentClass = get_parent_class($class);
-        $parent = null;
-        if ($parentClass) {
-            $parent = $this->getMeta($parentClass);
+        table: {
+            $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
+            unset($info['table']);
         }
 
-        $relationNotes = array();
-
-        class_relations: {
-            if (isset($info['relations'])) {
-                foreach ($info['relations'] as $relKey=>&$relDef) {
-                    $type = $relDef['type'];
-                    unset($relDef['type']);
-                    array_unshift($relDef, $type);
-
-                    if (!is_array($relDef)) {
-                        throw new \Exception("Relation $relKey was not valid in class $class");
-                    }
-                    $relDef['mode'] = 'class';
-                }
-                unset($relDef);
+        parent_class: {
+            $parentClass = get_parent_class($class);
+            $parent = null;
+            if ($parentClass) {
+                $parent = $this->getMeta($parentClass);
             }
         }
 
-        if (isset($info['indexes'])) {
+        class_relations: if (isset($info['relations'])) {
+            foreach ($info['relations'] as $relKey=>&$relDef) {
+                $type = $relDef['type'];
+                unset($relDef['type']);
+                array_unshift($relDef, $type);
+
+                if (!is_array($relDef)) {
+                    throw new \Exception("Relation $relKey was not valid in class $class");
+                }
+                $relDef['mode'] = 'class';
+            }
+            unset($relDef);
+        }
+
+        indexes: if (isset($info['indexes'])) {
             foreach ($info['indexes'] as $idxKey=>&$idxDef) {
                 if ($idxDef === true) {
                     $idxDef = ['fields'=>[$idxKey]];
@@ -93,6 +90,7 @@ class Note extends \Amiss\Mapper\Base
         }
 
         $setters = array();
+        $relationNotes = array();
         
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
@@ -109,8 +107,8 @@ class Note extends \Amiss\Mapper\Base
                     $field = true;
                 }
 
-                // $key is set by this block
-                if ($field !== null) {
+                key_find: if ($field !== null) {
+                    // $key is set by this block
                     $fieldInfo = array();
 
                     if ($type == 'method') {
@@ -128,15 +126,15 @@ class Note extends \Amiss\Mapper\Base
                     $info['fields'][$key] = $fieldInfo;
                 }
 
-                if ($key && isset($itemNotes['primary'])) {
+                field_primary: if ($key && isset($itemNotes['primary'])) {
                     $info['primary'][] = $key;
                 }
 
-                if ($key && (isset($itemNotes['index']) || isset($itemNotes['key']))) {
+                field_index: if ($key && (isset($itemNotes['index']) || isset($itemNotes['key']))) {
                     $indexNote = isset($itemNotes['index']) ? $itemNotes['index'] : null;
                     $keyNote   = isset($itemNotes['key'])   ? $itemNotes['key']   : null;
                     if ($indexNote && $keyNote) {
-                        throw new Exception();
+                        throw new Exception("Invalid field $key: cannot specify both index and key");
                     }
 
                     $indexNote = $indexNote ?: $keyNote;
@@ -157,25 +155,22 @@ class Note extends \Amiss\Mapper\Base
                     ];
                 }
                 
-                if (isset($itemNotes['has'])) {
+                field_relation: if (isset($itemNotes['has'])) {
                     if ($field) {
                         throw new \UnexpectedValueException(
                             "Invalid class {$class}: relation and a field declared together on {$name}"
                         );
                     }
-
                     if ($type == 'method' && (!isset($itemNotes['getter']) || !$itemNotes['getter'])) {
                         $itemNotes['getter'] = $name;
                     }
-
                     if (isset($relationNotes[$name])) {
                         throw new \UnexpectedValueException("Duplicate relation {$name} on class {$class}");
                     }
                     $relationNotes[$name] = $itemNotes;
                 }
 
-                // look for the constructor!
-                if ($type == 'method' && isset($itemNotes['constructor'])) {
+                constructor: if ($type == 'method' && isset($itemNotes['constructor'])) {
                     if ($info['constructor']) {
                         throw new \UnexpectedValueException("Constructor already declared: {$info['constructor']}");
                     }
