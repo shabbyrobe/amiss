@@ -3,29 +3,23 @@ namespace Amiss\Note;
 
 class Parser
 {
-    public $defaultValue;
-    public $keyPrefix;
-    
-    public function __construct(array $config=null)
+    const S_NONE = 0;
+    const S_NAME = 1;
+    const S_JSON_START = 2;
+    const S_JSON = 3;
+
+    public function parseClass($class)
     {
-        $defaultConfig = array(
-            'defaultValue'=>true,
-            'keyPrefix'=>null,
-        );
-        $config = $config ? array_merge($defaultConfig, $config) : $defaultConfig;
-        
-        $this->defaultValue = $config['defaultValue'];
-        $this->keyPrefix = $config['keyPrefix'];
-    }
-    
-    public function parseClass(\ReflectionClass $class)
-    {
+        if (!$class instanceof \ReflectionClass) {
+            $class = new \ReflectionClass($class);
+        }
+
         $info = new \stdClass;
         $info->notes = null;
         
         $doc = $class->getDocComment();
         if ($doc) {
-            $info->notes = $this->parseDocComment($doc);
+            $info->notes = $this->parse($this->stripDocComment($doc));
         }
 
         $info->methods = $this->parseReflectors($class->getMethods());
@@ -41,88 +35,117 @@ class Parser
             $comment = $r->getDocComment();
             $name = $r->name;
             if ($comment) {
-                $notes[$name] = $this->parseDocComment($comment);
+                try {
+                    $notes[$name] = $this->parse($this->stripDocComment($comment));
+                }
+                catch (\Exception $ex) {
+                    throw new \RuntimeException("Failed parsing reflector {$r->name}: ".$ex->getMessage(), null, $ex);
+                }
             }
         }
         return $notes;
     }
     
-    public function parseDocComment($docComment)
-    {
-        // docblock start
-        $docComment = preg_replace('@\s*/\*+\s*@', '', $docComment);
-        
-        // docblock end
-        $docComment = preg_replace('@\s*\*+/\s*$@', '', $docComment);
-        
-        // docblock margin
-        $docComment = preg_replace('@^\h*\*\h*@mx', '', $docComment);
-
-        return $this->parse($docComment);
-    }
-    
-    // TODO: this should use a proper parser for the keys. it should be simple 
-    // to do, performance is not an issue here because the result of this should
-    // ALWAYS be cached somehow, and it allows better error handling. this 
-    // will do for now, but it's definitely one to revisit.
     public function parse($string)
     {
-        $keyPrefixLen = $this->keyPrefix ? strlen($this->keyPrefix) : 0;
-        
-        $data = array();
-        $lines = preg_split('@\n@', $string, null, PREG_SPLIT_NO_EMPTY);
-        foreach ($lines as $l) {
-            $l = trim($l);
-            if ($l && $l[0] == '@') {
-                $l = substr($l, 1);
-                $d = preg_split('/\s+/', $l, 2);
-                
-                $key = $d[0];
-                if ($this->keyPrefix) {
-                    if (strpos($key, $this->keyPrefix)!==0)
-                        continue;
-                    $key = substr($key, $keyPrefixLen);
+        $tokens = preg_split(
+            '~ ( ^\h*: | = | \{ | \} ) ~xm', 
+            $string, null, 
+            PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE
+        );
+
+        $state = self::S_NONE;
+        $curName = null;
+        $jsonBuf = null;
+        $jsonDepth = 0;
+
+        $parsed = [];
+
+        foreach ($tokens as $tok) {
+            if ($state == self::S_NONE) {
+                if (ltrim($tok) == ':') {
+                    $state = self::S_NAME;
+                    $curName = null;
                 }
-                
-                $key = preg_split(
-                    "/(
-                           \]\[
-                        |  \[
-                        |  \]\.   # when php style abuts dot notation (foo[a].b)
-                        |  \]
-                        |  \.)
-                    /x", 
-                    rtrim($key, ']')
-                );
-                
-                $value = isset($d[1]) ? $d[1] : $this->defaultValue;
-                
-                $current = &$data;
-                $found = array();
-                foreach ($key as $part) {
-                    if ($current && !is_array($current))
-                        throw new \UnexpectedValueException("Key at path ".implode('.', $found)." already had non-array value, tried to set key $part");
-                    
-                    $found[] = $part;
-                    
-                    // if the last segment is empty, it means "@key[] value" or "@key. value" was used,
-                    //  so we should just assign the next key
-                    if ($part !== "")
-                        $current = &$current[$part];
-                    else
-                        $current = &$current[];
+            }
+            elseif ($state == self::S_NAME) {
+                if ($tok == '=') {
+                    $state = self::S_JSON_START;
                 }
-                
-                if ($current === null)
-                    $current = $value;
-                elseif (!is_array($current))
-                    $current = array($current, $value);
-                else
-                    $current[] = $value;
-                
-                unset($current);
+                elseif ($curName) {
+                    throw new \Exception("Already got a name");
+                }
+                else {
+                    $curName = trim($tok);
+                    if (!$curName) {
+                        throw new \Exception("Empty name");
+                    }
+                }
+            }
+            elseif ($state == self::S_JSON_START) {
+                if (!trim($tok)) {
+                    continue;
+                }
+                elseif ($tok != '{') {
+                    throw new \Exception();
+                }
+                $jsonBuf = '{';
+                $jsonDepth = 1;
+                $state = self::S_JSON;
+            }
+            elseif ($state == self::S_JSON) {
+                if ($tok == '{') {
+                    $jsonBuf .= $tok;
+                    ++$jsonDepth;
+                }
+                elseif ($tok == '}') {
+                    --$jsonDepth;
+                    if ($jsonDepth == 0) {
+                        $jsonBuf .= $tok;
+                        $parsed[$curName] = $jsonBuf;
+                        $curName = null;
+                        $jsonBuf = null;
+                        $state = self::S_NONE;
+                    }
+                    elseif ($jsonDepth > 0) {
+                        $jsonBuf .= $tok;
+                    }
+                    elseif ($jsonDepth < 0) {
+                        throw new \LogicException();    
+                    }
+                }
+                else {
+                    $jsonBuf .= $tok;
+                }
             }
         }
-        return $data;
+
+        if ($curName || $jsonBuf) {
+            throw new \Exception("Unexpected end of JSON for key $curName");
+        }
+
+        $out = [];
+        foreach ($parsed as $key=>$json) {
+            $cur = json_decode($json, !!'assoc');
+            if ($cur === null && ($err = json_last_error())) {
+                throw new \Exception("JSON parsing failed for $key: ".json_last_error_msg());
+            }
+            $out[$key] = $cur;
+        }
+        return $out;
+    }
+
+    public function stripDocComment($docComment)
+    {
+        // docblock start
+        $docComment = preg_replace('~ \s* / \*+ \s* ~x', '', $docComment);
+        
+        // docblock end
+        $docComment = preg_replace('~ \s* \*+ / \s* $~x', '', $docComment);
+        
+        // docblock margin
+        $docComment = preg_replace('~^ \h* \* \h? ~mx', '', $docComment);
+
+        return $docComment;
     }
 }

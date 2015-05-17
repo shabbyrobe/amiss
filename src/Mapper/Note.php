@@ -50,86 +50,54 @@ class Note extends \Amiss\Mapper\Base
         
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
-        $table = isset($classNotes['table']) ? $classNotes['table'] : $this->getDefaultTable($class);
+        if (!isset($classNotes['amiss'])) {
+            throw new \Exception();
+        }
+
+        $info = $classNotes['amiss'];
+        
+        $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
+        unset($info['table']);
 
         $parentClass = get_parent_class($class);
         $parent = null;
         if ($parentClass) {
             $parent = $this->getMeta($parentClass);
         }
-        
-        $info = array(
-            'primary'=>array(),
-            'fields'=>array(),
-            'indexes'=>array(),
-            'relations'=>array(),
-            'ext'=>isset($classNotes['ext']) ? $classNotes['ext'] : null,
-            'defaultFieldType'=>isset($classNotes['fieldType']) ? $classNotes['fieldType'] : null,
-            'constructor'=>null,
-            'constructorArgs'=>[],
-        );
 
-        if (isset($classNotes['readOnly']) && $classNotes['readOnly']) {
-            $info['readOnly'] = true;
-        }
-        if (isset($classNotes['canInsert'])) {
-            $info['canInsert'] = !!$classNotes['canInsert'];
-        }
-        if (isset($classNotes['canUpdate'])) {
-            $info['canUpdate'] = !!$classNotes['canUpdate'];
-        }
-        if (isset($classNotes['canDelete'])) {
-            $info['canDelete'] = !!$classNotes['canDelete'];
-        }
-
-        if (isset($classNotes['index'])) {
-            foreach ($classNotes['index'] as $key=>$index) {
-                if ($index === true) {
-                    $index = ['fields'=>[$key]];
-                }
-                $info['indexes'][$key] = $index;
-            }
-        }
-
-        if (isset($classNotes['constructor'])) {
-            if (is_string($classNotes['constructor'])) {
-                $info['constructor'] = $classNotes['constructor'];
-            }
-            elseif (is_array($classNotes['constructor'])) {
-                $info['constructor'] = $classNotes['constructor']['name'];
-                $info['constructorArgs'] = $this->parseConstructorArgs($classNotes['constructor']['args']);
-            }
-            else {
-                throw new \Exception("Constructor annotation for class {$class} must be string or array");
-            }
-        }
-        
         $relationNotes = array();
 
         class_relations: {
-            if (isset($classNotes['relation'])) {
-                foreach ($classNotes['relation'] as $key=>$def) {
-                    if (!is_array($def)) {
-                        throw new \Exception("Relation $key was not valid in class $class");
+            if (isset($info['relations'])) {
+                foreach ($info['relations'] as $relKey=>&$relDef) {
+                    $type = $relDef['type'];
+                    unset($relDef['type']);
+                    array_unshift($relDef, $type);
+
+                    if (!is_array($relDef)) {
+                        throw new \Exception("Relation $relKey was not valid in class $class");
                     }
-                    $type = key($def);
-                    if (!is_array($def[$type])) {
-                        throw new \Exception("Relation $key was not valid in class $class");
-                    }
-                    if (isset($def[$type]['mode'])) {
-                        throw new \Exception("Mode {$def['mode']} not valid for class-level relation {$key}");
-                    }
-                    $def[$type]['mode'] = 'class';
-                    $relationNotes[$key] = ['has'=>$def];
+                    $relDef['mode'] = 'class';
+                }
+                unset($relDef);
+            }
+        }
+
+        if (isset($info['indexes'])) {
+            foreach ($info['indexes'] as $idxKey=>&$idxDef) {
+                if ($idxDef === true) {
+                    $idxDef = ['fields'=>[$idxKey]];
                 }
             }
+            unset($idxDef);
         }
 
         $setters = array();
         
-        $fieldIndexLengths = [];
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $type=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
+                $itemNotes = $itemNotes['amiss'];
+
                 $key = null;
                 $field = null;
                 $relationNote = null;
@@ -219,18 +187,13 @@ class Note extends \Amiss\Mapper\Base
             }
         }
 
-        // The indexes may be added out of order:
-        // $a[1] = 'b'; $a[0] = 'a'; == [1 => 'b', 0 => 'a']!
-        foreach ($fieldIndexLengths as $name=>$length) {
-            if ($length > 1) {
-                $f = $info['indexes'][$name]['fields'];
-                ksort($f);
-                $info['indexes'][$name]['fields'] = array_values($f);
-            }
-        }
-
         if ($relationNotes) {
-            $info['relations'] = $this->buildRelations($relationNotes);
+            foreach ($this->buildRelations($relationNotes) as $relKey=>$relDef) {
+                if (isset($info['relations'][$relKey])) {
+                    throw new \UnexpectedValueException();
+                }
+                $info['relations'][$relKey] = $relDef;
+            }
         }
         
         $info['fields'] = $this->resolveUnnamedFields($info['fields']);
@@ -238,19 +201,6 @@ class Note extends \Amiss\Mapper\Base
         return new \Amiss\Meta($class, $table, $info, $parent);
     }
 
-    protected function parseConstructorArgs($constructorArgs)
-    {
-        $args = [];
-        foreach ($constructorArgs as $idx=>$arg) {
-            $split = preg_split('/:\s*/', $arg, 2);
-            if (!$split[0] || !isset($split[1]) || $split[1] === null || $split[1] === '') {
-                throw new \UnexpectedValueException("Invalid arg specification. Expected 'type:id', found '$arg'");
-            }
-            $args[$idx] = [$split[0], $split[1]];
-        }
-        return $args;
-    }
-    
     protected function findGetterSetter($name, $itemNotes, $readOnlyAllowed=false)
     {
         $getter = $name;
@@ -269,20 +219,19 @@ class Note extends \Amiss\Mapper\Base
     {
         $relations = array();
         
-        if (!$this->parser) {
-            $this->parser = new \Amiss\Note\Parser;
-        }
         foreach ($relationNotes as $name=>$info) {
             $relation = $info['has'];
             if (is_string($relation)) {
-                $relation = array($relation);
+                $relation = [$relation];
             }
             else {
-                $id = key($relation);
-                $relation = current($relation);
-                array_unshift($relation, $id);
+                if (!isset($relation['type'])) {
+                    throw new \UnexpectedValueException("Relation $name missing 'type'");
+                }
+                $type = $relation['type'];
+                unset($relation['type']);
+                array_unshift($relation, $type);
             }
-
             if (isset($info['getter'])) {
                 list($name, $relation['getter'], $relation['setter']) = $this->findGetterSetter($name, $info, !'readOnly');
             }
