@@ -5,8 +5,7 @@ class Parser
 {
     const S_NONE = 0;
     const S_NAME = 1;
-    const S_JSON_START = 2;
-    const S_JSON = 3;
+    const S_JSON = 2;
 
     public function parseClass($class)
     {
@@ -57,7 +56,11 @@ class Parser
     public function parse($string)
     {
         $tokens = preg_split(
-            '~ ( ^\h*: | = | \{ | \} ) ~xm', 
+            '~ ( 
+                  ^ \h* :    # start - ":key" must be the first non-hwsp thing on the line
+                | =              
+                | ; \h* $    # end - ";" must be the last non-hwsp thing on the line
+            ) ~xm', 
             $string, null, 
             PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE
         );
@@ -81,46 +84,18 @@ class Parser
                     if (!$curName) {
                         throw new ParseException("Unexpected token '=', expected annotation name");
                     }
-                    $state = self::S_JSON_START;
-                }
-                elseif ($curName) {
-                    throw new ParseException("Annotation already has a name: '$curName'");
+                    $state = self::S_JSON;
                 }
                 else {
                     $curName = trim($tok);
                 }
             }
-            elseif ($state == self::S_JSON_START) {
-                if (!trim($tok)) {
-                    continue;
-                }
-                elseif ($tok != '{') {
-                    throw new ParseException("Unexpected token '".trim($tok)."', expected JSON start '{'");
-                }
-                $jsonBuf = '{';
-                $jsonDepth = 1;
-                $state = self::S_JSON;
-            }
             elseif ($state == self::S_JSON) {
-                if ($tok == '{') {
-                    $jsonBuf .= $tok;
-                    ++$jsonDepth;
-                }
-                elseif ($tok == '}') {
-                    --$jsonDepth;
-                    if ($jsonDepth == 0) {
-                        $jsonBuf .= $tok;
-                        $parsed[$curName] = $jsonBuf;
-                        $curName = null;
-                        $jsonBuf = null;
-                        $state = self::S_NONE;
-                    }
-                    elseif ($jsonDepth > 0) {
-                        $jsonBuf .= $tok;
-                    }
-                    elseif ($jsonDepth < 0) {
-                        throw new \LogicException();    
-                    }
+                if ($tok[0] == ';') {
+                    $parsed[$curName] = $jsonBuf;
+                    $curName = null;
+                    $jsonBuf = null;
+                    $state = self::S_NONE;
                 }
                 else {
                     $jsonBuf .= $tok;
@@ -129,7 +104,7 @@ class Parser
         }
 
         if ($state == self::S_JSON) {
-            throw new ParseException("Unexpected end of JSON for key $curName");
+            throw new ParseException("Unexpected end of JSON for key '$curName'");
         }
         elseif ($state != self::S_NONE) {
             throw new ParseException("Unexpected end of definition for key '$curName'");

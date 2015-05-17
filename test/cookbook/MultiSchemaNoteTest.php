@@ -72,49 +72,46 @@ class MultiSchemaNoteTest extends \CustomTestCase
 }
 
 /**
- * @table schema_one.table_one
+ * :amiss = {"table": "schema_one.table_one"};
  */
 class MultiSchemaNoteTestOne
 {
-    /** 
-     * @primary
-     * @type autoinc 
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /** @field */
+    /** :amiss = {"field": true}; */
     public $oneName;
     
-    /**
-     * @field 
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}}; */
     public $twoId;
     
     /**
-     * @has.one.of MultiSchemaNoteTestTwo
-     * @has.one.from twoId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "MultiSchemaNoteTestTwo",
+     *     "from": "twoId"
+     * }};
      */
     public $two;
 }
 
 /**
- * @table schema_two.table_two
+ * :amiss = {"table": "schema_two.table_two"};
  */
 class MultiSchemaNoteTestTwo
 {
-    /** 
-     * @primary
-     * @type autoinc 
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /** @field */
+    /** :amiss = {"field": true}; */
     public $twoName;
     
     /**
-     * @has.many.of MultiSchemaNoteTestOne
-     * @has.many.to twoId
+     * :amiss = {"has": {
+     *     "type": "many",
+     *     "of"  : "MultiSchemaNoteTestOne",
+     *     "to"  : "twoId"
+     * }};
      */
     public $ones = array();
 }

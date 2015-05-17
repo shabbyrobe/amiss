@@ -20,3 +20,8 @@ branches:
 
 script: php test/run.php --with-mysql --exclude-group=faulty,faulty-sqlite,faulty-mysql
 
+matrix:
+  allowed_failures:
+    - php: 5.5
+    - php: 5.4
+

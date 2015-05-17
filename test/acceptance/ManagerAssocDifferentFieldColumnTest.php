@@ -60,70 +60,73 @@ namespace Amiss\Test\Acceptance
 namespace Amiss\Demo\AssocDifferentFieldColumn
 {
     /**
-     * @table adfc_artist
+     * :amiss = {"table": "adfc_artist"};
      */
     class Artist
     {
-        /**
-         * @primary
-         * @field artistid
-         */
+        /** :amiss = {"field": { "primary": true, "name": "artistId" }}; */
         public $id;
 
-        /** @field */
+        /** :amiss = {"field": true}; */
         public $name;
 
         /**
-         * @has.assoc.of Amiss\Demo\AssocDifferentFieldColumn\Event
-         * @has.assoc.via Amiss\Demo\AssocDifferentFieldColumn\EventArtist
+         * :amiss = {"has": {
+         *     "type": "assoc",
+         *     "of"  : "Amiss\\Demo\\AssocDifferentFieldColumn\\Event",
+         *     "via" : "Amiss\\Demo\\AssocDifferentFieldColumn\\EventArtist"
+         * }};
          */
         public $events;
     }
 
     /**
-     * @table adfc_event
+     * :amiss = {"table": "adfc_event"};
      */
     class Event
     {
-        /**
-         * @primary
-         * @field eventid
-         */
+        /** :amiss = {"field": {"primary": true, "name": "eventId"}}; */
         public $id;
 
-        /** @field */
+        /** :amiss = {"field": true}; */
         public $name;
 
-        /** 
-         * @has.assoc.of Amiss\Demo\AssocDifferentFieldColumn\Artist
-         * @has.assoc.via Amiss\Demo\AssocDifferentFieldColumn\EventArtist
+        /**
+         * :amiss = {"has": {
+         *     "type": "assoc",
+         *     "of"  : "Amiss\\Demo\\AssocDifferentFieldColumn\\Artist",
+         *     "via" : "Amiss\\Demo\\AssocDifferentFieldColumn\\EventArtist"
+         * }};
          */
         public $artists;
     }
 
     /**
-     * @table adfc_event_artist
+     * :amiss = {"table": "adfc_event_artist"};
      */
     class EventArtist
     {
-        /** @primary */
+        /** :amiss = {"field": {"primary": true}}; */
         public $eventId;
 
-        /**
-         * @primary
-         * @index
-         */
+        /** :amiss = {"field": {"primary": true, "index": true}}; */
         public $artistId;
 
         /**
-         * @has.one.of Amiss\Demo\AssocDifferentFieldColumn\Event
-         * @has.one.from primary
+         * :amiss = {"has": {
+         *     "type": "one",
+         *     "of"  : "Amiss\\Demo\\AssocDifferentFieldColumn\\Event",
+         *     "from": "primary"
+         * }};
          */
         public $event;
 
         /**
-         * @has.one.of Amiss\Demo\AssocDifferentFieldColumn\Artist
-         * @has.one.from artistId
+         * :amiss = {"has": {
+         *     "type": "one",
+         *     "of"  : "Amiss\\Demo\\AssocDifferentFieldColumn\\Artist",
+         *     "from": "artistId"
+         * }};
          */
         public $artist;
     }

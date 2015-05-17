@@ -15,9 +15,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testInsertReadOnlyClassFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @readOnly */
+            /** :amiss = {"readOnly": true}; */
             class Artist {
-                /** @primary */
+                /** :amiss = {"field": {"primary": true}}; */
                 public $artistId;
             }
         ');
@@ -30,9 +30,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testUpdateReadOnlyClassFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @readOnly */
+            /** :amiss = {"readOnly": true}; */
             class Artist {
-                /** @primary */
+                /** :amiss = {"field": {"primary": true}}; */
                 public $artistId;
             }
         ');
@@ -45,12 +45,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testSaveReadOnlyClassFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @readOnly */
+            /** :amiss = {"readOnly": true}; */
             class Artist {
-                /**
-                 * @primary
-                 * @type autoinc
-                 */
+                /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
                 public $artistId;
             }
         ');
@@ -63,12 +60,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testDeleteReadOnlyClassFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @readOnly */
+            /** :amiss = {"readOnly": true}; */
             class Artist {
-                /**
-                 * @primary
-                 * @type autoinc
-                 */
+                /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
                 public $artistId;
             }
         ');
@@ -81,9 +75,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testCanInsertDisabledFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @canInsert 0 */
+            /** :amiss = {"canInsert": false}; */
             class Artist {
-                /** @primary */
+                /** :amiss = {"field": {"primary": true}}; */
                 public $artistId;
             }
         ');
@@ -96,9 +90,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testCanUpdateDisabledFails()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @canUpdate 0 */
+            /** :amiss = {"canUpdate": false}; */
             class Artist {
-                /** @primary */
+                /** :amiss = {"field": {"primary": true}}; */
                 public $artistId;
             }
         ');
@@ -111,12 +105,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testCanInsertDisabledPreventsSave()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @canInsert 0 */
+            /** :amiss = {"canInsert": false}; */
             class Artist {
-                /**
-                 * @primary
-                 * @type autoinc
-                 */
+                /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
                 public $artistId;
             }
         ');
@@ -128,12 +119,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testCanUpdateDisabledPreventsSave()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @canUpdate 0 */
+            /** :amiss = {"canUpdate": false}; */
             class Artist {
-                /**
-                 * @primary
-                 * @type autoinc
-                 */
+                /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
                 public $artistId;
             }
         ');
@@ -146,12 +134,9 @@ class ClassPermissionsTest extends \CustomTestCase
     public function testCanDeleteDisabled()
     {
         $c = self::createFnScopeClass('Artist', '
-            /** @canDelete 0 */
+            /** :amiss = {"canDelete": false}; */
             class Artist {
-                /**
-                 * @primary
-                 * @type autoinc
-                 */
+                /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
                 public $artistId;
             }
         ');

@@ -177,7 +177,7 @@ class Meta
     {
         foreach ($indexes as $name=>&$index) {
             if (isset($this->indexes[$name])) {
-                throw new Exception("Duplicate index name $indexName on {$this->class}");
+                throw new Exception("Duplicate index name '$name' on {$this->class}");
             }
             if (!isset($index['key'])) {
                 $index['key'] = false;
@@ -200,14 +200,24 @@ class Meta
         $primary = [];
         $indexes = [];
         foreach ($fields as $name=>&$field) {
+            if ($field === true) {
+                $field = [];
+            } elseif (is_string($field)) {
+                $field = ['name'=>$field];
+            }
             if (!is_array($field)) {
                 throw new \UnexpectedValueException();
             }
             if (!isset($field['name'])) {
                 $field['name'] = $name;
             }
-            if (isset($field['type']) && !is_array($field['type'])) {
-                $field['type'] = array('id'=>$field['type']);
+            if (isset($field['type'])) {
+                if (!is_array($field['type'])) {
+                    $field['type'] = array('id'=>$field['type']);
+                }
+            }
+            else {
+                $field['type'] = null;
             }
             if (isset($field['primary'])) {
                 $primary[] = $name;
@@ -217,13 +227,12 @@ class Meta
                 if ($index === true) {
                     $index = [];
                 } elseif (!is_array($index)) {
-                    throw new Exception();
+                    throw new Exception("Invalid index '$name': index must either be boolean or an array of index metadata");
                 }
-                $indexName = $name;
                 if (!isset($index['fields'])) {
                     $index['fields'] = [$name];
                 }
-                $indexes[$indexName] = $index;
+                $indexes[$name] = $index;
             }
         }
         $this->fields = $fields;

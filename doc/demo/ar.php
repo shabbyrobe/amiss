@@ -2,33 +2,29 @@
 namespace Amiss\Demo\Active;
 
 /**
- * :amiss = {"table": "artist"}
+ * :amiss = {"table": "artist"};
  */
 class ArtistRecord extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": {"primary": true, "type": "autoinc"}} */
+    /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
     public $artistId;
     
-    /** :amiss = {"field": {"index": true}} */
+    /** :amiss = {"field": {"index": true}}; */
     public $artistTypeId;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $name;
     
-    /** :amiss = {"field": {"index": {"key": true}}} */
+    /** :amiss = {"field": {"index": {"key": true}}}; */
     public $slug;
     
-    /** :amiss = {"field": {"type": "LONGTEXT"}} */
+    /** :amiss = {"field": {"type": "LONGTEXT"}}; */
     public $bio;
 
     private $type;
     
     /**
-     * :amiss = {"has": {
-     *     "type": "assoc",
-     *     "of"  : "Event",
-     *     "via" : "EventArtist"
-     * }}
+     * :amiss = {"has": {"type": "one", "of": "ArtistType", "from": "artistTypeId"}};
      */
     public function getType()
     {
@@ -41,13 +37,13 @@ class ArtistRecord extends \Amiss\Sql\ActiveRecord
 
 class ArtistType extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $artistTypeId;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $type;
     
-    /** :amiss = {"field": {"readOnly": true}} */
+    /** :amiss = {"field": {"readOnly": true}}; */
     public function getSlug()
     {
         return trim(preg_replace('/[^a-z\d]+/', '-', strtolower($this->type)), '-');
@@ -58,9 +54,9 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
     /**
      * :amiss = {"has": {
      *     "type": "many",
-     *     "of"  : "Artist",
+     *     "of"  : "ArtistRecord",
      *     "to"  : "artistTypeId"
-     * }}
+     * }};
      */
     public function getArtists()
     {
@@ -72,29 +68,29 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
 }
 
 /**
- * :amiss = {"table": "event"}
+ * :amiss = {"table": "event"};
  */
 class EventRecord extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $eventId;
     
-    /** :amiss = {"field": {"type": "datetime"}} */
+    /** :amiss = {"field": {"type": "datetime"}}; */
     public $dateStart;
     
-    /** :amiss = {"field": {"type": "datetime"}} */
+    /** :amiss = {"field": {"type": "datetime"}}; */
     public $dateEnd;
     
-    /** :amiss = {"field": {"index": true}} */
+    /** :amiss = {"field": {"index": true}}; */
     public $venueId;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": {"type": "VARCHAR(128)"}}; */
     public $name;
     
-    /** :amiss = {"field": "sub_name"} */
+    /** :amiss = {"field": "sub_name"}; */
     public $subName;
     
-    /** :amiss = {"field": {"index": {"key": true}}} */
+    /** :amiss = {"field": {"index": {"key": true}}}; */
     public $slug;
     
     private $eventArtists;
@@ -105,7 +101,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
     private $venue;
     
     /**
-     * :amiss = {"has": {"type": "one", "of": "VenueRecord", "from": "venueId"}}
+     * :amiss = {"has": {"type": "one", "of": "VenueRecord", "from": "venueId"}};
      */
     public function getVenue()
     {
@@ -120,7 +116,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
      *     "type"   : "many",
      *     "of"     : "EventArtist",
      *     "inverse": "event"
-     * }}
+     * }};
      */
     public function getEventArtists()
     {
@@ -134,97 +130,97 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
 /**
  * :amiss = {
  *     "relations": {
- *         "event": {"type": "one", "of"  : "Event", "from": "eventId"}
+ *         "event": {"type": "one", "of": "EventRecord", "from": "eventId"}
  *     }
- * }
+ * };
  */
 class Ticket extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $ticketId;
 
-    /** :amiss = {"field": { "index": true }} */
+    /** :amiss = {"field": { "index": true }}; */
     public $eventId;
 
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $name;
 
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $cost;
 
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $numAvailable;
 
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $numSold;
 }
 
 class PlannedEvent extends EventRecord
 {
-    /** :amiss = {"field": {"type": "tinyint"}} */
+    /** :amiss = {"field": {"type": "tinyint"}}; */
     public $completeness;
 }
 
 class EventArtist extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": { "primary": true }} */
+    /** :amiss = {"field": { "primary": true }}; */
     public $eventId;
     
-    /** :amiss = {"field": { "primary": true, "index": true }} */
+    /** :amiss = {"field": { "primary": true, "index": true }}; */
     public $artistId;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $priority;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $sequence;
     
-    /** :amiss = {"field": true} */
+    /** :amiss = {"field": true}; */
     public $eventArtistName;
     
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "Event"
-     * }}
-     * @var Amiss\Demo\Event
+     *     "of"  : "EventRecord"
+     * }};
+     * @var Amiss\Demo\Active\EventRecord
      */
     public $event;
     
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "Artist",
+     *     "of"  : "ArtistRecord",
      *     "from": "artistId"
-     * }}
-     * @var Amiss\Demo\Artist
+     * }};
+     * @var Amiss\Demo\Active\ArtistRecord
      */
     public $artist;
 }
 
 /**
- * :amiss = {"table": "venue"}
+ * :amiss = {"table": "venue"};
  */
 class VenueRecord extends \Amiss\Sql\ActiveRecord
 {
-    /** :amiss = {"field": { "primary": true, "type": "autoinc" }} */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $venueId;
     
-    /** :amiss = {"field": "name"} */
+    /** :amiss = {"field": "name"}; */
     public $venueName;
     
-    /** :amiss = {"field": "slug"} */
+    /** :amiss = {"field": "slug"}; */
     public $venueSlug;
     
-    /** :amiss = {"field": "address"} */
+    /** :amiss = {"field": "address"}; */
     public $venueAddress;
     
-    /** :amiss = {"field": "shortAddress"} */
+    /** :amiss = {"field": "shortAddress"}; */
     public $venueShortAddress;
     
-    /** :amiss = {"field": "latitude"} */
+    /** :amiss = {"field": "latitude"}; */
     public $venueLatitude;
     
-    /** :amiss = {"field": "longitude"} */
+    /** :amiss = {"field": "longitude"}; */
     public $venueLongitude;
 }

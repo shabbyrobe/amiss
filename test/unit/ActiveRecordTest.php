@@ -248,26 +248,26 @@ class ActiveRecordTest extends \DataTestCase
 }
 
 /**
- * @table table_1
+ * :amiss = {"table": "table_1"};
  */
 class TestActiveRecord1 extends \Amiss\Sql\ActiveRecord
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $fooBar;
 }
 
 /**
- * @table table_2
+ * :amiss = {"table": "table_2"};
  */
 class TestActiveRecord2 extends \Amiss\Sql\ActiveRecord
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $testActiveRecord2Id;
 }
 
 class TestActiveRecord3 extends \Amiss\Sql\ActiveRecord
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $testActiveRecord3Id;
 }
 
@@ -279,29 +279,29 @@ class TestOtherConnRecord2 extends OtherConnBase {}
 
 class TestRelatedParent extends \Amiss\Sql\ActiveRecord
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $parentId;
     
     /**
-     * @has.many.of TestRelatedChild
+     * :amiss = {"has": {"type": "many", "of": "TestRelatedChild"}};
      */
     public $children;
 }
 
 class TestRelatedChild extends \Amiss\Sql\ActiveRecord
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $childId;
     
-    /**
-     * @field 
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}}; */
     public $parentId;
     
     /**
-     * @has.one.of TestRelatedParent
-     * @has.one.from parentId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "TestRelatedParent",
+     *     "from": "parentId"
+     * }};
      */
     public $parent;
 }

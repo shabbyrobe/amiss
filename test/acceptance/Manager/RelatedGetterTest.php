@@ -58,23 +58,23 @@ class RelatedGetterTest extends \CustomTestCase
     }
 }
 
-/** @table child */
+/** :amiss = {"table": "child"}; */
 class RelatedGetterTestChild
 {
-    /** @primary */
+    /** :amiss = {"field": {"primary": true}}; */
     public $id;
 
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}}; */
     public $parentId;
 
     private $parent;
 
     /**
-     * @has.one.of Amiss\Test\Acceptance\Manager\RelatedGetterTestParent
-     * @has.one.from parentId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "Amiss\\Test\\Acceptance\\Manager\\RelatedGetterTestParent",
+     *     "from": "parentId"
+     * }};
      */
     public function getParent()
     {
@@ -88,20 +88,21 @@ class RelatedGetterTestChild
 }
 
 /**
- * @table parent
+ * :amiss = {"table": "parent"};
  */
 class RelatedGetterTestParent
 {
-    /**
-     * @primary
-     */
+    /** :amiss = {"field": {"primary": true}}; */
     public $id;
 
     private $children;
 
     /**
-     * @has.many.of Amiss\Test\Acceptance\Manager\RelatedGetterTestChild
-     * @has.many.inverse parent
+     * :amiss = {"has": {
+     *     "type": "many",
+     *     "of": "Amiss\\Test\\Acceptance\\Manager\\RelatedGetterTestChild",
+     *     "inverse": "parent"
+     * }};
      */
     public function getChildren()
     {

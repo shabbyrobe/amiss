@@ -83,42 +83,39 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
 
 class MultiSchemaTranslatorTestOne
 {
-    /** 
-     * @primary
-     * @type autoinc 
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /** @field */
+    /** :amiss = {"field": true}; */
     public $oneName;
     
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}}; */
     public $twoId;
     
     /**
-     * @has.one.of MultiSchemaTranslatorTestTwo
-     * @has.one.from twoId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "MultiSchemaTranslatorTestTwo",
+     *     "from": "twoId"
+     * }};
      */
     public $two;
 }
 
 class MultiSchemaTranslatorTestTwo
 {
-    /** 
-     * @primary
-     * @type autoinc 
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /** @field */
+    /** :amiss = {"field": true}; */
     public $twoName;
     
     /**
-     * @has.many.of MultiSchemaTranslatorTestOne
-     * @has.many.to twoId
+     * :amiss = {"has": {
+     *     "type": "many",
+     *     "of": "MultiSchemaTranslatorTestOne",
+     *     "to": "twoId"
+     * }};
      */
     public $ones = array();
 }

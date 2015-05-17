@@ -60,32 +60,20 @@ class TableBuilderCustomTypeTest extends \CustomTestCase
 }
 
 /**
- * @table bar
+ * :amiss = {"table": "bar"};
  */
 class TestCreateWithCustomType
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $testCreateId;
     
-    /**
-     * @field
-     * @type slappywag
-     */
+    /** :amiss = {"field": {"type": "slappywag"}}; */
     public $foo1;
     
-    /**
-     * @field
-     * @type slappywag
-     */
+    /** :amiss = {"field": {"type": "slappywag"}}; */
     public $foo2;
     
-    /**
-     * @field
-     * @type int unsigned not null
-     */
+    /** :amiss = {"field": {"type": "int unsigned not null"}}; */
     public $pants;
 }
 

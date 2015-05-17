@@ -14,6 +14,8 @@ class Note extends \Amiss\Mapper\Base
      * @var Amiss\Note\Parser
      */
     public $parser;
+
+    public $annotationNamespace = 'amiss';
     
     public function __construct($cache=null, $parser=null)
     {
@@ -51,7 +53,7 @@ class Note extends \Amiss\Mapper\Base
         $notes = $this->parser->parseClass($ref);
         $classNotes = $notes->notes;
 
-        $info = isset($classNotes['amiss']) ? $classNotes['amiss'] : [];
+        $info = isset($classNotes[$this->annotationNamespace]) ? $classNotes[$this->annotationNamespace] : [];
 
         table: {
             $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
@@ -91,14 +93,17 @@ class Note extends \Amiss\Mapper\Base
  
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $noteType=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
-                if (!isset($itemNotes['amiss'])) {
+                if (!isset($itemNotes[$this->annotationNamespace])) {
                     continue;
                 }
 
-                $itemNotes = $itemNotes['amiss'];
+                $itemNotes = $itemNotes[$this->annotationNamespace];
 
                 field: if (isset($itemNotes['field'])) {
                     $field = $itemNotes['field'];
+                    // NOTE: do not ensure $field['name'] is set here - it happens later in
+                    // one big hit.
+
                     if ($field === true) {
                         $field = [];
                     } elseif (is_string($field)) {
@@ -112,11 +117,7 @@ class Note extends \Amiss\Mapper\Base
                     } else {
                         $key = $name;
                     }
-                    
-                    if (!isset($field['name'])) {
-                        $field['name'] = $key;
-                    }
-
+ 
                     $info['fields'][$key] = $field;
                 }
                 
@@ -128,8 +129,11 @@ class Note extends \Amiss\Mapper\Base
                     }
                     $relation = $itemNotes['has'];
                     if (is_string($relation)) {
-                        $relation = [$relation];
-                    } elseif (!isset($relation['type'])) {
+                        $relation = ["type"=>$relation];
+                    } elseif (!is_array($relation)) {
+                        throw new \UnexpectedValueException();
+                    }
+                    if (!isset($relation['type'])) {
                         throw new \UnexpectedValueException("Relation $name missing 'type'");
                     }
                     $type = $relation['type'];
@@ -148,12 +152,18 @@ class Note extends \Amiss\Mapper\Base
                 }
 
                 constructor: if ($noteType == 'method' && isset($itemNotes['constructor'])) {
-                    if ($info['constructor']) {
+                    if (isset($info['constructor']) && $info['constructor']) {
                         throw new \UnexpectedValueException("Constructor already declared: {$info['constructor']}");
                     }
                     $info['constructor'] = $name;
-                    if (isset($itemNotes['constructor']['args'])) {
-                        $info['constructorArgs'] = $this->parseConstructorArgs($itemNotes['constructor']['args']);
+                    if ($itemNotes['constructor'] !== true) {
+                        if (!is_array($itemNotes['constructor'])) {
+                            throw new \UnexpectedValueException();
+                        }
+                        if (isset($info['constructorArgs']) && $info['constructorArgs']) {
+                            throw new \UnexpectedValueException("Constructor args declared at class level and also on method $name.");
+                        }
+                        $info['constructorArgs'] = $itemNotes['constructor'];
                     }
                 }
             }

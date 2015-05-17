@@ -129,41 +129,24 @@ class EmbedTest extends \ModelDataTestCase
 
 class TestEmbedOneParent
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
 
-    /**
-     * @field
-     * @type.id embed
-     * @type.class TestEmbedChild
-     */
+    /** :amiss = {"field": {"type": {"id": "embed", "class": "TestEmbedChild"}}}; */
     public $child;
 }
 
 class TestEmbedManyParent
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /**
-     * @field
-     * @type.id embed
-     * @type.class TestEmbedChild
-     * @type.many
-     */
+    /** :amiss = {"field": {"type": {"id": "embed", "class": "TestEmbedChild", "many": true}}}; */
     public $children = array();
 }
 
 class TestEmbedChild
 {
-    /**
-     * @field pants
-     */
+    /** :amiss = {"field": "pants"}; */
     public $foo;
 }

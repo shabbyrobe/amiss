@@ -13,10 +13,10 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithDefinedTable()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', "
-            /** @table custom_table */
+        $class = $this->createFnScopeClass('Test', '
+            /** :amiss = {"table": "custom_table"}; */
             class Test {}
-        ");
+        ');
         $meta = $mapper->getMeta($class);
         $this->assertEquals('custom_table', $meta->table);
     }
@@ -75,8 +75,11 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @primary */ public $id1;
-                /** @primary */ public $id2;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $id1;
+
+                /** :amiss = {"field": {"primary": true}}; */
+                public $id2;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -91,11 +94,10 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @field */ public $foo;
-                /** @field */ public $bar;
+                /** :amiss = {"field": true}; */ public $foo;
+                /** :amiss = {"field": true}; */ public $bar;
             }
         ');
-        
         $meta = $mapper->getMeta($class);
         $this->assertEquals(array('foo', 'bar'), array_keys($meta->getFields()));
     }
@@ -110,7 +112,7 @@ class NoteMapperTest extends \CustomTestCase
             class Test {
                 public $notAField;
                 
-                /** @field */ public $yepAField;
+                /** :amiss = {"field": true}; */ public $yepAField;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -125,7 +127,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @field */
+                /** :amiss = {"field": true}; */
                 public function getFoo(){}
                 public function setFoo($value){} 
             }
@@ -141,10 +143,10 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithDefinedConstructor()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', "
-            /** @constructor pants */
+        $class = $this->createFnScopeClass('Test', '
+            /** :amiss = {"constructor": "pants"}; */
             class Test {}
-        ");
+        ');
         $meta = $mapper->getMeta($class);
         $this->assertEquals('pants', $meta->constructor);
     }
@@ -155,10 +157,10 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaWithDefaultConstructor()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', "
-            /** @table pants */
+        $class = $this->createFnScopeClass('Test', '
+            /** :amiss = {"table": "pants"}; */
             class Test {}
-        ");
+        ');
         $meta = $mapper->getMeta($class);
         $this->assertEquals('__construct', $meta->constructor);
     }
@@ -171,7 +173,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @primary */ public $id;
+                /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -186,15 +188,21 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /**
-                 * @primary
-                 * @type autoinc 
-                 */ 
+                /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
             }
         ');
         $meta = $mapper->getMeta($class);
-        $this->assertEquals(array('id'=>array('name'=>'id', 'type'=>array('id'=>'autoinc'))), $meta->getFields());
+        $this->assertEquals(
+            array(
+                'id'=>array(
+                    'name'=>'id',
+                    'type'=>array('id'=>'autoinc'),
+                    'primary'=>true,
+                )
+            ),
+            $meta->getFields()
+        );
     }
     
     /**
@@ -205,7 +213,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @primary */ public $id;
+                /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -220,8 +228,8 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** @primary */ public $idPart1;
-                /** @primary */ public $idPart2;
+                /** :amiss = {"field": {"primary": true}}; */ public $idPart1;
+                /** :amiss = {"field": {"primary": true}}; */ public $idPart2;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -236,11 +244,8 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Test', '
             class Test {
-                /** 
-                 * @field
-                 * @type foobar
-                 */
-                 public $id;
+                /** :amiss = {"field": {"type": "foobar"}}; */
+                public $id;
             }
         ');
         $meta = $mapper->getMeta($class);
@@ -256,12 +261,14 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class1 = $this->createFnScopeClass("Test1", '
             class Test1 {
-                /** @field */ public $foo;
+                /** :amiss = {"field": true}; */
+                public $foo;
             }
         ');
         $class2 = $this->createFnScopeClass("Test2", '
             class Test2 extends Test1 {
-                /** @field */ public $bar;
+                /** :amiss = {"field": true}; */
+                public $bar;
             }
         ');
         
@@ -279,14 +286,20 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Foo', '
             class Foo {
-                /** @primary */ public $id;
-                /** @field */   public $barId;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $id;
+
+                /** :amiss = {"field": true}; */
+                public $barId;
 
                 private $bar;
                 
                 /** 
-                 * @has.one.of Bar
-                 * @has.one.from barId
+                 * :amiss = {"has": {
+                 *     "type": "one",
+                 *     "of"  : "Bar",
+                 *     "from": "barId"
+                 * }};
                  */
                 public function getBar() { return $this->bar; }
             }
@@ -303,15 +316,15 @@ class NoteMapperTest extends \CustomTestCase
      */
     public function testPrimaryFieldTranslation()
     {
-        $class = $this->createFnScopeClass('Foo', "
+        $class = $this->createFnScopeClass('Foo', '
             class Foo {
-                /** @primary */
-                public \$fooBarBaz;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $fooBarBaz;
 
-                /** @field */
-                public \$bazQuxDing;
+                /** :amiss = {"field": true}; */
+                public $bazQuxDing;
             }
-        ");
+        ');
 
         $mapper = new \Amiss\Mapper\Note;
         $mapper->unnamedPropertyTranslator = new \Amiss\Name\CamelToUnderscore();
@@ -331,15 +344,21 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $class = $this->createFnScopeClass('Foo', '
             class Foo {
-                /** @primary */ public $id;
-                /** @field */   public $barId;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $id;
+
+                /** :amiss = {"field": true}; */
+                public $barId;
                 
                 private $bar;
                 
                 /** 
-                 * @has.one.of Bar
-                 * @has.one.from barId
-                 * @setter setLaDiDaBar
+                 * :amiss = {"has": {
+                 *     "type"  : "one",
+                 *     "of"    : "Bar",
+                 *     "from"  : "barId",
+                 *     "setter": "setLaDiDaBar"
+                 * }};
                  */
                 public function getBar()             { return $this->bar; }
                 public function setLaDiDaBar($value) { $this->bar = $value; }
@@ -359,24 +378,24 @@ class NoteMapperTest extends \CustomTestCase
     public function testGetMetaOneToManyPropertyRelationWithNoOn()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class1 = $this->createFnScopeClass("Class1", "
+        $class1 = $this->createFnScopeClass("Class1", '
             class Class1 {
-                /** @primary */ 
-                public \$class1id;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $class1id;
                 
-                /** @field */ 
-                public \$class2Id;
+                /** :amiss = {"field": true}; */
+                public $class2Id;
                 
-                /** @has.many.of Class2 */
-                public \$class2;
+                /** :amiss = {"has": {"type": "many", "of": "Class2"}}; */
+                public $class2;
             }
-        ");
-        $class2 = $this->createClass("Class2", "
+        ');
+        $class2 = $this->createFnScopeClass("Class2", '
             class Class2 {
-                /** @primary */ 
-                public \$class2Id;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $class2Id;
             }
-        ");
+        ');
         $meta = $mapper->getMeta($class1);
         $expected = array(
             'class2'=>array('many', 'of'=>"Class2", 'name'=>'class2', 'mode'=>'default')
@@ -393,7 +412,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Class1", '
             class Class1 {
-                /** @has test */ 
+                /** :amiss = {"has": "test"}; */
                 public $test;
             }
         ');
@@ -408,9 +427,10 @@ class NoteMapperTest extends \CustomTestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
-            /** @index.foo.fields[] a */
+            /** :amiss = {"indexes": {"foo": {"fields": ["a"]}}}; */
             class Test {
-                /** @field */ public $a;
+                /** :amiss = {"field": true}; */
+                public $a;
             }
         ');
         $meta = $mapper->getMeta($name);
@@ -423,11 +443,15 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             /** 
-             * @index.foo.fields[] a
-             * @index.foo.key
+             * :amiss = {
+             *     "indexes": {
+             *        "foo": {"fields": ["a"], "key": true}
+             *     }
+             * };
              */
             class Test {
-                /** @field */ public $a;
+                /** :amiss = {"field": true}; */
+                public $a;
             }
         ');
         $meta = $mapper->getMeta($name);
@@ -440,11 +464,13 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             /** 
-             * @index.foo.fields[] b
-             * @index.foo.fields[] a
+             * :amiss = {"indexes": {
+             *    "foo": {"fields": ["b", "a"]}
+             * }};
              */
             class Test {
-                /** @field */ public $a;
+                /** :amiss = {"field": true}; */
+                public $a;
             }
         ');
         $meta = $mapper->getMeta($name);
@@ -457,35 +483,28 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             /** 
-             * @index.foo.key
+             * :amiss = {"indexes": {"a": {"fields": ["a"], "key": true}}};
              */
             class Test {
-                /**
-                 * @field
-                 * @index foo
-                 */
+                /** :amiss = {"field": {"index": true}}; */
                  public $a;
             }
         ');
-        $this->setExpectedException(\Amiss\Exception::class, "Index foo already defined");
+        $this->setExpectedException(\Amiss\Exception::class, "Duplicate index name 'a' on Amiss\\Test\\");
         $meta = $mapper->getMeta($name);
     }
 
-    public function testGetMetaWithStringFieldIndex()
+    public function testGetMetaWithStringFieldIndexFails()
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /** 
-                 * @field 
-                 * @index foo
-                 */
+                /** :amiss = {"field": {"index": "foo"}}; */
                 public $a;
             }
         ');
+        $this->setExpectedException(\Amiss\Exception::class, "Invalid index 'a': index must either be boolean or an array of index metadata");
         $meta = $mapper->getMeta($name);
-        $expected = ['foo'=>['fields'=>['a'], 'key'=>false]];
-        $this->assertEquals($expected, $meta->indexes);
     }
 
     public function testGetMetaWithStringFieldKey()
@@ -493,32 +512,13 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /** 
-                 * @field 
-                 * @key foo
-                 */
+                /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $a;
             }
         ');
         $meta = $mapper->getMeta($name);
-        $expected = ['foo'=>['fields'=>['a'], 'key'=>true]];
+        $expected = ['a'=>['fields'=>['a'], 'key'=>true]];
         $this->assertEquals($expected, $meta->indexes);
-    }
-
-    public function testGetMetaWithBadTypeFails()
-    {
-        $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
-            class Test {
-                /** 
-                 * @field 
-                 * @index.foo
-                 */
-                public $a;
-            }
-        ');
-        $this->setExpectedException(\Amiss\Exception::class);
-        $meta = $mapper->getMeta($name);
     }
 
     public function testGetMetaAutoNamedIndexFromGetter()
@@ -528,10 +528,7 @@ class NoteMapperTest extends \CustomTestCase
             class Test {
                 private $field;
                 
-                /**
-                 * @field
-                 * @index
-                 */
+                /** :amiss = {"field": {"index": true}}; */
                 public function getField()   { return $this->field; }
                 public function setField($v) { $this->field = $v;   }
             }
@@ -551,10 +548,7 @@ class NoteMapperTest extends \CustomTestCase
             class Test {
                 private $field;
                 
-                /**
-                 * @field
-                 * @key
-                 */
+                /** :amiss = {"field": {"index": {"key": true}}}; */
                 public function getField()   { return $this->field; }
                 public function setField($v) { $this->field = $v;   }
             }
@@ -572,10 +566,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /**
-                 * @field
-                 * @index
-                 */
+                /** :amiss = {"field": {"index": true}}; */
                 public $field;
             }
         ');
@@ -592,10 +583,7 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /**
-                 * @field
-                 * @key
-                 */
+                /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $field;
             }
         ');
@@ -613,7 +601,7 @@ class NoteMapperTest extends \CustomTestCase
         $name = $this->createFnScopeClass("Test", '
             class Test {
                 private $field;
-                /** @primary */
+                /** :amiss = {"field": {"primary": true}}; */
                 public function getField() { return $this->field; }
                 public function setField($v) { $this->field = $v; }
             }
@@ -630,7 +618,7 @@ class NoteMapperTest extends \CustomTestCase
 
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /** @constructor */
+                /** :amiss = {"constructor": true}; */
                 public static function foo() {}
             }
         ');
@@ -645,7 +633,9 @@ class NoteMapperTest extends \CustomTestCase
         $name = $this->createFnScopeClass("Test", '
             class Test {
                 /**
-                 * @constructor.args[] relation:pants
+                 * :amiss = {"constructor": [
+                 *      ["relation", "pants"]
+                 * ]};
                  */
                 public static function foo() {}
             }
@@ -662,7 +652,9 @@ class NoteMapperTest extends \CustomTestCase
         $name = $this->createFnScopeClass("Test", '
             class Test {
                 /**
-                 * @constructor.args[] relation:pants
+                 * :amiss = {"constructor": [
+                 *     ["relation", "pants"]
+                 * ]};
                  */
                 public function __construct()
                 {}
@@ -680,8 +672,10 @@ class NoteMapperTest extends \CustomTestCase
         $name = $this->createFnScopeClass("Test", '
             class Test {
                 /**
-                 * @constructor.args[] relation:pants
-                 * @constructor.args[] field:foo
+                 * :amiss = {"constructor": [
+                 *     ["relation", "pants"],
+                 *     ["field"   , "foo"]
+                 * ]};
                  */
                 public static function foo($a, $b) {}
             }
@@ -691,13 +685,13 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals([['relation', 'pants'], ['field', 'foo']], $meta->constructorArgs);
     }
 
-    public function testGetMetaField()
+    public function testGetMetaFieldWithStringName()
     {
         $mapper = new \Amiss\Mapper\Note;
 
         $name = $this->createFnScopeClass("Test", '
             class Test {
-                /** @field bar */
+                /** :amiss = {"field": "bar"}; */
                 public $foo;
             }
         ');
@@ -710,7 +704,12 @@ class NoteMapperTest extends \CustomTestCase
         $mapper = new \Amiss\Mapper\Note;
         $name = $this->createFnScopeClass('Test', '
             /**
-             * @relation[foo].one.of Pants
+             * :amiss = {"relations": {
+             *     "foo": {
+             *         "type": "one",
+             *         "of"  : "Pants"
+             *     }
+             * }};
              */
             class Test {
             }

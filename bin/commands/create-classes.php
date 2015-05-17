@@ -3,137 +3,102 @@
 require_once __DIR__.'/../../vendor/autoload.php';
 require_once __DIR__.'/../lib/functions.php';
 
-$usage = "amiss create-classes [OPTIONS] OUTDIR
-
+$usage = <<<'DOCOPT'
 Creates classes from an existing database
 
+Usage: amiss create-classes [options] <outdir>
+
 Options:
-  --namespace     Place all records in this namespace (make sure you quote!)
-  --dsn           Database DSN to use.
-  --base          Base class to use for created classes
-  --ars           Equivalent to --base \Amiss\Sql\ActiveRecord
-  -u, --user      Database user
-  -p              Prompt for database password 
-  --password      Database password (don't use this - use -p instead)
-  --words w1[,w2] Comma separated word list file for table name translation
-  --wfile file    Word list file for table name translation
+  --namespace <ns>   Place all records in this namespace (make sure you quote!)
+  --dsn <dsn>        Database DSN to use.
+  --base <base>      Base class to use for created classes
+  --ars              Equivalent to --base \Amiss\Sql\ActiveRecord
+  -u, --user <user>  Database user
+  -p                 Prompt for database password 
+  --getset           Use getters/setters instead of fields
+  --password <pass>  Database password (don't use this, use -p instead)
+  --words <words>    Comma separated word list file for table name translation
+  --wfile <file>     Word list file for table name translation
 
 Word list:
   Some databases don't have a table name separator. Pass a list or path to a
   list of words (all lower case) separated by newlines and these will be
   used to determine PascalCasing
-";
+DOCOPT;
 
-$outdir = null;
-$namespace = null;
-$dsn = null;
-$prompt = false;
-$user = null;
-$password = null;
-$words = null;
-$wfile = null;
-$base = null;
+$options = (new \Docopt\Handler)->handle($usage);
+$mapper = new \Amiss\Mapper\Arrays;
+$meta = new \Amiss\Meta('stdClass', '', [
+    'fields'=>[
+        'outdir'=>'<outdir>',
+        'namespace'=>'--namespace',
+        'dsn'=>'--dsn',
+        'prompt'=>'-p',
+        'user'=>'--user',
+        'password'=>'--password',
+        'words'=>'--words',
+        'wfile'=>'--wfile',
+        'base'=>'--base',
+        'getset'=>'--getset',
+    ]
+]);
+$options = $mapper->toObject($options, null, $meta);
 
-$iter = new ArrayIterator(array_slice($argv, 1));
-foreach ($iter as $v) {
-    if ($v == '--user' || $v == '-u') {
-        $iter->next();
-        $user = $iter->current();
-    }
-    elseif ($v == '--namespace') {
-        $iter->next();
-        $namespace = $iter->current();
-    }
-    elseif ($v == '--password') {
-        $iter->next();
-        $password = $iter->current();
-    }
-    elseif ($v == '--ars') {
-        $base = '\Amiss\Sql\ActiveRecord';
-    }
-    elseif ($v == '--base') {
-        $iter->next();
-        $base = $iter->current();
-    }
-    elseif ($v == '--password') {
-        $iter->next();
-        $password = $iter->current();
-    }
-    elseif ($v == '-p') {
-        $prompt = true;
-    }
-    elseif ($v == '--dsn') {
-        $iter->next();
-        $dsn = $iter->current();
-    }
-    elseif ($v == '--words') {
-        $iter->next();
-        $words = $iter->current();
-    }
-    elseif ($v == '--wfile') {
-        $iter->next();
-        $wfile = $iter->current();
-    }
-    elseif (strpos($v, '--')===0 || $outdir) {
-        echo "Invalid arguments\n\n";
-        echo $usage;
-        exit(1);
-    }
-    else {
-        $outdir = $v;
-    }
+if ($options->base && $options->ars) {
+    die("Cannot pass --base and --ars\n");
 }
 
-$outdir = $outdir ? realpath($outdir) : null;
+$options->outdir = $options->outdir ? realpath($options->outdir) : null;
 
-if (!$outdir || !is_writable($outdir)) {
+if (!$options->outdir || !is_writable($options->outdir)) {
     echo "Outdir not passed, missing or not writable\n\n";
     echo $usage;
     exit(1);
 }
 
-if (!$dsn) {
+if (!$options->dsn) {
     echo "DSN not specified\n\n";
     echo $usage;
     exit(1);
 }
 
-if ($prompt) {
-    $password = prompt_silent("Password: ");
+if ($options->prompt) {
+    $options->password = prompt_silent("Password: ");
 }
-
-if (is_string($words))
-    $words = explode(',', $words);
-
-if (!$words)
-    $words = array();
-
-if ($wfile) {
-    $words = array_merge($words, explode("\n", trim(file_get_contents($wfile))));
+if (is_string($options->words)) {
+    $options->words = explode(',', $options->words);
+}
+if (!$options->words) {
+    $options->words = array();
+}
+if ($options->wfile) {
+    $options->words = array_merge(
+        $options->words,
+        explode("\n", trim(file_get_contents($options->wfile)))
+    );
 }
 
 $sep = '_';
 
-$wtmp = $words;
-$words = array();
+$wtmp = $options->words;
+$options->words = array();
 foreach ($wtmp as $w) {
     $w = trim($w);
     if ($w) {
         $w = strtolower($w);
         $v = $w.$sep;
-        $words[$w] = $v;
+        $options->words[$w] = $v;
     }
 }
 
-$words = array_unique($words);
+$options->words = array_unique($options->words);
 
-$connector = new \PDOK\Connector($dsn, $user, $password);
+$connector = new \PDOK\Connector($options->dsn, $options->user, $options->password);
 $stmt = $connector->query("SHOW TABLES");
 while ($table = $stmt->fetchColumn()) {
-    $oname = strtr($table, $words);
+    $oname = strtr($table, $options->words);
     $oname = preg_replace('/\d+/', '$0'.$sep, $oname);
     $oname = ucfirst(preg_replace_callback('/'.preg_quote($sep, '/').'(.)/', function($match) { return strtoupper($match[1]); }, rtrim($oname, $sep)));
-    
     
     $tableFields = $connector->query("SHOW FULL FIELDS FROM $table")->fetchAll(\PDO::FETCH_ASSOC);
     
@@ -187,25 +152,48 @@ while ($table = $stmt->fetchColumn()) {
     */
     
     $output = "<?php\n\n";
-    if ($namespace) {
-        $output .= "namespace $namespace;\n\n";
+    if ($options->namespace) {
+        $output .= "namespace {$options->namespace};\n\n";
     }
     
-    $output .= "/**\n * @table ".addslashes($table)."\n */\n";
-    $output .= "class ".$oname.($base ? " extends ".$base : '')."\n{\n";
+    $classNotes = [
+        'table'=>$table,
+    ];
+    $output .= "/**\n * :amiss = ".json_encode($classNotes).";\n */\n";
+    $output .= "class ".$oname.($options->base ? " extends ".$options->base : '')."\n{\n";
     
-    foreach ($fields as $f=>$details) {
-        $output .= "    /**\n";
+    foreach ($fields as $f=>&$details) {
+        $fieldNotes = [
+            'type'=>$details['type'],
+        ];
         $isPrimary = in_array($details['name'], $primary);
-        
-        $output .= "     * @".($isPrimary ? 'primary' : 'field')."\n";
-        $output .= "     * @type {$details['type']}\n";
-        
-        $output .= "     */\n";
-        $output .= "    public \$$f;\n\n";
+        if ($isPrimary) {
+            $fieldNotes['primary'] = true;
+        }
+
+        $details['notes'] = "    /**\n     * :amiss = ".json_encode(["field"=>$fieldNotes]).";\n     */\n";
+        if ($options->getset) {
+            $output .= "    private \$$f;\n";
+        }
+        else {
+            $output .= $details['notes'];
+            $output .= "    public \$$f;\n\n";
+        }
+    }
+    unset($details);
+
+    if ($options->getset) {
+        $output .= "\n";
+        foreach ($fields as $f=>$details) {
+            $n  = ucfirst($f);
+            $output .= $details['notes'];
+            $output .= "    public function get$n()   { return \$this->\$f; }\n";
+            $output .= "    public function set$n(\$v) { \$this->\$f = \$v; return \$this; }\n";
+            $output .= "\n";
+        }
     }
     
     $output .= "}\n\n";
     
-    file_put_contents($outdir.'/'.$oname.'.php', $output);
+    file_put_contents($options->outdir.'/'.$oname.'.php', $output);
 }

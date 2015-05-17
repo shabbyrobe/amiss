@@ -39,7 +39,7 @@ class NoteParserTest extends \CustomTestCase
      */
     public function testParseSingleValuelessNote()
     {
-        $parsed = $this->parser->parse(':note = {}');
+        $parsed = $this->parser->parse(':note = {};');
         $this->assertEquals(array('note'=>[]), $parsed);
     }
  
@@ -48,7 +48,7 @@ class NoteParserTest extends \CustomTestCase
      */
     public function testParseSingleValueNote()
     {
-        $parsed = $this->parser->parse(':note = {"foo": "bar"}');
+        $parsed = $this->parser->parse(':note = {"foo": "bar"};');
         $this->assertEquals(array('note'=>["foo"=>"bar"]), $parsed);
     }
 
@@ -58,10 +58,25 @@ class NoteParserTest extends \CustomTestCase
     public function testParseManyNotesMultiline()
     {
         $parsed = $this->parser->parse(
-            ":one = {}\n".
-            ":two = {}\n"
+            ":one = {};\n".
+            ":two = {};\n"
         );
         $this->assertEquals(array("one"=>[], "two"=>[]), $parsed);
+    }
+
+    /**
+     * @covers Amiss\Note\Parser::parse
+     */
+    public function testParseComplexMultilineNote()
+    {
+        $parsed = $this->parser->parse('
+            :one = {
+                "is": {"pants": true},
+                "so": [1, 2, 3]
+            }
+            ;
+        ');
+        $this->assertEquals(['one'=>['is'=>['pants'=>true], 'so'=>[1, 2, 3]]], $parsed);
     }
 
     /**
@@ -120,27 +135,40 @@ class NoteParserTest extends \CustomTestCase
 
     public function testParseAllowsHwspBeforeKey()
     {
-        $in = "      \t\t\t    :foo = {}";
+        $in = "      \t\t\t    :foo = {};";
         $parsed = $this->parser->parse($in);
         $this->assertEquals(['foo'=>[]], $parsed);
     }
 
     public function testParseDoubleNameFails()
     {
-        $in = ":foo = :bar = {}";
+        $in = ":foo = :bar = {};";
         $this->setExpectedException(
             \Amiss\Note\ParseException::class, 
-            "Unexpected token ':bar', expected JSON start '{'"
+            "JSON parsing failed for foo: Syntax error"
         );
         $parsed = $this->parser->parse($in);
+    }
+
+    public function testParseIgnoresSemicolonInsideJSON()
+    {
+        $in = ':foo = {"bar": "baz;qux"};';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(['foo'=>['bar'=>'baz;qux']], $parsed);
+    }
+
+    public function testParseIgnoresEqualsInsideJSON()
+    {
+        $in = ':foo = {"bar": "baz=qux"};';
+        $parsed = $this->parser->parse($in);
+        $this->assertEquals(['foo'=>['bar'=>'baz=qux']], $parsed);
     }
 
     /**
      * @dataProvider dataEmptyName
      */
-    public function testParseEmptyNameFails($emptyName)
+    public function testParseEmptyNameFails($in)
     {
-        $in = ": = {}";
         $this->setExpectedException(
             \Amiss\Note\ParseException::class, 
             "Unexpected token '=', expected annotation name"
@@ -151,8 +179,8 @@ class NoteParserTest extends \CustomTestCase
     function dataEmptyName()
     {
         return [
-            [': = {}'],
-            [':= {}'],
+            [': = {};'],
+            [':= {};'],
         ];
     }
 
@@ -165,35 +193,45 @@ class NoteParserTest extends \CustomTestCase
         );
         $parsed = $this->parser->parse($in);
     }
+
+    public function testParseEndsExpectingJson()
+    {
+        $in = ':foo = {"baz';
+        $this->setExpectedException(
+            \Amiss\Note\ParseException::class, 
+            "Unexpected end of JSON for key 'foo'"
+        );
+        $parsed = $this->parser->parse($in);
+    }
 }
 
 /**
- * :c1 = {"cv1": true}
- * :c2 = {"cv2": true}
+ * :c1 = {"cv1": true};
+ * :c2 = {"cv2": true};
  */
 class ParserTestClass
 {
     /**
-     * :p1 = {"pv1": true}
-     * :p2 = {"pv2": true}
+     * :p1 = {"pv1": true};
+     * :p2 = {"pv2": true};
      */
     public $property1;
     
     /**
-     * :p3 = {"pv3": true}
-     * :p4 = {"pv4": true}
+     * :p3 = {"pv3": true};
+     * :p4 = {"pv4": true};
      */
     public $property2;
 
     /**
-     * :m1 = {"mv1": true}
-     * :m2 = {"mv2": true}
+     * :m1 = {"mv1": true};
+     * :m2 = {"mv2": true};
      */
     public function method1() {}
 
     /**
-     * :m3 = {"mv3": true}
-     * :m4 = {"mv4": true}
+     * :m3 = {"mv3": true};
+     * :m4 = {"mv4": true};
      */
     public function method2() {}
 }

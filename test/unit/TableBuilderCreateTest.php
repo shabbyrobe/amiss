@@ -144,110 +144,79 @@ class TestNoFieldsCreate
 
 class TestCreate
 {
-    /**
-     * @primary
-     * @type int
-     */
+    /** :amiss = {"field": { "primary": true, "type": "int" }}; */
     public $testCreateId;
     
-    /**
-     * @field
-     * @type varchar(128)
-     */
+    /** :amiss = {"field": {"type": "varchar(128)"}}; */
     public $foo1;
     
-    /**
-     * @field
-     * @type varchar(128)
-     */
+    /** :amiss = {"field": {"type": "varchar(128)"}}; */
     public $foo2;
     
-    /**
-     * @field
-     * @type int unsigned not null
-     */
+    /** :amiss = {"field": {"type": "int unsigned not null"}}; */
     public $pants;
 }
     
 class TestCreateDefaultField
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $testCreateDefaultFieldId;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $foo;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $bar;
 }
 
 /**
- * @table bar
+ * :amiss = {"table": "bar"};
  */
 class TestCreateWithIndexedSingleOnRelation
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $barId;
     
-    /**
-     * @field
-     * @index
-     */
+    /** :amiss = {"field": {"index": true}}; */
     public $fooId;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $quack;
     
     /**
-     * @has.one.of stdClass
-     * @has.one.from fooId
+     * :amiss = {"has": {"type": "one", "of": "stdClass", "from": "fooId"}};
      */
     public $foo;
 }
 
 /**
- * @table bar
- * @index.myFoo.fields[] myFooId
- * @index.myFoo.fields[] myOtherFooId
+ * :amiss = {
+ *     "table": "bar",
+ *     "indexes": {
+ *         "myFoo": {"fields": ["myFooId", "myOtherFooId"]}
+ *     }
+ * };
  */
 class TestCreateWithIndexedMultiOnRelation
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $barId;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $myFooId;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $myOtherFooId;
     
-    /**
-     * @field
-     */
+    /** :amiss = {"field": true}; */
     public $bar;
     
     /**
-     * @has.one.of stdClass
-     * @has.one.from.myFoo
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "stdClass",
+     *     "from": "myFoo"
+     * }};
      */
     public $foo;
 }

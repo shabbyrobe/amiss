@@ -113,9 +113,6 @@ class ActiveRecordEventTest extends \CustomTestCase
 
 class RecordEventTestRecord extends ActiveRecord
 {
-    /** 
-     * @primary
-     * @type autoinc 
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
 }

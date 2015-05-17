@@ -11,20 +11,37 @@ class ClassRelationTest extends \CustomTestCase
     {
         self::createClassScopeClass('Artist', '
             /**
-             * @relation[type].one.of ArtistType
-             * @relation[type].one.from typeId
-             * @index.typeId
+             * :amiss = {
+             *     "relations": {
+             *         "type": {
+             *             "type": "one",
+             *             "of"  : "ArtistType",
+             *             "from": "typeId"
+             *         }
+             *     },
+             *     "indexes": {
+             *         "typeId": true
+             *     }
+             * };
              */
             class Artist {
-                /** @primary */ public $artistId;
-                /** @field   */ public $typeId;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $artistId;
+
+                /** :amiss = {"field": true}; */
+                public $typeId;
             }
         ');
 
         self::createClassScopeClass('ArtistType', '
-            /** @relation[artists].many.of Artist */
+            /**
+             * :amiss = {"relations": {
+             *     "artists": {"type": "many", "of": "Artist"}
+             * }};
+             */
             class ArtistType {
-                /** @primary */ public $typeId;
+                /** :amiss = {"field": {"primary": true}}; */
+                public $typeId;
             }
         ');
     }

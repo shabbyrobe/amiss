@@ -97,90 +97,94 @@ class MappedFieldNameTest extends \DataTestCase
 
 class MappedFieldNameLeft
 {
-    /**
-     * @primary
-     * @type autoinc
-     * @field mapped_field_name_left_id
+    /** 
+     * :amiss = {"field": {
+     *     "primary": true,
+     *     "type": "autoinc",
+     *     "name": "mapped_field_name_left_id"
+     * }};
      */
     public $id;
 
-    /**
-     * @field my_pants
-     */
+    /** :amiss = {"field": "my_pants"}; */
     public $pants;
 
     /**
-     * @has.many.of MappedFieldNameAssoc
-     * @has.many.to leftId
+     * :amiss = {"has": {
+     *     "type": "many",
+     *     "of"  : "MappedFieldNameAssoc",
+     *     "to"  : "leftId"
+     * }};
      */
     public $assocs = array();
 
     /**
-     * @has.assoc.of MappedFieldNameRight
-     * @has.assoc.via MappedFieldNameAssoc
+     * :amiss = {"has": {
+     *     "type": "assoc",
+     *     "of"  : "MappedFieldNameRight",
+     *     "via" : "MappedFieldNameAssoc"
+     * }};
      */
     public $rights = array();
 }
 
 class MappedFieldNameAssoc
 {
-    /**
-     * @primary
-     * @type autoinc
-     * @field mapped_field_name_assoc_id
+    /** 
+     * :amiss = {"field": {
+     *     "primary": true,
+     *     "type": "autoinc",
+     *     "name": "mapped_field_name_assoc_id"
+     * }};
      */
     public $id;
 
-    /**
-     * @field left_id
-     * @type integer
-     * @index
-     */
+    /** :amiss = {"field": {"type": "integer", "name": "left_id", "index": true}}; */
     public $leftId;
 
-    /**
-     * @field right_id
-     * @type integer
-     * @index
-     */
+    /** :amiss = {"field": {"type": "integer", "name": "right_id", "index": true}}; */
     public $rightId;
 
     /**
-     * @has.one.of MappedFieldNameLeft
-     * @has.one.from leftId
+     * :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "MappedFieldNameLeft",
+     *     "from": "leftId"
+     * }};
      */
     public $left;
 
-    /**
-     * @has.one.of MappedFieldNameRight
-     * @has.one.from rightId
-     */
+    /** :amiss = {"has": {
+     *     "type": "one",
+     *     "of"  : "MappedFieldNameRight",
+     *     "from": "rightId"
+     * }}; */
     public $right;
 }
 
 class MappedFieldNameRight
 {
-    /**
-     * @primary
-     * @type autoinc
-     * @field mapped_field_name_right_id
-     */
+    /** :amiss = {"field": { "primary": true, "name": "mapped_field_name_right_id", "type": "autoinc" }}; */
     public $id;
 
-    /**
-     * @field my_trousers
-     */
+    /** :amiss = {"field": "my_trousers"}; */
     public $trousers;
 
     /**
-     * @has.many.of MappedFieldNameAssoc
-     * @has.many.inverse right
+     * :amiss = {"has": {
+     *     "type"   : "many",
+     *     "of"     : "MappedFieldNameAssoc",
+     *     "inverse": "right"
+     * }};
      */
     public $assocs = array();
 
     /**
-     * @has.assoc.of MappedFieldNameLeft
-     * @has.assoc.via MappedFieldNameAssoc
+     * :amiss = {"has": {
+     *     "type": "assoc",
+     *     "of"  : "MappedFieldNameLeft",
+     *     "via" : "MappedFieldNameAssoc"
+     * }};
      */
     public $lefts = array();
 }

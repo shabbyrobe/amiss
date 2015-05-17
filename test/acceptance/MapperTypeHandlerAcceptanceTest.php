@@ -85,15 +85,11 @@ class TestTypeHandler implements \Amiss\Type\Handler
 
 class TestCustomFieldTypeRecord extends \Amiss\Sql\ActiveRecord
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": {"primary": true, "type": "autoinc" }}; */
     public $testCustomFieldTypeRecordId;
     
     /**
-     * @field
-     * @type foo bar
+     * :amiss = {"field": {"type": "foo bar"}};
      */
     public $yep1;
 }

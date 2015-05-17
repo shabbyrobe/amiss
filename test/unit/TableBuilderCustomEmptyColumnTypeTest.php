@@ -41,20 +41,14 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
 }
 
 /**
- * @table bar
+ * :amiss = {"table": "bar"};
  */
 class TestCreateCustomTypeWithEmptyColumnTypeRecord extends \Amiss\Sql\ActiveRecord
 {
-    /**
-     * @primary
-     * @type autoinc
-     */
+    /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /**
-     * @field
-     * @type int
-     */
+    /** :amiss = {"field": {"type": "int"}}; */
     public $foo1;
 }
 
