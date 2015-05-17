@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../lib/functions.php';
-
 $usage = <<<'DOCOPT'
 Creates tables in the specified database
 
@@ -30,11 +27,11 @@ Use all classes with the @foo annotation at class level:
     amiss create-tables --note foo
 
 Use all classes in the Foo\Model namespace
-    amiss create-tables --namespace Foo\\Model
+    amiss create-tables --ns Foo\\Model
 
 Use all classes in the Foo\Model and Bar\Model namespaces with the 
 annotation ":foo = {}":
-    amiss create-tables --namespace Foo\\Model --namespace Bar\\Model --note foo
+    amiss create-tables --ns Foo\\Model --ns Bar\\Model --note foo
 
 DOCOPT;
 

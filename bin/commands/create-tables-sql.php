@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../lib/functions.php';
-
 $usage = <<<'DOCOPT'
 Usage: amiss create-tables-sql [options] [--note=<note>]... 
                                [--ns=<ns>]... <input>
@@ -27,12 +24,12 @@ Use all classes with the @foo annotation at class level:
     amiss create-tables-sql --note foo src/foo.php
 
 Use all classes in the Foo\Model namespace in the src/foo.php file
-    amiss create-tables-sql --namespace Foo\\Model src/foo.php
+    amiss create-tables-sql --ns Foo\\Model src/foo.php
 
 Use all classes in the Foo\Model and Bar\Model namespaces with
 the ":foo = {};" annotation in the current directory:
-    amiss create-tables-sql --namespace Foo\\Model \
-        --namespace Bar\\Model \
+    amiss create-tables-sql --ns Foo\\Model \
+        --ns Bar\\Model \
         --note foo -r .
 
 DOCOPT;

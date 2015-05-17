@@ -82,7 +82,7 @@ class Note extends \Amiss\Mapper\Base
             unset($relDef);
         }
 
-        indexes: if (isset($info['indexes'])) {
+        class_indexes: if (isset($info['indexes'])) {
             foreach ($info['indexes'] as $idxKey=>&$idxDef) {
                 if ($idxDef === true) {
                     $idxDef = ['fields'=>[$idxKey]];

@@ -1,15 +1,11 @@
 <?php
-
-require_once __DIR__.'/../../vendor/autoload.php';
-require_once __DIR__.'/../lib/functions.php';
-
 $usage = <<<'DOCOPT'
 Creates classes from an existing database
 
 Usage: amiss create-classes [options] <outdir>
 
 Options:
-  --namespace <ns>   Place all records in this namespace (make sure you quote!)
+  --ns <ns>          Place all records in this namespace (make sure you quote!)
   --dsn <dsn>        Database DSN to use.
   --base <base>      Base class to use for created classes
   --ars              Equivalent to --base \Amiss\Sql\ActiveRecord
@@ -31,7 +27,7 @@ $mapper = new \Amiss\Mapper\Arrays;
 $meta = new \Amiss\Meta('stdClass', '', [
     'fields'=>[
         'outdir'=>'<outdir>',
-        'namespace'=>'--namespace',
+        'namespace'=>'--ns',
         'dsn'=>'--dsn',
         'prompt'=>'-p',
         'user'=>'--user',
