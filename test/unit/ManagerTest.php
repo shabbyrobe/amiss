@@ -37,7 +37,7 @@ class ManagerTest extends \CustomTestCase
             ->setMethods(array('getMeta'))
             ->getMockForAbstractClass()
         ;
-        $meta = new \Amiss\Meta('stdClass', 'stdClass', array());
+        $meta = new \Amiss\Meta('stdClass', array('table'=>'stdClass'));
         $meta->relations = array(
             'a'=>array('wahey')
         );

@@ -26,7 +26,7 @@ DOCOPT;
 
 $options = (new \Docopt\Handler)->handle($usage);
 $optMapper = new \Amiss\Mapper\Arrays;
-$meta = new \Amiss\Meta('stdClass', '', [
+$meta = new \Amiss\Meta('stdClass', [
     'fields'=>[
         'input'=>'<input>',
         'inPlace'=>'--in-place',

@@ -19,7 +19,7 @@ class UpdateQueryTest extends \CustomTestCase
         $uq->where = array('a'=>'b');
         $uq->set = array('c'=>'d');
         
-        $meta = new Meta('Foo', 'foo', array());
+        $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
         $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE `a`=:zp_1', $sql);
         $this->assertEquals(array(':zs_0'=>'d', ':zp_1'=>'b'), $params);
@@ -35,7 +35,7 @@ class UpdateQueryTest extends \CustomTestCase
         $uq->params = array('bar'=>'ding');
         $uq->set = array('c'=>'d');
         
-        $meta = new Meta('Foo', 'foo', array());
+        $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
         $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE foo=:bar', $sql);
         $this->assertEquals(array(':zs_0'=>'d', ':bar'=>'ding'), $params);
@@ -51,7 +51,7 @@ class UpdateQueryTest extends \CustomTestCase
         $uq->params = array('ding');
         $uq->set = array('c'=>'d');
         
-        $meta = new Meta('Foo', 'foo', array());
+        $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
         $this->assertEquals('UPDATE foo SET `c`=? WHERE foo=?', $sql);
         $this->assertEquals(array('d', 'ding'), $params);
@@ -136,7 +136,8 @@ class UpdateQueryTest extends \CustomTestCase
     
     protected function createGenericMeta()
     {
-        return new \Amiss\Meta('stdClass', 'std_class', array(
+        return new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'fooFoo'=>array('name'=>'foo_field'),
                 'barBar'=>array('name'=>'bar_field'),

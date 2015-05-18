@@ -21,7 +21,7 @@ class ManagerCountTest extends \CustomTestCase
      */
     public function testCountQueryWithoutPrimary()
     {
-        $this->mapper->meta['stdClass'] = new \Amiss\Meta('stdClass', 'std_class', array());
+        $this->mapper->meta['stdClass'] = new \Amiss\Meta('stdClass', array('table'=>'std_class'));
         $this->manager->count('stdClass');
         
         $expected = 'SELECT COUNT(*) FROM std_class';
@@ -36,7 +36,8 @@ class ManagerCountTest extends \CustomTestCase
      */
     public function testCountQueryWithSingleColumnPrimary()
     {
-        $this->mapper->meta['stdClass'] =  new \Amiss\Meta('stdClass', 'std_class', array(
+        $this->mapper->meta['stdClass'] =  new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array(
                 'a'
             ),
@@ -60,7 +61,8 @@ class ManagerCountTest extends \CustomTestCase
      */
     public function testCountQueryWithMultiColumnPrimary()
     {
-        $this->mapper->meta['stdClass'] =  new \Amiss\Meta('stdClass', 'std_class', array(
+        $this->mapper->meta['stdClass'] =  new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array(
                 'a', 'b'
             ),

@@ -54,17 +54,23 @@ class Note extends \Amiss\Mapper\Base
         $classNotes = $notes->notes;
 
         $info = isset($classNotes[$this->annotationNamespace]) ? $classNotes[$this->annotationNamespace] : [];
+        $parent = null;
 
         table: {
-            $table = isset($info['table']) ? $info['table'] : $this->getDefaultTable($class);
-            unset($info['table']);
+            if (!isset($info['table'])) {
+                $info['table'] = $this->getDefaultTable($class);
+            }
         }
 
         parent_class: {
-            $parentClass = get_parent_class($class);
-            $parent = null;
-            if ($parentClass) {
-                $parent = $this->getMeta($parentClass);
+            if (isset($info['inherit']) && $info['inherit']) {
+                // really important to prepend a backslash - without it, non-namespaced classes
+                // fool the class name resolver into thinking they're not fully qualified
+                $parentClass = get_parent_class($class);
+                if ($parentClass) {
+                    $parent = $this->getMeta("\\".$parentClass);
+                }
+                unset($info['inherit']);
             }
         }
 
@@ -83,6 +89,7 @@ class Note extends \Amiss\Mapper\Base
         }
 
         class_indexes: if (isset($info['indexes'])) {
+            // TODO: should be in Meta so the Arrays mapper can share it
             foreach ($info['indexes'] as $idxKey=>&$idxDef) {
                 if ($idxDef === true) {
                     $idxDef = ['fields'=>[$idxKey]];
@@ -104,6 +111,8 @@ class Note extends \Amiss\Mapper\Base
                     // NOTE: do not ensure $field['name'] is set here - it happens later in
                     // one big hit.
 
+                    // FIXME: this should also happen in the Meta, but we need to guarantee we
+                    // are operating on an array to collect getters and setters, etc
                     if ($field === true) {
                         $field = [];
                     } elseif (is_string($field)) {
@@ -175,7 +184,7 @@ class Note extends \Amiss\Mapper\Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
 
-        return new \Amiss\Meta($class, $table, $info, $parent);
+        return new \Amiss\Meta($class, $info, $parent);
     }
 
     protected function fillGetterSetter($name, &$itemNotes, $readOnlyAllowed=false)

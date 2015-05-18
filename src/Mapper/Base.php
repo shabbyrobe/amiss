@@ -33,11 +33,21 @@ abstract class Base extends \Amiss\Mapper
         if (!is_string($class)) {
             throw new \InvalidArgumentException();
         }
+        
+        $meta = null;
         if (!isset($this->meta[$class])) {
-            $resolved = $this->resolveObjectName($class);
-            $this->meta[$class] = $this->createMeta($resolved);
+            if ($this->objectNamespace) {
+                $resolved = $this->resolveObjectName($class);
+                $meta = $this->meta[$class] = $this->createMeta($resolved);
+                if ($resolved != $class) {
+                    $this->meta[$resolved] = $meta;
+                }
+            }
+            else {
+                $meta = $this->meta[$class] = $this->createMeta($class);
+            }
         }
-        return $this->meta[$class];
+        return $meta ?: $this->meta[$class];
     }
     
     abstract protected function createMeta($class);
@@ -244,7 +254,10 @@ abstract class Base extends \Amiss\Mapper
      */
     protected function resolveObjectName($name)
     {
-        return ($this->objectNamespace && strpos($name, '\\')===false ? $this->objectNamespace . '\\' : '').$name;
+        $base = ($this->objectNamespace && strpos($name, '\\') === false 
+            ? $this->objectNamespace . '\\' 
+            : '');
+        return $base.$name;
     }
     
     protected function getDefaultTable($class)
@@ -286,7 +299,8 @@ abstract class Base extends \Amiss\Mapper
     {
         $unnamed = array();
         foreach ($fields as $prop=>$f) {
-            if (!isset($f['name']) || !$f['name']) {
+            // if it's not a string and the 'name' is unset or empty
+            if (!($f == 0 && $f != "0") && (!isset($f['name']) || !$f['name'])) {
                 $unnamed[$prop] = $prop;
             }
         }
@@ -296,7 +310,11 @@ abstract class Base extends \Amiss\Mapper
                 $unnamed = $this->unnamedPropertyTranslator->translate($unnamed);
             }
             foreach ($unnamed as $name=>$field) {
-                $fields[$name]['name'] = $field;
+                if ($fields[$name] === true) {
+                    $fields[$name] = ['name'=>$field];
+                } else {
+                    $fields[$name]['name'] = $field;
+                }
             }
         }
         

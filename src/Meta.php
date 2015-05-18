@@ -76,11 +76,16 @@ class Meta
         ); 
     }
 
-    public function __construct($class, $table, array $info, Meta $parent=null)
+    public function __construct($class, array $info, Meta $parent=null)
     {
-        $this->class = $class;
-        $this->parent = $parent;
-        $this->table = $table;
+        // due to some other hacks where we need to guarantee parent class lookups
+        // are always fully qualified, we get inconsistent input here - a leading
+        // backslash when the lookup is for a parent class.
+        // would like to get rid of this, but other things need to be dealt with first.
+        $this->class   = ltrim($class, "\\");
+
+        $this->parent  = $parent;
+        $this->table   = isset($info['table'])   ? $info['table']   : array();
         $this->primary = isset($info['primary']) ? $info['primary'] : array();
 
         if ($this->primary && !is_array($this->primary)) {
@@ -102,31 +107,35 @@ class Meta
 
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
         
-        if (isset($info['constructor']) && $info['constructor']) {
-            $this->constructor = $info['constructor'];
-        }
-        if (isset($info['constructorArgs']) && $info['constructorArgs']) {
-            // must come after setFields()
-            $this->setConstructorArgs($info['constructorArgs']);
-        }
-        if (!$this->constructor) {
-            $this->constructor = '__construct';
+        class_constructor: {
+            if (isset($info['constructor']) && $info['constructor']) {
+                $this->constructor = $info['constructor'];
+            }
+            if (isset($info['constructorArgs']) && $info['constructorArgs']) {
+                // must come after setFields()
+                $this->setConstructorArgs($info['constructorArgs']);
+            }
+            if (!$this->constructor) {
+                $this->constructor = '__construct';
+            }
         }
 
-        if (isset($info['readOnly'])) {
-            $this->canInsert = false; 
-            $this->canUpdate = false; 
-            $this->canDelete = false; 
-        }
-        else {
-            if (isset($info['canInsert'])) {
-                $this->canInsert = !!$info['canInsert'];
+        permissions: {
+            if (isset($info['readOnly'])) {
+                $this->canInsert = false; 
+                $this->canUpdate = false; 
+                $this->canDelete = false; 
             }
-            if (isset($info['canUpdate'])) {
-                $this->canUpdate = !!$info['canUpdate'];
-            }
-            if (isset($info['canDelete'])) {
-                $this->canDelete = !!$info['canDelete'];
+            else {
+                if (isset($info['canInsert'])) {
+                    $this->canInsert = !!$info['canInsert'];
+                }
+                if (isset($info['canUpdate'])) {
+                    $this->canUpdate = !!$info['canUpdate'];
+                }
+                if (isset($info['canDelete'])) {
+                    $this->canDelete = !!$info['canDelete'];
+                }
             }
         }
 
@@ -205,6 +214,7 @@ class Meta
             } elseif (is_string($field)) {
                 $field = ['name'=>$field];
             }
+
             if (!is_array($field)) {
                 throw new \UnexpectedValueException();
             }

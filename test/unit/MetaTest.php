@@ -11,14 +11,15 @@ class MetaTest extends \CustomTestCase
      */
     public function testCreateMeta()
     {
-        $parent = new \Amiss\Meta('a', 'a', array());
+        $parent = new \Amiss\Meta('a', array('table'=>'a'));
         $info = array(
+            'table'=>'std_class',
             'primary'=>'pri',
             'fields'=>array('f'=>array()),
             'relations'=>array('r'=>array()),
             'defaultFieldType'=>'def',
         );
-        $meta = new \Amiss\Meta('stdClass', 'std_class', $info, $parent);
+        $meta = new \Amiss\Meta('stdClass', $info, $parent);
         
         $this->assertEquals('stdClass',   $meta->class);
         $this->assertEquals('std_class',  $meta->table);
@@ -34,10 +35,11 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetDefaultFieldTypeInheritsFromDirectParent()
     {
-        $parent = new \Amiss\Meta('parent', 'parent', array(
+        $parent = new \Amiss\Meta('parent', array(
+            'table'=>'parent',
             'defaultFieldType'=>'def',
         ));
-        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
         $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
     }
     
@@ -46,11 +48,12 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetDefaultFieldTypeInheritsFromGrandparent()
     {
-        $grandParent = new \Amiss\Meta('grandparent', 'grandparent', array(
+        $grandParent = new \Amiss\Meta('grandparent', array(
+            'table'=>'grandparent',
             'defaultFieldType'=>'def',
         ));
-        $parent = new \Amiss\Meta('parent', 'parent', array(), $grandParent);
-        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $parent = new \Amiss\Meta('parent', array('table'=>'parent'), $grandParent);
+        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
         $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
     }
     
@@ -67,7 +70,7 @@ class MetaTest extends \CustomTestCase
         ;
         $parent->expects($this->once())->method('getDefaultFieldType')->will($this->returnValue($defaultType));
         
-        $meta = new \Amiss\Meta('child', 'child', array(), $parent);
+        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
         $meta->getDefaultFieldType();
         $meta->getDefaultFieldType();
     }
@@ -87,19 +90,26 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetFieldInheritance()
     {
-        $grandparent = new \Amiss\Meta('a', 'a', array(
+        $grandparent = new \Amiss\Meta('a', array(
+            'table'=>'a',
             'fields'=>array(
                 'field1'=>array(),
                 'field2'=>array(),
             ),
         )); 
-        $parent = new \Amiss\Meta('b', 'b', array(
-            'fields'=>array(
-                'field3'=>array(),
-                'field4'=>array(1),
+        $parent = new \Amiss\Meta(
+            'b',
+            array(
+                'table'=>'b',
+                'fields'=>array(
+                    'field3'=>array(),
+                    'field4'=>array(1),
+                ),
             ),
-        ), $grandparent);
-        $child = new \Amiss\Meta('c', 'c', array(
+            $grandparent
+        );
+        $child = new \Amiss\Meta('c', array(
+            'table'=>'c',
             'fields'=>array(
                 'field4'=>array(2),
                 'field5'=>array(),
@@ -121,7 +131,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetPrimaryValueSingleCol()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array('a'),
         ));
         
@@ -134,7 +145,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetPrimaryValueMultiCol()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array('a', 'b'),
         ));
         
@@ -147,7 +159,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetPrimaryValueMultiReturnsNullWhenNoValues()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array('a', 'b'),
         ));
         
@@ -160,7 +173,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetPrimaryValueMultiWhenOneValueIsNull()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'primary'=>array('a', 'b'),
         ));
         
@@ -173,7 +187,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetPropertyValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array(),
             ),
@@ -189,7 +204,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetUnknownPropertyValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array(),
             ),
@@ -206,7 +222,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetGetterValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array('getter'=>'getTest'),
             ),
@@ -226,7 +243,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testGetUnknownGetterValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array('getter'=>'getDoesntExist'),
             ),
@@ -247,7 +265,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testSetValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array(),
             ),
@@ -263,7 +282,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testSetUnknownValue()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array(),
             ),
@@ -279,7 +299,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testSetValueWithSetter()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array('setter'=>'setValue'),
             ),
@@ -298,7 +319,8 @@ class MetaTest extends \CustomTestCase
      */
     public function testSetValueWithUnknownSetter()
     {
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'a'=>array('setter'=>'setDoesntExist'),
             ),

@@ -256,6 +256,30 @@ class NoteMapperTest extends \CustomTestCase
     /**
      * @covers Amiss\Mapper\Note::loadMeta
      */
+    public function testGetMetaIgnoresParentClassByDefault()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $class1 = $this->createFnScopeClass("Test1", '
+            class Test1 {
+                /** :amiss = {"field": true}; */
+                public $foo;
+            }
+        ');
+        $class2 = $this->createFnScopeClass("Test2", '
+            class Test2 extends Test1 {
+                /** :amiss = {"field": true}; */
+                public $bar;
+            }
+        ');
+
+        $meta1 = $mapper->getMeta($class1);
+        $meta2 = $mapper->getMeta($class2);
+        $this->assertEquals(null, $this->getProtected($meta2, 'parent'));
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     */
     public function testGetMetaWithParentClass()
     {
         $mapper = new \Amiss\Mapper\Note;
@@ -266,6 +290,7 @@ class NoteMapperTest extends \CustomTestCase
             }
         ');
         $class2 = $this->createFnScopeClass("Test2", '
+            /** :amiss = {"inherit": true}; */
             class Test2 extends Test1 {
                 /** :amiss = {"field": true}; */
                 public $bar;
