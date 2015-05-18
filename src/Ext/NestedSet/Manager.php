@@ -61,11 +61,12 @@ class Manager
         $meta = $this->manager->getMeta($class);
         $ext = isset($meta->ext['nestedSet']) ? $meta->ext['nestedSet'] : null;
         
-        if (!$ext)
+        if (!$ext) {
             throw new \InvalidArgumentException("$class did not define nestedSet extension");
-        
-        if (!$meta->primary || isset($meta->primary[2]))
+        }
+        if (!$meta->primary || isset($meta->primary[2])) {
             throw new \UnexpectedValueException("Class $class must have a one-column primary for use with nested sets");
+        }
         
         $leftField   = isset($ext['leftId'])   ? $ext['leftId']   : 'treeLeft';
         $rightField  = isset($ext['rightId'])  ? $ext['rightId']  : 'treeRight';
@@ -83,22 +84,24 @@ class Manager
         );
         
         foreach ($meta->relations as $id=>$rel) {
-            if ($rel[0] == 'parent')
+            if ($rel[0] == 'parent') {
                 $treeMeta->parentRel = $id;
-            elseif ($rel[0] == 'parents')
+            } elseif ($rel[0] == 'parents') {
                 $treeMeta->parentsRel = $id;
-            elseif ($rel[0] == 'tree')
+            } elseif ($rel[0] == 'tree') {
                 $treeMeta->treeRel = $id;
+            }
         }
         
         $missing = array();
         foreach ($treeMeta as $k=>$v) {
-            if ($v === null)
+            if ($v === null) {
                 $missing[] = $k;
+            }
         }
-        if ($missing)
+        if ($missing) {
             throw new \UnexpectedValueException("Missing nestedSet keys: ".implode(", ", $missing));
-        
+        }
         return $treeMeta;
     }
     
@@ -110,8 +113,9 @@ class Manager
         $meta = $treeMeta->meta;
         
         $conn->beginTransaction();
-        if ($conn->engine == 'mysql')
+        if ($conn->engine == 'mysql') {
             $conn->exec("LOCK TABLES `{$meta->table}` WRITE");
+        }
         
         $primaryName = $meta->getField($meta->primary[0])['name'];
         $parentIdFieldName = $meta->getField($treeMeta->parentId)['name'];
@@ -120,11 +124,13 @@ class Manager
         
         $rootStmt = $conn->query("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)");
         $rootId = $rootStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-        if (!$rootId || count($rootId) > 1)
+        if (!$rootId || count($rootId) > 1) {
             throw new \UnexpectedValueException("Could not find one and only one root id for class $class");
+        }
         
-        if ($conn->engine == 'mysql')
+        if ($conn->engine == 'mysql') {
             $conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        }
         
         $childIdStmt = $conn->prepare("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE `{$parentIdFieldName}` = ?");
         $updateStmt = $conn->prepare("UPDATE `{$meta->table}` SET `{$leftIdName}`=?, `{$rightIdName}`=? WHERE `{$primaryName}`=?");
@@ -148,7 +154,8 @@ class Manager
         
         $conn->commit();
         
-        if ($conn->engine == 'mysql')
+        if ($conn->engine == 'mysql') {
             $conn->exec("UNLOCK TABLES");
+        }
     }
 }

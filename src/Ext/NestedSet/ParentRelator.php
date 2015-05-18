@@ -20,13 +20,15 @@ class ParentRelator extends Relator
 
     function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
-        if ($criteria)
+        if ($criteria) {
             throw new \InvalidArgumentException("Can't use criteria with parent relator");
+        }
         
         $treeMeta = $this->nestedSetManager->getTreeMeta($source);
         
         $parentIdValue = $treeMeta->meta->getValue($source, $treeMeta->parentId);
-        if ($parentIdValue)
+        if ($parentIdValue) {
             return $this->nestedSetManager->manager->getById($treeMeta->meta->class, $parentIdValue);
+        }
     }
 }

@@ -44,8 +44,9 @@ class TreeRelator extends Relator
         $query->stack = $stack;
         $children = $this->nestedSetManager->manager->getList($meta->class, $query);
         
-        if ($children)
+        if ($children) {
             return $this->buildTree($treeMeta, $source, $children);
+        }
     }
     
     private function buildTree($treeMeta, $rootNode, $objects)
@@ -65,25 +66,25 @@ class TreeRelator extends Relator
         $parentIndex = array();
         
         foreach ($objects as $node) {
-              $id = $meta->getValue($node, $primaryField);
-              $parentId = $meta->getValue($node, $treeMeta->parentId);
-              $parentIndex[$id] = $parentId;
-              
-              $index->nodes[$id] = $node;
-              if (!isset($index->children[$parentId])) {
-                  $index->children[$parentId] = array();
-              }
-              $index->children[$parentId][] = $node;
+            $id = $meta->getValue($node, $primaryField);
+            $parentId = $meta->getValue($node, $treeMeta->parentId);
+            $parentIndex[$id] = $parentId;
+
+            $index->nodes[$id] = $node;
+            if (!isset($index->children[$parentId])) {
+                $index->children[$parentId] = array();
+            }
+            $index->children[$parentId][] = $node;
         }
         
         foreach ($objects as $node) {
-              $id = $meta->getValue($node, $primaryField);
-              $parentId = $parentIndex[$id];
-              
-              if (isset($index->children[$id]))
-                  $meta->setValue($node, $treeMeta->treeRel, $index->children[$id]);
-              
-              $meta->setValue($node, $treeMeta->parentRel, $index->nodes[$parentId]);
+            $id = $meta->getValue($node, $primaryField);
+            $parentId = $parentIndex[$id];
+
+            if (isset($index->children[$id])) {
+                $meta->setValue($node, $treeMeta->treeRel, $index->children[$id]);
+            }
+            $meta->setValue($node, $treeMeta->parentRel, $index->nodes[$parentId]);
         }
         
         return $index->children[$rootNodeId];
