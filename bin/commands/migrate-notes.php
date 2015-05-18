@@ -179,10 +179,15 @@ function comment_rewrite($code)
             if (!$newDoc) {
                 $newDoc = "/**\n$newNoteLined */";
             } else {
-                $newDoc = preg_replace("~(\*/\s*)$~", "*\n$newNoteLined */", $newDoc);
+                // preg_replace requires backslashes to be escaped in the replacement pattern
+                $newNoteReplace = str_replace("\\", "\\\\", $newNoteLined);
+                $newDoc = preg_replace("~(\*/\s*)$~", "*\n$newNoteReplace */", $newDoc);
             }
 
-            $code = preg_replace('~'.preg_quote($doc, '~').'~', $newDoc, $code, 1, $count);
+            // preg_replace requires backslashes to be escaped in the replacement pattern
+            $newDocReplace = str_replace("\\", "\\\\", $newDoc);
+
+            $code = preg_replace('~'.preg_quote($doc, '~').'~', $newDocReplace, $code, 1, $count);
             if (!$count) {
                 throw new RewriteException();
             }
