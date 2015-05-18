@@ -96,7 +96,7 @@ Annotations are javadoc-style key/values and are formatted like so:
 
     <?php
     /**
-     * @key this is the value
+     * @thekey this is the value
      */
 
 - Keys end at the first whitespace character. 
