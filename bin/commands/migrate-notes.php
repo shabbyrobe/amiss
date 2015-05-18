@@ -62,24 +62,27 @@ $iter = function() use ($options) {
             if (preg_match('~(^|[/\\\\])\.~', $i)) {
                 continue;
             }
+            if ($i instanceof \SplFileInfo) {
+                $i = $i->getPathname();
+            }
             yield $i;
         }
     }
 };
 
-$allOut = '';
+$allOut = [];
 $errors = [];
 $hr = "----------------------------------------------------------";
 
 foreach ($iter() as $file) {
     $code = file_get_contents($file);
-
     try {
-        ob_start();
         $out = comment_rewrite($code);
         if ($options->inPlace) {
-            file_put_contents($file, $out);
-        } else {
+            $allOut[$file] = $out;
+        }
+        else {
+            ob_start();
             if ($options->noColour) {
                 echo $file."\n";
             } else {
@@ -91,8 +94,8 @@ foreach ($iter() as $file) {
             } else {
                 echo "\e[90m$hr\e[0m\n";
             }
+            $allOut[$file] = ob_get_clean();
         }
-        $allOut .= ob_get_clean();
     }
     catch (RewriteException $rex) {
         $errors[] = "Rewriting $file failed: ".$rex->getMessage();
@@ -100,7 +103,13 @@ foreach ($iter() as $file) {
 }
 
 if ($options->warnOnly || !$errors) {
-    echo $allOut;
+    foreach ($allOut as $file=>$out) {
+        if ($options->inPlace) {
+            file_put_contents($file, $out);
+        } else {
+            echo $out;
+        }
+    }
 }
 if ($errors) {
     if ($options->noColour) {
