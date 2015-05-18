@@ -301,6 +301,8 @@ function data_rebuild($data)
 
     $rebuilt = [];
     if ($isDefinitelyClass) {
+        // it's a class!
+
         if (isset($data['table'])) {
             $rebuilt['table'] = $data['table'];
         }
@@ -328,7 +330,10 @@ function data_rebuild($data)
             }
         }
     }
+
     elseif ($isDefinitelyProp && isset($data['has'])) {
+        // it's a relation!
+
         $rebuilt = ['has'=>[]];
         if (isset($data['getter'])) {
             $rebuilt['field']['getter'] = $data['getter'];
@@ -338,9 +343,12 @@ function data_rebuild($data)
         }
         $type = key($data['has']);
         $rebuilt['has']['type'] = $type;
-        $rebuilt['has'] = array_merge($rebuilt['has'], $data['has']); 
+        $rebuilt['has'] = array_merge($rebuilt['has'], $data['has'][$type]); 
     }
+
     elseif ($isDefinitelyProp) {
+        // it's a field!
+
         $rebuilt = ['field'=>[]];
         if (isset($data['getter'])) {
             $rebuilt['field']['getter'] = $data['getter'];
@@ -355,6 +363,12 @@ function data_rebuild($data)
             if ($data['field'] !== true) {
                 $rebuilt['field']['name'] = $data['field'];
             }
+        }
+        if (isset($data['readOnly'])) {
+            $rebuilt['field']['readOnly'] = $data['readOnly'] == true;
+        }
+        elseif (isset($data['readonly'])) {
+            $rebuilt['field']['readOnly'] = $data['readonly'] == true;
         }
         foreach (['index', 'key'] as $ntype) {
             if (isset($data[$ntype])) {
