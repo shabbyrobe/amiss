@@ -183,7 +183,7 @@ class Meta
                 $index['key'] = false;
             }
             if (!isset($index['fields']) || !$index['fields']) {
-                throw new \UnexpectedValueException("Misconfigured index $name");
+                throw new \UnexpectedValueException("Misconfigured index '$name': no fields defined");
             }
             $index['fields'] = (array)$index['fields'];
             $this->indexes[$name] = $index;

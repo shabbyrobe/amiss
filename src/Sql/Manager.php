@@ -258,8 +258,12 @@ class Manager
             $params = $this->mapper->formatParams($meta, $props, $params);
         }
 
-        $fields = implode(', ', array_values($meta->primary));
-        $query = "SELECT COUNT($fields) FROM {$meta->table} "
+        $fields = $meta->getFields();
+        $qFields = [];
+        foreach ($meta->primary as $p) {
+            $qFields[] = $fields[$p]['name'];
+        }
+        $query = "SELECT COUNT(".implode(',', $qFields).") FROM {$meta->table} "
             .($where  ? "WHERE $where" : '');
 
         $stmt = $this->getConnector()->prepare($query)->execute($params);
