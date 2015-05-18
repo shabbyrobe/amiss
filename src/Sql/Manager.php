@@ -244,11 +244,11 @@ class Manager
         return (int)$stmt->fetchColumn();
     }
 
-    public function exists($class, $id)
+    public function exists($class, $id, $key='primary')
     {
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
         $query = new \Amiss\Sql\Query\Criteria;
-        $query->setParams([$this->createKeyCriteria($meta, $id)]);
+        $query->setParams([$this->createKeyCriteria($meta, $id, $key)]);
         if (!$meta->primary) {
             throw new \InvalidArgumentException();
         }
