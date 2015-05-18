@@ -49,17 +49,24 @@ $code = file_get_contents($file);
 $tokens = token_get_all($code);
 
 $docComments = [];
+$lastWsp = null;
 foreach ($tokens as $token) {
     $token = (array)$token;
     if (!isset($token[1])) {
         $token = [null, $token[0], null];
     }
+    if ($token[0] == T_WHITESPACE) {
+        $lastWsp = $token[1];
+    }
     if ($token[0] == T_DOC_COMMENT) {
-        $docComments[] = $token[1];
+        $docComments[] = [$token[1], $lastWsp];
+    }
+    if ($token[0] != T_WHITESPACE) {
+        $lastWsp = null;
     }
 }
 
-foreach ($docComments as $doc) {
+foreach ($docComments as list($lastWsp, $doc)) {
     list ($data, $delete) = $parser->parse($parser->stripDocComment($doc));
 
     $newDoc = $doc;
@@ -79,8 +86,9 @@ foreach ($docComments as $doc) {
     $newData = data_rebuild($data);
     $newNote = ":amiss = ".(json_encode($newData, JSON_PRETTY_PRINT)).";";
 
-    // detect indent
     $newNoteLined = " * ".implode("\n * ", explode("\n", $newNote))."\n";
+    $indent = indent_detect($doc, $lastWsp);
+    $newNoteLined = indent($newNoteLined, $indent);
 
     if (!$newDoc) {
         $newDoc = "/**\n$newNoteLined */";
@@ -95,6 +103,21 @@ foreach ($docComments as $doc) {
 }
 
 echo $code;
+
+function indent_detect($doc, $lastWsp)
+{
+    if ($lastWsp == null) {
+        return '';
+    }
+    if (preg_match('~\h+$~', $lastWsp, $match)) {
+        var_dump($match[0]);
+    }
+}
+
+function indent($doc, $indent)
+{
+    return $doc;
+}
 
 function data_rebuild($data)
 {
