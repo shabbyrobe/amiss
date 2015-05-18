@@ -44,19 +44,13 @@ Using the Annotation mapper, object/table mappings are defined in this way:
      */
     class Foo
     {
-        /**
-         * :amiss = {"field":{"primary":true}};
-         */
+        /** :amiss = {"field":{"primary":true}}; */
         public $id;
 
-        /**
-         * :amiss = {"field":"some_column"};
-         */
+        /** :amiss = {"field":"some_column"}; */
         public $name;
 
-        /**
-         * :amiss = {"field":true};
-         */
+        /** :amiss = {"field":true}; */
         public $barId;
 
         /**
@@ -113,48 +107,46 @@ mapping should be handled using a :doc:`custom mapper <custom>`.
 Annotations
 -----------
 
-Annotations are javadoc-style key/values and are formatted like so:
+Annotations are defined in PHP docblocks and follow the format::
 
-.. code-block:: php
-
-    <?php
     /**
-     * @thekey this is the value
+     * :namespace = {"json": "object"};
      */
 
-- Keys end at the first whitespace character. 
-- Values start at the first non-whitespace character after the key.
-- Values are optional.
-- Values are ended by a newline or the end of the docblock.
+Parsing of an annotation starts as soon as a ``:namespace`` token is seen at the **start
+of a line**::
 
-
-Arbitrarily nested arrays can be represented:
-
-.. code-block:: php
-
-    <?php
     /**
-     * @foo.bar.baz value
+     * :parsed = {"json": "object"};
+     * This won't be parsed: :notparsed = {"json": "object"};
      */
-    $parsesTo = array(
-        'foo'=>array(
-            'bar'=>array(
-                'baz'=>'value',
-            ),
-        ),
-    );
 
+Namespace tokens should not contain any characters that you could not use in
+PHP variable names::
 
-Arrays will be inferred if multiple values are specified:
-
-.. code-block:: php
-
-    <?php
     /**
-     * @foo 1
-     * @foo 2
+     * :good = {"json": "object"};
+     * :This is not good = {"json": "object"};
      */
-    $parsesTo = array('foo'=>array(1, 2));
+
+The JSON object starts immediately after the ``=`` sign and continues until the first
+semicolon found which is the last character on a line (excluding horizontal whitespace)::
+
+    /**
+     * :newlines_galore = {
+     *     "foo": "bar",
+     *     "baz": "qux"
+     * };
+     *
+     * :good_though_ugly = 
+     *    {"json": "object"}
+     * ;
+     *
+     * :will_fail = {"json": "object"}
+     * ; not the last thing on the line
+     */
+
+Annotations used by Amiss are always placed into the ``:amiss`` namespace.
 
 
 Class Mapping
