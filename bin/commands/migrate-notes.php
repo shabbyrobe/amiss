@@ -2,24 +2,18 @@
 $usage = <<<'DOCOPT'
 Migrate Amiss v4 notes to v5
 
-Usage: amiss migrate-notes [options] [--note=<note>]... [--ns=<ns>]...
-                           <input>
+Usage: amiss migrate-notes [options] <input>...
+
+Displays a diff of each file changed to STDOUT, or rewrites the files in place
+if you pass the `--in-place` flag.
 
 <input>:
-  PHP file or folder containing classes to migrate
+  PHP file(s) or folder(s) containing classes to migrate
 
 Options:
-  --note <note>            Search for all classes that have this note set at 
-                           class level. Can specify more than once.
-  --ns <ns>                Search for all classes in this namespace. Can specify more 
-                           than once.
-
-Use all classes in the Foo\Model namespace
-    amiss create-tables --ns Foo\\Model
-
-Use all classes in the Foo\Model and Bar\Model namespaces with the 
-annotation ":foo = {}":
-    amiss create-tables --ns Foo\\Model --ns Bar\\Model --note foo
+  --no-colour      No colours in diff output
+  --in-place       DO IT!
+  --warn-only      Errors are treated as warnings, keeps processing
 
 DOCOPT;
 
@@ -28,11 +22,14 @@ $optMapper = new \Amiss\Mapper\Arrays;
 $meta = new \Amiss\Meta('stdClass', '', [
     'fields'=>[
         'input'=>'<input>',
-        'notes'=>'--note',
-        'namespaces'=>'--ns',
+        'inPlace'=>'--in-place',
+        'noColour'=>'--no-colour',
+        'warnOnly'=>'--warn-only',
     ]
 ]);
 $options = $optMapper->toObject($options, null, $meta);
+$hasColorDiff = shell_cmd('which colordiff', false);
+$diffCmd = (!$options->noColour && $hasColorDiff[0] == 0) ? 'colordiff' : 'diff';
 
 goto class_defs; script:
 
@@ -43,66 +40,212 @@ $matchedNotes = [
 ];
 $parser = new LegacyParser();
 
-$file = $options->input;
+$iter = function() use ($options) {
+    $iters = [];
+    foreach ($options->input as $input) {
+        if (is_dir($input)) {
+            $iters[] = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($input), \RecursiveIteratorIterator::LEAVES_ONLY);
+        } elseif (is_file($input)) {
+            $iters[] = [$input];
+        } else {
+            throw new \Exception();
+        }
+    }
+    foreach ($iters as $iter) {
+        foreach ($iter as $i) { 
+            if (is_dir($i)) {
+                continue;
+            }
+            if (!preg_match('~\.php$~', $i)) {
+                continue;
+            }
+            if (preg_match('~(^|[/\\\\])\.~', $i)) {
+                continue;
+            }
+            yield $i;
+        }
+    }
+};
 
-$code = file_get_contents($file);
-$tokens = token_get_all($code);
+$allOut = '';
+$errors = [];
+$hr = "----------------------------------------------------------";
 
-$docComments = [];
-$lastWsp = null;
-foreach ($tokens as $token) {
-    $token = (array)$token;
-    if (!isset($token[1])) {
-        $token = [null, $token[0], null];
+foreach ($iter() as $file) {
+    $code = file_get_contents($file);
+
+    try {
+        ob_start();
+        $out = comment_rewrite($code);
+        if ($options->inPlace) {
+            file_put_contents($file, $out);
+        } else {
+            if ($options->noColour) {
+                echo $file."\n";
+            } else {
+                echo "\e[92;1m{$file}\e[0m\n";
+            }
+            echo $diff = diff($code, $out);
+            if ($options->noColour) {
+                echo "$hr\n";
+            } else {
+                echo "\e[90m$hr\e[0m\n";
+            }
+        }
+        $allOut .= ob_get_clean();
     }
-    if ($token[0] == T_WHITESPACE) {
-        $lastWsp = $token[1];
-    }
-    if ($token[0] == T_DOC_COMMENT) {
-        $docComments[] = [$token[1], $lastWsp];
-    }
-    if ($token[0] != T_WHITESPACE) {
-        $lastWsp = null;
+    catch (RewriteException $rex) {
+        $errors[] = "Rewriting $file failed: ".$rex->getMessage();
     }
 }
 
-foreach ($docComments as list($lastWsp, $doc)) {
-    list ($data, $delete) = $parser->parse($parser->stripDocComment($doc));
+if ($options->warnOnly || !$errors) {
+    echo $allOut;
+}
+if ($errors) {
+    if ($options->noColour) {
+        echo "ERRORS:\n";
+    } else {
+        echo "\e[91;1mERRORS:\e[0m\n";        
+    }
+    foreach ($errors as $e) {
+        echo " - $e\n";
+    }
+}
+if (!$options->warnOnly && $errors) {
+    exit(1);
+}
 
-    $newDoc = $doc;
-    foreach ($delete as $del) {
-        $qdel = preg_quote($del, '~');
-        $newDoc = preg_replace("~(/\*\*\h*){$qdel}\h*\n?~", '$1', $newDoc, 1, $aCount);
-        $newDoc = preg_replace("~^\h*\*\h*{$qdel}\h*\n?~m", '', $newDoc, 1, $bCount);
-        if ($del && !$aCount && !$bCount) {
-            throw new \UnexpectedValueException($del);
+function comment_rewrite($code)
+{
+    global $parser;
+
+    $nl = nl_detect($code);
+    $tokens = token_get_all($code);
+
+    $docComments = [];
+    $lastWsp = null;
+    foreach ($tokens as $token) {
+        $token = (array)$token;
+        if (!isset($token[1])) {
+            $token = [null, $token[0], null];
+        }
+        if ($token[0] == T_WHITESPACE) {
+            $lastWsp = $token[1];
+        }
+        if ($token[0] == T_DOC_COMMENT) {
+            $docComments[] = [$token[1], $lastWsp];
+        }
+        if ($token[0] != T_WHITESPACE) {
+            $lastWsp = null;
         }
     }
 
-    if (preg_match("~^ /\*\* [\s\*]* \*/ $~x", trim($newDoc))) {
-        $newDoc = '';
+    foreach ($docComments as list($doc, $lastWsp)) {
+        list ($data, $delete) = $parser->parse($parser->stripDocComment($doc));
+
+        $newDoc = $doc;
+        foreach ($delete as $del) {
+            $qdel = preg_quote($del, '~');
+            $newDoc = preg_replace("~(/\*\*\h*){$qdel}\h*\n?~", '$1', $newDoc, 1, $aCount);
+            $newDoc = preg_replace("~^\h*\*\h*{$qdel}\h*\n?~m", '', $newDoc, 1, $bCount);
+            if ($del && !$aCount && !$bCount) {
+                throw new RewriteException($del);
+            }
+        }
+
+        if (preg_match("~^ /\*\* [\s\*]* \*/ $~x", trim($newDoc))) {
+            $newDoc = '';
+        }
+
+        $newData = data_rebuild($data);
+        if ($newData) {
+            $pretty = true;
+
+            if (isset($newData['field']) && count($newData['field']) == 1 && (is_string($newData['field']) || $newData['field'] === true)) {
+                // {"field": true}, {"field": "name"}
+                $pretty = false;
+            }
+            elseif (isset($newData['field']) && count($newData['field']) == 1 && (isset($newData['field']['index']) || isset($newData['field']['primary']))) {
+                // {"field": {"index": true}}, {"field": {"primary": true}}, 
+                $pretty = false;
+            }
+            $newNote = ":amiss = ".(json_encode($newData, ($pretty ? JSON_PRETTY_PRINT : null))).";";
+
+            $newNoteLined = " * ".implode("\n * ", explode("\n", $newNote))."\n";
+            $indent = indent_detect($doc, $lastWsp);
+            $newNoteLined = indent($newNoteLined, $indent, $nl);
+
+            if (!$newDoc) {
+                $newDoc = "/**\n$newNoteLined */";
+            } else {
+                $newDoc = preg_replace("~(\*/\s*)$~", "*\n$newNoteLined */", $newDoc);
+            }
+
+            $code = preg_replace('~'.preg_quote($doc, '~').'~', $newDoc, $code, 1, $count);
+            if (!$count) {
+                throw new RewriteException();
+            }
+        }
     }
 
-    $newData = data_rebuild($data);
-    $newNote = ":amiss = ".(json_encode($newData, JSON_PRETTY_PRINT)).";";
-
-    $newNoteLined = " * ".implode("\n * ", explode("\n", $newNote))."\n";
-    $indent = indent_detect($doc, $lastWsp);
-    $newNoteLined = indent($newNoteLined, $indent);
-
-    if (!$newDoc) {
-        $newDoc = "/**\n$newNoteLined */";
-    } else {
-        $newDoc = preg_replace("~(\*/\s*)$~", "*\n$newNoteLined */", $newDoc);
-    }
-    
-    $code = preg_replace('~'.preg_quote($doc, '~').'~', $newDoc, $code, 1, $count);
-    if (!$count) {
-        throw new \UnexpectedValueException();
-    }
+    return $code;
 }
 
-echo $code;
+function nl_detect($code)
+{
+    $nl = "\n";
+    $counts = [];
+    if (preg_match_all('/\r?\n/', $code, $matches)) {
+        foreach ($matches[0] as $match) {
+            if (!isset($counts[$match])) {
+                $counts[$match] = 0;
+            }
+            ++$counts[$match];
+        }
+    }
+    if ($counts) {
+        arsort($counts, SORT_NUMERIC);
+        $nl = key($counts);
+    }
+    return $nl;
+}
+
+function diff($a, $b)
+{
+    global $diffCmd;
+
+    $aFile = tempnam(sys_get_temp_dir(), 'amiss-');
+    $bFile = tempnam(sys_get_temp_dir(), 'amiss-');
+    file_put_contents($aFile, $a);
+    file_put_contents($bFile, $b);
+    
+    list ($code, $stdout, $stderr) = shell_cmd("$diffCmd -u $aFile $bFile | tail -n +3", false);
+    @unlink($aFile);
+    @unlink($bFile);
+
+    if ($code !== 0 && $code !== 1) {
+        throw new \UnexpectedValueException("Diff failed: $stderr");
+    }
+    return $stdout;
+}
+
+function shell_cmd($cmd, $failOnNonZero=true)
+{
+    $proc = proc_open($cmd, [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes);
+    fclose($pipes[0]);
+    $result = stream_get_contents($pipes[1]);
+    $error = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    
+    $return = proc_close($proc);
+    if ($failOnNonZero && $return != 0) {
+        throw new \RuntimeException("Command $cmd failed with code $return, message $error\n");
+    }
+    
+    return [$return, $result, $error];
+}
 
 function indent_detect($doc, $lastWsp)
 {
@@ -110,13 +253,14 @@ function indent_detect($doc, $lastWsp)
         return '';
     }
     if (preg_match('~\h+$~', $lastWsp, $match)) {
-        var_dump($match[0]);
+        return $match[0];
     }
 }
 
-function indent($doc, $indent)
+function indent($doc, $indent, $nl)
 {
-    return $doc;
+    $doc = preg_split("/\r?\n/", $doc);
+    return $indent.implode("$nl$indent", $doc);
 }
 
 function data_rebuild($data)
@@ -138,11 +282,14 @@ function data_rebuild($data)
         || (isset($data['index']) && $data['index'] === true)
     ;
     if ($isDefinitelyProp && $isDefinitelyClass) {
-        throw new \LogicException();
+        throw new RewriteException();
     }
 
     $rebuilt = [];
     if ($isDefinitelyClass) {
+        if (isset($data['table'])) {
+            $rebuilt['table'] = $data['table'];
+        }
         if (isset($data['canUpdate'])) {
             $rebuilt['canUpdate'] = $data['canUpdate'] == true;
         }
@@ -151,9 +298,6 @@ function data_rebuild($data)
         }
         if (isset($data['canDelete'])) {
             $rebuilt['canDelete'] = $data['canDelete'] == true;
-        }
-        if (isset($data['table'])) {
-            $rebuilt['table'] = $data['table'];
         }
         if (isset($data['readOnly'])) {
             $rebuilt['readOnly'] = $data['readOnly'] == true;
@@ -194,9 +338,7 @@ function data_rebuild($data)
             $rebuilt['field']['primary'] = true;
         }
         if (isset($data['field'])) {
-            if ($data['field'] === true) {
-                $rebuilt['field'] = true;
-            } else {
+            if ($data['field'] !== true) {
                 $rebuilt['field']['name'] = $data['field'];
             }
         }
@@ -208,14 +350,20 @@ function data_rebuild($data)
                 if ($data[$ntype] === true) {
                     $rebuilt['field'][$ntype] = true;
                 } elseif (is_string($data[$ntype])) {
-                    throw new \Exception("Not supported in new model");
+                    throw new RewriteException("String named indexes not supported in new model");
                 } elseif (!is_array($data[$ntype])) {
-                    throw new \Exception("Not supported in new model");
+                    throw new RewriteException("Index must be true or an array definition to be supported in new model");
                 } else {
                     unset($data[$ntype]['fields']);
                     $rebuilt['field'][$ntype] = $data[$ntype];
                 }
             }
+        }
+        if ($rebuilt['field'] == []) {
+            $rebuilt['field'] = true;
+        }
+        elseif (count($rebuilt['field']) == 1 && isset($rebuilt['field']['name'])) {
+            $rebuilt['field'] = $rebuilt['field']['name'];
         }
     }
 
@@ -224,6 +372,9 @@ function data_rebuild($data)
 
 return;
 class_defs:
+
+class RewriteException extends \RuntimeException {}
+
 class LegacyParser
 {
     public $defaultValue;
@@ -307,8 +458,9 @@ class LegacyParser
                 $current = &$data;
                 $found = array();
                 foreach ($key as $part) {
-                    if ($current && !is_array($current))
-                        throw new \UnexpectedValueException("Key at path ".implode('.', $found)." already had non-array value, tried to set key $part");
+                    if ($current && !is_array($current)) {
+                        throw new RewriteException("Key at path ".implode('.', $found)." already had non-array value, tried to set key $part");
+                    }
 
                     if (!$found) {
                         if (in_array($part, $matchedNotes)) {

@@ -37,8 +37,9 @@ function find_classes($input, $recursive=true)
     $found = array();
     foreach ($classes as $c) {
         $rc = new \ReflectionClass($c);
-        if ($rc->isInstantiable())
+        if ($rc->isInstantiable()) {
             $found[] = $c;
+        }
     }
     return $found;
 }
