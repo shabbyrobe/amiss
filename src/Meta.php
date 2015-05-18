@@ -191,7 +191,7 @@ class Meta
 
         // special sauce
         if (isset($this->indexes['primary'])) {
-            throw new \UnexpectedValueException();
+            throw new \UnexpectedValueException("Cannot manually declare primary in indexes - set 'primary' in meta info instead");
         }
     }
 

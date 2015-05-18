@@ -350,8 +350,14 @@ function data_rebuild($data)
         // it's a field!
 
         $rebuilt = ['field'=>[]];
+        if (isset($data['name'])) {
+            $rebuilt['field']['key'] = $data['name'];
+        }
         if (isset($data['getter'])) {
             $rebuilt['field']['getter'] = $data['getter'];
+        }
+        if (isset($data['type'])) {
+            $rebuilt['field']['type'] = $data['type'];
         }
         if (isset($data['setter'])) {
             $rebuilt['field']['setter'] = $data['setter'];
