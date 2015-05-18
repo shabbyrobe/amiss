@@ -28,10 +28,11 @@ class Date implements \Amiss\Type\Handler
             // 21000 becomes 210000. up becomes down. monkeys fly out of your butt!
             $export = $value->sec.' '.str_pad($value->usec, 6, '0', STR_PAD_LEFT);
             $format = 'U u';
-            if ($this->timeZone)
+            if ($this->timeZone) {
                 $out = \DateTime::createFromFormat($format, $export, $this->timeZone);
-            else
+            } else {
                 $out = \DateTime::createFromFormat($format, $export);
+            }
         }
         return $out;
     }

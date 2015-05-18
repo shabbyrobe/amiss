@@ -17,7 +17,7 @@ class MultiSchemaTranslatorTest extends \CustomTestCase
         $this->connector->exec("CREATE TABLE schema_one.multi_schema_translator_test_one(id INTEGER PRIMARY KEY AUTOINCREMENT, oneName STRING, twoId INTEGER)");
         $this->connector->exec("CREATE TABLE schema_two.multi_schema_translator_test_two(id INTEGER PRIMARY KEY AUTOINCREMENT, twoName STRING)");
         
-        $this->manager = \Amiss\Factory::createSqlManager($this->connector);
+        $this->manager = \Amiss\Sql\Factory::createManager($this->connector);
         $mapper = $this->mapper = $this->manager->mapper;
         $this->mapper->defaultTableNameTranslator = function($name) use ($mapper) {
             if (preg_match('/One$/', $name)) {

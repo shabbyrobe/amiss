@@ -14,9 +14,8 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 
     <?php
 
-    // Include and register optiona autoloader
-    require_once('/path/to/amiss/src/Amiss.php');
-    Amiss::register();
+    // Include and register optional autoloader (generate using composer install)
+    require_once('/path/to/amiss/src/vendor/autoload.php');
 
     // This is basically a PDO with a bit of extra niceness. You should use it instead
     // of PDO in your own code
@@ -24,19 +23,23 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     
     // This will create a SQL manager using the default configuration (note mapper, default types
     // and relators, no cache)
-    $manager = Amiss::createSqlManager($connector);
+    $manager = Amiss\Sql\Factory::createManager($connector);
     
     // Same as above, but with a cache
     $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
-    $manager = Amiss::createSqlManager($connector, array('cache'=>$cache));
+    $manager = Amiss\Sql\Factory::createManager($connector, array('cache'=>$cache));
     
     // Configure the default mapper
     $manager->mapper->objectNamespace = 'Your\Model';
     
     // Or use your own mapper:
     $mapper = new \Amiss\Mapper\Arrays();
-    $manager = Amiss::createSqlManager($connector, $mapper); // shorthand
-    $manager = Amiss::createSqlManager($connector, array(
+
+    // shorthand
+    $manager = Amiss\Sql\Factory::createManager($connector, $mapper); 
+
+    // longhand
+    $manager = Amiss\Sql\Factory::createManager($connector, array(
         'mapper'=>$mapper, 
         'cache'=>$cache
     ));

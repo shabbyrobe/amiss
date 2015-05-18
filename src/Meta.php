@@ -343,14 +343,17 @@ class Meta
             $field = $this->getField($p);
             $value = !isset($field['getter']) 
                 ? $object->{$p} 
-                : call_user_func(array($object, $field['getter']))
-            ;
-            if ($value) { $foundValue = true; }
-            
+                : call_user_func(array($object, $field['getter']));
+
+            if ($value) {
+                $foundValue = true;
+            }
             $indexValue[$p] = $value;
         }
         
-        if ($foundValue) { return $indexValue; }
+        if ($foundValue) {
+            return $indexValue;
+        }
     }
     
     function getValue($object, $property)
@@ -358,8 +361,8 @@ class Meta
         $field = $this->getField($property);
         $value = !isset($field['getter']) 
             ? $object->{$property} 
-            : call_user_func(array($object, $field['getter'])
-        );
+            : call_user_func(array($object, $field['getter']));
+
         return $value;
     }
     

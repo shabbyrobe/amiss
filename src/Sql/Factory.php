@@ -1,38 +1,29 @@
 <?php
-namespace Amiss;
+namespace Amiss\Sql;
 
 class Factory
 {
-    public static function createSqlManager($connector, $config=null)
+    public static function createManager($connector, $config=null)
     {
         if ($config instanceof \Amiss\Mapper) {
             $config = array('mapper'=>$config);
         }
-        if ($config === null) {
-            $config = array();
-        }
-        
-        $manager = new \Amiss\Sql\Manager($connector, isset($config['mapper']) ? $config['mapper'] : static::createSqlMapper($config));
-        $manager->relators = isset($config['relators']) ? $config['relators'] : static::createSqlRelators($config);
+        $manager = new \Amiss\Sql\Manager($connector, isset($config['mapper']) ? $config['mapper'] : static::createMapper($config));
+        $manager->relators = isset($config['relators']) ? $config['relators'] : static::createRelators($config);
         return $manager;
     }
     
-    public static function createSqlMapper($config=null)
+    public static function createMapper($config=null)
     {
-        $keyPrefix = isset($config['keyPrefix']) ? $config['keyPrefix'] : null; // 'amiss.';
         $mapper = new \Amiss\Mapper\Note(
-            isset($config['cache']) ? $config['cache'] : null,
-            $keyPrefix ? new \Amiss\Note\Parser(['keyPrefix'=>$keyPrefix]) : null
+            isset($config['cache']) ? $config['cache'] : null
         );
-        $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createSqlTypeHandlers($config);
+        $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createTypeHandlers($config);
         return $mapper;
     }
     
-    public static function createSqlRelators($config=null)
+    public static function createRelators($config=null)
     {
-        if ($config == null) {
-            $config = array();
-        }
         $relators = array();
         $oneMany = function($manager) use (&$oneMany) {
             return $oneMany = new \Amiss\Sql\Relator\OneMany($manager);
@@ -45,12 +36,8 @@ class Factory
         return $relators;
     }
     
-    public static function createSqlTypeHandlers($config=null)
+    public static function createTypeHandlers($config=null)
     {
-        if ($config == null) {
-            $config = array();
-        }
-        
         $handlers = array();
         
         if (isset($config['dbTimeZone'])) {
@@ -66,7 +53,11 @@ class Factory
         }
         else {
             $handlers['date'] = $handlers['datetime'] = $handlers['timestamp'] = $handlers['unixtime'] = function() {
-                throw new \UnexpectedValueException("Please pass dbTimeZone (and optionally appTimeZone) with your \$config when using Amiss\Factory::createSqlManager(), Amiss\Factory::createSqlMapper() or Amiss\Factory::createSqlTypeHandlers()");
+                throw new \UnexpectedValueException(
+                    "Please pass dbTimeZone (and optionally appTimeZone) with your \$config ".
+                    "when using Amiss\Sql\Factory::createManager(), Amiss\Sql\Factory::createMapper() ".
+                    "or Amiss\Sql\Factory::createTypeHandlers()"
+                );
             };
         }
         

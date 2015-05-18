@@ -97,7 +97,7 @@ class Criteria extends Sql\Query
 
         if ($namedParams) {
             foreach ($this->params as $p=>$v) {
-                // ($k == 0 && $k !== 0) == !is_numeric($k) (mostly. (string)"0" and (string)"0.0" don't work)
+                // ($k == 0 && $k !== 0) == faster !is_numeric($k) for array keys
                 if (($p == 0 && $p !== 0) && $p[0] != ':') {
                     $k = ':'.$p;
                     $fields && isset($fields[$p]) && $properties[$p] = $k;
@@ -147,16 +147,17 @@ class Criteria extends Sql\Query
     {
         $tokens = array();
         foreach ($fields as $k=>$v) {
-            $repl = null;
+            $rep = null;
             if (isset($this->aliases[$v['name']])) {
-                $repl = $this->aliases[$v['name']];
-            } else {
-                $repl = '`'.$v['name'].'`';
+                $rep = $this->aliases[$v['name']];
+            }
+            else {
+                $rep = '`'.$v['name'].'`';
                 if ($tableAlias) {
-                    $repl = "$tableAlias.$repl";
+                    $rep = "$tableAlias.$rep";
                 }
             }
-            $tokens['{'.$k.'}'] = $repl;
+            $tokens['{'.$k.'}'] = $rep;
         }
         $clause = strtr($clause, $tokens);
         

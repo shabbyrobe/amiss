@@ -104,7 +104,7 @@ If you make use of these defaults, you will need to change::
 	
 To this::
 
-	$manager = Amiss::createSqlManager($conn);
+	$manager = Amiss\Sql\Factory::createManager($conn);
 
 
 Note mapper relation syntax change
