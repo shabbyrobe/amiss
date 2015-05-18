@@ -127,6 +127,40 @@ class MetaTest extends \CustomTestCase
     }
     
     /**
+     * @covers Amiss\Meta::setFields
+     */
+    public function testPrimaryDefinedInInfoAndFieldsFails()
+    {
+        $this->setExpectedException(
+            \Amiss\Exception::class, 
+            "Primary can not be defined at class level and field level simultaneously in class 'stdClass'"
+        );
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
+            'primary'=>'a',
+            'fields'=>[
+                'a'=>['primary'=>true],
+            ],
+        ));
+    }
+
+    /**
+     * @covers Amiss\Meta::__construct
+     * @covers Amiss\Meta::getPrimaryValue
+     */
+    public function testGetPrimaryValueString()
+    {
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
+            'primary'=>'a',
+        ));
+        
+        $obj = (object)array('a'=>1, 'b'=>2);
+        $this->assertEquals(array('a'=>1), $meta->getPrimaryValue($obj));
+    }
+
+    /**
+     * @covers Amiss\Meta::__construct
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueSingleCol()
@@ -141,6 +175,7 @@ class MetaTest extends \CustomTestCase
     }
 
     /**
+     * @covers Amiss\Meta::__construct
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueMultiCol()
@@ -155,6 +190,7 @@ class MetaTest extends \CustomTestCase
     }
 
     /**
+     * @covers Amiss\Meta::__construct
      * @covers Amiss\Meta::getPrimaryValue
      */
     public function testGetPrimaryValueMultiReturnsNullWhenNoValues()
@@ -334,5 +370,18 @@ class MetaTest extends \CustomTestCase
         
         $this->setExpectedException('PHPUnit_Framework_Error_Warning');
         $meta->setValue($object, 'a', 'foo');
+    }
+
+    /**
+     * @covers Amiss\Meta::__sleep
+     */
+    public function testSleep()
+    {
+        $m = new \Amiss\Meta('stdClass', []);
+        $props = $m->__sleep();
+        $rc = new \ReflectionClass($m);
+        foreach ($rc->getProperties() as $p) {
+            $this->assertContains($p->name, $props, "You forgot to add '{$p->name}' to Amiss\Meta's __sleep()");
+        }
     }
 }

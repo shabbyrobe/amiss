@@ -303,8 +303,7 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     * @covers Amiss\Mapper\Note::findGetterSetter
+     * @covers Amiss\Mapper\Note::fillGetterSetter
      */
     public function testGetMetaRelationWithInferredGetterAndInferredSetter()
     {
@@ -359,10 +358,40 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
         $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
     }
+    
+    /**
+     * @covers Amiss\Mapper\Note::fillGetterSetter
+     * @dataProvider dataForInferSetter
+     */
+    public function testRelationFillGetterSetterInferSetter($prefix)
+    {
+        $class = $this->createFnScopeClass("Foo$prefix", '
+            class Foo'.$prefix.' {
+                /** :amiss = {"has": {"type": "pants"}}; */
+                function '.$prefix.'Pants() {}
+            }
+        ');
+        $mapper = new \Amiss\Mapper\Note;
+        $meta = $mapper->getMeta($class);
+        $expected = [
+            'pants'=>[
+                'pants',
+                'getter'=>"{$prefix}Pants",
+                'setter'=>'setPants',
+                'mode'=>'default',
+                'name'=>'pants',
+            ],
+        ];
+        $this->assertEquals($expected, $meta->relations);
+    }
+
+    function dataForInferSetter()
+    {
+        return [['has'], ['get'], ['is']];
+    }
 
     /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     * @covers Amiss\Mapper\Note::findGetterSetter
+     * @covers Amiss\Mapper\Note::fillGetterSetter
      */
     public function testGetMetaRelationWithInferredGetterAndExplicitSetter()
     {
@@ -398,7 +427,6 @@ class NoteMapperTest extends \CustomTestCase
     
     /**
      * @covers Amiss\Mapper\Note::loadMeta
-     * @covers Amiss\Mapper\Note::buildRelations
      */
     public function testGetMetaOneToManyPropertyRelationWithNoOn()
     {
@@ -430,7 +458,6 @@ class NoteMapperTest extends \CustomTestCase
     
     /**
      * @covers Amiss\Mapper\Note::loadMeta
-     * @covers Amiss\Mapper\Note::buildRelations
      */
     public function testGetMetaWithStringRelation()
     {

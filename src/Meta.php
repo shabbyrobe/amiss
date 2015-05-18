@@ -1,6 +1,8 @@
 <?php
 namespace Amiss;
 
+use Amiss\Exception;
+
 class Meta
 {
     public $class;
@@ -86,18 +88,32 @@ class Meta
 
         $this->parent  = $parent;
         $this->table   = isset($info['table'])   ? $info['table']   : array();
-        $this->primary = isset($info['primary']) ? $info['primary'] : array();
 
-        if ($this->primary && !is_array($this->primary)) {
-            $this->primary = array($this->primary);
+        primary: {
+            if (isset($info['primary'])) {
+                if ($info['primary'] == 0 && $info['primary'] !== "0") {
+                    // it's a string!
+                    $this->primary = [$info['primary']];
+                } else {
+                    $this->primary = $info['primary'];
+                }
+            }
+            else {
+                $this->primary = [];
+            }
         }
-        $this->setIndexes(isset($info['indexes']) ? $info['indexes'] : array());
 
-        // set indexes first: setFields is reliant on them 
-        $this->setFields(isset($info['fields']) ? $info['fields'] : array());
+        if (isset($info['indexes'])) {
+            $this->setIndexes($info['indexes']);
+        }
 
-        // must happen after setFields - setFields can influence the primary
+        if (isset($info['fields'])) {
+            // set indexes first: setFields is reliant on them 
+            $this->setFields($info['fields']);
+        }
+
         if ($this->primary) {
+            // must happen after setFields - setFields can influence the primary
             $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
         }
 
@@ -139,8 +155,7 @@ class Meta
             }
         }
 
-        $this->defaultFieldType = null;
-        if (isset($info['defaultFieldType'])) {
+        default_field_type: if (isset($info['defaultFieldType'])) {
             $ft = $info['defaultFieldType'];
             if (!is_array($ft)) {
                 $ft = array('id'=>$ft);
@@ -153,7 +168,10 @@ class Meta
     {
         foreach ($relations as $id=>$r) {
             if (isset($r['on'])) {
-                throw new Exception("Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to'");
+                throw new Exception(
+                    "Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to' ".
+                    "and specify an index name as the value rather than field names"
+                );
             }
             $r['name'] = $id;
             if (isset($r['mode'])) {
@@ -192,7 +210,7 @@ class Meta
                 $index['key'] = false;
             }
             if (!isset($index['fields']) || !$index['fields']) {
-                throw new \UnexpectedValueException("Misconfigured index $name");
+                throw new Exception("Misconfigured index $name");
             }
             $index['fields'] = (array)$index['fields'];
             $this->indexes[$name] = $index;
@@ -200,7 +218,7 @@ class Meta
 
         // special sauce
         if (isset($this->indexes['primary'])) {
-            throw new \UnexpectedValueException("Cannot manually declare primary in indexes - set 'primary' in meta info instead");
+            throw new Exception("Cannot manually declare primary in indexes - set 'primary' in meta info instead");
         }
     }
 
@@ -216,7 +234,7 @@ class Meta
             }
 
             if (!is_array($field)) {
-                throw new \UnexpectedValueException();
+                throw new Exception();
             }
             if (!isset($field['name'])) {
                 $field['name'] = $name;
@@ -248,7 +266,7 @@ class Meta
         $this->fields = $fields;
         if ($primary) {
             if ($this->primary) {
-                throw new \Exception();
+                throw new Exception("Primary can not be defined at class level and field level simultaneously in class '{$this->class}'");
             }
             $this->primary = $primary;
         }

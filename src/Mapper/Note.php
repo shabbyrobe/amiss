@@ -192,9 +192,16 @@ class Note extends \Amiss\Mapper\Base
         $itemNotes['getter'] = $name;
         $methodWithoutPrefix = $name;
         if ($name[0] == 'g' && $name[1] == 'e' && $name[2] == 't') {
+            // getFoo -> foo
             $methodWithoutPrefix = substr($name, 3);
-        } elseif ($name[0] == 'i' && $name[1] == 's') {
+        }
+        elseif ($name[0] == 'i' && $name[1] == 's') {
+            // isFoo -> foo
             $methodWithoutPrefix = substr($name, 2);
+        }
+        elseif ($name[0] == 'h' && $name[1] == 'a' && $name[2] == 's') {
+            // hasFoo -> foo
+            $methodWithoutPrefix = substr($name, 3);
         }
 
         $name = lcfirst($methodWithoutPrefix);

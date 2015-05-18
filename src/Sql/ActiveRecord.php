@@ -10,7 +10,7 @@ abstract class ActiveRecord
     
     /**
      * For testing only
-     * @ignore
+     * @codeCoverageIgnore
      */
     public static function _reset()
     {
@@ -120,9 +120,6 @@ abstract class ActiveRecord
         return call_user_func_array(array($manager, 'updateTable'), $args);
     }
     
-    /**
-     * @ignore
-     */
     public function __call($name, $args)
     {
         $manager = static::getDependency('manager');
@@ -140,9 +137,6 @@ abstract class ActiveRecord
         }
     }
     
-    /**
-     * @ignore
-     */
     public static function __callStatic($name, $args)
     {
         $manager = static::getDependency('manager');
@@ -168,9 +162,6 @@ abstract class ActiveRecord
         }
     }
     
-    /**
-     * @ignore
-     */
     public function __get($name)
     {
         $meta = static::getMeta();
@@ -185,9 +176,6 @@ abstract class ActiveRecord
         }
     }
     
-    /**
-     * @ignore
-     */
     public function __set($name, $value)
     {
         $meta = static::getMeta();
