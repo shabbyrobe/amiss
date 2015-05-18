@@ -51,7 +51,7 @@ class ClassRelationTest extends \CustomTestCase
         $this->db = new \PDOK\Connector('sqlite::memory:');
         $this->mapper = $this->createDefaultMapper();
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
-        $this->manager->relators = \Amiss\Factory::createSqlRelators();
+        $this->manager->relators = \Amiss\Sql\Factory::createRelators();
 
         foreach (self::$classScopeClasses as $fqcn=>$_) {
             TableBuilder::create($this->manager->connector, $this->mapper, $fqcn);

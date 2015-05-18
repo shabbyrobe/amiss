@@ -41,8 +41,11 @@ Define an object with a field that has a ``@type`` annotation:
     class Foo
     {
         /**
-         * @field
-         * @type mydate
+         * :amiss = {
+         *     "field": {
+         *         "type": "mydate"
+         *     }
+         * };
          */
         public $bar;
     }
@@ -87,8 +90,11 @@ opening bracket
     class Foo
     {
         /**
-         * @field
-         * @type BAZ(QUX)
+         * :amiss = {
+         *     "field": {
+         *         "type": "BAZ(QUX)"
+         *     }
+         * };
          */
         public $bar;
     }
@@ -139,14 +145,20 @@ Encoder
         class Foo
         {
             /**
-             * @field
-             * @type myEncodedType
+             * :amiss = {
+             *     "field": {
+             *         "type": "myEncodedType"
+             *     }
+             * };
              */
             public $nestage;
 
             /**
-             * @field
-             * @type mySuperMunge
+             * :amiss = {
+             *     "field": {
+             *         "type": "mySuperMunge"
+             *     }
+             * };
              */
             public $munged;
         }
@@ -189,17 +201,27 @@ Embed
         class Artist
         {
             /**
-             * @field
-             * @type.id embed
-             * @type.class ArtistType
+             * :amiss = {
+             *     "field": {
+             *         "type": {
+             *             "id": "embed",
+             *             "class": "ArtistType"
+             *         }
+             *     }
+             * };
              */
             public $artistType;
 
             /**
-             * @field
-             * @type.id embed
-             * @type.class Member
-             * @type.many
+             * :amiss = {
+             *     "field": {
+             *         "type": {
+             *             "id": "embed",
+             *             "class": "Member",
+             *             "many": true
+             *         }
+             *     }
+             * };
              */
             public $members;
         }
@@ -281,18 +303,26 @@ register the handler with your mapper:
     <?php
     class Foo
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $fooId;
 
         /**
-         * @field
-         * @type serialise
+         * :amiss = {
+         *     "field": {
+         *         "type": "serialise"
+         *     }
+         * };
          */
         public $bar;
 
         /**
-         * @field
-         * @type serialise
+         * :amiss = {
+         *     "field": {
+         *         "type": "serialise"
+         *     }
+         * };
          */
         public $baz;
     }
@@ -341,8 +371,11 @@ parenthesis. In the following example, the type handler ``varchar`` will be used
     class Foo
     {
         /**
-         * @field
-         * @type VARCHAR(48)
+         * :amiss = {
+         *     "field": {
+         *         "type": "VARCHAR(48)"
+         *     }
+         * };
          */
         public $bar;
     }

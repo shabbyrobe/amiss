@@ -21,7 +21,7 @@ class RelatedGetterTest extends \CustomTestCase
         $this->db->exec("INSERT INTO parent VALUES(1)");
         $this->mapper = new \Amiss\Mapper\Note;
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
-        $this->manager->relators = \Amiss\Factory::createSqlRelators();
+        $this->manager->relators = \Amiss\Sql\Factory::createRelators();
     }
 
     function testGetRelatedGetterOneToOne()

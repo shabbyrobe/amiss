@@ -23,11 +23,12 @@ class Encoder implements Handler
     {
         $return = null;
         if ($value) {
-            if ($this->innerHandler)
+            if ($this->innerHandler) {
                 $value = $this->innerHandler->prepareValueForDb($value, $fieldInfo);
-            
-            if ($value)
+            }
+            if ($value) {
                 $return = call_user_func($this->serialiser, $value);
+            }
         }
         return $return;
     }
@@ -37,18 +38,19 @@ class Encoder implements Handler
         $return = null;
         if ($value) {
             $return = call_user_func($this->deserialiser, $value);
-            
-            if ($this->innerHandler)
+            if ($this->innerHandler) {
                 $return = $this->innerHandler->handleValueFromDb($return, $fieldInfo, $row);
+            }
         }
         return $return;
     }
     
     function createColumnType($engine)
     {
-        if (is_string($this->columnType))
+        if (is_string($this->columnType)) {
             return $this->columnType;
-        else
+        } else {
             return call_user_func($this->columnType, $engine);
+        }
     }
 }

@@ -32,8 +32,12 @@ Mapping a Mongo ID:
     class Event
     {
         /**
-         * @field _id
-         * @type id
+         * :amiss = {
+         *     "field": {
+         *         "type": "id",
+         *         "name": "_id"
+         *     }
+         * };
          */
         public $id;
     }

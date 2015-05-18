@@ -25,18 +25,29 @@ configuration that works with the data mapper.
     <?php
     class Artist extends Amiss\Sql\ActiveRecord
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $artistId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $name;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $artistTypeId;
 
-        /** 
-         * @has.one.of ArtistType
-         * @has.one.on artistTypeId
+        /**
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "ArtistType",
+         *         "on": "artistTypeId"
+         *     }
+         * };
          */
         public $artistType;
     }
@@ -205,8 +216,13 @@ using a wrapper function:
         private $artistType;
         
         /**
-         * @has.one.of ArtistType
-         * @has.one.on artistTypeId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "ArtistType",
+         *         "on": "artistTypeId"
+         *     }
+         * };
          */
         public function getArtistType()
         {

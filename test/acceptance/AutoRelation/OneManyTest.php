@@ -13,7 +13,7 @@ class OneManyTest extends \CustomTestCase
         $this->mapper = $this->createDefaultMapper();
         $this->mapper->objectNamespace = __NAMESPACE__;
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
-        $this->manager->relators = \Amiss\Factory::createSqlRelators();
+        $this->manager->relators = \Amiss\Sql\Factory::createRelators();
         foreach ($this->mapper->arrayMap as $class=>$meta) {
             TableBuilder::create($this->manager->connector, $this->mapper, $class);
         }

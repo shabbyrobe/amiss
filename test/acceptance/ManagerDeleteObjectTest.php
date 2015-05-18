@@ -46,7 +46,7 @@ class ManagerDeleteObjectTest extends \ModelDataTestCase
     public function testDeleteObjectWithoutPrimaryFails()
     {
         $mapper = new \TestMapper(array(
-            'Amiss\Demo\Artist'=>new \Amiss\Meta('Artist', 'artist', array()),
+            'Amiss\Demo\Artist'=>new \Amiss\Meta('Artist', ['table'=>'artist']),
         ));
 
         $manager = new \Amiss\Sql\Manager($this->manager->connector, $mapper);

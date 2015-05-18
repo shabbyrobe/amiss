@@ -236,7 +236,7 @@ class ModelDataTestCase extends DataTestCase
     
     public function getMapper()
     {
-        $mapper = \Amiss\Factory::createSqlMapper(array(
+        $mapper = \Amiss\Sql\Factory::createMapper(array(
             'dbTimeZone'=>'UTC',
         ));
         $mapper->objectNamespace = 'Amiss\Demo';
@@ -245,7 +245,7 @@ class ModelDataTestCase extends DataTestCase
     
     public function getManager()
     {
-        return \Amiss\Factory::createSqlManager($this->db, $this->mapper);
+        return \Amiss\Sql\Factory::createManager($this->db, $this->mapper);
     }
     
     public function setUp()

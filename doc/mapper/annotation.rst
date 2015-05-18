@@ -1,14 +1,14 @@
 Annotation Mapper
 =================
 
-``Amiss\Factory::createSqlManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types`
+``Amiss\Sql\Factory::createManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types`
 preconfigured by default. This should be used as a default starting point. You can access
 the mapper for further configuration after you create the manager like so:
 
 .. code-block:: php
 
     <?php
-    $manager = \Amiss\Factory::createSqlManager($db, array('cache'=>$cache));
+    $manager = \Amiss\Sql\Factory::createManager($db, array('cache'=>$cache));
     $mapper = $manager->mapper;
 
 This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance
@@ -37,31 +37,45 @@ Using the Annotation mapper, object/table mappings are defined in this way:
 
     <?php
     /**
-     * @table your_table
-     * @fieldType VARCHAR(255)
+     * :amiss = {
+     *     "table": "your_table",
+     *     "fieldType": "VARCHAR(255)"
+     * };
      */
     class Foo
     {
-        /** @primary */
+        /** :amiss = {"field":{"primary":true}}; */
         public $id;
 
-        /** @field some_column */
+        /** :amiss = {"field":"some_column"}; */
         public $name;
 
-        /** @field */
+        /** :amiss = {"field":true}; */
         public $barId;
 
         /**
          * One-to-one relation: 
-         * @has.one.of Baz
-         * @has.one.on bazId
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Baz",
+         *         "on": "bazId"
+         *     }
+         * };
          */
         public $baz;
 
         /** 
          * One-to-many relation:
-         * @has.many.of Bar
-         * @has.many.inverse foo
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Bar",
+         *         "inverse": "foo"
+         *     }
+         * };
          */
         public $bars;
 
@@ -69,8 +83,11 @@ Using the Annotation mapper, object/table mappings are defined in this way:
         private $fooDate;
 
         /**
-         * @field
-         * @type date
+         * :amiss = {
+         *     "field": {
+         *         "type": "date"
+         *     }
+         * };
          */
         public function getFooDate()
         {
@@ -90,48 +107,46 @@ mapping should be handled using a :doc:`custom mapper <custom>`.
 Annotations
 -----------
 
-Annotations are javadoc-style key/values and are formatted like so:
+Annotations are defined in PHP docblocks and follow the format::
 
-.. code-block:: php
-
-    <?php
     /**
-     * @key this is the value
+     * :namespace = {"json": "object"};
      */
 
-- Keys end at the first whitespace character. 
-- Values start at the first non-whitespace character after the key.
-- Values are optional.
-- Values are ended by a newline or the end of the docblock.
+Parsing of an annotation starts as soon as a ``:namespace`` token is seen at the **start
+of a line**::
 
-
-Arbitrarily nested arrays can be represented:
-
-.. code-block:: php
-
-    <?php
     /**
-     * @foo.bar.baz value
+     * :parsed = {"json": "object"};
+     * This won't be parsed: :notparsed = {"json": "object"};
      */
-    $parsesTo = array(
-        'foo'=>array(
-            'bar'=>array(
-                'baz'=>'value',
-            ),
-        ),
-    );
 
+Namespace tokens should not contain any characters that you could not use in
+PHP variable names::
 
-Arrays will be inferred if multiple values are specified:
-
-.. code-block:: php
-
-    <?php
     /**
-     * @foo 1
-     * @foo 2
+     * :good = {"json": "object"};
+     * :This is not good = {"json": "object"};
      */
-    $parsesTo = array('foo'=>array(1, 2));
+
+The JSON object starts immediately after the ``=`` sign and continues until the first
+semicolon found which is the last character on a line (excluding horizontal whitespace)::
+
+    /**
+     * :newlines_galore = {
+     *     "foo": "bar",
+     *     "baz": "qux"
+     * };
+     *
+     * :good_though_ugly = 
+     *    {"json": "object"}
+     * ;
+     *
+     * :will_fail = {"json": "object"}
+     * ; not the last thing on the line
+     */
+
+Annotations used by Amiss are always placed into the ``:amiss`` namespace.
 
 
 Class Mapping
@@ -143,8 +158,10 @@ These values must be assigned in the class' docblock:
 
     <?php
     /**
-     * @table my_table
-     * @fieldType string-a-doodle-doo
+     * :amiss = {
+     *     "table": "my_table",
+     *     "fieldType": "string-a-doodle-doo"
+     * };
      */
     class Foo
     {}
@@ -258,15 +275,24 @@ The following annotations are available to define this mapping:
         <?php
         class Artist
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $artistId;
 
-            /** @field */
+            /**
+             * :amiss = {"field":true};
+             */
             public $artistTypeId;
             
             /**
-             * @has.one.of ArtistType
-             * @has.one.on artistTypeId
+             * :amiss = {
+             *     "has": {
+             *         "type": "one",
+             *         "of": "ArtistType",
+             *         "on": "artistTypeId"
+             *     }
+             * };
              */
             public $artist;
         }
@@ -308,12 +334,19 @@ The following annotations are available to define this mapping:
         <?php
         class ArtistType
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $artistTypeId;
 
             /**
-             * @has.many.of Artist
-             * @has.many.on artistTypeId
+             * :amiss = {
+             *     "has": {
+             *         "type": "many",
+             *         "of": "Artist",
+             *         "on": "artistTypeId"
+             *     }
+             * };
              */
             public $artists;
         }
@@ -328,18 +361,30 @@ The following annotations are available to define this mapping:
         <?php
         class Event
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $eventId;
 
             /**
-             * @has.many.of EventArtist
-             * @has.many.on eventId
+             * :amiss = {
+             *     "has": {
+             *         "type": "many",
+             *         "of": "EventArtist",
+             *         "on": "eventId"
+             *     }
+             * };
              */
             public $eventArtists;
 
-            /** 
-             * @has.assoc.of Artist
-             * @has.assoc.via EventArtist
+            /**
+             * :amiss = {
+             *     "has": {
+             *         "type": "assoc",
+             *         "of": "Artist",
+             *         "via": "EventArtist"
+             *     }
+             * };
              */
             public $artists;
         }
@@ -383,15 +428,22 @@ property:
         private $baz;
         private $qux;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public function getBaz()
         {
             return $this->baz;
         }
 
         /**
-         * @has.one.of Qux
-         * @has.one.on baz
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Qux",
+         *         "on": "baz"
+         *     }
+         * };
          */
         public function getQux()
         {
@@ -438,9 +490,12 @@ opinionated so you can go ahead and make your names whatever you please:
         private $baz;
         private $qux;
 
-        /** 
-         * @field
-         * @setter assignAValueToBaz
+        /**
+         * :amiss = {
+         *     "field": {
+         *         "setter": "assignAValueToBaz"
+         *     }
+         * };
          */
         public function getBaz()
         {
@@ -453,10 +508,17 @@ opinionated so you can go ahead and make your names whatever you please:
             $this->baz = $value;
         }
 
-        /** 
-         * @has.one.of Qux
-         * @has.one.on baz
-         * @setter makeQuxEqualTo
+        /**
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Qux",
+         *         "on": "baz"
+         *     },
+         *     "field": {
+         *         "setter": "makeQuxEqualTo"
+         *     }
+         * };
          */
         public function pleaseGrabThatQuxForMe() 
         
@@ -492,11 +554,11 @@ getter and setter as the first two arguments, then pass it as the first construc
     $cache = new \Amiss\Cache('eaccelerator_get', 'eaccelerator_put');
     
     // when using the SQL manager's default note mapper:
-    $manager = \Amiss\Factory::createSqlManager($db, array('cache'=>$cache));
+    $manager = \Amiss\Sql\Factory::createManager($db, array('cache'=>$cache));
     
     // when creating the mapper by hand
     $mapper = new \Amiss\Mapper\Note($cache);
-    $manager = \Amiss\Factory::createSqlManager($db, $mapper);
+    $manager = \Amiss\Sql\Factory::createManager($db, $mapper);
 
 
 By default, no TTL or expiration information will be passed by the mapper. In the case of

@@ -256,7 +256,7 @@ class NoteMapperTest extends \CustomTestCase
     /**
      * @covers Amiss\Mapper\Note::loadMeta
      */
-    public function testGetMetaWithParentClass()
+    public function testGetMetaIgnoresParentClassByDefault()
     {
         $mapper = new \Amiss\Mapper\Note;
         $class1 = $this->createFnScopeClass("Test1", '
@@ -271,6 +271,31 @@ class NoteMapperTest extends \CustomTestCase
                 public $bar;
             }
         ');
+
+        $meta1 = $mapper->getMeta($class1);
+        $meta2 = $mapper->getMeta($class2);
+        $this->assertEquals(null, $this->getProtected($meta2, 'parent'));
+    }
+
+    /**
+     * @covers Amiss\Mapper\Note::loadMeta
+     */
+    public function testGetMetaWithParentClass()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        $class1 = $this->createFnScopeClass("Test1", '
+            class Test1 {
+                /** :amiss = {"field": true}; */
+                public $foo;
+            }
+        ');
+        $class2 = $this->createFnScopeClass("Test2", '
+            /** :amiss = {"inherit": true}; */
+            class Test2 extends Test1 {
+                /** :amiss = {"field": true}; */
+                public $bar;
+            }
+        ');
         
         $meta1 = $mapper->getMeta($class1);
         $meta2 = $mapper->getMeta($class2);
@@ -278,8 +303,7 @@ class NoteMapperTest extends \CustomTestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     * @covers Amiss\Mapper\Note::findGetterSetter
+     * @covers Amiss\Mapper\Note::fillGetterSetter
      */
     public function testGetMetaRelationWithInferredGetterAndInferredSetter()
     {
@@ -334,10 +358,40 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
         $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
     }
+    
+    /**
+     * @covers Amiss\Mapper\Note::fillGetterSetter
+     * @dataProvider dataForInferSetter
+     */
+    public function testRelationFillGetterSetterInferSetter($prefix)
+    {
+        $class = $this->createFnScopeClass("Foo$prefix", '
+            class Foo'.$prefix.' {
+                /** :amiss = {"has": {"type": "pants"}}; */
+                function '.$prefix.'Pants() {}
+            }
+        ');
+        $mapper = new \Amiss\Mapper\Note;
+        $meta = $mapper->getMeta($class);
+        $expected = [
+            'pants'=>[
+                'pants',
+                'getter'=>"{$prefix}Pants",
+                'setter'=>'setPants',
+                'mode'=>'default',
+                'name'=>'pants',
+            ],
+        ];
+        $this->assertEquals($expected, $meta->relations);
+    }
+
+    function dataForInferSetter()
+    {
+        return [['has'], ['get'], ['is']];
+    }
 
     /**
-     * @covers Amiss\Mapper\Note::buildRelations
-     * @covers Amiss\Mapper\Note::findGetterSetter
+     * @covers Amiss\Mapper\Note::fillGetterSetter
      */
     public function testGetMetaRelationWithInferredGetterAndExplicitSetter()
     {
@@ -373,7 +427,6 @@ class NoteMapperTest extends \CustomTestCase
     
     /**
      * @covers Amiss\Mapper\Note::loadMeta
-     * @covers Amiss\Mapper\Note::buildRelations
      */
     public function testGetMetaOneToManyPropertyRelationWithNoOn()
     {
@@ -405,7 +458,6 @@ class NoteMapperTest extends \CustomTestCase
     
     /**
      * @covers Amiss\Mapper\Note::loadMeta
-     * @covers Amiss\Mapper\Note::buildRelations
      */
     public function testGetMetaWithStringRelation()
     {

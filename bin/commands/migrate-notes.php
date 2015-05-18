@@ -3,6 +3,7 @@ $usage = <<<'DOCOPT'
 Migrate Amiss v4 notes to v5
 
 Usage: amiss migrate-notes [options] <input>...
+       amiss migrate-notes --help
 
 Displays a diff of each file changed to STDOUT, or rewrites the files in place
 if you pass the `--in-place` flag.
@@ -14,20 +15,29 @@ Options:
   --no-colour      No colours in diff output
   --in-place       DO IT!
   --warn-only      Errors are treated as warnings, keeps processing
+  --ext <ext>      File extension to look for [default: php]
+
+If you set `--ext` to anything other than php, a less reliable docblock
+extraction method will be used. This can yield more errors, but it means
+you can use this script for things like documentation as well (it was
+used on the Amiss docs).
 
 DOCOPT;
 
 $options = (new \Docopt\Handler)->handle($usage);
 $optMapper = new \Amiss\Mapper\Arrays;
-$meta = new \Amiss\Meta('stdClass', '', [
+$meta = new \Amiss\Meta('stdClass', [
     'fields'=>[
         'input'=>'<input>',
         'inPlace'=>'--in-place',
         'noColour'=>'--no-colour',
         'warnOnly'=>'--warn-only',
+        'ext'=>'--ext',
     ]
 ]);
 $options = $optMapper->toObject($options, null, $meta);
+$options->crapExtractor = $options->ext != 'php';
+
 $hasColorDiff = shell_cmd('which colordiff', false);
 $diffCmd = (!$options->noColour && $hasColorDiff[0] == 0) ? 'colordiff' : 'diff';
 
@@ -36,7 +46,7 @@ goto class_defs; script:
 $matchedNotes = [
     'has', 'field', 'primary', 'index', 'constructor', 'relation', 
     'canUpdate', 'canDelete', 'canInsert', 'readOnly', 'table', 'type',
-    'getter', 'setter', 'key',
+    'getter', 'setter', 'key', 'fieldType',
 ];
 $parser = new LegacyParser();
 
@@ -56,7 +66,7 @@ $iter = function() use ($options) {
             if (is_dir($i)) {
                 continue;
             }
-            if (!preg_match('~\.php$~', $i)) {
+            if (!preg_match("~\.{$options->ext}$~", $i)) {
                 continue;
             }
             if (preg_match('~(^|[/\\\\])\.~', $i)) {
@@ -78,6 +88,8 @@ foreach ($iter() as $file) {
     $code = file_get_contents($file);
     try {
         $out = comment_rewrite($code);
+        echo "Preparing $file\n";
+
         if ($options->inPlace) {
             $allOut[$file] = $out;
         }
@@ -128,26 +140,31 @@ if (!$options->warnOnly && $errors) {
 function comment_rewrite($code)
 {
     global $parser;
+    global $options;
 
     $nl = nl_detect($code);
-    $tokens = token_get_all($code);
+
+    if ($options->crapExtractor) {
+        $tokens = token_get_docblocks_manual($code);
+    } else {
+        $tokens = token_get_all($code);
+    }
 
     $docComments = [];
-    $lastWsp = null;
+    $prev = null;
     foreach ($tokens as $token) {
         $token = (array)$token;
         if (!isset($token[1])) {
             $token = [null, $token[0], null];
         }
-        if ($token[0] == T_WHITESPACE) {
-            $lastWsp = $token[1];
-        }
         if ($token[0] == T_DOC_COMMENT) {
+            $lastWsp = null;
+            if ($prev && $prev[0] == T_WHITESPACE) {
+                $lastWsp = $prev[1];
+            }
             $docComments[] = [$token[1], $lastWsp];
         }
-        if ($token[0] != T_WHITESPACE) {
-            $lastWsp = null;
-        }
+        $prev = $token;
     }
 
     foreach ($docComments as list($doc, $lastWsp)) {
@@ -187,7 +204,8 @@ function comment_rewrite($code)
 
             if (!$newDoc) {
                 $newDoc = "/**\n$newNoteLined */";
-            } else {
+            }
+            else {
                 // preg_replace requires backslashes to be escaped in the replacement pattern
                 $newNoteReplace = str_replace("\\", "\\\\", $newNoteLined);
                 $newDoc = preg_replace("~(\*/\s*)$~", "*\n$newNoteReplace */", $newDoc);
@@ -204,6 +222,24 @@ function comment_rewrite($code)
     }
 
     return $code;
+}
+
+function token_get_docblocks_manual($code)
+{
+    $tokens = [];
+    $split = preg_split("~ ( /\*\*+ .*? \*/ | \s+ ) ~sx", $code, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    foreach ($split as $tok) {
+        if (strpos($tok, "/**") === 0) {
+            $tokens[] = [T_DOC_COMMENT, $tok, null];
+        }
+        elseif (preg_match("/\s/", $tok[0])) {
+            $tokens[] = [T_WHITESPACE, $tok, null];
+        }
+        else {
+            $tokens[] = [null, $tok, null];
+        }
+    }
+    return $tokens;
 }
 
 function nl_detect($code)
@@ -285,6 +321,7 @@ function data_rebuild($data)
         || isset($data['canUpdate'])
         || isset($data['canInsert'])
         || isset($data['canDelete'])
+        || isset($data['fieldType'])
     ;
     $isDefinitelyProp =
            isset($data['has'])
@@ -315,6 +352,9 @@ function data_rebuild($data)
         if (isset($data['canDelete'])) {
             $rebuilt['canDelete'] = $data['canDelete'] == true;
         }
+        if (isset($data['fieldType'])) {
+            $rebuilt['fieldType'] = $data['fieldType'];
+        }
         if (isset($data['readOnly'])) {
             $rebuilt['readOnly'] = $data['readOnly'] == true;
         }
@@ -340,6 +380,9 @@ function data_rebuild($data)
         }
         if (isset($data['setter'])) {
             $rebuilt['field']['setter'] = $data['setter'];
+        }
+        if (is_string($data['has'])) {
+            $data['has'] = [$data['has']=>[]];
         }
         $type = key($data['has']);
         $rebuilt['has']['type'] = $type;

@@ -20,8 +20,9 @@ class ParentsRelator extends Relator
     
     function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
-        if ($criteria)
+        if ($criteria) {
             throw new \InvalidArgumentException("Can't use criteria with parents relator");
+        }
         
         $treeMeta = $this->nestedSetManager->getTreeMeta($source, $relationName);
         $meta = $treeMeta->meta;
@@ -38,8 +39,9 @@ class ParentsRelator extends Relator
 
         $parents = $this->nestedSetManager->manager->getList($meta->class, $query);
 
-        if ($parents && isset($relation['includeRoot']) && !$relation['includeRoot'])
+        if ($parents && isset($relation['includeRoot']) && !$relation['includeRoot']) {
             array_pop($parents);
+        }
         
         return $parents;
     }

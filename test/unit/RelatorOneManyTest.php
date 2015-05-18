@@ -78,7 +78,8 @@ class RelatorOneManyTest extends \CustomTestCase
     {
         $metaIndex = array();
         
-        $this->mapper->meta['DummyChild'] = new \Amiss\Meta('DummyChild', 'child', array(
+        $this->mapper->meta['DummyChild'] = new \Amiss\Meta('DummyChild', array(
+            'table'=>'child',
             'primary'=>array('childId'),
             'fields'=>array(
                 'childId'=>array('name'=>'child_id'),
@@ -91,7 +92,8 @@ class RelatorOneManyTest extends \CustomTestCase
                 'parent'=>array('one', 'of'=>'DummyParent', 'from'=>'childParentId')
             ),
         ));
-        $this->mapper->meta['DummyParent'] = new \Amiss\Meta('DummyParent', 'parent', array(
+        $this->mapper->meta['DummyParent'] = new \Amiss\Meta('DummyParent', array(
+            'table'=>'parent',
             'primary'=>array('parentId'),
             'fields'=>array(
                 'parentId'=>array('name'=>'parent_id'),

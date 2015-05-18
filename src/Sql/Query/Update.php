@@ -84,8 +84,9 @@ class Update extends Criteria
             throw new Exception("Param overlap between set and where clause. Duplicated keys: ".implode(', ', $intersection));
         }
         
-        if (!$whereClause)
+        if (!$whereClause) {
             throw new \InvalidArgumentException("No where clause specified for table update. Explicitly specify 1=1 as the clause if you meant to do this.");
+        }
         
         $sql = "UPDATE $table SET $setClause WHERE $whereClause";
         

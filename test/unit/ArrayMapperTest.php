@@ -37,32 +37,31 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         $this->assertEquals('abc', $meta->table);
     }
-    
+
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
      */
-    public function testInheritTrue()
+    public function testInherit()
     {
         $name = 'c'.md5(uniqid('', true));
         $name2 = $name.'2';
         $this->createClass($name, 'class '.$name.'{} class '.$name2.' extends '.$name.'{}');
         $mappings = array(
             $name=>array(),
-            $name2=>array(),
+            $name2=>array('inherit'=>true),
         );
         
         $mapper = new Arrays($mappings);
-        $mapper->inherit = true;
         $meta = $mapper->getMeta($name2);
         
         $parent = $this->getProtected($meta, 'parent');
         $this->assertEquals($name, $parent->class);
     }
-    
+
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
      */
-    public function testInheritFalse()
+    public function testNoInheritByDefault()
     {
         $name = 'c'.md5(uniqid('', true));
         $name2 = $name.'2';
@@ -73,13 +72,12 @@ class ArrayMapperTest extends \CustomTestCase
         );
         
         $mapper = new Arrays($mappings);
-        $mapper->inherit = false;
         $meta = $mapper->getMeta($name2);
         
         $parent = $this->getProtected($meta, 'parent');
-        $this->assertEquals(null, $parent);
+        $this->assertNull($parent);
     }
-    
+
     /**
      * @covers Amiss\Mapper\Arrays::__construct
      */
@@ -96,7 +94,7 @@ class ArrayMapperTest extends \CustomTestCase
     public function testArrayFieldStrings()
     {
         $mappings = array(
-            'foo'=>array('fields'=>array('a', 'b', 'c')),
+            'foo'=>array('fields'=>array('a'=>true, 'b'=>true, 'c'=>true)),
         );
         $mapper = new Arrays($mappings);
         $meta = $mapper->getMeta('foo');
@@ -112,7 +110,7 @@ class ArrayMapperTest extends \CustomTestCase
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
      */
-    public function testArrayPrimaryInfersField()
+    public function testArrayPrimaryDoesNotInferField()
     {
         $mappings = array(
             'foo'=>array('primary'=>'id'),
@@ -120,62 +118,22 @@ class ArrayMapperTest extends \CustomTestCase
         $mapper = new Arrays($mappings);
         $meta = $mapper->getMeta('foo');
         
-        $expected = array(
-            'id'=>array('name'=>'id', 'type'=>array('id'=>'autoinc')),
-        );
-        $this->assertEquals($expected, $meta->getFields());
+        $this->assertEquals([], $meta->getFields());
     }
 
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
      */
-    public function testArrayPrimaryInferredFieldDefaultType()
-    {
-        $mappings = array(
-            'foo'=>array('primary'=>'id'),
-        );
-        $mapper = new Arrays($mappings);
-        $mapper->defaultPrimaryType = 'flobadoo';
-        $meta = $mapper->getMeta('foo');
-        
-        $expected = array(
-            'id'=>array('name'=>'id', 'type'=>array('id'=>'flobadoo')),
-        );
-        $this->assertEquals($expected, $meta->getFields());
-    }
-    
-    /**
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function testArrayDeclaredPrimaryFieldWithoutTypeAssumesDefaultPrimaryType()
-    {
-        $mappings = array(
-            'foo'=>array('primary'=>'id', 'fields'=>array('id')),
-        );
-        $mapper = new Arrays($mappings);
-        $mapper->defaultPrimaryType = 'flobadoo';
-        $meta = $mapper->getMeta('foo');
-        
-        $expected = array(
-            'id'=>array('name'=>'id', 'type'=>array('id'=>'flobadoo')),
-        );
-        $this->assertEquals($expected, $meta->getFields());
-    }
-    
-    /**
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function testArrayPrimaryExplicitFieldType()
+    public function testArrayPrimaryExplicitField()
     {
         $mappings = array(
             'foo'=>array('primary'=>'id', 'fields'=>array('id'=>array('type'=>array('id'=>'foobar')))),
         );
         $mapper = new Arrays($mappings);
-        $mapper->defaultPrimaryType = 'flobadoo';
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>array('id'=>'foobar')),
+            'id'=>array('name'=>'id', 'type'=>['id'=>'foobar']),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -204,31 +162,6 @@ class ArrayMapperTest extends \CustomTestCase
         
         $this->assertEquals($expected, $meta->getFields());
     }
-    
-    /**
-     * Tests issue #7
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function testArrayPrimaryImplicitFieldTypeWithFieldName()
-    {
-        $mappings = array(
-            'foo'=>array(
-                'primary'=>'id', 
-                'fields'=>array(
-                    'id'=>array('name'=>'pants')
-                )
-            ),
-        );
-        $mapper = new Arrays($mappings);
-        $mapper->defaultPrimaryType = 'flobadoo';
-        $meta = $mapper->getMeta('foo');
-        
-        $expected = array(
-            'id'=>array('name'=>'pants', 'type'=>array('id'=>'flobadoo')),
-        );
-        
-        $this->assertEquals($expected, $meta->getFields());
-    }
 
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
@@ -239,6 +172,7 @@ class ArrayMapperTest extends \CustomTestCase
             'foo'=>array(
                 'primary'=>'fooBarBaz',
                 'fields'=>array(
+                    'fooBarBaz'=>[],
                     'bazQuxDing'=>[],
                 ),
             ),

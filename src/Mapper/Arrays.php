@@ -7,8 +7,6 @@ namespace Amiss\Mapper;
 class Arrays extends Base
 {
     public $arrayMap;
-    public $inherit = false;
-    public $defaultPrimaryType = 'autoinc';
     
     public function __construct($arrayMap=array())
     {
@@ -22,52 +20,30 @@ class Arrays extends Base
         if (!isset($this->arrayMap[$class])) {
             throw new \InvalidArgumentException("Unknown class $class");
         }
-        $array = $this->arrayMap[$class];
+
+        $info = $this->arrayMap[$class];
         $parent = null;
-        if ($this->inherit) {
-            $parentClass = get_parent_class($class);
-            if ($parentClass) { $parent = $this->getMeta($parentClass); }
-        }
         
-        $table = null;
-        if (isset($array['table'])) {
-            $table = $array['table'];
-        } else {
-            $table = $this->getDefaultTable($class);
-        }
-        
-        $fields = array();
-        if (isset($array['fields'])) {
-            foreach ($array['fields'] as $id=>$field) {
-                if (!($id == 0 && $id !== 0)) { // it's a numeric index, not a string
-                    $id = $field; 
-                    $field = array();
+        parent_class: {
+            if (isset($info['inherit']) && $info['inherit']) {
+                $parent = null;
+                $parentClass = get_parent_class($class);
+                if ($parentClass) {
+                    $parent = $this->getMeta($parentClass);
                 }
-                if (!isset($field['type'])) {
-                    $field['type'] = null;
-                }
-                $fields[$id] = $field;
+                unset($info['inherit']);
             }
         }
-        $array['fields'] = $fields;
-        
-        if (isset($array['primary'])) {
-            if (!is_array($array['primary'])) {
-                $array['primary'] = array($array['primary']);
-            }
-            foreach ($array['primary'] as $v) {
-                if (!isset($array['fields'][$v])) {
-                    $array['fields'][$v] = array();
-                }
-                if (!isset($array['fields'][$v]['type'])) {
-                    $array['fields'][$v]['type'] = $this->defaultPrimaryType;
-                }
-            }
+
+        if (!isset($info['table'])) {
+            $info['table'] = $this->getDefaultTable($class);
+        }
+
+        if (isset($info['fields'])) {
+            $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
         
-        $array['fields'] = $this->resolveUnnamedFields($array['fields']);
-        
-        $meta = new \Amiss\Meta($class, $table, $array, $parent);
+        $meta = new \Amiss\Meta($class, $info, $parent);
         
         return $meta;
     }

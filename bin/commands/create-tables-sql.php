@@ -36,7 +36,7 @@ DOCOPT;
 
 $options = (new \Docopt\Handler)->handle($usage);
 $mapper = new \Amiss\Mapper\Arrays;
-$meta = new \Amiss\Meta('stdClass', '', [
+$meta = new \Amiss\Meta('stdClass', [
     'fields'=>[
         'input'=>'<input>',
         'engine'=>'--engine',

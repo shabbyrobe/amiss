@@ -24,18 +24,18 @@ Creating an ``Amiss\Sql\Manager`` with the default mapping options is simple:
         'user'=>'user', 
         'password'=>'password',
     );
-    $manager = new \Amiss\Factory::createSqlManager($db);
+    $manager = new \Amiss\Sql\Factory::createManager($db);
 
 
 This will also create an instance of ``Amiss\Mapper\Note`` with a default set of :doc:`mapper/types`
 and assign it to the manager. If you wish to use your own mapper, you can pass it as the second
-argument to ``createSqlManager()``. The  mapper must implement the ``Amiss\Mapper`` interface.
+argument to ``createManager()``. The  mapper must implement the ``Amiss\Mapper`` interface.
 
 .. code-block:: php
 
     <?php
     $mapper = new \Amiss\Mapper\Arrays();
-    $manager = \Amiss\Factory::createSqlManager($db, $mapper);
+    $manager = \Amiss\Sql\Factory::createManager($db, $mapper);
 
 
 If the default options are not desirable, you can create an instance of ``Amiss\Sql\Manager``
@@ -45,7 +45,7 @@ yourself by hand, though it will not come with any :ref:`relators` unless you ad
 
     <?php
     $manager = new \Amiss\Sql\Manager($db);
-    $manager->relators = \Amiss\Factory::createSqlRelators();
+    $manager->relators = \Amiss\Sql\Factory::createRelators();
 
 
 For more information on customising the mapping, please read the :doc:`mapper/mapping` section.
@@ -54,7 +54,7 @@ For more information on customising the mapping, please read the :doc:`mapper/ma
 Options
 -------
 
-``Amiss\Factory::createSqlManager()`` accepts either an instance of ``Amiss\Mapper`` or an
+``Amiss\Sql\Factory::createManager()`` accepts either an instance of ``Amiss\Mapper`` or an
 array of configuration options as the second parameter. The following options are
 supported:
 
@@ -70,15 +70,15 @@ supported:
 
     If the default ``mapper`` is used, this can contain an array of ``Amiss\Type\Handler`` instances
     indexed by a string indicating the type name. Used instead of the default set of type handlers
-    produced by ``Amiss::createSqlTypeHandlers``.
+    produced by ``Amiss\Sql\Factory::createTypeHandlers``.
 
 .. py:attribute:: relators
 
     An array of ``Amiss\Sql\Relator`` instances indexed by a string indicating the relation type.
-    Used instead of the default set of relators produced by ``Amiss::createSqlRelators``.
+    Used instead of the default set of relators produced by ``Amiss\Sql\Factory::createRelators``.
 
 
-``Amiss::createSqlTypeHandlers`` returns handlers for converting database dates to PHP
+``Amiss\Sql\Factory::createTypeHandlers`` returns handlers for converting database dates to PHP
 ``DateTime`` objects. For these conversions to happen consistently and reliably, both the
 database timezone and the application timezone need to be specified in the config otherwise the
 handlers will not be created:

@@ -23,30 +23,49 @@ Secondly, create an object to represent the row:
     <?php
     class EventArtistSummary
     {
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $eventId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $artistId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $artistTypeId;
         
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $type;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $name;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $priority;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $sequence;
         
         /**
-         * @has.one.of Event
-         * @has.one.on eventId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Event",
+         *         "on": "eventId"
+         *     }
+         * };
          */
         public $event;
     }

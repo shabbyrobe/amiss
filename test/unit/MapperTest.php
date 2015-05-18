@@ -46,7 +46,8 @@ class MapperTest extends \CustomTestCase
         ;
         $mapper->skipNulls = true;
         
-        $meta = new \Amiss\Meta('stdClass', 'table', [
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'=>'table',
             'fields'=>[
                 'a'=>['type'=>'text', 'name'=>'a'],
                 'b'=>['type'=>'text', 'name'=>'b'],
@@ -72,7 +73,8 @@ class MapperTest extends \CustomTestCase
         ;
         $this->assertFalse($mapper->skipNulls);
         
-        $meta = new \Amiss\Meta('stdClass', 'table', [
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'=>'table',
             'fields'=>[
                 'a'=>['type'=>'text', 'name'=>'a'],
                 'b'=>['type'=>'text', 'name'=>'b'],
@@ -98,7 +100,7 @@ class MapperTest extends \CustomTestCase
             ->getMockForAbstractClass()
         ;
         $mapper->expects($this->exactly(2))->method('toObject');
-        $meta = new \Amiss\Meta('a', 'b', []);
+        $meta = new \Amiss\Meta('a', ['table'=>'b']);
         $mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
         $mapper->toObjects(array('a', 'b'), null, 'foo');
     }
@@ -256,7 +258,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObject()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta('stdClass', 'test_table', [
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ]
@@ -274,7 +277,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectPropertyArgs()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -296,7 +300,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectArgs()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -314,7 +319,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectMixedArgs()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -337,7 +343,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectArgsNull()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -357,7 +364,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectPropertyNull()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -379,7 +387,8 @@ class MapperTest extends \CustomTestCase
     public function testCreateObjectRelations()
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', 'test_table', [
+        $meta = new \Amiss\Meta(__NAMESPACE__.'\TestCreateObject', [
+            'table'=>'test_table',
             'fields'=>[
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
@@ -408,7 +417,8 @@ class MapperTest extends \CustomTestCase
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
-        $meta = new \Amiss\Meta($class, 'test_table', [
+        $meta = new \Amiss\Meta($class, [
+            'table'=>'test_table',
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
         ]);
         $obj = $mapper->toObject(['a'=>'foo'], null, $meta);
@@ -426,7 +436,8 @@ class MapperTest extends \CustomTestCase
     {
         $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
         $class = __NAMESPACE__.'\TestCreateObject';
-        $meta = new \Amiss\Meta($class, 'test_table', [
+        $meta = new \Amiss\Meta($class, [
+            'table'=>'test_table',
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
             'constructor'=>'staticConstruct',
         ]);

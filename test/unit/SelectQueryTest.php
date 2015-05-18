@@ -55,7 +55,8 @@ class SelectQueryTest extends \CustomTestCase
         $criteria = new Query\Select;
         $criteria->fields = array('foo', 'bar');
         
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
             ),
@@ -111,7 +112,7 @@ class SelectQueryTest extends \CustomTestCase
         $criteria = new Query\Select;
         $criteria->order = null;
         
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array());
+        $meta = new \Amiss\Meta('stdClass', array('table'=>'std_class'));
         $fields = $criteria->buildOrder($meta);
         $this->assertEquals('', $fields);
     }
@@ -176,7 +177,7 @@ class SelectQueryTest extends \CustomTestCase
         $criteria = new Query\Select;
         $criteria->order = array('abc_def', 'ghi_jkl');
         
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array());
+        $meta = new \Amiss\Meta('stdClass', array('table'=>'std_class'));
         $fields = $criteria->buildOrder($meta);
         $this->assertEquals('`abc_def`, `ghi_jkl`', $fields);
     }
@@ -212,7 +213,8 @@ class SelectQueryTest extends \CustomTestCase
         $criteria = new Query\Select;
         $criteria->order = array('foo', 'bar');
         
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
             ),
@@ -223,7 +225,8 @@ class SelectQueryTest extends \CustomTestCase
     
     protected function createGenericMeta()
     {
-        return new \Amiss\Meta('stdClass', 'std_class', array(
+        return new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
                 'bar'=>array('name'=>'bar_field'),

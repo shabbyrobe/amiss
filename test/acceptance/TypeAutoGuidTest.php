@@ -14,7 +14,7 @@ class TypeAutoGuidTest extends \CustomTestCase
                 'primary'=>'guid',
                 'fields'=>array(
                     'guid'=>array('type'=>'autoguid'),
-                    'name',
+                    'name'=>true,
                 ),
             ),
         ));

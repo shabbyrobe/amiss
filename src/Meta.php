@@ -1,6 +1,8 @@
 <?php
 namespace Amiss;
 
+use Amiss\Exception;
+
 class Meta
 {
     public $class;
@@ -76,23 +78,42 @@ class Meta
         ); 
     }
 
-    public function __construct($class, $table, array $info, Meta $parent=null)
+    public function __construct($class, array $info, Meta $parent=null)
     {
-        $this->class = $class;
-        $this->parent = $parent;
-        $this->table = $table;
-        $this->primary = isset($info['primary']) ? $info['primary'] : array();
+        // due to some other hacks where we need to guarantee parent class lookups
+        // are always fully qualified, we get inconsistent input here - a leading
+        // backslash when the lookup is for a parent class.
+        // would like to get rid of this, but other things need to be dealt with first.
+        $this->class   = ltrim($class, "\\");
 
-        if ($this->primary && !is_array($this->primary)) {
-            $this->primary = array($this->primary);
+        $this->parent  = $parent;
+        $this->table   = isset($info['table'])   ? $info['table']   : array();
+
+        primary: {
+            if (isset($info['primary'])) {
+                if ($info['primary'] == 0 && $info['primary'] !== "0") {
+                    // it's a string!
+                    $this->primary = [$info['primary']];
+                } else {
+                    $this->primary = $info['primary'];
+                }
+            }
+            else {
+                $this->primary = [];
+            }
         }
-        $this->setIndexes(isset($info['indexes']) ? $info['indexes'] : array());
 
-        // set indexes first: setFields is reliant on them 
-        $this->setFields(isset($info['fields']) ? $info['fields'] : array());
+        if (isset($info['indexes'])) {
+            $this->setIndexes($info['indexes']);
+        }
 
-        // must happen after setFields - setFields can influence the primary
+        if (isset($info['fields'])) {
+            // set indexes first: setFields is reliant on them 
+            $this->setFields($info['fields']);
+        }
+
         if ($this->primary) {
+            // must happen after setFields - setFields can influence the primary
             $this->indexes['primary'] = ['fields'=>$this->primary, 'key'=>true];
         }
 
@@ -102,36 +123,39 @@ class Meta
 
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
         
-        if (isset($info['constructor']) && $info['constructor']) {
-            $this->constructor = $info['constructor'];
-        }
-        if (isset($info['constructorArgs']) && $info['constructorArgs']) {
-            // must come after setFields()
-            $this->setConstructorArgs($info['constructorArgs']);
-        }
-        if (!$this->constructor) {
-            $this->constructor = '__construct';
-        }
-
-        if (isset($info['readOnly'])) {
-            $this->canInsert = false; 
-            $this->canUpdate = false; 
-            $this->canDelete = false; 
-        }
-        else {
-            if (isset($info['canInsert'])) {
-                $this->canInsert = !!$info['canInsert'];
+        class_constructor: {
+            if (isset($info['constructor']) && $info['constructor']) {
+                $this->constructor = $info['constructor'];
             }
-            if (isset($info['canUpdate'])) {
-                $this->canUpdate = !!$info['canUpdate'];
+            if (isset($info['constructorArgs']) && $info['constructorArgs']) {
+                // must come after setFields()
+                $this->setConstructorArgs($info['constructorArgs']);
             }
-            if (isset($info['canDelete'])) {
-                $this->canDelete = !!$info['canDelete'];
+            if (!$this->constructor) {
+                $this->constructor = '__construct';
             }
         }
 
-        $this->defaultFieldType = null;
-        if (isset($info['defaultFieldType'])) {
+        permissions: {
+            if (isset($info['readOnly'])) {
+                $this->canInsert = false; 
+                $this->canUpdate = false; 
+                $this->canDelete = false; 
+            }
+            else {
+                if (isset($info['canInsert'])) {
+                    $this->canInsert = !!$info['canInsert'];
+                }
+                if (isset($info['canUpdate'])) {
+                    $this->canUpdate = !!$info['canUpdate'];
+                }
+                if (isset($info['canDelete'])) {
+                    $this->canDelete = !!$info['canDelete'];
+                }
+            }
+        }
+
+        default_field_type: if (isset($info['defaultFieldType'])) {
             $ft = $info['defaultFieldType'];
             if (!is_array($ft)) {
                 $ft = array('id'=>$ft);
@@ -144,7 +168,10 @@ class Meta
     {
         foreach ($relations as $id=>$r) {
             if (isset($r['on'])) {
-                throw new Exception("Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to'");
+                throw new Exception(
+                    "Relation $id used 'on' in class {$this->class}. Please use 'from' and/or 'to' ".
+                    "and specify an index name as the value rather than field names"
+                );
             }
             $r['name'] = $id;
             if (isset($r['mode'])) {
@@ -191,7 +218,7 @@ class Meta
 
         // special sauce
         if (isset($this->indexes['primary'])) {
-            throw new \UnexpectedValueException("Cannot manually declare primary in indexes - set 'primary' in meta info instead");
+            throw new Exception("Cannot manually declare primary in indexes - set 'primary' in meta info instead");
         }
     }
 
@@ -205,8 +232,9 @@ class Meta
             } elseif (is_string($field)) {
                 $field = ['name'=>$field];
             }
+
             if (!is_array($field)) {
-                throw new \UnexpectedValueException();
+                throw new Exception();
             }
             if (!isset($field['name'])) {
                 $field['name'] = $name;
@@ -238,7 +266,7 @@ class Meta
         $this->fields = $fields;
         if ($primary) {
             if ($this->primary) {
-                throw new \Exception();
+                throw new Exception("Primary can not be defined at class level and field level simultaneously in class '{$this->class}'");
             }
             $this->primary = $primary;
         }
@@ -333,14 +361,17 @@ class Meta
             $field = $this->getField($p);
             $value = !isset($field['getter']) 
                 ? $object->{$p} 
-                : call_user_func(array($object, $field['getter']))
-            ;
-            if ($value) { $foundValue = true; }
-            
+                : call_user_func(array($object, $field['getter']));
+
+            if ($value) {
+                $foundValue = true;
+            }
             $indexValue[$p] = $value;
         }
         
-        if ($foundValue) { return $indexValue; }
+        if ($foundValue) {
+            return $indexValue;
+        }
     }
     
     function getValue($object, $property)
@@ -348,8 +379,8 @@ class Meta
         $field = $this->getField($property);
         $value = !isset($field['getter']) 
             ? $object->{$property} 
-            : call_user_func(array($object, $field['getter'])
-        );
+            : call_user_func(array($object, $field['getter']));
+
         return $value;
     }
     

@@ -14,7 +14,7 @@ class TableBuilderCustomEmptyColumnTypeTest extends \CustomTestCase
         
         \Amiss\Sql\ActiveRecord::_reset();
         $this->connector = new \TestConnector('mysql:xx');
-        $this->mapper = \Amiss\Factory::createSqlMapper(array());
+        $this->mapper = \Amiss\Sql\Factory::createMapper(array());
         $this->manager = new \Amiss\Sql\Manager($this->connector, $this->mapper);
         \Amiss\Sql\ActiveRecord::setManager($this->manager);
         $this->class = __NAMESPACE__.'\TestCreateCustomTypeWithEmptyColumnTypeRecord';

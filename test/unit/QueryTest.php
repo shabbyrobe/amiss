@@ -28,7 +28,8 @@ class QueryTest extends \CustomTestCase
     public function testInClauseWithFieldMapping()
     {
         $criteria = new Query\Criteria;
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
                 'bar'=>array('name'=>'bar_field'),
@@ -135,7 +136,8 @@ class QueryTest extends \CustomTestCase
     public function testBuildClauseFieldSubstitutionWithFromRawSql($query, $expected)
     { 
         $criteria = new Query\Criteria;
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
                 'bar'=>array('name'=>'bar_field'),
@@ -164,7 +166,8 @@ class QueryTest extends \CustomTestCase
     public function testBuildClauseFieldSubstitutionWithArray($query, $expected)
     {
         $criteria = new Query\Criteria;
-        $meta = new \Amiss\Meta('stdClass', 'std_class', array(
+        $meta = new \Amiss\Meta('stdClass', array(
+            'table'=>'std_class',
             'fields'=>array(
                 'foo'=>array('name'=>'foo_field'),
                 'bar'=>array('name'=>'bar_field'),

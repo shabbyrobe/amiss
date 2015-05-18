@@ -412,7 +412,9 @@ criteria.
     <?php
     class Foo
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $id;
 
         public function __construct(Bar $bar)
