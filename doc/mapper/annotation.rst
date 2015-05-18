@@ -37,31 +37,51 @@ Using the Annotation mapper, object/table mappings are defined in this way:
 
     <?php
     /**
-     * @table your_table
-     * @fieldType VARCHAR(255)
+     * :amiss = {
+     *     "table": "your_table",
+     *     "fieldType": "VARCHAR(255)"
+     * };
      */
     class Foo
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $id;
 
-        /** @field some_column */
+        /**
+         * :amiss = {"field":"some_column"};
+         */
         public $name;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $barId;
 
         /**
          * One-to-one relation: 
-         * @has.one.of Baz
-         * @has.one.on bazId
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Baz",
+         *         "on": "bazId"
+         *     }
+         * };
          */
         public $baz;
 
         /** 
          * One-to-many relation:
-         * @has.many.of Bar
-         * @has.many.inverse foo
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Bar",
+         *         "inverse": "foo"
+         *     }
+         * };
          */
         public $bars;
 
@@ -69,8 +89,11 @@ Using the Annotation mapper, object/table mappings are defined in this way:
         private $fooDate;
 
         /**
-         * @field
-         * @type date
+         * :amiss = {
+         *     "field": {
+         *         "type": "date"
+         *     }
+         * };
          */
         public function getFooDate()
         {
@@ -143,8 +166,10 @@ These values must be assigned in the class' docblock:
 
     <?php
     /**
-     * @table my_table
-     * @fieldType string-a-doodle-doo
+     * :amiss = {
+     *     "table": "my_table",
+     *     "fieldType": "string-a-doodle-doo"
+     * };
      */
     class Foo
     {}
@@ -258,15 +283,24 @@ The following annotations are available to define this mapping:
         <?php
         class Artist
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $artistId;
 
-            /** @field */
+            /**
+             * :amiss = {"field":true};
+             */
             public $artistTypeId;
             
             /**
-             * @has.one.of ArtistType
-             * @has.one.on artistTypeId
+             * :amiss = {
+             *     "has": {
+             *         "type": "one",
+             *         "of": "ArtistType",
+             *         "on": "artistTypeId"
+             *     }
+             * };
              */
             public $artist;
         }
@@ -308,12 +342,19 @@ The following annotations are available to define this mapping:
         <?php
         class ArtistType
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $artistTypeId;
 
             /**
-             * @has.many.of Artist
-             * @has.many.on artistTypeId
+             * :amiss = {
+             *     "has": {
+             *         "type": "many",
+             *         "of": "Artist",
+             *         "on": "artistTypeId"
+             *     }
+             * };
              */
             public $artists;
         }
@@ -328,18 +369,30 @@ The following annotations are available to define this mapping:
         <?php
         class Event
         {
-            /** @primary */
+            /**
+             * :amiss = {"field":{"primary":true}};
+             */
             public $eventId;
 
             /**
-             * @has.many.of EventArtist
-             * @has.many.on eventId
+             * :amiss = {
+             *     "has": {
+             *         "type": "many",
+             *         "of": "EventArtist",
+             *         "on": "eventId"
+             *     }
+             * };
              */
             public $eventArtists;
 
-            /** 
-             * @has.assoc.of Artist
-             * @has.assoc.via EventArtist
+            /**
+             * :amiss = {
+             *     "has": {
+             *         "type": "assoc",
+             *         "of": "Artist",
+             *         "via": "EventArtist"
+             *     }
+             * };
              */
             public $artists;
         }
@@ -383,15 +436,22 @@ property:
         private $baz;
         private $qux;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public function getBaz()
         {
             return $this->baz;
         }
 
         /**
-         * @has.one.of Qux
-         * @has.one.on baz
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Qux",
+         *         "on": "baz"
+         *     }
+         * };
          */
         public function getQux()
         {
@@ -438,9 +498,12 @@ opinionated so you can go ahead and make your names whatever you please:
         private $baz;
         private $qux;
 
-        /** 
-         * @field
-         * @setter assignAValueToBaz
+        /**
+         * :amiss = {
+         *     "field": {
+         *         "setter": "assignAValueToBaz"
+         *     }
+         * };
          */
         public function getBaz()
         {
@@ -453,10 +516,17 @@ opinionated so you can go ahead and make your names whatever you please:
             $this->baz = $value;
         }
 
-        /** 
-         * @has.one.of Qux
-         * @has.one.on baz
-         * @setter makeQuxEqualTo
+        /**
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Qux",
+         *         "on": "baz"
+         *     },
+         *     "field": {
+         *         "setter": "makeQuxEqualTo"
+         *     }
+         * };
          */
         public function pleaseGrabThatQuxForMe() 
         

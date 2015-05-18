@@ -13,10 +13,14 @@ the table in the database directly, or emit the SQL for you to use as you please
     <?php
     class Artist
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $artistId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $name;
     }
 

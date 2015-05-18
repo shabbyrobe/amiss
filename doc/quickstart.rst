@@ -68,55 +68,87 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
 
     class Event
     {
-        /** 
-         * @primary 
-         * @type autoinc
+        /**
+         * :amiss = {
+         *     "field": {
+         *         "type": "autoinc",
+         *         "primary": true
+         *     }
+         * };
          */
         public $eventId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $name;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $startDate;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $venueId;
 
         /**
-         * @has.one.of Venue
-         * @has.one.on venueId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Venue",
+         *         "on": "venueId"
+         *     }
+         * };
          */
         public $venue;
     }
 
     /**
      * Explicit table name annotation. Leave this out and the table will default to 'venue'
-     * @table venues
+     *
+     * :amiss = {
+     *     "table": "venues"
+     * };
      */
     class Venue
     {
         /**
-         * @primary
-         * @type autoinc
+         * :amiss = {
+         *     "field": {
+         *         "type": "autoinc",
+         *         "primary": true
+         *     }
+         * };
          */
         public $venueId;
 
         /**
-         * @field venueName
+         * :amiss = {"field":"venueName"};
          */
         public $name;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $slug;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $address;
 
         /** 
          * Inverse relationship of Event->venue
-         * @has.many.of Event
-         * @has.many.inverse venue
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Event",
+         *         "inverse": "venue"
+         *     }
+         * };
          */
         public $events;
     }
@@ -206,16 +238,20 @@ One-to-one
     class Event
     {
         /**
-         * @primary
-         * @field
+         * :amiss = {"field":{"primary":true}};
          */
         public $eventId;
         
         // snip
 
         /**
-         * @has.one.of Venue
-         * @has.one.on venueId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Venue",
+         *         "on": "venueId"
+         *     }
+         * };
          */
         public $venue;
     }
@@ -244,16 +280,20 @@ One-to-many
     class Venue
     {
         /**
-         * @primary
-         * @field
+         * :amiss = {"field":{"primary":true}};
          */
         public $venueId;
         
         // snip
 
         /**
-         * @has.many.of Event
-         * @has.many.on venueId
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Event",
+         *         "on": "venueId"
+         *     }
+         * };
          */
         public $events;
     }
@@ -296,8 +336,13 @@ also require the relation to be specified on both sides:
         // snip
         
         /**
-         * @has.assoc.of Artist
-         * @has.assoc.via EventArtist
+         * :amiss = {
+         *     "has": {
+         *         "type": "assoc",
+         *         "of": "Artist",
+         *         "via": "EventArtist"
+         *     }
+         * };
          */
         public $artists;
     }
@@ -307,14 +352,24 @@ also require the relation to be specified on both sides:
         // snip
 
         /**
-         * @has.one.of Event
-         * @has.one.on eventId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Event",
+         *         "on": "eventId"
+         *     }
+         * };
          */
         public $event;
 
         /**
-         * @has.one.of Artist
-         * @has.one.on artistId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "Artist",
+         *         "on": "artistId"
+         *     }
+         * };
          */
         public $artist;
     }
@@ -324,8 +379,13 @@ also require the relation to be specified on both sides:
         // snip
 
         /**
-         * @has.assoc.of Event
-         * @has.assoc.via EventArtist
+         * :amiss = {
+         *     "has": {
+         *         "type": "assoc",
+         *         "of": "Event",
+         *         "via": "EventArtist"
+         *     }
+         * };
          */
         public $events;
     }

@@ -11,30 +11,48 @@ using ``Amiss\Mapper\Note``, you would define a bi-directional relation like so:
     <?php
     class Artist
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $artistId;
         
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $artistTypeId;
         
         /**
-         * @has.one.of ArtistType
-         * @has.one.on artistTypeId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "ArtistType",
+         *         "on": "artistTypeId"
+         *     }
+         * };
          */
         public $artistType;
     }
 
     class ArtistType
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $artistTypeId;
 
-        /** @field */
+        /**
+         * :amiss = {"field":true};
+         */
         public $type;g16
 
         /**
-         * @has.many.of Artist
-         * @has.many.inverse artistType
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Artist",
+         *         "inverse": "artistType"
+         *     }
+         * };
          */
         public $artists = array();
     }
@@ -406,11 +424,17 @@ If you are using ``Amiss\Mapper\Note``, you would define a relation that uses th
     <?php
     class Bar
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $id
 
         /**
-         * @has somethingElse
+         * :amiss = {
+         *     "has": {
+         *         "type": "somethingElse"
+         *     }
+         * };
          */
         public $foo;
     }
@@ -427,15 +451,26 @@ ones do), you can use array notation instead:
     <?php
     class Bar
     {
-        /** @primary */
+        /**
+         * :amiss = {"field":{"primary":true}};
+         */
         public $id
 
         /**
-         * @has.somethingElse.key value
-         * @has.somethingElse.anotherKey anotherValue
-         * @has.somethingElse.anArray value1
-         * @has.somethingElse.anArray value2
-         * @has.somethingElse.anArrayWithOneElement.0 yep
+         * :amiss = {
+         *     "has": {
+         *         "type": "somethingElse",
+         *         "key": "value",
+         *         "anotherKey": "anotherValue",
+         *         "anArray": [
+         *             "value1",
+         *             "value2"
+         *         ],
+         *         "anArrayWithOneElement": [
+         *             "yep"
+         *         ]
+         *     }
+         * };
          */
         public $foo;
     }
