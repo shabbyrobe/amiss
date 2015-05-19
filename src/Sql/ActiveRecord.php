@@ -147,11 +147,21 @@ abstract class ActiveRecord
             $name == 'getById'  || $name == 'getList'    || 
             $name == 'count'    || $name == 'deleteById' ||
             $name == 'getByKey' || $name == 'exists'
-        ) { 
+        ) {
             $exists = true; 
             array_unshift($args, $called);
         }
         elseif ($name == 'assignRelated') {
+            $exists = true;
+        }
+        elseif ($name == 'indexBy') {
+            $args = array_pad($args, 4, null);
+            $args = array_merge(array_slice($args, 0, 2), [$called], array_slice($args, 2));
+            $exists = true;
+        }
+        elseif ($name == 'groupBy') {
+            $args = array_pad($args, 2, null);
+            $args[] = $called;
             $exists = true;
         }
         

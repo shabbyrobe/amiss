@@ -85,6 +85,41 @@ class GetByIdTest extends \CustomMapperTestCase
      * @group manager 
      * @group getById
      */
+    public function testGetByIdKeyMultiNamedWithTranslatedNames()
+    {
+        $manager = $this->createDefaultArrayManager([
+            'Pants'=>[
+                'class'   => 'stdClass',
+                'table'   => 'pa_nts',
+
+                // add a separate primary and unique key so that we can be sure the
+                // access is using the righto ne
+                'primary' => ['pri1', 'pri2'],
+                'indexes' => ['idx'=>['key'=>true, 'fields'=>['key1', 'key2']]],
+
+                'fields'  => [
+                    'pri1'=>'pri_1', 'pri2'=>'pri_2',
+                    'key1'=>'key_1', 'key2'=>'key_2',
+                ],
+            ],
+        ]);
+        $manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
+
+        $result = $manager->getById('Pants', array('key2'=>'k2', 'key1'=>'k1'), ['key'=>'idx']);
+        $this->assertEquals("k1", $result->key1);
+        $this->assertEquals("k2", $result->key2);
+        
+        // sanity check to make sure the underlying table actually uses the translated names
+        $rows = $manager->getConnector()->query("SELECT pri_1, pri_2, key_1, key_2 FROM pa_nts")->fetchAll(\PDO::FETCH_ASSOC);
+        $expectedRows = [['pri_1'=>'p1', 'pri_2'=>'p2', 'key_1'=>'k1', 'key_2'=>'k2']];
+        $this->assertEquals($expectedRows, $rows);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     * @group getById
+     */
     public function testGetByIdPrimarySingle()
     {
         $manager = $this->createDefaultArrayManager([

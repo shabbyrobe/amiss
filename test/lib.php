@@ -240,7 +240,7 @@ class TestApp
 
 class CustomMapperTestCase extends DataTestCase
 {
-    private $classes = [];
+    private static $classes = [];
     private $tearDownStatements = [];
 
     private function createClasses($classes)
@@ -252,8 +252,8 @@ class CustomMapperTestCase extends DataTestCase
             $hash .= "$k|$v|";
         }
         $classHash = sha1($hash);
-        if (isset($this->classes[$classHash])) {
-            list ($ns, $classes) = $this->classes[$classHash];
+        if (isset(self::$classes[$classHash])) {
+            list ($ns, $classes) = self::$classes[$classHash];
         }
         else {
             $ns = "AmissTest_".$classHash;
@@ -264,7 +264,7 @@ class CustomMapperTestCase extends DataTestCase
             $classes = get_declared_classes();
             eval($script);
             $classes = array_values(array_diff(get_declared_classes(), $classes));
-            $this->classes[$classHash] = [$ns, $classes];
+            self::$classes[$classHash] = [$ns, $classes];
         }
         return [$classHash, $ns, $classes];
     }

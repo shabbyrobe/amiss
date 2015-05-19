@@ -224,14 +224,8 @@ class Manager
         if ($props) {
             $params = $this->mapper->formatParams($meta, $props, $params);
         }
-        
-        $field = '*';
-        if ($meta->primary && count($meta->primary) == 1) {
-            $metaField = $meta->getField($meta->primary[0]);
-            $field = $metaField['name'];
-        }
-        
-        $query = "SELECT COUNT($field) FROM $table "
+
+        $query = "SELECT COUNT(1) FROM $table "
             .($where  ? "WHERE $where" : '');
 
         $stmt = $this->getConnector()->prepare($query)->execute($params);
@@ -241,27 +235,10 @@ class Manager
     public function exists($class, $id, $key='primary')
     {
         $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
-        $query = new \Amiss\Sql\Query\Criteria;
+        $query = new \Amiss\Sql\Query\Select;
         $query->setParams([$this->createKeyCriteria($meta, $id, $key)]);
-        if (!$meta->primary) {
-            throw new \InvalidArgumentException();
-        }
 
-        list ($where, $params, $props) = $query->buildClause($meta);
-        if ($props) {
-            $params = $this->mapper->formatParams($meta, $props, $params);
-        }
-
-        $fields = $meta->getFields();
-        $qFields = [];
-        foreach ($meta->primary as $p) {
-            $qFields[] = $fields[$p]['name'];
-        }
-        $query = "SELECT COUNT(".implode(',', $qFields).") FROM {$meta->table} "
-            .($where  ? "WHERE $where" : '');
-
-        $stmt = $this->getConnector()->prepare($query)->execute($params);
-        return ((int)$stmt->fetchColumn()) > 0;
+        return $this->count($meta, $query) > 0;
     }
 
     /**
@@ -812,8 +789,14 @@ class Manager
      * 
      * @return array
      */
-    public function indexBy($list, $property, $meta=null, $allowDupes=false, $ignoreNulls=true)
+    public function indexBy($list, $property, $meta=null, $allowDupes=null, $ignoreNulls=null)
     {
+        $allowDupes  = $allowDupes  !== null ? $allowDupes  : false;
+        $ignoreNulls = $ignoreNulls !== null ? $ignoreNulls : true;
+
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        }
         if (!$list) {
             return [];
         }
@@ -824,7 +807,7 @@ class Manager
 
         $index = array();
 
-        $props = $meta->getProperties();
+        $props = $meta ? $meta->getProperties() : [];
         foreach ($list as $object) {
             $propDef = !isset($props[$property]) ? null : $props[$property];
             $value = !$propDef || !isset($propDef['getter']) 

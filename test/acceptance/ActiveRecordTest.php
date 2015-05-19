@@ -142,4 +142,21 @@ class ActiveRecordTest extends \ActiveRecordDataTestCase
         $obj = Active\ArtistRecord::getById($obj->artistId);
         $this->assertEquals($obj->name, $n);
     }
+
+    public function testIndexBy()
+    {
+        $obj1 = new Active\ArtistRecord;
+        $obj1->artistTypeId = 1;
+        $obj1->name = 'a';
+        $obj1->slug = 'a';
+
+        $obj2 = new Active\ArtistRecord;
+        $obj2->artistTypeId = 1;
+        $obj2->name = 'b';
+        $obj2->slug = 'b';
+
+        $indexed = Active\ArtistRecord::indexBy([$obj1, $obj2], 'name');
+        $expected = ['a'=>$obj1, 'b'=>$obj2];
+        $this->assertEquals($expected, $indexed);
+    }
 }
