@@ -30,7 +30,7 @@ $boris->setInspector(new AmissInspector());
 function note()
 {
     $connector = new \PDOK\Connector('sqlite::memory:');
-    $manager = Amiss\Factory::createSqlManager($connector, [
+    $manager = Amiss\Sql\Factory::createManager($connector, [
         'dbTimeZone'=>date_default_timezone_get(),
     ]);
 
@@ -53,7 +53,7 @@ function note()
 function ar()
 {
     $connector = new \PDOK\Connector('sqlite::memory:');
-    $manager = Amiss\Factory::createSqlManager($connector, [
+    $manager = Amiss\Sql\Factory::createManager($connector, [
         'dbTimeZone'=>date_default_timezone_get(),
     ]);
 

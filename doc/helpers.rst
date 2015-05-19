@@ -91,7 +91,7 @@ relation gymnastics.
         );
         
         $manager = new Amiss\Sql\Manager(...);
-        $indexed = $manager->indexBy($objects), 'foo';
+        $indexed = $manager->indexBy($objects, 'foo');
         
         // this will output array('a', 'b', 'c')
         var_dump(array_keys($indexed));
@@ -101,8 +101,8 @@ relation gymnastics.
 
 
     If you have more than one object with the same property value, ``indexBy`` will
-    merrily overwrite an existing key. Pass ``Amiss\Functions::INDEX_DUPE_FAIL`` as the
-    third parameter if you would prefer an exception on a duplicate key:
+    raise an exception by default. Pass ``false`` as the fourth parameter if you would
+    prefer to overwrite existing keys:
 
     .. code-block:: php
 
@@ -113,9 +113,9 @@ relation gymnastics.
             (object)array('foo'=>'b'),
         );
         $manager = new Amiss\Sql\Manager(...);
-        $indexed = $manager->indexBy($objects, 'foo', Amiss\Functions::INDEX_DUPE_FAIL);
+        $indexed = $manager->indexBy($objects, 'foo', null, !'failOnDupe');
 
-    BZZT! ``UnexpectedValueException``!
+        count($indexed) == 2;
 
 
 .. py:function:: Amiss\Sql\Manager::keyValue()

@@ -805,6 +805,78 @@ class Manager
     }
 
     /**
+     * Iterate over an array of objects and returns an array of objects
+     * indexed by a property
+     *
+     * Doesn't really belong in Manager from a purist POV, but it's very convenient for
+     * users for it to be here.
+     * 
+     * @return array
+     */
+    public function indexBy($list, $property, $meta=null, $allowDupes=false, $ignoreNulls=true)
+    {
+        if (!$list) {
+            return [];
+        }
+        $first = current($list);
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($first);
+        }
+
+        $index = array();
+
+        $props = $meta->getProperties();
+        foreach ($list as $object) {
+            $propDef = !isset($props[$property]) ? null : $props[$property];
+            $value = !$propDef || !isset($propDef['getter']) 
+                ? $object->{$property} 
+                : call_user_func(array($object, $propDef['getter']));
+
+            if ($value === null && $ignoreNulls) {
+                continue;
+            }
+            if (!$allowDupes && isset($index[$value])) {
+                throw new \UnexpectedValueException("Duplicate value for property $property");
+            }
+            $index[$value] = $object;
+        }
+        return $index;
+    }
+
+    /**
+     * Iterate over an array of objects and group them by the value of a property
+     *
+     * Doesn't really belong in Manager from a purist POV, but it's very convenient for
+     * users for it to be here.
+     * 
+     * @return array[group] = class[]
+     */
+    public function groupBy($list, $property, $meta=null)
+    {
+        if (!$list) {
+            return [];
+        }
+        $first = current($list);
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($first);
+        }
+
+        $groups = [];
+
+        $props = $meta->getProperties();
+        foreach ($list as $object) {
+            $propDef = !isset($props[$property]) ? null : $props[$property];
+            $value = !$propDef || !isset($propDef['getter']) 
+                ? $object->{$property} 
+                : call_user_func(array($object, $propDef['getter']));
+
+            $groups[$value][] = $object;
+        }
+        return $groups;
+    }
+
+
+    /**
      * @ignore
      */
     public function __get($name)

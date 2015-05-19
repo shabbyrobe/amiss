@@ -3,31 +3,6 @@ namespace Amiss;
 
 class Functions
 {
-    const INDEX_DUPE_CONTINUE = 0;
-    
-    const INDEX_DUPE_FAIL = 1;
-    
-    /**
-     * Iterate over an array of objects and returns an array of objects
-     * indexed by a property
-     * 
-     * @param array The list of objects to index
-     * @param string The property to index by
-     * @param integer Index mode
-     * @return array
-     */
-    public static function indexBy($list, $property, $mode=self::INDEX_DUPE_CONTINUE)
-    {
-        $index = array();
-        foreach ($list as $i) {
-            if ($mode === self::INDEX_DUPE_FAIL && isset($index[$i->$property])) {
-                throw new \UnexpectedValueException("Duplicate value for property $property");
-            }
-            $index[$i->$property] = $i;
-        }
-        return $index;
-    }
-    
     /**
      * Create a one-dimensional associative array from a list of objects, or a list of 2-tuples.
      * 
