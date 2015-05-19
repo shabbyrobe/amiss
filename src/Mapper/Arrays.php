@@ -22,8 +22,13 @@ class Arrays extends Base
         }
 
         $info = $this->arrayMap[$class];
-        $parent = null;
+
+        class_name: {
+            $class = isset($info['class']) ? $info['class'] : $class;
+            unset($info['class']);
+        }
         
+        $parent = null;
         parent_class: {
             if (isset($info['inherit']) && $info['inherit']) {
                 $parent = null;

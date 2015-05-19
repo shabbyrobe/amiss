@@ -127,8 +127,8 @@ class Note extends \Amiss\Mapper\Base
                         $key = $name;
                     }
  
-                    $manualKey = isset($field['key']) ? $field['key'] : null;
-                    unset($field['key']);
+                    $manualKey = isset($field['id']) ? $field['id'] : null;
+                    unset($field['id']);
                     $info['fields'][$manualKey ?: $key] = $field;
                 }
                 

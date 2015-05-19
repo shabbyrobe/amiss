@@ -19,6 +19,10 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
             }
             $fields = [];
             foreach ($details['fields'] as $p) {
+                $metaField = $this->meta->getField($p);
+                if (!$metaField) {
+                    throw new \UnexpectedValueException("Unknown field '$p' in index '$k' for class {$this->meta->class}");
+                }
                 $fields[] = $this->meta->getField($p)['name'];
             }
             $colStr = '`'.implode('`, `', $fields).'`';

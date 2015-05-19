@@ -201,7 +201,7 @@ class Manager
         return $objects;
     }
 
-    public function getById($class, $id, $criteria=null)
+    public function getById($class, $id, array $criteria=null)
     {
         $key = isset($criteria['key']) ? $criteria['key'] : null;
         unset($criteria['key']);

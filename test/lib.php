@@ -263,30 +263,45 @@ class CustomMapperTestCase extends DataTestCase
             }
             $classes = get_declared_classes();
             eval($script);
-            $classes = array_diff(get_declared_classes(), $classes);
+            $classes = array_values(array_diff(get_declared_classes(), $classes));
             $this->classes[$classHash] = [$ns, $classes];
         }
         return [$classHash, $ns, $classes];
     }
 
-    public function createDefaultManager($classes, $options=[])
+    public function createDefaultNoteManager($classes)
     {
-        $defaults = [];
-        $options = array_merge($defaults, $options);
-
         $ns = null;
+        $classNames = [];
         if ($classes) {
-            list ($classHash, $ns, $classes) = $this->createClasses($classes);
+            list ($classHash, $ns, $classNames) = $this->createClasses($classes);
         }
-        $connector = $this->getConnector();
-        $info = $this->getConnectionInfo();
-        $manager = \Amiss\Sql\Factory::createSqlManager($connector, array(
-            'dbTimeZone'=>'UTC',
-        ));
+        $manager = $this->createDefaultManager(null, $classNames);
         if ($ns) {
             $manager->mapper->objectNamespace = $ns;
         }
-        switch ($connector->getEngine()) {
+        return [$manager, $ns];
+    }
+
+    public function createDefaultArrayManager($map)
+    {
+        $mapper = new \Amiss\Mapper\Arrays($map);
+        $config = [
+            'dbTimeZone'=>'UTC',
+        ];
+        $mapper->typeHandlers = \Amiss\Sql\Factory::createTypeHandlers($config);
+        return $this->createDefaultManager($mapper, array_keys($map));
+    }
+
+    private function createDefaultManager($mapper=null, $classNames=null)
+    {
+        $connector = $this->getConnector();
+        $info = $this->getConnectionInfo();
+        $manager = \Amiss\Sql\Factory::createManager($connector, array(
+            'dbTimeZone'=>'UTC',
+            'mapper'=>$mapper,
+        ));
+        switch ($connector->engine) {
         case 'mysql':
             $connector->exec("DROP IF EXISTS  `{$info['dbName']}`");
             $connector->exec("CREATE DATABASE `{$info['dbName']}`");
@@ -295,8 +310,8 @@ class CustomMapperTestCase extends DataTestCase
         default:
             throw new \Exception();
         }
-        foreach ($classes as $c) {
-            \Amiss\Sql\TableBuilder::create($connector, $manager->mapper, $classes);
+        if ($classNames) {
+            \Amiss\Sql\TableBuilder::create($connector, $manager->mapper, $classNames);
         }
         return $manager;
     }

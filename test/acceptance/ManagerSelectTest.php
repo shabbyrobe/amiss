@@ -7,39 +7,6 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
-    public function testGetByIdSingle()
-    {
-        $a = $this->manager->getById('Artist', 1);
-        $this->assertTrue($a instanceof \Amiss\Demo\Artist);
-        $this->assertEquals('Limozeen', $a->name);
-    }
-
-    /**
-     * @group acceptance
-     * @group manager 
-     */
-    public function testGetByIdArgs()
-    {
-        $a = $this->manager->getById('Artist', 1);
-        $this->assertTrue($a instanceof \Amiss\Demo\Artist);
-        $this->assertEquals('Limozeen', $a->name);
-    }
-
-    /**
-     * @group acceptance
-     * @group manager 
-     */
-    public function testGetByKeySingle()
-    {
-        $a = $this->manager->getById('Artist', 'limozeen', ['key'=>'slug']);
-        $this->assertTrue($a instanceof \Amiss\Demo\Artist);
-        $this->assertEquals('Limozeen', $a->name);
-    }
-
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testExists()
     {
         $a = $this->manager->exists('Artist', 1);
@@ -54,30 +21,6 @@ class ManagerSelectTest extends \ModelDataTestCase
     {
         $a = $this->manager->exists('Artist', PHP_INT_MAX);
         $this->assertFalse($a);
-    }
-
-    /**
-     * @group acceptance
-     * @group manager 
-     */
-    public function testGetByIdMultiPositional()
-    {
-        $a = $this->manager->getById('EventArtist', array(2, 1));
-        $this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
-        $this->assertEquals(2, $a->eventId);
-        $this->assertEquals(1, $a->artistId);
-    }
-    
-    /**
-     * @group acceptance
-     * @group manager 
-     */
-    public function testGetByIdMultiNamed()
-    {
-        $a = $this->manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>2));
-        $this->assertTrue($a instanceof \Amiss\Demo\EventArtist);
-        $this->assertEquals(2, $a->eventId);
-        $this->assertEquals(2, $a->artistId);
     }
     
     /**

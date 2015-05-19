@@ -41,7 +41,7 @@ class Meta
 
     public $autoRelations = [];
 
-    public $indexes;
+    public $indexes = [];
 
     public $canInsert = true;
     public $canUpdate = true;
@@ -232,7 +232,6 @@ class Meta
             } elseif (is_string($field)) {
                 $field = ['name'=>$field];
             }
-
             if (!is_array($field)) {
                 throw new Exception();
             }
