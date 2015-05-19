@@ -19,12 +19,12 @@ namespace Amiss\Test\Acceptance
             ]);
 
             $manager = $this->manager;
-            $manager->insertTable($this->ns.'\Event', ['eventId'=>1, 'name'=>'event1']);
-            $manager->insertTable($this->ns.'\Event', ['eventId'=>2, 'name'=>'event2']);
-            $manager->insertTable($this->ns.'\Event', ['eventId'=>3, 'name'=>'event3']);
-            $manager->insertTable($this->ns.'\Artist', ['artistId'=>1, 'name'=>'artist1']);
-            $manager->insertTable($this->ns.'\Artist', ['artistId'=>2, 'name'=>'artist2']);
-            $manager->insertTable($this->ns.'\Artist', ['artistId'=>3, 'name'=>'artist3']);
+            $manager->insertTable($this->ns.'\Event', ['id'=>1, 'name'=>'event1']);
+            $manager->insertTable($this->ns.'\Event', ['id'=>2, 'name'=>'event2']);
+            $manager->insertTable($this->ns.'\Event', ['id'=>3, 'name'=>'event3']);
+            $manager->insertTable($this->ns.'\Artist', ['id'=>1, 'name'=>'artist1']);
+            $manager->insertTable($this->ns.'\Artist', ['id'=>2, 'name'=>'artist2']);
+            $manager->insertTable($this->ns.'\Artist', ['id'=>3, 'name'=>'artist3']);
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>1, 'artistId'=>1]);
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>1, 'artistId'=>2]);
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>2, 'artistId'=>2]);

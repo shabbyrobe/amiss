@@ -6,6 +6,8 @@ use Amiss\Exception;
 
 class Insert extends Sql\Query
 {
+    // FIXME: this comes in with column names as keys rather than
+    // property names.
     public $values;
 
     public function buildQuery($meta)
@@ -25,11 +27,13 @@ class Insert extends Sql\Query
         $properties = [];
 
         $idx = 0;
-        foreach ($this->values as $k=>$v) {
-            if (isset($fields[$k])) {
-                $properties[$k] = $idx++;
+        foreach ($this->values as $name=>$value) {
+            $field = ($fieldSet = isset($fields[$name]) ? $fields[$name]['name'] : $name);
+
+            if ($fieldSet) {
+                $properties[$name] = $idx++;
             }
-            $columns[] = '`'.str_replace('`', '', $k).'`';
+            $columns[] = '`'.str_replace('`', '', $field).'`';
         }
 
         $sql = "INSERT INTO {$this->table}(".implode(',', $columns).") ".

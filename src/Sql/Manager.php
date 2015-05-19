@@ -457,8 +457,8 @@ class Manager
      * Insert values into a table
      * 
      * Supports the following signatures:
-     *   insert($meta, array $propertyValues);
-     *   insert($meta, Query\Insert $query);
+     *   insertTable($meta, array $propertyValues);
+     *   insertTable($meta, Query\Insert $query);
      * 
      * - $meta can be an instance of Amiss\Meta or a class name.
      * - Property keys must exist in the corresponding Meta.
@@ -473,14 +473,13 @@ class Manager
         }
 
         $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
+        $query->values = $this->mapper->fromProperties($query->values, $meta);
         if (!$query->table) {
             $query->table = $meta->table;
         }
 
-        list ($sql, $params, $props) = $query->buildQuery($meta);
-        if ($props) {
-            $params = $this->mapper->formatParams($meta, $props, $params);
-        }
+        list ($sql, $params) = $query->buildQuery($meta);
+        // no need to formatParams here - they're already field names
 
         $stmt = $this->getConnector()->prepare($sql);
         $stmt->execute($params);
