@@ -145,10 +145,15 @@ class DataTestCase extends CustomTestCase
         $this->connections = [];
         
         $info = $this->getConnectionInfo();
+        $this->createDb($info);
+    }
+    
+    protected function createDb($info)
+    {
         if ($info['engine'] == 'mysql') {
-            if (!isset($info['dbName']))
+            if (!isset($info['dbName'])) {
                 throw new \UnexpectedValueException("Please set dbName in MySQL connection info");
-            
+            }
             $result = $this->getConnector()->exec("CREATE DATABASE IF NOT EXISTS `{$info['dbName']}`");
             TestApp::instance()->connectionInfo['statements'] = array(
                 "USE `{$info['dbName']}`"
@@ -159,8 +164,14 @@ class DataTestCase extends CustomTestCase
             $c->exec('drop schema public cascade');
             $c->exec('create schema public');
         }
+        elseif ($info['engine'] == 'sqlite') {
+            // nothin!
+        }
+        else {
+            throw new \UnexpectedValueException();
+        }
     }
-    
+
     public function tearDown()
     {
         parent::tearDown();
@@ -226,7 +237,71 @@ class TestApp
         return $this->connectionInfo;
     }
 }
-    
+
+class CustomMapperTestCase extends DataTestCase
+{
+    private $classes = [];
+    private $tearDownStatements = [];
+
+    private function createClasses($classes)
+    {
+        $classes = (array)$classes;
+
+        $hash = '';
+        foreach ($classes as $k=>$v) {
+            $hash .= "$k|$v|";
+        }
+        $classHash = sha1($hash);
+        if (isset($this->classes[$classHash])) {
+            list ($ns, $classes) = $this->classes[$classHash];
+        }
+        else {
+            $ns = "AmissTest_".$classHash;
+            $script = "namespace $ns;";
+            foreach ($classes as $k=>$v) {
+                $script .= $v;
+            }
+            $classes = get_declared_classes();
+            eval($script);
+            $classes = array_diff(get_declared_classes(), $classes);
+            $this->classes[$classHash] = [$ns, $classes];
+        }
+        return [$classHash, $ns, $classes];
+    }
+
+    public function createDefaultManager($classes, $options=[])
+    {
+        $defaults = [];
+        $options = array_merge($defaults, $options);
+
+        $ns = null;
+        if ($classes) {
+            list ($classHash, $ns, $classes) = $this->createClasses($classes);
+        }
+        $connector = $this->getConnector();
+        $info = $this->getConnectionInfo();
+        $manager = \Amiss\Sql\Factory::createSqlManager($connector, array(
+            'dbTimeZone'=>'UTC',
+        ));
+        if ($ns) {
+            $manager->mapper->objectNamespace = $ns;
+        }
+        switch ($connector->getEngine()) {
+        case 'mysql':
+            $connector->exec("DROP IF EXISTS  `{$info['dbName']}`");
+            $connector->exec("CREATE DATABASE `{$info['dbName']}`");
+        break;
+        case 'sqlite': break;
+        default:
+            throw new \Exception();
+        }
+        foreach ($classes as $c) {
+            \Amiss\Sql\TableBuilder::create($connector, $manager->mapper, $classes);
+        }
+        return $manager;
+    }
+}
+
 class ModelDataTestCase extends DataTestCase
 {
     /**
