@@ -18,6 +18,28 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
+    public function testGetByIdArgs()
+    {
+        $a = $this->manager->getById('Artist', 1);
+        $this->assertTrue($a instanceof \Amiss\Demo\Artist);
+        $this->assertEquals('Limozeen', $a->name);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
+    public function testGetByKeySingle()
+    {
+        $a = $this->manager->getById('Artist', 'limozeen', ['key'=>'slug']);
+        $this->assertTrue($a instanceof \Amiss\Demo\Artist);
+        $this->assertEquals('Limozeen', $a->name);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
     public function testExists()
     {
         $a = $this->manager->exists('Artist', 1);

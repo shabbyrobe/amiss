@@ -201,20 +201,14 @@ class Manager
         return $objects;
     }
 
-    public function getByKey($class, $key, $id, $args=null)
+    public function getById($class, $id, $criteria=null)
     {
-        $query = $this->createKeyCriteria($class, $id, $key);
-        if ($args) {
-            $query['args'] = $args; 
-        }
-        return $this->get($class, $query);
-    }
+        $key = isset($criteria['key']) ? $criteria['key'] : null;
+        unset($criteria['key']);
 
-    public function getById($class, $id, $args=null)
-    {
-        $query = $this->createKeyCriteria($class, $id);
-        if ($args) {
-            $query['args'] = $args; 
+        $query = $this->createKeyCriteria($class, $id, $key);
+        if ($criteria) {
+            $query = array_merge($criteria, $query);
         }
         return $this->get($class, $query);
     }
@@ -754,8 +748,11 @@ class Manager
      * @param mixed $meta Meta or class name
      * @return array Criteria
      */
-    public function createKeyCriteria($meta, $id, $indexId='primary')
+    public function createKeyCriteria($meta, $id, $indexId=null)
     {
+        if ($indexId == null) {
+            $indexId = 'primary';
+        }
         $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!isset($meta->indexes[$indexId])) {
             throw new Exception("Index $indexId does not exist on class {$meta->class}");
