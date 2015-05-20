@@ -24,6 +24,7 @@ class ParentsRelator extends Relator
             throw new \InvalidArgumentException("Can't use criteria with parents relator");
         }
         
+        $relationName = $relation[0];
         $treeMeta = $this->nestedSetManager->getTreeMeta($source, $relationName);
         $meta = $treeMeta->meta;
         $relation = $meta->relations[$treeMeta->parentsRel];
@@ -32,7 +33,8 @@ class ParentsRelator extends Relator
         $rightValue = $meta->getValue($source, $treeMeta->rightId);
         
         $query = new \Amiss\Sql\Query\Select;
-        $query->stack = $stack;
+
+        $query->stack = $criteria ? $criteria->stack : null;
         $query->where = "{".$treeMeta->leftId."} < ? AND {".$treeMeta->rightId."} > ?";
         $query->params = array($leftValue, $rightValue);
         $query->order = array($treeMeta->leftId=>'desc');

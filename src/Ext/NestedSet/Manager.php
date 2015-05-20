@@ -14,8 +14,8 @@ class Manager
     {
         $new = new static($manager);
         $manager->relators['parents'] = new ParentsRelator($new);
-        $manager->relators['parent'] = new ParentRelator($new);
-        $manager->relators['tree'] = new TreeRelator($new);
+        $manager->relators['parent']  = new ParentRelator($new);
+        $manager->relators['tree']    = new TreeRelator($new);
         return $new;
     }
     

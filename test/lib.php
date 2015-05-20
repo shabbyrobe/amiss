@@ -243,7 +243,7 @@ class CustomMapperTestCase extends DataTestCase
     private static $classes = [];
     private $tearDownStatements = [];
 
-    private function createClasses($classes)
+    protected function createClasses($classes)
     {
         $classes = (array)$classes;
 
@@ -276,10 +276,11 @@ class CustomMapperTestCase extends DataTestCase
         if ($classes) {
             list ($classHash, $ns, $classNames) = $this->createClasses($classes);
         }
-        $manager = $this->createDefaultManager(null, $classNames);
+        $manager = $this->createDefaultManager();
         if ($ns) {
             $manager->mapper->objectNamespace = $ns;
         }
+        $manager->prepareManager($manager, $classNames);
         return [$manager, $ns];
     }
 
@@ -290,10 +291,12 @@ class CustomMapperTestCase extends DataTestCase
             'dbTimeZone'=>'UTC',
         ];
         $mapper->typeHandlers = \Amiss\Sql\Factory::createTypeHandlers($config);
-        return $this->createDefaultManager($mapper, array_keys($map));
+        $manager = $this->createDefaultManager($mapper);
+        $this->prepareManager($manager, array_keys($map));
+        return $manager;
     }
 
-    private function createDefaultManager($mapper=null, $classNames=null)
+    protected function createDefaultManager($mapper=null)
     {
         $connector = $this->getConnector();
         $info = $this->getConnectionInfo();
@@ -301,17 +304,22 @@ class CustomMapperTestCase extends DataTestCase
             'dbTimeZone'=>'UTC',
             'mapper'=>$mapper,
         ));
-        switch ($connector->engine) {
+        return $manager;
+    }
+
+    protected function prepareManager($manager, $classNames)
+    {
+        switch ($manager->connector->engine) {
         case 'mysql':
-            $connector->exec("DROP IF EXISTS  `{$info['dbName']}`");
-            $connector->exec("CREATE DATABASE `{$info['dbName']}`");
+            $manager->connector->exec("DROP IF EXISTS  `{$info['dbName']}`");
+            $manager->connector->exec("CREATE DATABASE `{$info['dbName']}`");
         break;
         case 'sqlite': break;
         default:
             throw new \Exception();
         }
         if ($classNames) {
-            \Amiss\Sql\TableBuilder::create($connector, $manager->mapper, $classNames);
+            \Amiss\Sql\TableBuilder::create($manager->connector, $manager->mapper, $classNames);
         }
         return $manager;
     }

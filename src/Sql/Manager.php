@@ -8,11 +8,6 @@ use Amiss\Sql\Query;
 use Amiss\Sql\Query\Criteria;
 use PDOK\Connector;
 
-/**
- * Amiss query manager. This is the core of Amiss' functionality.
- * 
- * @package Manager
- */
 class Manager
 {
     /**
@@ -579,7 +574,6 @@ class Manager
 
         return $this->getConnector()->exec($sql, $params);
     }
-    
     
     /**
      * Update an object in the database, or update a table by criteria.

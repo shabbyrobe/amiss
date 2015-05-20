@@ -23,6 +23,7 @@ class TreeRelator extends Relator
         $treeMeta = $this->nestedSetManager->getTreeMeta($source);
         $meta = $treeMeta->meta;
         
+        $relationName = $relation[0];
         $relation = $meta->relations[$relationName];
         
         $leftValue = $meta->getValue($source, $treeMeta->leftId);
@@ -41,7 +42,7 @@ class TreeRelator extends Relator
             $query->order = $criteria->order;
         }
         
-        $query->stack = $stack;
+        $query->stack = $criteria ? $criteria->stack : null;
         $children = $this->nestedSetManager->manager->getList($meta->class, $query);
         
         if ($children) {
