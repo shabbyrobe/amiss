@@ -47,7 +47,7 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     // Or use your own everything:
     $mapper = new \Amiss\Mapper\Arrays();
     $mapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
-    $mapper->addTypeHandler(new \Amiss\Sql\Type\Bool, 'bool');
+    $mapper->addTypeHandler(new \Amiss\Sql\Type\Boolean, 'bool');
     $manager = new \Amiss\Sql\Manager($connector, $mapper);
     $manager->relators['one'] = new \Amiss\Sql\Relator\OneMany($manager);
     $manager->relators['many'] = new \Amiss\Sql\Relator\OneMany($manager);

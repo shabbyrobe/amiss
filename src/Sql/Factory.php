@@ -62,7 +62,7 @@ class Factory
         }
         
         $handlers['bool'] = $handlers['boolean'] = function() {
-            return new \Amiss\Sql\Type\Bool();
+            return new \Amiss\Sql\Type\Boolean();
         };
         
         $handlers['autoinc'] = new \Amiss\Sql\Type\Autoinc();

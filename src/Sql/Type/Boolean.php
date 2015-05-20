@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Sql\Type;
 
-class Bool implements \Amiss\Type\Handler
+class Boolean implements \Amiss\Type\Handler
 {
     function handleValueFromDb($value, array $fieldInfo, $row)
     {
