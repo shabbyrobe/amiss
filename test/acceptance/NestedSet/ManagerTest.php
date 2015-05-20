@@ -50,14 +50,14 @@ class ManagerTest extends TestCase
         ');
         $this->manager = $this->nestedSetManager->manager;
 
-        $this->manager->insertTable('Tree', ['id'=>1, 'treeParentId'=>null, 'treeLeft'=>1 , 'treeRight'=>14]);
+        $this->manager->insertTable('Tree', ['id'=>1, 'treeParentId'=>null, 'treeLeft'=>1 , 'treeRight'=>16]);
         $this->manager->insertTable('Tree', ['id'=>2, 'treeParentId'=>1,    'treeLeft'=>2 , 'treeRight'=>9]);
-        $this->manager->insertTable('Tree', ['id'=>3, 'treeParentId'=>2,    'treeLeft'=>3 , 'treeRight'=>4]);
+        $this->manager->insertTable('Tree', ['id'=>3, 'treeParentId'=>2,    'treeLeft'=>3 , 'treeRight'=>6]);
         $this->manager->insertTable('Tree', ['id'=>4, 'treeParentId'=>3,    'treeLeft'=>4 , 'treeRight'=>5]);
-        $this->manager->insertTable('Tree', ['id'=>5, 'treeParentId'=>2,    'treeLeft'=>6 , 'treeRight'=>7]);
-        $this->manager->insertTable('Tree', ['id'=>6, 'treeParentId'=>1,    'treeLeft'=>8 , 'treeRight'=>11]);
-        $this->manager->insertTable('Tree', ['id'=>7, 'treeParentId'=>6,    'treeLeft'=>9 , 'treeRight'=>10]);
-        $this->manager->insertTable('Tree', ['id'=>8, 'treeParentId'=>1,    'treeLeft'=>12, 'treeRight'=>13]);
+        $this->manager->insertTable('Tree', ['id'=>5, 'treeParentId'=>2,    'treeLeft'=>7 , 'treeRight'=>8]);
+        $this->manager->insertTable('Tree', ['id'=>6, 'treeParentId'=>1,    'treeLeft'=>10, 'treeRight'=>13]);
+        $this->manager->insertTable('Tree', ['id'=>7, 'treeParentId'=>6,    'treeLeft'=>11, 'treeRight'=>12]);
+        $this->manager->insertTable('Tree', ['id'=>8, 'treeParentId'=>1,    'treeLeft'=>14, 'treeRight'=>15]);
     }
 
     function testGetRelatedTree()
@@ -66,6 +66,21 @@ class ManagerTest extends TestCase
         $tree = $this->manager->getRelated($parent, 'tree');
         $expectedTree = [1=>[2=>[3=>[4=>true], 5=>true], 6=>[7=>true], 8=>true]];
         $this->assertEquals($expectedTree, $this->idTree($parent, $tree));
+    }
+
+    function testGetRelatedTrees()
+    {
+        $parents = $this->manager->getList('Tree', 'id=3 or id=4 or id=6');
+        $trees = $this->manager->getRelated($parents, 'tree');
+        $expectedTrees = [
+            [2=>[3=>[4=>true], 5=>true], 6=>[7=>true], 8=>true],
+            [6=>[7=>true]],
+        ];
+        $resultTrees = [];
+        foreach ($trees as $idx=>$tree) {
+            $resultTrees[] = $this->idTree($parents[$idx], $tree);
+        }
+        $this->assertEquals($expectedTrees, $this->idTree($parent, $tree));
     }
 
     function testGetRelatedParents()

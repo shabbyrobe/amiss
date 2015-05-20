@@ -13,38 +13,75 @@ class TreeRelator extends Relator
         $this->nestedSetManager = $nestedSetManager;
     }
     
-    function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null)
+    function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
         throw new \Exception('not implemented');
     }
 
-    function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
+    function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
-        $treeMeta = $this->nestedSetManager->getTreeMeta($source);
-        $meta = $treeMeta->meta;
-        
-        $relationName = $relation[0];
-        $relation = $meta->relations[$relationName];
-        
-        $leftValue = $meta->getValue($source, $treeMeta->leftId);
-        $rightValue = $meta->getValue($source, $treeMeta->rightId);
-        
-        $query = new \Amiss\Sql\Query\Select;
-        $query->where = "{".$treeMeta->leftId."} > ? AND {".$treeMeta->rightId."} < ?";
-        $query->params = array($leftValue, $rightValue);
-        
-        if ($criteria) {
-            if ($criteria->where) {
-                list ($cWhere, $cParams) = $criteria->buildClause($meta);
-                $query->params = array_merge($cParams, $query->params);
-                $query->where .= ' AND ('.$cWhere.')';
-            }
-            $query->order = $criteria->order;
+        if (!$source) {
+            return $source;
         }
+
+        $treeMeta = $this->nestedSetManager->getTreeMeta(current($source));
         
-        $query->stack = $criteria ? $criteria->stack : null;
-        $children = $this->nestedSetManager->manager->getList($meta->class, $query);
-        
+        index: {
+            $leftRights = [];
+            $sourceIndex = [];
+            foreach ($source as $i) {
+                $leftValue  = $meta->getValue($i, $treeMeta->leftId);
+                $rightValue = $meta->getValue($i, $treeMeta->rightId);
+                $id = $meta->getIndexValue($i);
+
+                $sourceIndex[implode('|', $id)] = [$i, $id, $leftValue, $rightValue];
+                $leftRights[$leftValue] = $rightValue;
+            }
+            ksort($leftRights);
+        }
+
+        limit: {
+            $lastLeft = null;
+            $lastRight = null;
+            foreach ($leftRights as $l=>$r) {
+                if ($lastLeft !== null && $l < $lastRight) {
+                    unset($leftRights[$l]);
+                }
+                $lastLeft = $l;
+                $lastRight = $r;
+            }
+        }
+
+        query: {
+            $query = new \Amiss\Sql\Query\Select;
+            $idx = 0;
+            foreach ($leftRights as $l=>$r) {
+                $query->where .= (!$idx++ ? "" : " OR ").
+                    "({".$treeMeta->leftId."} > ? AND {".$treeMeta->rightId."} < ?)";
+                $query->params[] = $l;
+                $query->params[] = $r;
+            }
+
+            if ($criteria) {
+                if ($criteria->where) {
+                    list ($cWhere, $cParams) = $criteria->buildClause($meta);
+                    $query->params = array_merge($cParams, $query->params);
+                    $query->where .= ' AND ('.$cWhere.')';
+                }
+                $query->order = $criteria->order;
+            }
+            
+            $query->stack = $criteria ? $criteria->stack : null;
+            $children = $this->nestedSetManager->manager->getList($meta->class, $query);
+        }
+
+        index_children: {
+            $childrenIndex = [];
+            foreach ($children as $c) {
+                throw new \Exception();
+            }
+        }
+
         if ($children) {
             return $this->buildTree($treeMeta, $source, $children);
         }
