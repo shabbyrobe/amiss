@@ -441,4 +441,3 @@ class DatabaseSuite extends PHPUnit_Framework_TestSuite
         parent::setUp();
     }
 }
-

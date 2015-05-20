@@ -17,7 +17,8 @@ for ($i = 0; $i < $iter; $i++) {
             
             
             $name = $folder.'/'.pathinfo($item, PATHINFO_FILENAME);
-            $url = "{$webBase}/show.php/{$name}?cache={$cache}";
+            $loop = isset($_GET['loop']) ? $_GET['loop'] : 1;
+            $url = "{$webBase}/show.php/{$name}?cache={$cache}&loop={$loop}";
             $out = file_get_contents("http://localhost{$url}&fmt=json");
             $json = json_decode($out, true);
             
