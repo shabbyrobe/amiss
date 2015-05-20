@@ -303,8 +303,9 @@ class CustomMapperTestCase extends DataTestCase
         ));
         switch ($connector->engine) {
         case 'mysql':
-            $connector->exec("DROP IF EXISTS  `{$info['dbName']}`");
+            $connector->exec("DROP DATABASE IF EXISTS `{$info['dbName']}`");
             $connector->exec("CREATE DATABASE `{$info['dbName']}`");
+            $connector->exec("USE `{$info['dbName']}`");
         break;
         case 'sqlite': break;
         default:

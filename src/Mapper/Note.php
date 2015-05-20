@@ -105,6 +105,18 @@ class Note extends \Amiss\Mapper\Base
                 }
 
                 $itemNotes = $itemNotes[$this->annotationNamespace];
+                validate: {
+                    if ($diff = array_diff(array_keys($itemNotes), ['has', 'field', 'constructor'])) {
+                        throw new \UnexpectedValueException(
+                            "Invalid keys found in :amiss field/method annotation: ".implode(', ', $diff)
+                        );
+                    }
+                    if (isset($itemNotes['field']) && isset($itemNotes['has'])) {
+                        throw new \UnexpectedValueException(
+                            "Invalid class {$class}: relation and a field declared together on {$name}"
+                        );
+                    }
+                }
 
                 field: if (isset($itemNotes['field'])) {
                     $field = $itemNotes['field'];
@@ -133,11 +145,6 @@ class Note extends \Amiss\Mapper\Base
                 }
                 
                 field_relation: if (isset($itemNotes['has'])) {
-                    if (isset($itemNotes['field'])) {
-                        throw new \UnexpectedValueException(
-                            "Invalid class {$class}: relation and a field declared together on {$name}"
-                        );
-                    }
                     $relation = $itemNotes['has'];
                     if (is_string($relation)) {
                         $relation = ["type"=>$relation];
