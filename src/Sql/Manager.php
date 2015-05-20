@@ -419,9 +419,9 @@ class Manager
 
         $stack[$meta->class] = true;
         if ($sourceIsArray) {
-            return $relator->getRelatedForList($meta, $source, $relation, $query, $stack);
+            return $relator->getRelatedForList($meta, $source, $relation, $query ?: null, $stack);
         } else {
-            return $relator->getRelated($meta, $source, $relation, $query, $stack);
+            return $relator->getRelated($meta, $source, $relation, $query ?: null, $stack);
         }
     }
     

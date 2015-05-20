@@ -394,7 +394,7 @@ function data_rebuild($data)
 
         $rebuilt = ['field'=>[]];
         if (isset($data['name'])) {
-            $rebuilt['field']['key'] = $data['name'];
+            $rebuilt['field']['id'] = $data['name'];
         }
         if (isset($data['getter'])) {
             $rebuilt['field']['getter'] = $data['getter'];
