@@ -20,7 +20,7 @@ class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
         return (int)$value;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         if ($engine == 'sqlite') {
             return "INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT";

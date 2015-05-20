@@ -77,7 +77,7 @@ class TestTypeHandler implements \Amiss\Type\Handler
         return $this->garbage.$value.$this->garbage;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         return "TEXT";
     }
@@ -106,7 +106,7 @@ class TestCustomFieldTypeHandler implements \Amiss\Type\Handler
         return "value-$value"; 
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         return "TEXT";
     }

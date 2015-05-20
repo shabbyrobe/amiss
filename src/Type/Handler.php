@@ -22,5 +22,5 @@ interface Handler
      * It's ok to return nothing from this - the default column type
      * will be used.
      */
-    function createColumnType($engine);
+    function createColumnType($engine, array $fieldInfo);
 }

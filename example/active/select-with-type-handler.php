@@ -22,7 +22,7 @@ class Handler implements \Amiss\Type\Handler
         return $value;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {}
 }
 

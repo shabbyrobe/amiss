@@ -100,7 +100,7 @@ class Date implements \Amiss\Type\Handler
         return $out;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         if ($this->formats[0] == 'Y-m-d H:i:s') {
             return 'datetime';

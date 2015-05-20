@@ -25,7 +25,7 @@ class AutoGuid implements Handler, Identity
         return $value;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         return "CHAR(36)";
     }

@@ -37,6 +37,6 @@ class Date implements \Amiss\Type\Handler
         return $out;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {}
 }

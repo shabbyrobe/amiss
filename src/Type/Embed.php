@@ -59,6 +59,6 @@ class Embed implements Handler
         return $return;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {}
 }

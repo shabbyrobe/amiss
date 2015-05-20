@@ -13,6 +13,6 @@ class Id implements \Amiss\Type\Handler
         return $value->__toString();
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {}
 }

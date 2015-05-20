@@ -64,6 +64,6 @@ class RecordCreateCustomTypeWithEmptyColumnTypeHandler implements \Amiss\Type\Ha
         return $value;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {}
 }

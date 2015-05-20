@@ -255,12 +255,12 @@ interface requires three methods:
     Take an object value and prepare it for insertion into the database
     
 
-.. py:function:: handleValueFromDb( $value )
+.. py:function:: handleValueFromDb( $value , array $fieldInfo, array $row )
     
     Takes a value coming out of the database and prepare it for assigning to an object.
 
 
-.. py:function:: createColumnType( $engine )
+.. py:function:: createColumnType( $engine , array $fieldInfo )
 
     This generates the database type string for use in table creation. See :doc:`/schema` for more
     info. You can simply leave this method empty if you prefer and the type declared against the
@@ -288,7 +288,7 @@ The following (naive) handler demonstrates serialising/deserialising an object i
             return unserialize($value);
         }
 
-        function createColumnType($engine)
+        function createColumnType($engine, $fieldInfo)
         {
             return "LONGTEXT";
         }
@@ -359,11 +359,12 @@ nicely unserialised ``stdClass`` instance, just like we started with:
     
 
 In the situation where you want to handle a specific database type (like ``DATETIME`` or
-``VARCHAR``), you can provide a handler for it and simply leave the ``createColumnType`` method body
-empty.
+``VARCHAR``), you can provide a handler for it and simply leave the ``createColumnType``
+method body empty.
 
-To determine the id for the handler to use, it takes everything up to the first space or opening
-parenthesis. In the following example, the type handler ``varchar`` will be used for column ``bar``:
+To determine the id for the handler to use, it takes everything up to the first space or
+opening parenthesis. In the following example, the type handler ``varchar`` will be used
+for column ``bar``:
 
 .. code-block:: php
 

@@ -45,7 +45,7 @@ class Encoder implements Handler
         return $return;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         if (is_string($this->columnType)) {
             return $this->columnType;

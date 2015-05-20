@@ -110,7 +110,7 @@ class TestTypeHandler implements \Amiss\Type\Handler
         return $this->valueFromDb;
     }
     
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         return $this->columnType;
     }

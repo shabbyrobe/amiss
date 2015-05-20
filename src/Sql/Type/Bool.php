@@ -13,7 +13,7 @@ class Bool implements \Amiss\Type\Handler
         return $value == true;
     }
 
-    function createColumnType($engine)
+    function createColumnType($engine, array $fieldInfo)
     {
         return 'tinyint(1) unsigned';
     }

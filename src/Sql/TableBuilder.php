@@ -93,7 +93,7 @@ abstract class TableBuilder
         if (isset($info['type'])) {
             $handler = $this->mapper->determineTypeHandler($info['type']['id']);
             if ($handler) {
-                $new = $handler->createColumnType($this->engine);
+                $new = $handler->createColumnType($this->engine, $info);
                 if ($new) { 
                     $colType = $new;
                 }

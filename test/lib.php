@@ -280,7 +280,7 @@ class CustomMapperTestCase extends DataTestCase
         if ($ns) {
             $manager->mapper->objectNamespace = $ns;
         }
-        $manager->prepareManager($manager, $classNames);
+        $this->prepareManager($manager, $classNames);
         return [$manager, $ns];
     }
 

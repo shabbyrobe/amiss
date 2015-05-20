@@ -1,5 +1,4 @@
 <?php
-
 namespace Amiss\Test\Unit;
 
 use Amiss\Type;
@@ -13,7 +12,7 @@ class EncoderTest extends \CustomTestCase
     public function testCreateColumnTypeDefault()
     {
         $encoder = new Type\Encoder('serialize', 'unserialize');
-        $result = $encoder->createColumnType('sqlite');
+        $result = $encoder->createColumnType('sqlite', []);
         $this->assertEquals('TEXT', $result);
     }
 
@@ -21,7 +20,7 @@ class EncoderTest extends \CustomTestCase
     {
         $encoder = new Type\Encoder('serialize', 'unserialize');
         $encoder->columnType = 'PANTS';
-        $result = $encoder->createColumnType('sqlite');
+        $result = $encoder->createColumnType('sqlite', []);
         $this->assertEquals('PANTS', $result);
     }
 
@@ -32,7 +31,7 @@ class EncoderTest extends \CustomTestCase
             $this->assertEquals('sqlite', $engine);
             return 'PANTS';
         };
-        $result = $encoder->createColumnType('sqlite');
+        $result = $encoder->createColumnType('sqlite', []);
         $this->assertEquals('PANTS', $result);
     }
 
