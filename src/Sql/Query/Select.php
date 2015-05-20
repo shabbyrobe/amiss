@@ -8,7 +8,7 @@ class Select extends Criteria
     public $limit;
     public $offset = 0;
     public $fields;
-    public $order = array();
+    public $order = [];
     public $forUpdate = false;
     public $follow = true;
     public $with = [];
@@ -44,6 +44,7 @@ class Select extends Criteria
     
     public function buildFields($meta, $tablePrefix=null, $fieldAliasPrefix=null)
     {
+    // Careful! $meta might be null.
         $metaFields = $meta ? $meta->getFields() : null;
         
         $fields = $this->fields;
@@ -71,13 +72,17 @@ class Select extends Criteria
         return $fields;
     }
 
-    // damn, this is pretty much identical to the above.
+    // damn, this is pretty much identical to the above. FIXME, etc.
     public function buildOrder($meta, $tableAlias=null)
     {
+    // Careful! $meta might be null.
         $metaFields = $meta ? $meta->getFields() : null;
         
         $order = $this->order;
-        
+        if ($meta && $meta->defaultOrder && $order !== null) {
+            $order = $meta->defaultOrder;
+        }
+
         if ($order) {
             if (is_array($order)) {
                 $oClauses = array();

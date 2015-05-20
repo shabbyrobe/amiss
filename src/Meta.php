@@ -10,6 +10,10 @@ class Meta
     public $primary;
     public $constructor;
     public $constructorArgs = [];
+    
+    // queries that use this Meta which do not explicitly pass 'null' as their
+    // order will use this.
+    public $defaultOrder = [];
 
     /**
      * Array of relation arrays, hashed by property name
@@ -74,7 +78,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete',
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder',
         ); 
     }
 
@@ -84,10 +88,11 @@ class Meta
         // are always fully qualified, we get inconsistent input here - a leading
         // backslash when the lookup is for a parent class.
         // would like to get rid of this, but other things need to be dealt with first.
-        $this->class   = ltrim($class, "\\");
+        $this->class  = ltrim($class, "\\");
+        $this->parent = $parent;
+        $this->table  = isset($info['table'])   ? $info['table']   : array();
 
-        $this->parent  = $parent;
-        $this->table   = isset($info['table'])   ? $info['table']   : array();
+        $this->defaultOrder = isset($info['defaultOrder']) ? $info['defaultOrder'] : null;
 
         primary: {
             if (isset($info['primary'])) {
