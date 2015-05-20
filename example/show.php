@@ -25,6 +25,7 @@ if (!in_array($fmt, array('html', 'json'))) {
     $fmt = 'html';
 }
 
+$connector->queries = 0;
 if (isset($_GET['run'])) {
     require($file);
     exit;
