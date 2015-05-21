@@ -47,8 +47,6 @@ class Meta
 
     public $indexes = [];
 
-    public $aliases = [];
-
     public $canInsert = true;
     public $canUpdate = true;
     public $canDelete = true;
@@ -80,7 +78,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'aliases',
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 
         ); 
     }
 
@@ -311,10 +309,6 @@ class Meta
                 $field['id'] = $name;
             }
             
-            if (isset($field['alias'])) {
-                $this->aliases[$field['alias']] = $field['id'];
-            }
-
             $fields[$field['id']] = $field;
         }
 
@@ -396,14 +390,6 @@ class Meta
         return $this->defaultFieldType;
     }
 
-    /**
-     * @deprecated Use getIndexValue($object, 'primary')
-     */
-    function getPrimaryValue($object)
-    {
-        return $this->getIndexValue($object);
-    }
-    
     function getIndexValue($object, $indexName='primary')
     {
         $foundValue = false;

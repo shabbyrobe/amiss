@@ -146,9 +146,9 @@ class MetaTest extends \CustomTestCase
 
     /**
      * @covers Amiss\Meta::__construct
-     * @covers Amiss\Meta::getPrimaryValue
+     * @covers Amiss\Meta::getIndexValue
      */
-    public function testGetPrimaryValueString()
+    public function testGetIndexValueString()
     {
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
@@ -156,14 +156,14 @@ class MetaTest extends \CustomTestCase
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
-        $this->assertEquals(array('a'=>1), $meta->getPrimaryValue($obj));
+        $this->assertEquals(array('a'=>1), $meta->getIndexValue($obj));
     }
 
     /**
      * @covers Amiss\Meta::__construct
-     * @covers Amiss\Meta::getPrimaryValue
+     * @covers Amiss\Meta::getIndexValue
      */
-    public function testGetPrimaryValueSingleCol()
+    public function testGetIndexValueSingleCol()
     {
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
@@ -171,14 +171,14 @@ class MetaTest extends \CustomTestCase
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
-        $this->assertEquals(array('a'=>1), $meta->getPrimaryValue($obj));
+        $this->assertEquals(array('a'=>1), $meta->getIndexValue($obj));
     }
 
     /**
      * @covers Amiss\Meta::__construct
-     * @covers Amiss\Meta::getPrimaryValue
+     * @covers Amiss\Meta::getIndexValue
      */
-    public function testGetPrimaryValueMultiCol()
+    public function testGetIndexValueMultiCol()
     {
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
@@ -186,14 +186,14 @@ class MetaTest extends \CustomTestCase
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
-        $this->assertEquals(array('a'=>1, 'b'=>2), $meta->getPrimaryValue($obj));
+        $this->assertEquals(array('a'=>1, 'b'=>2), $meta->getIndexValue($obj));
     }
 
     /**
      * @covers Amiss\Meta::__construct
-     * @covers Amiss\Meta::getPrimaryValue
+     * @covers Amiss\Meta::getIndexValue
      */
-    public function testGetPrimaryValueMultiReturnsNullWhenNoValues()
+    public function testGetIndexValueMultiReturnsNullWhenNoValues()
     {
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
@@ -201,13 +201,13 @@ class MetaTest extends \CustomTestCase
         ));
         
         $obj = (object)array('a'=>null, 'b'=>null, 'c'=>3);
-        $this->assertEquals(null, $meta->getPrimaryValue($obj));
+        $this->assertEquals(null, $meta->getIndexValue($obj));
     }
 
     /**
-     * @covers Amiss\Meta::getPrimaryValue
+     * @covers Amiss\Meta::getIndexValue
      */
-    public function testGetPrimaryValueMultiWhenOneValueIsNull()
+    public function testGetIndexValueMultiWhenOneValueIsNull()
     {
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
@@ -215,7 +215,7 @@ class MetaTest extends \CustomTestCase
         ));
         
         $obj = (object)array('a'=>null, 'b'=>2, 'c'=>3);
-        $this->assertEquals(array('a'=>null, 'b'=>2), $meta->getPrimaryValue($obj));
+        $this->assertEquals(array('a'=>null, 'b'=>2), $meta->getIndexValue($obj));
     }
 
     /**

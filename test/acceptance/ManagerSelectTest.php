@@ -96,6 +96,18 @@ class ManagerSelectTest extends \ModelDataTestCase
      * @group acceptance
      * @group manager 
      */
+    public function testListByProperty()
+    {
+        $artists = $this->manager->getList('Artist', ['where'=>['artistTypeId'=>2]]);
+        $this->assertTrue(is_array($artists));
+        $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
+        $this->assertEquals('george-carlin', current($artists)->slug);
+    }
+
+    /**
+     * @group acceptance
+     * @group manager 
+     */
     public function testPagedListFirstPage()
     {
         $artists = $this->manager->getList('Artist', array('page'=>array(1, 3)));

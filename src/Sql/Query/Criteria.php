@@ -72,11 +72,16 @@ class Criteria extends Sql\Query
         if (is_array($where)) {
             $wh = array();
             foreach ($where as $p=>$v) {
-                $k = $p;
-                if (isset($fields[$k])) {
-                    $k = $fields[$k]['name'];
+                $name = $p;
+                $table = null;
+                if (isset($fields[$name])) {
+                    $mf = $fields[$name];
+                    $name  = !isset($mf['source']) ? $mf['name']  : $mf['source'];
+                    $table =  isset($mf['table'])  ? $mf['table'] : null;
                 }
-                $qk = $k[0] != '`' ?  '`'.str_replace('`', '', $k).'`' : $k;
+                $qk = ($table ?        ($table[0] == '`' ? $table : '`'.$table.'`.') : '') .
+                      ($name  ?        ($name[0]  == '`' ? $name  : '`'.$name.'`')   : '');
+
                 $pidx = 'zp_'.$fidx++;
                 $wh[] = "$qk=:$pidx";
                 $properties[$p] = ":$pidx";
@@ -87,7 +92,7 @@ class Criteria extends Sql\Query
         }
         else {
             if ($fields && strpos($where, '{') !== false) {
-                $where = $this->replaceFieldTokens($fields, $where);
+                $where = static::replaceFields($meta, $where);
             }
         }
 
@@ -139,19 +144,19 @@ class Criteria extends Sql\Query
         }
     }
     
-    protected function replaceFieldTokens($fields, $clause, $tableAlias=null)
+    public static function replaceFields(\Amiss\Meta $meta, $clause, $tableAlias=null)
     {
         $tokens = array();
-        foreach ($fields as $k=>$v) {
+        foreach ($meta->getFields() as $k=>$v) {
             $rep = !isset($v['source']) ? $v['name'] : $v['source'];
             if ($rep[0] != '`') {
                 $rep = '`'.$rep.'`';
             }
             if (isset($v['table'])) {
-                $rep = "{$v['table']}.$rep";
+                $tableAlias = $v['table'];
             }
-            elseif ($tableAlias) {
-                $rep = "$tableAlias.$rep";
+            if ($tableAlias) {
+                $rep = ($tableAlias[0] != '`' ? '`'.$tableAlias.'`' : $tableAlias).'.'.$rep;
             }
             $tokens['{'.$k.'}'] = $rep;
         }

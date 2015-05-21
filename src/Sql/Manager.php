@@ -609,7 +609,7 @@ class Manager
         }
 
         $query->set = $this->mapper->fromObject($object, $meta, 'update');
-        $query->where = $meta->getPrimaryValue($object);
+        $query->where = $meta->getIndexValue($object);
         
         list ($sql, $params, $props) = $query->buildQuery($meta);
         // don't need to do formatParams - it's already covered by the fromProperties call in
@@ -691,7 +691,7 @@ class Manager
             throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
         }
         
-        $prival = $meta->getPrimaryValue($object);
+        $prival = $meta->getIndexValue($object);
         return $prival == false;
     }
     

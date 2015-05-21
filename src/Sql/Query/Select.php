@@ -70,28 +70,20 @@ class Select extends Criteria
                         $name  = $mf['source'];
                         $alias = $mf['name'];
                     }
-
-                    if (isset($mf['table'])) {
-                        $table = $mf['table'];
-                    } else {
-                        $table = $tablePrefix;
-                    }
+                    $table = isset($mf['table']) ? $mf['table'] : $tablePrefix;
                 }
                 else {
                     $name   = $f;
                     $alias  = null;
+                    $table = $tablePrefix;
                 }
 
-                if (isset($v['table'])) {
-
-
-                $fq .= ($source ?        ($source[0] == '`' ? $source : '`'.$source.'`.') : '') .
-                       ($name   ?        ($name[0]   == '`' ? $name   : '`'.$name.'`')    : '') .
-                       ($alias  ? ' AS '.($alias[0]  == '`' ? $alias  : '`'.$alias.'`')   : '')
+                $fq .= ($table ?        ($table[0] == '`' ? $table : '`'.$table.'`.') : '') .
+                       ($name  ?        ($name[0]  == '`' ? $name  : '`'.$name.'`')   : '') .
+                       ($alias ? ' AS '.($alias[0] == '`' ? $alias : '`'.$alias.'`')  : '')
                 ;
             }
             $fields = $fq;
-            $fields = implode(', ', $fNames);
         }
         
         return $fields;
@@ -125,7 +117,7 @@ class Select extends Criteria
             }
             else {
                 if ($metaFields && strpos($order, '{')!==false) {
-                    $order = $this->replaceFieldTokens($metaFields, $order, $tableAlias);
+                    $order = static::replaceFields($meta, $order, $tableAlias);
                 }
             }
         }

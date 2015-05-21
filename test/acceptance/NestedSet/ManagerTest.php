@@ -3,6 +3,9 @@ namespace Amiss\Test\Acceptance\NestedSet;
 
 require_once __DIR__.'/TestCase.php';
 
+/**
+ * @group faulty
+ */
 class ManagerTest extends TestCase
 {
     function setUp()

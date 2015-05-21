@@ -3,7 +3,6 @@
 use Amiss\Demo\Active\ArtistRecord;
 
 $artist = ArtistRecord::getById(1);
-dump($artist);
 
 $artist->name = 'foo bar';
 $artist->update();
