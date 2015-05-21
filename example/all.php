@@ -10,11 +10,12 @@ $result = array();
 for ($i = 0; $i < $iter; $i++) {
     foreach (array('active', 'array', 'note') as $folder) {
         foreach (new \DirectoryIterator(__DIR__.'/'.$folder) as $item) {
-            if ($item->isDir() || $item->isDot())
+            if ($item->isDir() || $item->isDot()) {
                 continue;
-            if ($item->getFilename() == 'config.php')
+            }
+            if (($fname = $item->getFilename()) == 'config.php' || $fname[0] == '.') {
                 continue;
-            
+            }
             
             $name = $folder.'/'.pathinfo($item, PATHINFO_FILENAME);
             $loop = isset($_GET['loop']) ? $_GET['loop'] : 1;

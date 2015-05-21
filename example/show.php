@@ -11,9 +11,7 @@ else {
     $fmt = isset($_GET['fmt']) ? $_GET['fmt'] : null;
 }
 
-if (!$ex) {
-    exit;
-}
+if (!$ex) exit;
 $ex = str_replace('..', '', $ex);
 if (strpos($ex, '/')===false) {
     exit;
@@ -25,7 +23,6 @@ if (!in_array($fmt, array('html', 'json'))) {
     $fmt = 'html';
 }
 
-$connector->queries = 0;
 if (isset($_GET['run'])) {
     require($file);
     exit;
@@ -37,6 +34,7 @@ if (isset($_GET['loop'])) {
     }
 }
 
+$manager->connector->queries = 0;
 ob_start();
 $startTime = microtime(true);
 $data = require($file);
