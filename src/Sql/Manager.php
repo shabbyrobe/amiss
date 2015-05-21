@@ -626,27 +626,33 @@ class Manager
             throw new Exception("Class {$meta->class} prohibits update");
         }
 
-        $query->set = $this->mapper->fromObject($object, $meta, 'update');
-        $query->where = $meta->getIndexValue($object);
-        
-        list ($sql, $params, $props) = $query->buildQuery($meta);
-        // don't need to do formatParams - it's already covered by the fromProperties call in
-        // table update mode
-
-        if (isset($this->on['beforeUpdate'])) {
-            foreach ($this->on['beforeUpdate'] as $cb) { $cb($object, $meta); }
-        }
-        if (isset($meta->on['beforeUpdate'])) {
-            foreach ($meta->on['beforeUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        event_before: {
+            if (isset($this->on['beforeUpdate'])) {
+                foreach ($this->on['beforeUpdate'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['beforeUpdate'])) {
+                foreach ($meta->on['beforeUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
         }
 
-        $return = $this->getConnector()->exec($sql, $params);
+        query: {
+            $query->set = $this->mapper->fromObject($object, $meta, 'update');
+            $query->where = $meta->getIndexValue($object);
+            
+            list ($sql, $params, $props) = $query->buildQuery($meta);
+            // don't need to do formatParams - it's already covered by the fromProperties call in
+            // table update mode
 
-        if (isset($this->on['afterUpdate'])) {
-            foreach ($this->on['afterUpdate'] as $cb) { $cb($object, $meta); }
+            $return = $this->getConnector()->exec($sql, $params);
         }
-        if (isset($meta->on['afterUpdate'])) {
-            foreach ($meta->on['afterUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+
+        event_after: {
+            if (isset($this->on['afterUpdate'])) {
+                foreach ($this->on['afterUpdate'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['afterUpdate'])) {
+                foreach ($meta->on['afterUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
         }
         return $return;
     }
@@ -665,6 +671,7 @@ class Manager
     {
         $meta = null;
         $criteria = null;
+        $object = null;
  
         if (is_object($first) && !$first instanceof Meta) {
             $object = $first;
@@ -682,6 +689,16 @@ class Manager
             if (!$meta) {
                 $meta = $this->mapper->getMeta(get_class($object));
             }
+
+            event_before: {
+                if (isset($this->on['beforeDelete'])) {
+                    foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
+                }
+                if (isset($meta->on['beforeDelete'])) {
+                    foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+                }
+            }
+
             $criteria->where = $meta->getIndexValue($object);
         }
         else {
@@ -692,20 +709,15 @@ class Manager
             $criteria = $args[0] instanceof Query\Criteria ? $args[0] : Query\Criteria::fromParamArgs($args);
         }
 
-        if (isset($this->on['beforeDelete'])) {
-            foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
-        }
-        if (isset($meta->on['beforeDelete'])) {
-            foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
-        }
-
         $return = $this->executeDelete($meta, $criteria);
 
-        if (isset($this->on['afterDelete'])) {
-            foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
-        }
-        if (isset($meta->on['afterDelete'])) {
-            foreach ($meta->on['afterDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        if ($object) {
+            if (isset($this->on['afterDelete'])) {
+                foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['afterDelete'])) {
+                foreach ($meta->on['afterDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
         }
 
         return $return;
