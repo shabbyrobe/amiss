@@ -42,7 +42,7 @@ class Select extends Criteria
         return array($query, $params, $properties);
     }
     
-    public function buildFields($meta, $tablePrefix=null, $fieldAliasPrefix=null)
+    public function buildFields($meta, $tablePrefix=null)
     {
     // Careful! $meta might be null.
         $metaFields = $meta ? $meta->getFields() : null;
@@ -53,19 +53,44 @@ class Select extends Criteria
         }
         
         if (is_array($fields)) {
-            $fNames = array();
+            $fq = '';
             foreach ($fields as $f) {
-                $name = (isset($metaFields[$f]) ? $metaFields[$f]['name'] : $f);
-                if (isset($this->aliases[$name])) {
-                    $name = $this->aliases[$name];
+                if ($fq) {
+                    $fq .= ', ';
                 }
-                $qname = $name[0] == '`' ? $name : '`'.$name.'`';
-                $fName = ($tablePrefix ? $tablePrefix.'.' : '').$qname;
-                if ($fieldAliasPrefix) {
-                    $fName .= ' as `'.$fieldAliasPrefix.$name.'`';
+
+                $table = null;
+                if (isset($metaFields[$f])) {
+                    $mf = $metaFields[$f];
+                    if (!isset($mf['source'])) {
+                        $name  = $mf['name'];
+                        $alias = null;
+                    }
+                    else {
+                        $name  = $mf['source'];
+                        $alias = $mf['name'];
+                    }
+
+                    if (isset($mf['table'])) {
+                        $table = $mf['table'];
+                    } else {
+                        $table = $tablePrefix;
+                    }
                 }
-                $fNames[] = $fName;
+                else {
+                    $name   = $f;
+                    $alias  = null;
+                }
+
+                if (isset($v['table'])) {
+
+
+                $fq .= ($source ?        ($source[0] == '`' ? $source : '`'.$source.'`.') : '') .
+                       ($name   ?        ($name[0]   == '`' ? $name   : '`'.$name.'`')    : '') .
+                       ($alias  ? ' AS '.($alias[0]  == '`' ? $alias  : '`'.$alias.'`')   : '')
+                ;
             }
+            $fields = $fq;
             $fields = implode(', ', $fNames);
         }
         
@@ -92,9 +117,6 @@ class Select extends Criteria
                     }
                     
                     $name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
-                    if (isset($this->aliases[$name])) {
-                        $name = $this->aliases[$name];
-                    }
                     $qname = $name[0] == '`' ? $name : '`'.$name.'`';
                     $qname = ($tableAlias ? $tableAlias.'.' : '').$qname;
                     $oClauses[] = $qname.($dir == 'asc' ? '' : ' desc');

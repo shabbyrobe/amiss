@@ -75,7 +75,7 @@ class SelectQueryTest extends \CustomTestCase
         
         $meta = null;
         $fields = $criteria->buildFields($meta, 'whoopee');
-        $this->assertEquals('whoopee.`foo`, whoopee.`bar`', $fields);
+        $this->assertEquals('`whoopee`.`foo`, `whoopee`.`bar`', $fields);
     }
 
     /**

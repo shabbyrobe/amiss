@@ -47,6 +47,8 @@ class Meta
 
     public $indexes = [];
 
+    public $aliases = [];
+
     public $canInsert = true;
     public $canUpdate = true;
     public $canDelete = true;
@@ -78,7 +80,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder',
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'aliases',
         ); 
     }
 
@@ -307,6 +309,10 @@ class Meta
 
             if (!isset($field['id'])) {
                 $field['id'] = $name;
+            }
+            
+            if (isset($field['alias'])) {
+                $this->aliases[$field['alias']] = $field['id'];
             }
 
             $fields[$field['id']] = $field;
