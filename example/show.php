@@ -19,8 +19,9 @@ if (strpos($ex, '/')===false) {
 $file = __DIR__.'/'.$ex.'.php';
 require(dirname($file).'/config.php');
 
-if (!in_array($fmt, array('html', 'json')))
+if (!in_array($fmt, array('html', 'json'))) {
     $fmt = 'html';
+}
 
 if (isset($_GET['run'])) {
     require($file);
@@ -33,6 +34,7 @@ if (isset($_GET['loop'])) {
     }
 }
 
+$manager->connector->queries = 0;
 ob_start();
 $startTime = microtime(true);
 $data = require($file);
@@ -73,7 +75,7 @@ $source = source(file_get_contents($file), true);
 
 <dl>
 <dt>Queries</dt>
-<dd><?php echo $manager->queries ?></dd>
+<dd><?php echo $manager->connector->queries ?></dd>
 
 <dt>Time taken</dt>
 <dd id="time-taken"><?php echo $timeTaken ?>ms</dd>
@@ -91,7 +93,7 @@ $source = source(file_get_contents($file), true);
 echo json_encode(array(
     'id'=>$ex,
     'timeTakenMs'=>$timeTaken,
-    'queries'=>$manager->queries,
+    'queries'=>$manager->connector->queries,
     'memUsed'=>$memUsed,
     'memPeak'=>$memPeak,
 ));

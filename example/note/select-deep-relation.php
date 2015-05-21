@@ -6,10 +6,10 @@ $events = $manager->getList('Event');
 $manager->assignRelated($events, 'eventArtists');
 
 // Relation 2: populate each EventArtist object's artist property
-$eventArtists = $manager->getChildren($events, 'eventArtists');
+$eventArtists = \Amiss\Functions::getChildren($events, 'eventArtists');
 $manager->assignRelated($eventArtists, 'artist');
 
 // Relation 3: populate each Artist object's artistType property
-$manager->assignRelated($manager->getChildren($eventArtists, 'artist'), 'artistType');
+$manager->assignRelated(\Amiss\Functions::getChildren($eventArtists, 'artist'), 'artistType');
     
 return $events;

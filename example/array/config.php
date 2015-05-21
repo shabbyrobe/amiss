@@ -1,6 +1,6 @@
 <?php
 
-require_once($amissPath.'/../doc/demo/model.php');
+require_once(__DIR__.'/../../doc/demo/model.php');
 
 $namespace = 'Amiss\Demo';
 $mapper = new Amiss\Mapper\Arrays(array(
@@ -8,13 +8,13 @@ $mapper = new Amiss\Mapper\Arrays(array(
         'primary'=>array('artistId'),
         'fields'=>array(
             'artistId'=>array('type'=>'autoinc'),
-            'artistTypeId',
-            'name',
-            'slug',
-            'bio',
+            'artistTypeId'=>['index'=>true],
+            'name'=>true,
+            'slug'=>true,
+            'bio'=>true,
         ),
         'relations'=>array(
-            'artistType'=>array('one', 'of'=>'ArtistType', 'on'=>'artistTypeId'),
+            'artistType'=>array('one', 'of'=>'ArtistType', 'from'=>'artistTypeId'),
             'events'=>array('assoc', 'of'=>'Event', 'via'=>'EventArtist'),
         ),
     ),
@@ -24,7 +24,6 @@ $mapper = new Amiss\Mapper\Arrays(array(
         'fields'=>array(
             'artistTypeId'=>array('type'=>'autoinc'),
             'type'=>array(),
-            'slug'=>array(),
         ),
         'relations'=>array(
             'artists'=>array('many', 'of'=>'Artist'),
@@ -37,5 +36,5 @@ $connector = new \PDOK\Connector('sqlite::memory:');
 $manager = Amiss\Sql\Factory::createManager($connector, array(
     'mapper'=>$mapper,
 ));
-$connector->exec(file_get_contents($amissPath.'/../doc/demo/schema.sqlite.sql'));
-$connector->exec(file_get_contents($amissPath.'/../doc/demo/testdata.sql'));
+$connector->exec(file_get_contents(__DIR__.'/../../doc/demo/schema.sqlite.sql'));
+$connector->exec(file_get_contents(__DIR__.'/../../doc/demo/testdata.sql'));
