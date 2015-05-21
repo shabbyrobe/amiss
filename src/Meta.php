@@ -51,6 +51,8 @@ class Meta
     public $canUpdate = true;
     public $canDelete = true;
 
+    public $on = [];
+
     /**
      * Array of fields, hashed by property name
      */
@@ -65,7 +67,7 @@ class Meta
      *                        null if not yet checked
      */
     protected $defaultFieldType;
-    
+
     function __sleep()
     {
         // precache this stuff before serialization
@@ -78,7 +80,7 @@ class Meta
             'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on',
         ); 
     }
 
@@ -126,6 +128,10 @@ class Meta
             $this->setRelations($info['relations']);
         }
 
+        if (isset($info['on'])) {
+            $this->setEvents($info['on']);
+        }
+
         $this->ext = isset($info['ext']) ? $info['ext'] : array();
         
         class_constructor: {
@@ -167,6 +173,21 @@ class Meta
             }
             $this->defaultFieldType = $ft;
         }
+    }
+
+    private function setEvents($events)
+    {
+        foreach ($events as $event=>$handlers) {
+            if (!is_array($handlers)) {
+                throw new Exception("Handler $event expected array for meta {$this->class}");
+            }
+            foreach ($handlers as $h) {
+                if ($h instanceof \Closure) {
+                    throw new Exception("Handler for $event was an instance of Closure. Unfortunately, Closures aren't serialisable.");
+                }
+            }
+        }
+        $this->on = $events;
     }
 
     /*

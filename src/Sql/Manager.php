@@ -24,18 +24,17 @@ class Manager
      * @var (Amiss\Sql\Relator|callable)[]
      */
     public $relators = [];
-    
+
+    public $on = [];
+
     /**
      * @param PDOK\Connector|array  Database connector
      * @param Amiss\Mapper
      */
     public function __construct($connector, $mapper)
     {
-        if (is_array($connector)) {
-            $connector = Connector::create($connector);
-        }
         if (!$connector instanceof Connector) {
-            throw new \InvalidArgumentException();
+            $connector = Connector::create($connector);
         }
         $this->connector = $connector;
         $this->mapper = $mapper;
@@ -491,15 +490,25 @@ class Manager
             throw new Exception("Class {$meta->class} prohibits insert");
         }
 
-        $query->values = $this->mapper->fromObject($object, $meta, 'insert');
-        if (!$query->table) {
-            $query->table = $meta->table;
+        event_before: {
+            if (isset($this->on['beforeInsert'])) {
+                foreach ($this->on['beforeInsert'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['beforeInsert'])) {
+                foreach ($meta->on['beforeInsert'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
         }
 
-        list ($sql, $params, $props) = $query->buildQuery($meta);
+        query: {
+            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+            if (!$query->table) {
+                $query->table = $meta->table;
+            }
 
-        $stmt = $this->getConnector()->prepare($sql);
-        $stmt->execute($params);
+            list ($sql, $params, $props) = $query->buildQuery($meta);
+            $stmt = $this->getConnector()->prepare($sql);
+            $stmt->execute($params);
+        }
         
         $lastInsertId = null;
 
@@ -540,6 +549,15 @@ class Manager
             }
         }
         
+        event_after: {
+            if (isset($this->on['afterInsert'])) {
+                foreach ($this->on['afterInsert'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['afterInsert'])) {
+                foreach ($meta->on['afterInsert'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+        }
+
         return $lastInsertId;
     }
 
@@ -615,7 +633,22 @@ class Manager
         // don't need to do formatParams - it's already covered by the fromProperties call in
         // table update mode
 
-        return $this->getConnector()->exec($sql, $params);
+        if (isset($this->on['beforeUpdate'])) {
+            foreach ($this->on['beforeUpdate'] as $cb) { $cb($object, $meta); }
+        }
+        if (isset($meta->on['beforeUpdate'])) {
+            foreach ($meta->on['beforeUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        }
+
+        $return = $this->getConnector()->exec($sql, $params);
+
+        if (isset($this->on['afterUpdate'])) {
+            foreach ($this->on['afterUpdate'] as $cb) { $cb($object, $meta); }
+        }
+        if (isset($meta->on['afterUpdate'])) {
+            foreach ($meta->on['afterUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        }
+        return $return;
     }
     
     /**
@@ -659,7 +692,23 @@ class Manager
             $criteria = $args[0] instanceof Query\Criteria ? $args[0] : Query\Criteria::fromParamArgs($args);
         }
 
-        return $this->executeDelete($meta, $criteria);
+        if (isset($this->on['beforeDelete'])) {
+            foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
+        }
+        if (isset($meta->on['beforeDelete'])) {
+            foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        }
+
+        $return = $this->executeDelete($meta, $criteria);
+
+        if (isset($this->on['afterDelete'])) {
+            foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
+        }
+        if (isset($meta->on['afterDelete'])) {
+            foreach ($meta->on['afterDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+        }
+
+        return $return;
     }
     
     /** 
