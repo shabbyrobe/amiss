@@ -264,11 +264,12 @@ class Meta
         }
     }
 
-    private function setFields($fields)
+    private function setFields($inFields)
     {
         $primary = [];
         $indexes = [];
-        foreach ($fields as $name=>&$field) {
+        $fields  = [];
+        foreach ($inFields as $name=>&$field) {
             if ($field === true) {
                 $field = [];
             } elseif (is_string($field)) {
@@ -303,7 +304,14 @@ class Meta
                 }
                 $indexes[$name] = $index;
             }
+
+            if (!isset($field['id'])) {
+                $field['id'] = $name;
+            }
+
+            $fields[$field['id']] = $field;
         }
+
         $this->fields = $fields;
         if ($primary) {
             if ($this->primary) {

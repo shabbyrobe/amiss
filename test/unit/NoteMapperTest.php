@@ -133,7 +133,7 @@ class NoteMapperTest extends \CustomTestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $expected = array('name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo');
+        $expected = array('id'=>'foo', 'name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo');
         $this->assertEquals($expected, $meta->getField('foo'));
     }
 
@@ -196,6 +196,7 @@ class NoteMapperTest extends \CustomTestCase
         $this->assertEquals(
             array(
                 'id'=>array(
+                    'id'=>'id',
                     'name'=>'id',
                     'type'=>array('id'=>'autoinc'),
                     'primary'=>true,
@@ -748,7 +749,7 @@ class NoteMapperTest extends \CustomTestCase
             }
         ');
         $meta = $mapper->getMeta($name);
-        $this->assertEquals(['name'=>'bar', 'type'=>null], $meta->getField('foo'));
+        $this->assertEquals(['id'=>'foo', 'name'=>'bar', 'type'=>null], $meta->getField('foo'));
     }
 
     public function testClassRelations()

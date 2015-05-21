@@ -100,9 +100,9 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'a'=>array('name'=>'a', 'type'=>null),
-            'b'=>array('name'=>'b', 'type'=>null),
-            'c'=>array('name'=>'c', 'type'=>null),
+            'a'=>array('id'=>'a', 'name'=>'a', 'type'=>null),
+            'b'=>array('id'=>'b', 'name'=>'b', 'type'=>null),
+            'c'=>array('id'=>'c', 'name'=>'c', 'type'=>null),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -133,7 +133,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'id', 'type'=>['id'=>'foobar']),
+            'id'=>array('id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar']),
         );
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -157,7 +157,7 @@ class ArrayMapperTest extends \CustomTestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = array(
-            'id'=>array('name'=>'pants', 'type'=>array('id'=>'foobar')),
+            'id'=>array('id'=>'id', 'name'=>'pants', 'type'=>array('id'=>'foobar')),
         );
         
         $this->assertEquals($expected, $meta->getFields());

@@ -25,7 +25,7 @@ class MetaTest extends \CustomTestCase
         $this->assertEquals('std_class',  $meta->table);
         $this->assertEquals(array('pri'), $meta->primary);
         
-        $this->assertEquals(array('f'=>array('name'=>'f', 'type'=>null)), $this->getProtected($meta, 'fields'));
+        $this->assertEquals(array('f'=>array('name'=>'f', 'type'=>null, 'id'=>'f')), $this->getProtected($meta, 'fields'));
         $this->assertEquals(array('r'=>array('name'=>'r', 'mode'=>'default')), $this->getProtected($meta, 'relations'));
         $this->assertEquals(array('id'=>'def'),  $this->getProtected($meta, 'defaultFieldType'));
     }
@@ -117,11 +117,11 @@ class MetaTest extends \CustomTestCase
         ), $parent);
         
         $expected = array(
-            'field1'=>array('name'=>'field1', 'type'=>null),
-            'field2'=>array('name'=>'field2', 'type'=>null),
-            'field3'=>array('name'=>'field3', 'type'=>null),
-            'field4'=>array(2, 'name'=>'field4', 'type'=>null),
-            'field5'=>array('name'=>'field5', 'type'=>null),
+            'field1'=>array('id'=>'field1', 'name'=>'field1', 'type'=>null),
+            'field2'=>array('id'=>'field2', 'name'=>'field2', 'type'=>null),
+            'field3'=>array('id'=>'field3', 'name'=>'field3', 'type'=>null),
+            'field4'=>array(2, 'id'=>'field4', 'name'=>'field4', 'type'=>null),
+            'field5'=>array('id'=>'field5', 'name'=>'field5', 'type'=>null),
         );
         $this->assertEquals($expected, $child->getFields());
     }
