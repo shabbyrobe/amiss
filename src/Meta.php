@@ -190,43 +190,6 @@ class Meta
         $this->on = $events;
     }
 
-    /*
-    This needs to be in its own class and have access to a manager to properly check
-    relators and such.
-
-    Just leaving it here for now.
-
-    public function validate(&$errors=false)
-    {
-        $throwOnError = $errors === false;
-
-        indexes: foreach ($this->indexes as $idxKey=>$idxDef) {
-            $allowedIndexKeys = ['key', 'fields'];
-            if (!is_array($idxDef)) {
-                $errors[] = "Index '$idxKey' had invalid type. Expected array, found ".gettype($idxDef);
-            }
-            else {
-                if ($badKeys = array_diff(array_keys($idxDef), $allowedIndexKeys)) {
-                    $errors[] = "Index '$idxKey' contained invalid keys: ".implode(", ", $badKeys);
-                }
-                if (isset($idxDef['fields'])) {
-                    foreach ($idxDef['fields'] as $field) {
-                        if (!is_string($field)) {
-                            $errors[] = "Primary was invalid - must be an array of strings or a string";
-                        }
-                        else {
-                            $fieldMeta = $this->getField($field);
-                            if (!$fieldMeta) {
-                                $errors[] = "Primary contained reference to unknown field '$field'";
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    */
-
     private function setRelations($relations)
     {
         foreach ($relations as $id=>$r) {
