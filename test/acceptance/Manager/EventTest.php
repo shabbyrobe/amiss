@@ -5,14 +5,6 @@ use Amiss\Sql\Manager;
 
 class EventTest extends \CustomMapperTestCase
 {
-    private $callback;
-
-    function doEvent(...$args)
-    {
-        $cb = $this->callback;
-        $cb(...$args);
-    }
-
     function testBeforeInsert()
     {
         list ($nm, $ns) = $this->createDefaultNoteManager('
