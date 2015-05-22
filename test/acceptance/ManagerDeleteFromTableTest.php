@@ -17,7 +17,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     public function testDeleteTableWithMatchAllClause()
     {
         $this->assertGreaterThan(0, $this->manager->count('Artist'));
-        $this->manager->delete('Artist', '1=1');
+        $this->manager->deleteTable('Artist', '1=1');
         $this->assertEquals(0, $this->manager->count('Artist'));
     }
     
@@ -30,7 +30,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->delete('Artist');
+        $this->manager->deleteTable('Artist');
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
@@ -40,7 +40,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Sql\Manager->delete( string $table, string $positionalWhere, [ $param1, ... ] )
+     *   Amiss\Sql\Manager->deleteTable( string $table, string $positionalWhere, [ $param1, ... ] )
      * 
      * @group acceptance
      * @group manager
@@ -49,7 +49,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->delete('Artist', 'artistTypeId=?', [1]);
+        $this->manager->deleteTable('Artist', 'artistTypeId=?', [1]);
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
@@ -59,7 +59,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Sql\Manager->delete( string $table, string $namedWhere, array $params )
+     *   Amiss\Sql\Manager->deleteTable( string $table, string $namedWhere, array $params )
      * 
      * @group acceptance
      * @group manager
@@ -68,7 +68,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->delete('Artist', 'artistTypeId=:id', array(':id'=>1));
+        $this->manager->deleteTable('Artist', 'artistTypeId=:id', array(':id'=>1));
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
@@ -78,7 +78,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Sql\Manager->delete( string $table, array $criteria )
+     *   Amiss\Sql\Manager->deleteTable( string $table, array $criteria )
      * 
      * @group acceptance
      * @group manager
@@ -87,7 +87,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
-        $this->manager->delete('Artist', array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
+        $this->manager->deleteTable('Artist', array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
 
@@ -97,7 +97,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
     
     /**
      * Ensures the following signature works as expected:
-     *   Amiss\Sql\Manager->delete( string $table, Criteria\Query $criteria )
+     *   Amiss\Sql\Manager->deleteTable( string $table, Criteria\Query $criteria )
      * 
      * @group acceptance
      * @group manager
@@ -107,7 +107,7 @@ class ManagerDeleteFromTableTest extends \ModelDataTestCase
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         
         $criteria = new Criteria(array('where'=>'artistTypeId=:id', 'params'=>array(':id'=>1)));
-        $this->manager->delete('Artist', $criteria);
+        $this->manager->deleteTable('Artist', $criteria);
         
         $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
         

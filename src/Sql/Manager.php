@@ -565,8 +565,8 @@ class Manager
      * Update a table by criteria.
      * 
      * Supports the following signatures:
-     *   update($classNameOrMeta, array $values, $criteria...);
-     *   update($classNameOrMeta, Query\Update $query, $criteria...);
+     *   updateTable($classNameOrMeta, array $values, $criteria...);
+     *   updateTable($classNameOrMeta, Query\Update $query, $criteria...);
      * 
      * @return void
      */
@@ -658,60 +658,72 @@ class Manager
     }
     
     /**
-     * Delete an object from the database, or delete objects from a table by criteria.
+     * Delete from a table by criteria
+     * 
+     * Supports the following signatures:
+     *   deleteTable($classNameOrMeta, $criteria...);
+     * 
+     * @return void
+     */
+    public function deleteTable($meta, ...$args)
+    {
+        if (!isset($args[0])) {
+            throw new \InvalidArgumentException("Cannot delete from table without a condition (pass the string '1=1' if you really meant to do this)");
+        }
+        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
+        if (!$meta->canDelete) {
+            throw new Exception("Class {$meta->class} prohibits update");
+        }
+        $query = Query\Criteria::fromParamArgs($args);
+        return $this->executeDelete($meta, $query); 
+    }
+    
+    /**
+     * Delete an object from the database
      * 
      * Supports the following signatures:
      *   delete($object)
      *   delete($object, $tableOrMeta)
-     *   delete($classNameOrMeta, $criteria...);
      * 
      * @return void
      */
-    public function delete($first, ...$args)
+    public function delete($object, $arg=null)
     {
         $meta = null;
-        $criteria = null;
-        $object = null;
- 
-        if (is_object($first) && !$first instanceof Meta) {
-            $object = $first;
-            $criteria = new Query\Criteria();
-            if (isset($args[0])) {
-                if ($args[0] instanceof Meta) {
-                    // Signature: delete($object, Meta $meta)
-                    $meta = $args[0];
-                }
-                elseif (is_string($args[0])) {
-                    // Signature: delete($object, $table)
-                    $query->table = $args[0];
-                }
-            }
-            if (!$meta) {
-                $meta = $this->mapper->getMeta(get_class($object));
-            }
+        $query = new Query\Criteria();
 
-            event_before: {
-                if (isset($this->on['beforeDelete'])) {
-                    foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
-                }
-                if (isset($meta->on['beforeDelete'])) {
-                    foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
-                }
-            }
-
-            $criteria->where = $meta->getIndexValue($object);
-        }
-        else {
-            if (!isset($args[0])) {
-                throw new \InvalidArgumentException("Cannot delete from table without a condition");
-            }
-            $meta = !$first instanceof Meta ? $this->mapper->getMeta($first) : $first;
-            $criteria = $args[0] instanceof Query\Criteria ? $args[0] : Query\Criteria::fromParamArgs($args);
+        if (!is_object($object)) {
+            throw new \BadMethodCallException("Please use deleteTable()");
+        } 
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
+            $query->table = $arg;
+        } 
+        elseif ($arg) {
+            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
         }
 
-        $return = $this->executeDelete($meta, $criteria);
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($object);
+        }
+        if (!$meta->canDelete) {
+            throw new Exception("Class {$meta->class} prohibits delete");
+        }
 
-        if ($object) {
+        event_before: {
+            if (isset($this->on['beforeDelete'])) {
+                foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
+            }
+            if (isset($meta->on['beforeDelete'])) {
+                foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+        }
+
+        $query->where = $meta->getIndexValue($object);
+        $return = $this->executeDelete($meta, $query);
+
+        event_after: {
             if (isset($this->on['afterDelete'])) {
                 foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
             }
@@ -726,9 +738,9 @@ class Manager
     /** 
      * @param mixed $meta Class name or Amiss\Meta
      */
-    public function deleteById($meta, $id)
+    public function deleteById($meta, $id, $key='primary')
     {
-        return $this->delete($meta, $this->createKeyCriteria($meta, $id));
+        return $this->deleteTable($meta, $this->createKeyCriteria($meta, $id, $key));
     }
 
     /**
@@ -808,19 +820,8 @@ class Manager
         return array('where'=>$where);
     }
 
-    protected function executeDelete($meta, Query\Criteria $criteria)
+    protected function executeDelete(Meta $meta, Query\Criteria $criteria)
     {
-        if (!$meta instanceof Meta) {
-            $meta = $this->mapper->getMeta($meta);
-            if (!$meta instanceof Meta) {
-                throw new \InvalidArgumentException();
-            }
-        }
-
-        if (!$meta->canDelete) {
-            throw new Exception("Class {$meta->class} prohibits delete");
-        }
-
         $table = $criteria->table ?: $meta->table;
 
         list ($whereClause, $whereParams, $whereProps) = $criteria->buildClause($meta);
