@@ -73,6 +73,9 @@ class TestMapper extends \Amiss\Mapper
     
     function getMeta($class)
     {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
         return isset($this->meta[$class]) ? $this->meta[$class] : null;
     }
 

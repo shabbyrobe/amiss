@@ -491,11 +491,11 @@ class Manager
         }
 
         event_before: {
-            if (isset($this->on['beforeInsert'])) {
-                foreach ($this->on['beforeInsert'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['beforeInsert'])) {
                 foreach ($meta->on['beforeInsert'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['beforeInsert'])) {
+                foreach ($this->on['beforeInsert'] as $cb) { $cb($object, $meta); }
             }
         }
 
@@ -550,11 +550,11 @@ class Manager
         }
         
         event_after: {
-            if (isset($this->on['afterInsert'])) {
-                foreach ($this->on['afterInsert'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['afterInsert'])) {
                 foreach ($meta->on['afterInsert'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['afterInsert'])) {
+                foreach ($this->on['afterInsert'] as $cb) { $cb($object, $meta); }
             }
         }
 
@@ -627,11 +627,11 @@ class Manager
         }
 
         event_before: {
-            if (isset($this->on['beforeUpdate'])) {
-                foreach ($this->on['beforeUpdate'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['beforeUpdate'])) {
                 foreach ($meta->on['beforeUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['beforeUpdate'])) {
+                foreach ($this->on['beforeUpdate'] as $cb) { $cb($object, $meta); }
             }
         }
 
@@ -647,11 +647,11 @@ class Manager
         }
 
         event_after: {
-            if (isset($this->on['afterUpdate'])) {
-                foreach ($this->on['afterUpdate'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['afterUpdate'])) {
                 foreach ($meta->on['afterUpdate'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['afterUpdate'])) {
+                foreach ($this->on['afterUpdate'] as $cb) { $cb($object, $meta); }
             }
         }
         return $return;
@@ -712,11 +712,11 @@ class Manager
         }
 
         event_before: {
-            if (isset($this->on['beforeDelete'])) {
-                foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['beforeDelete'])) {
                 foreach ($meta->on['beforeDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['beforeDelete'])) {
+                foreach ($this->on['beforeDelete'] as $cb) { $cb($object, $meta); }
             }
         }
 
@@ -724,11 +724,11 @@ class Manager
         $return = $this->executeDelete($meta, $query);
 
         event_after: {
-            if (isset($this->on['afterDelete'])) {
-                foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
-            }
             if (isset($meta->on['afterDelete'])) {
                 foreach ($meta->on['afterDelete'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['afterDelete'])) {
+                foreach ($this->on['afterDelete'] as $cb) { $cb($object, $meta); }
             }
         }
 
