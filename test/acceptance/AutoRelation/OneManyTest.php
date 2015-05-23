@@ -81,30 +81,30 @@ class OneManyTest extends \CustomTestCase
         $this->assertTrue($child->parent instanceof TestParent);
     }
 
-    public function testAutoOneDoesntCycle()
+    public function testAutoOneWithInverseMany()
     {
         $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
 
         $child = $manager->getById('TestChild', 1);
-        $this->assertEquals(2, $this->db->queries);
+        $this->assertEquals(3, $this->db->queries);
 
         $this->assertTrue($child->parent instanceof TestParent);
-        $this->assertNull($child->parent->children);
+        $this->assertCount(2, $child->parent->children);
     }
 
-    public function testAutoOneDoesntCycleDeep()
+    public function testAutoOneDeep()
     {
         $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
         $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
 
         $child = $manager->getById('TestChild', 1);
-        $this->assertEquals(3, $this->db->queries);
+        $this->assertEquals(4, $this->db->queries);
 
         $this->assertTrue($child->parent instanceof TestParent);
         $this->assertTrue($child->parent->grandParent instanceof TestGrandParent);
-        $this->assertNull($child->parent->children);
+        $this->assertCount(2, $child->parent->children);
     }
 
     public function testAutoMany()
