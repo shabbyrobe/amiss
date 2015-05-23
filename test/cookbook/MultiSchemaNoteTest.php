@@ -72,7 +72,7 @@ class MultiSchemaNoteTest extends \CustomTestCase
 }
 
 /**
- * :amiss = {"table": "schema_one.table_one"};
+ * :amiss = {"table": "table_one", "schema": "schema_one"};
  */
 class MultiSchemaNoteTestOne
 {
@@ -96,7 +96,7 @@ class MultiSchemaNoteTestOne
 }
 
 /**
- * :amiss = {"table": "schema_two.table_two"};
+ * :amiss = {"table": "table_two", "schema": "schema_two"};
  */
 class MultiSchemaNoteTestTwo
 {

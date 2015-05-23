@@ -3,9 +3,6 @@ namespace Amiss\Test\Acceptance\NestedSet;
 
 require_once __DIR__.'/TestCase.php';
 
-/**
- * @group faulty
- */
 class ManagerTest extends TestCase
 {
     function setUp()
@@ -76,14 +73,15 @@ class ManagerTest extends TestCase
         $parents = $this->manager->getList('Tree', 'id=3 or id=4 or id=6');
         $trees = $this->manager->getRelated($parents, 'tree');
         $expectedTrees = [
-            [2=>[3=>[4=>true], 5=>true], 6=>[7=>true], 8=>true],
+            [3=>[4=>true]],
+            [4=>true],
             [6=>[7=>true]],
         ];
         $resultTrees = [];
         foreach ($trees as $idx=>$tree) {
             $resultTrees[] = $this->idTree($parents[$idx], $tree);
         }
-        $this->assertEquals($expectedTrees, $this->idTree($parent, $tree));
+        $this->assertEquals($expectedTrees, $resultTrees);
     }
 
     function testGetRelatedParents()
@@ -100,5 +98,20 @@ class ManagerTest extends TestCase
         $node = $this->manager->getById('Tree', 7);
         $parent = $this->manager->getRelated($node, 'parent');
         $this->assertEquals(6, $parent->id);
+    }
+
+    function testRenumber()
+    {
+        $initialRows = $this->manager->getList('Tree');
+        $this->assertCount(8, $initialRows);
+
+        $this->manager->updateTable('Tree', 'treeLeft=treeLeft+10, treeRight=treeRight+20', '1=1');
+        $rows = $this->manager->getList('Tree');
+        // sanity check
+        $this->assertEquals(11, $rows[0]->treeLeft);
+
+        $this->nestedSetManager->renumber('Tree', !'clone');
+
+        $this->assertEquals($initialRows, $this->manager->getList('Tree'));
     }
 }

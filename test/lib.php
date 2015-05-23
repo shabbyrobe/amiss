@@ -130,9 +130,9 @@ abstract class CustomTestCase extends PHPUnit_Framework_TestCase
     
     public function createRecordMemoryDb($class)
     {
-        if ($class instanceof \Amiss\Active\Record)
+        if ($class instanceof \Amiss\Active\Record) {
             forward_static_call(array($class, 'setManager'), $this->manager);
-
+        }
         TableBuilder::create($this->manager->connector, $this->manager->mapper, $class);
     }
 }
@@ -406,10 +406,13 @@ class LooseStringMatch extends PHPUnit_Framework_Constraint
             $result = preg_match($pattern, $other) > 0;
         }
         if (!$returnResult) {
-            if (!$result) $this->fail($other, $description);
+            if (!$result) {
+                $this->fail($other, $description);
+            }
         }
-        else
+        else {
             return $result;
+        }
     }
 
     /**
@@ -429,9 +432,9 @@ class DatabaseSuite extends PHPUnit_Framework_TestSuite
 
     public function __construct($conn)
     {
-        if (!is_array($conn))
+        if (!is_array($conn)) {
             throw new \InvalidArgumentException();
-
+        }
         $this->connectionInfo = $conn;
     }
 

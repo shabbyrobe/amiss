@@ -36,7 +36,8 @@ class Insert extends Sql\Query
             $columns[] = '`'.str_replace('`', '', $field).'`';
         }
 
-        $sql = "INSERT INTO {$this->table}(".implode(',', $columns).") ".
+        $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$meta->table}`";
+        $sql = "INSERT INTO $t(".implode(',', $columns).") ".
             "VALUES(?".($count > 1 ? str_repeat(",?", $count-1) : '').")";
         
         return [$sql, array_values($this->values), $properties];

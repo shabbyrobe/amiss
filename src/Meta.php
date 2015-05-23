@@ -7,6 +7,7 @@ class Meta
 {
     public $class;
     public $table;
+    public $schema;
     public $primary;
     public $constructor;
     public $constructorArgs = [];
@@ -18,7 +19,8 @@ class Meta
     /**
      * Array of relation arrays, hashed by property name
      * 
-     * Relation arrays *must* contain at least a type at index 0. 
+     * Relation arrays *must* contain at least a type at index 0:
+     *   $rel = ['one'];
      * 
      * The meta also looks for the following keys:
      * - name (will be assigned by this class)
@@ -77,7 +79,7 @@ class Meta
         $this->getColumnToPropertyMap();
 
         return array(
-            'class', 'table', 'primary', 'relations', 'fields', 'allFields', 
+            'class', 'table', 'schema', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
             'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on',
@@ -93,6 +95,7 @@ class Meta
         $this->class  = ltrim($class, "\\");
         $this->parent = $parent;
         $this->table  = isset($info['table'])   ? $info['table']   : array();
+        $this->schema = isset($info['schema'])  ? $info['schema']  : array();
 
         $this->defaultOrder = isset($info['defaultOrder']) ? $info['defaultOrder'] : null;
 

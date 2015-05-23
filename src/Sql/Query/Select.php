@@ -29,8 +29,9 @@ class Select extends Criteria
         list ($where, $params, $properties) = $this->buildClause($meta);
         $order = $this->buildOrder($meta);
         list ($limit, $offset) = $this->getLimitOffset();
-        
-        $query = "SELECT ".$this->buildFields($meta)." FROM $table "
+
+        $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$table}`";
+        $query = "SELECT ".$this->buildFields($meta)." FROM $t "
             .($where  ? "WHERE $where "            : '').' '
             .($order  ? "ORDER BY $order "         : '').' '
             .($limit  ? "LIMIT  ".(int)$limit." "  : '').' '

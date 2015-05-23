@@ -105,10 +105,14 @@ class Manager
         return $treeMeta;
     }
     
-    public function renumber($class)
+    public function renumber($class, $clone=true)
     {
-        $conn = clone $this->manager->connector;
-        
+        if (!$clone) {
+            $conn = $this->manager->connector;
+        } else {
+            $conn = clone $this->manager->connector;
+        }
+
         $treeMeta = $this->getTreeMeta($class);
         $meta = $treeMeta->meta;
         
@@ -122,6 +126,7 @@ class Manager
         $leftIdName = $meta->getField($treeMeta->leftId)['name'];
         $rightIdName = $meta->getField($treeMeta->rightId)['name'];
         
+        $sql = "SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)";
         $rootStmt = $conn->query("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)");
         $rootId = $rootStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
         if (!$rootId || count($rootId) > 1) {

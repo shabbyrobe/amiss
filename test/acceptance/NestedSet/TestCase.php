@@ -52,9 +52,10 @@ abstract class TestCase extends \CustomMapperTestCase
     function idTree($parent, $tree, $idProp='id', $treeProp='tree')
     {
         $r = function($c) use (&$r, $idProp, $treeProp) {
+            if (!$c) { return true; }
             $ids = [];
             foreach ($c as $child) {
-                $ids[$child->$idProp] = $child->$treeProp ? $r($child->$treeProp) : true;
+                $ids[$child->$idProp] = isset($child->$treeProp) ? $r($child->$treeProp) : true;
             }
             return $ids;
         };

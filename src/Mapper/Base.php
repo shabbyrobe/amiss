@@ -274,7 +274,7 @@ abstract class Base extends \Amiss\Mapper
         if ($table === null) {
             $table = $class;
             if ($this->convertUnknownTableNames) {
-                $table = '`'.$this->convertUnknownTableName($class).'`';
+                $table = $this->convertUnknownTableName($class);
             }
         }
         

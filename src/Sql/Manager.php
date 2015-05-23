@@ -219,7 +219,8 @@ class Manager
             $params = $this->mapper->formatParams($meta, $props, $params);
         }
 
-        $query = "SELECT COUNT(1) FROM $table "
+        $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$table}`";
+        $query = "SELECT COUNT(1) FROM $t "
             .($where  ? "WHERE $where" : '');
 
         $stmt = $this->getConnector()->prepare($query)->execute($params);
@@ -832,7 +833,8 @@ class Manager
             $whereParams = $this->mapper->formatParams($meta, $whereProps, $whereParams);
         }
 
-        $sql = "DELETE FROM $table WHERE $whereClause";
+        $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$table}`";
+        $sql = "DELETE FROM $t WHERE $whereClause";
         $stmt = $this->getConnector()->prepare($sql)->execute($whereParams);
     }
 

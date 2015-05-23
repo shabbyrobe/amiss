@@ -1,33 +1,33 @@
 <?php
 namespace Amiss\Mapper;
 
+use Amiss\Meta;
+
 /**
  * @package Mapper
  */
-class Arrays extends Base
+class Local extends Base
 {
-    public $arrayMap;
+    public $localName;
     
-    public function __construct($arrayMap=array())
+    public function __construct($localName='meta')
     {
         parent::__construct();
-        
-        $this->arrayMap = $arrayMap;
+        $this->localName = $localName;
     }
     
-    protected function createMeta($class)
+    protected function createMeta($id)
     {
-        if (!isset($this->arrayMap[$class])) {
-            throw new \InvalidArgumentException("Unknown class $class");
+        $class = $id;
+        $fn = $this->localName;
+        if (!method_exists($class, $fn)) {
+            throw new \UnexpectedValueException("Static function $fn not found on $class");
+        }
+        $info = $class::$fn();
+        if ($info instanceof Meta) {
+            return $info;
         }
 
-        $info = $this->arrayMap[$class];
-
-        class_name: {
-            $class = isset($info['class']) ? $info['class'] : $class;
-            unset($info['class']);
-        }
-        
         $parent = null;
         parent_class: {
             if (isset($info['inherit']) && $info['inherit']) {

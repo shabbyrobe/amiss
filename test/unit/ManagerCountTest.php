@@ -24,7 +24,7 @@ class ManagerCountTest extends \CustomTestCase
         $this->mapper->meta['stdClass'] = new \Amiss\Meta('stdClass', array('table'=>'std_class'));
         $this->manager->count('stdClass');
         
-        $expected = 'SELECT COUNT(1) FROM std_class';
+        $expected = 'SELECT COUNT(1) FROM `std_class`';
         $found = $this->db->getLastCall();
         
         $this->assertLoose($expected, $found[0]);
@@ -49,7 +49,7 @@ class ManagerCountTest extends \CustomTestCase
         
         $this->manager->count('stdClass');
         
-        $expected = 'SELECT COUNT(1) FROM std_class';
+        $expected = 'SELECT COUNT(1) FROM `std_class`';
         $found = $this->db->getLastCall();
         
         $this->assertLoose($expected, $found[0]);
@@ -74,7 +74,7 @@ class ManagerCountTest extends \CustomTestCase
         
         $this->manager->count('stdClass');
         
-        $expected = 'SELECT COUNT(1) FROM std_class';
+        $expected = 'SELECT COUNT(1) FROM `std_class`';
         $found = $this->db->getLastCall();
         
         $this->assertLoose($expected, $found[0]);

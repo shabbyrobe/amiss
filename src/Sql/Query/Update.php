@@ -88,7 +88,8 @@ class Update extends Criteria
             throw new \InvalidArgumentException("No where clause specified for table update. Explicitly specify 1=1 as the clause if you meant to do this.");
         }
         
-        $sql = "UPDATE $table SET $setClause WHERE $whereClause";
+        $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$table}`";
+        $sql = "UPDATE $t SET $setClause WHERE $whereClause";
         
         return array($sql, $params, $setProps, $whereProps);
     }

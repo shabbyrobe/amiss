@@ -152,9 +152,9 @@ class MapperTest extends \CustomTestCase
     public function dataForDefaultTableName()
     {
         return array(
-            array('Artist', '`artist`'),
-            array('ArtistPants', '`artist_pants`'),
-            array('ArtistPantsBurger', '`artist_pants_burger`'),
+            array('Artist', 'artist'),
+            array('ArtistPants', 'artist_pants'),
+            array('ArtistPantsBurger', 'artist_pants_burger'),
         );
     }
     

@@ -21,7 +21,7 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
-        $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE `a`=:zp_1', $sql);
+        $this->assertEquals('UPDATE `foo` SET `c`=:zs_0 WHERE `a`=:zp_1', $sql);
         $this->assertEquals(array(':zs_0'=>'d', ':zp_1'=>'b'), $params);
     }
 
@@ -37,7 +37,7 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
-        $this->assertEquals('UPDATE foo SET `c`=:zs_0 WHERE foo=:bar', $sql);
+        $this->assertEquals('UPDATE `foo` SET `c`=:zs_0 WHERE foo=:bar', $sql);
         $this->assertEquals(array(':zs_0'=>'d', ':bar'=>'ding'), $params);
     }
 
@@ -53,7 +53,7 @@ class UpdateQueryTest extends \CustomTestCase
         
         $meta = new Meta('Foo', array('table'=>'foo'));
         list($sql, $params) = $uq->buildQuery($meta);
-        $this->assertEquals('UPDATE foo SET `c`=? WHERE foo=?', $sql);
+        $this->assertEquals('UPDATE `foo` SET `c`=? WHERE foo=?', $sql);
         $this->assertEquals(array('d', 'ding'), $params);
     }
     

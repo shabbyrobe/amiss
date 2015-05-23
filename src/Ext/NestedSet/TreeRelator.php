@@ -15,7 +15,21 @@ class TreeRelator extends Relator
     
     function getRelated(Meta $meta, $source, array $relation, Criteria $criteria=null)
     {
-        throw new \Exception('not implemented');
+        if (!$source) {
+            return $source;
+        }
+
+        $treeMeta = $this->nestedSetManager->getTreeMeta($source);
+        $meta = $treeMeta->meta;
+
+        $leftRights = [$meta->getValue($source, $treeMeta->leftId)=>$meta->getValue($source, $treeMeta->rightId)];
+
+        $children = $this->fetchChildren($treeMeta, $criteria, $leftRights);
+
+        if ($children) {
+            $index = $this->buildTree($treeMeta, [$source], $children);
+            return $index->nodes[$meta->getValue($source, $meta->primary[0])]->tree;
+        }
     }
 
     function getRelatedForList(Meta $meta, $source, array $relation, Criteria $criteria=null)
@@ -40,7 +54,7 @@ class TreeRelator extends Relator
             ksort($leftRights);
         }
 
-        limit: {
+        reduce_lr: {
             $lastLeft = null;
             $lastRight = null;
             foreach ($leftRights as $l=>$r) {
@@ -53,60 +67,67 @@ class TreeRelator extends Relator
         }
 
         query: {
-            $query = new \Amiss\Sql\Query\Select;
-            $idx = 0;
-            foreach ($leftRights as $l=>$r) {
-                $query->where .= (!$idx++ ? "" : " OR ").
-                    "({".$treeMeta->leftId."} > ? AND {".$treeMeta->rightId."} < ?)";
-                $query->params[] = $l;
-                $query->params[] = $r;
-            }
-
-            if ($criteria) {
-                if ($criteria->where) {
-                    list ($cWhere, $cParams) = $criteria->buildClause($meta);
-                    $query->params = array_merge($cParams, $query->params);
-                    $query->where .= ' AND ('.$cWhere.')';
-                }
-                $query->order = $criteria->order;
-            }
-            
-            $query->stack = $criteria ? $criteria->stack : null;
-            $children = $this->nestedSetManager->manager->getList($meta->class, $query);
-        }
-
-        index_children: {
-            $childrenIndex = [];
-            foreach ($children as $c) {
-                throw new \Exception();
-            }
+            $children = $this->fetchChildren($treeMeta, $criteria, $leftRights);
         }
 
         if ($children) {
-            return $this->buildTree($treeMeta, $source, $children);
+            $index = $this->buildTree($treeMeta, $source, $children);
+
+            $out = [];
+            foreach ($source as $in) {
+                // primary is ensured to have one column in getTreeMeta
+                $id = $meta->getValue($in, $meta->primary[0]);
+                $out[] = $index->nodes[$id]->tree;
+            }
+            return $out;
         }
     }
-    
-    private function buildTree($treeMeta, $rootNode, $objects)
+
+    private function fetchChildren($treeMeta, $criteria, $leftRights)
+    {
+        $query = new \Amiss\Sql\Query\Select;
+        $idx = 0;
+        foreach ($leftRights as $l=>$r) {
+            $query->where .= (!$idx++ ? "" : " OR ").
+                "({".$treeMeta->leftId."} > ? AND {".$treeMeta->rightId."} < ?)";
+            $query->params[] = $l;
+            $query->params[] = $r;
+        }
+
+        if ($criteria) {
+            if ($criteria->where) {
+                list ($cWhere, $cParams) = $criteria->buildClause($meta);
+                $query->params = array_merge($cParams, $query->params);
+                $query->where .= ' AND ('.$cWhere.')';
+            }
+            $query->order = $criteria->order;
+        }
+        
+        $query->stack = $criteria ? $criteria->stack : null;
+        $children = $this->nestedSetManager->manager->getList($treeMeta->meta->class, $query);
+        return $children;
+    }
+
+    private function buildTree($treeMeta, $parents, $children)
     {
         $meta = $treeMeta->meta;
-        
+
         // primary is ensured to have one column in getTreeMeta
         $primaryField = $meta->primary[0];
         
-        $rootNodeId = $meta->getValue($rootNode, $primaryField);
-        
         $index = (object)array(
-            'nodes'=>array($rootNodeId=>$rootNode),
-            'children'=>array(),
+            'nodes'=>[],
+            'children'=>[],
+            'parents'=>[],
+            'info'=>[],
         );
-        
-        $parentIndex = array();
-        
-        foreach ($objects as $node) {
+
+        $objects = array_unique(array_merge($parents, $children), SORT_REGULAR);
+        foreach ($objects as $idx=>$node) {
             $id = $meta->getValue($node, $primaryField);
             $parentId = $meta->getValue($node, $treeMeta->parentId);
-            $parentIndex[$id] = $parentId;
+            $index->parents[$id] = $parentId;
+            $index->info[$idx] = [$id, $parentId];
 
             $index->nodes[$id] = $node;
             if (!isset($index->children[$parentId])) {
@@ -114,17 +135,18 @@ class TreeRelator extends Relator
             }
             $index->children[$parentId][] = $node;
         }
-        
-        foreach ($objects as $node) {
-            $id = $meta->getValue($node, $primaryField);
-            $parentId = $parentIndex[$id];
 
+        foreach ($objects as $idx=>$node) {
+            list ($id, $parentId) = $index->info[$idx];
+            
             if (isset($index->children[$id])) {
                 $meta->setValue($node, $treeMeta->treeRel, $index->children[$id]);
             }
-            $meta->setValue($node, $treeMeta->parentRel, $index->nodes[$parentId]);
+            if (isset($index->nodes[$parentId])) {
+                $meta->setValue($node, $treeMeta->parentRel, $index->nodes[$parentId]);
+            }
         }
-        
-        return $index->children[$rootNodeId];
+
+        return $index;
     }
 }

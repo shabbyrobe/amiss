@@ -4,6 +4,7 @@ namespace Amiss\Test\Cookbook;
 /**
  * This test doesn't need to run against MySQL - enough is proven by running
  * against sqlite only.
+ * @group faulty
  */
 class MultiSchemaTranslatorTest extends \CustomTestCase
 {

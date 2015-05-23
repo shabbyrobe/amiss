@@ -189,13 +189,15 @@ class Association extends Base
         $order = $query->buildOrder($relatedMeta, 't1');
         list ($limit, $offset) = $query->getLimitOffset();
 
+        $vt = ($viaMeta->schema     ? "`{$viaMeta->schema}`."     : null)."`{$viaMeta->table}`";
+        $rt = ($relatedMeta->schema ? "`{$relatedMeta->schema}`." : null)."`{$relatedMeta->table}`";
         $sql = "
             SELECT 
                 $queryFields, t2.".'`'.implode('`, t2.`', $sourcePkFields).'`'."
             FROM
-                {$viaMeta->table} t2
+                $vt t2
             INNER JOIN
-                {$relatedMeta->table} t1
+                $rt t1
                 ON  ({$joinOn})
             WHERE $where "
             .($order  ? "ORDER BY $order "         : '').' '
