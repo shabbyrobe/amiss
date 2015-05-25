@@ -4,117 +4,38 @@ date_default_timezone_set('Australia/Melbourne');
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/../doc/demo/model.php';
 require_once __DIR__.'/../doc/demo/ar.php';
-require_once __DIR__.'/lib.php';
 
-class TestConnector extends \PDOK\Connector
+autoload_namespace('Amiss\Test', __DIR__.'/lib');
+
+function autoload_namespace($prefix, $path, $options=array())
 {
-    public $calls = array();
+    $defaults = array(
+        'prepend'=>false,      // stick the autoloader up the top of the stack rather than on the bottom
+        'suffix'=>'.php',      // attached to the last namespace segment to determine the class file name
+        'stripPrefix'=>true,   // remove the prefix from the start of the class name before generating path
+        'separator'=>'\\',     // namespace separator (switch to _ for 5.2 style)
+    );
+    $options = array_merge($defaults, $options);
+    $prefix = trim($prefix, $options['separator']);
     
-    public function exec($statement, $params=null)
-    {
-        $this->calls[] = array($statement, array());
-    }
-    
-    public function prepareWithResult($statement, $result, array $driverOptions=array())
-    {
-        $stmt = $this->prepare($statement, $driverOptions);
-        $stmt->result = $result;
-        return $stmt;
-    }
-    
-    public function prepare($statement, array $driverOptions=array())
-    {
-        return new TestStatement($this, $statement, $driverOptions);
-    }
-    
-    public function getLastCall()
-    {
-        return $this->calls[count($this->calls)-1];
-    }
+    spl_autoload_register(
+        function($class) use ($prefix, $path, $options) {
+            static $prefixLen = null;
+            if ($prefixLen === null) {
+                $prefixLen = strlen($prefix);
+            }
+            
+            if (strpos($class, $prefix.$options['separator'])===0 || $class == $prefix) {
+                $toSplit = $options['stripPrefix']  ? substr($class, $prefixLen) : $class;
+                $file = str_replace('../', '', $path.'/'.str_replace($options['separator'], '/', $toSplit)).$options['suffix'];
+                
+                if (file_exists($file)) {
+                    require $file;
+                }
+            }
+        },
+        null,
+        $options['prepend']
+    );
 }
 
-class TestStatement
-{
-    public $queryString;
-    public $params = array();
-    public $driverOptions = array();
-    public $result;
-    
-    public function __construct($connector, $statement, $driverOptions)
-    {
-        $this->connector = $connector;
-        $this->driverOptions = $driverOptions;
-        $this->queryString = $statement;
-    }
-    
-    public function execute()
-    {
-        $this->connector->calls[] = array($this->queryString, $this->params);
-        $this->params = array();
-        return $this;
-    }
-    
-    public function fetchColumn()
-    {
-        $result = $this->result;
-        $this->result = null;
-        return $result;
-    }
-}
-
-class TestMapper extends \Amiss\Mapper
-{
-    public $meta;
-    
-    function __construct($meta=array())
-    {
-        $this->meta = $meta;
-    }
-    
-    function getMeta($class)
-    {
-        if (is_object($class)) {
-            $class = get_class($class);
-        }
-        return isset($this->meta[$class]) ? $this->meta[$class] : null;
-    }
-
-    function createObject($meta, $row, $args=null) {}
-    
-    function populateObject($object, \stdClass $mapped, $meta=null) {}
-
-    public function toProperties($input, $meta=null, $fieldMap=null) {}
-
-    public function fromProperties($input, $meta=null) {}
-
-    function fromObject($object, $meta=null, $context=null) {}
-    
-    function determineTypeHandler($type) {}
-}    
-
-class TestTypeHandler implements \Amiss\Type\Handler
-{
-    public $valueForDb;
-    public $valueFromDb;
-    public $columnType;
-    
-    public function __construct($data=array())
-    {
-        foreach ($data as $k=>$v) $this->$k = $v;
-    }
-    
-    function prepareValueForDb($value, array $fieldInfo)
-    {
-        return $this->valueForDb;
-    }
-    
-    function handleValueFromDb($value, array $fieldInfo, $row)
-    {
-        return $this->valueFromDb;
-    }
-    
-    function createColumnType($engine, array $fieldInfo)
-    {
-        return $this->columnType;
-    }
-}

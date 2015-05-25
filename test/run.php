@@ -6,6 +6,7 @@ Usage: test/run.php [--no-sqlite] [--with-mysql] [--filter=<expr>]
 ";
 
 $basePath = __DIR__.'/../';
+define('AMISS_BASE_PATH', $basePath);
 $testPath = __DIR__;
 
 require $testPath.'/config.php';
@@ -57,15 +58,15 @@ $sqliteConnection = array(
     'engine'=>'sqlite',
     'dsn'=>'sqlite::memory:',
 );
-TestApp::instance()->connectionInfo = $sqliteConnection;
+\Amiss\Test\Helper\Env::instance()->connectionInfo = $sqliteConnection;
 
 $suite = new PHPUnit_Framework_TestSuite();
-suite_add_dir($suite, $testPath.'/unit/');
-suite_add_dir($suite, $testPath.'/cookbook/');
+suite_add_dir($suite, $testPath.'/lib/Unit/');
+suite_add_dir($suite, $testPath.'/lib/Cookbook/');
 
 if (!array_key_exists('no-sqlite', $options)) {
-    $sqliteSuite = new DatabaseSuite($sqliteConnection);
-    suite_add_dir($sqliteSuite, $testPath.'/acceptance/');
+    $sqliteSuite = new \Amiss\Test\Helper\DatabaseSuite($sqliteConnection);
+    suite_add_dir($sqliteSuite, $testPath.'/lib/Acceptance/');
     $suite->addTest($sqliteSuite);
 }
 
@@ -73,7 +74,7 @@ if ($testMysql) {
     if (!isset($config['mysql']))
         throw new \Exception("Missing [mysql] section in amisstestrc file");
     
-    $mysqlSuite = new DatabaseSuite(array(
+    $mysqlSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
         'engine'=>'mysql',
         'dsn'=>"mysql:host={$config['mysql']['host']};port={$config['mysql']['port']}",
         'user'=>$config['mysql']['user'],
@@ -83,7 +84,7 @@ if ($testMysql) {
     suite_add_dir($mysqlSuite, $testPath.'/acceptance/');
     $suite->addTest($mysqlSuite);
 
-    $mysqlPersistentSuite = new DatabaseSuite(array(
+    $mysqlPersistentSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
         'engine'=>'mysql',
         'dsn'=>"mysql:host={$config['mysql']['host']};port={$config['mysql']['port']}",
         'user'=>$config['mysql']['user'],
@@ -107,7 +108,7 @@ if ($testPgsql) {
 
     $parts[] = "dbname=amiss_test";
 
-    $pgsqlSuite = new DatabaseSuite(array(
+    $pgsqlSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
         'engine'=>'pgsql',
         'dsn'=>"pgsql:".implode(';', $parts),
         'user'=>$config['pgsql']['user'],
