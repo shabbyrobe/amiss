@@ -1,7 +1,7 @@
 <?php
 namespace Amiss\Test\Query;
 
-class CriteriaReplaceFieldsTest extends \Amiss\Test\Helper\CustomMapperTestCase
+class CriteriaReplaceFieldsTest extends \Amiss\Test\Helper\TestCase
 {
     function testReplace()
     {

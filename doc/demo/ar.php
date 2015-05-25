@@ -1,10 +1,14 @@
 <?php
 namespace Amiss\Demo\Active;
 
+abstract class DemoRecord extends \Amiss\Sql\ActiveRecord
+{
+}
+
 /**
  * :amiss = {"table": "artist"};
  */
-class ArtistRecord extends \Amiss\Sql\ActiveRecord
+class ArtistRecord extends DemoRecord
 {
     /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
     public $artistId;
@@ -35,7 +39,7 @@ class ArtistRecord extends \Amiss\Sql\ActiveRecord
     }
 }
 
-class ArtistType extends \Amiss\Sql\ActiveRecord
+class ArtistType extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $artistTypeId;
@@ -70,7 +74,7 @@ class ArtistType extends \Amiss\Sql\ActiveRecord
 /**
  * :amiss = {"table": "event"};
  */
-class EventRecord extends \Amiss\Sql\ActiveRecord
+class EventRecord extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $eventId;
@@ -134,7 +138,7 @@ class EventRecord extends \Amiss\Sql\ActiveRecord
  *     }
  * };
  */
-class Ticket extends \Amiss\Sql\ActiveRecord
+class Ticket extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $ticketId;
@@ -161,7 +165,7 @@ class PlannedEvent extends EventRecord
     public $completeness;
 }
 
-class EventArtist extends \Amiss\Sql\ActiveRecord
+class EventArtist extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true }}; */
     public $eventId;
@@ -201,7 +205,7 @@ class EventArtist extends \Amiss\Sql\ActiveRecord
 /**
  * :amiss = {"table": "venue"};
  */
-class VenueRecord extends \Amiss\Sql\ActiveRecord
+class VenueRecord extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $venueId;

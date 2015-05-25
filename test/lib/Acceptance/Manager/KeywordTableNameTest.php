@@ -1,28 +1,31 @@
 <?php
 namespace Amiss\Test\Acceptance\Manager;
 
-class KeywordTableNameTest extends \Amiss\Test\Helper\CustomMapperTestCase
+use Amiss\Test;
+
+class KeywordTableNameTest extends \Amiss\Test\Helper\TestCase
 {
     function testCreate()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'table'=>'ORDER BY',
+                'class'=>'stdClass',
                 'fields'=>[
                     'foo'=>true,
                 ],
             ],
         ]);
-        return $manager;
+        return $d;
     }
 
     /** @depends testCreate */
-    function testInsertTable($manager)
+    function testInsertTable($d)
     {
-        $manager->insertTable('Pants', ['foo'=>'abc']);
-        $manager->insertTable('Pants', ['foo'=>'def']);
-        $manager->insertTable('Pants', ['foo'=>'ghi']);
-        $rows = $manager->connector->query("SELECT * FROM `ORDER BY`")->fetchAll(\PDO::FETCH_ASSOC);
+        $d->manager->insertTable('Pants', ['foo'=>'abc']);
+        $d->manager->insertTable('Pants', ['foo'=>'def']);
+        $d->manager->insertTable('Pants', ['foo'=>'ghi']);
+        $rows = $d->manager->connector->query("SELECT * FROM `ORDER BY`")->fetchAll(\PDO::FETCH_ASSOC);
         $expected = [
             ['foo'=>'abc'],
             ['foo'=>'def'],
@@ -30,13 +33,13 @@ class KeywordTableNameTest extends \Amiss\Test\Helper\CustomMapperTestCase
         ];
         $this->assertEquals($expected, $rows);
 
-        return $manager;
+        return $d;
     }
 
     /** @depends testInsertTable */
-    function testGet($manager)
+    function testGet($d)
     {
-        $obj = $manager->get('Pants', ['where'=>['foo'=>'abc']]);
+        $obj = $d->manager->get('Pants', ['where'=>['foo'=>'abc']]);
         $this->assertEquals('abc', $obj->foo);
     }
 }

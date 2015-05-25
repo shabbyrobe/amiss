@@ -7,13 +7,22 @@ use Amiss\Demo\Active;
  * @group active
  * @group acceptance
  */
-class ActiveRecordTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
+class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
-        \Amiss\Sql\ActiveRecord::_reset();
-        \Amiss\Sql\ActiveRecord::setManager($this->manager);
+        $this->deps = \Amiss\Test\Factory::managerActiveDemo();
+        $this->manager = $this->deps->manager;
+        $this->mapper = $this->deps->mapper;
+        $this->connector = $this->deps->connector;
+    }
+
+    public function tearDown()
+    {
+        $this->deps = null;
+        $this->manager = null;
+        $this->mapper = null;
+        $this->connector = null;
     }
 
     public function testGetById()

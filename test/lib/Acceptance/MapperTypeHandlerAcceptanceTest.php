@@ -2,6 +2,7 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
+use Amiss\Sql\TableBuilder;
 
 class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
 {
@@ -19,7 +20,9 @@ class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\ActiveRecordDat
     public function testCustomType()
     {
         $this->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
-        $this->createRecordMemoryDb(__NAMESPACE__.'\TestCustomFieldTypeRecord');
+        TableBuilder::create($this->db, $this->mapper, [
+            __NAMESPACE__.'\TestCustomFieldTypeRecord'
+        ]);
         
         $r = new TestCustomFieldTypeRecord;
         $r->yep1 = 'foo';

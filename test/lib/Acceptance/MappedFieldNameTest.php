@@ -1,6 +1,8 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Sql\TableBuilder;
+
 /**
  * Ensures objects with mapped field names (different from the property name)
  * work as expected
@@ -29,11 +31,12 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\DataTestCase
         $this->manager = \Amiss\Sql\Factory::createManager($this->db);
         $this->mapper = $this->manager->mapper;
         
+        TableBuilder::create($this->db, $this->mapper, [
+            __NAMESPACE__.'\MappedFieldNameLeft',
+            __NAMESPACE__.'\MappedFieldNameAssoc',
+            __NAMESPACE__.'\MappedFieldNameRight',
+        ]);
         $this->mapper->objectNamespace = __NAMESPACE__;
-
-        $this->createRecordMemoryDb('MappedFieldNameLeft');
-        $this->createRecordMemoryDb('MappedFieldNameAssoc');
-        $this->createRecordMemoryDb('MappedFieldNameRight');
     }
 
     public function loadTestData()

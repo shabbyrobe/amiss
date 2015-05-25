@@ -517,21 +517,21 @@ class Manager
         if ($object && $meta->primary) {
             $lastInsertId = $this->getConnector()->lastInsertId();
 
-            if (!$lastInsertId) {
-                throw new \UnexpectedValueException();
-            }
-
-            if (($count = count($meta->primary)) != 1) {
-                throw new Exception(
-                    "Last insert ID $lastInsertId found for class {$meta->class}. ".
-                    "Expected 1 primary field, but class defines {$count}"
-                );
-            }
-
             $field = $meta->getField($meta->primary[0]);
             $handler = $this->mapper->determineTypeHandler($field['type']['id']);
             
             if ($handler instanceof \Amiss\Type\Identity) {
+                if (!$lastInsertId) {
+                    throw new \UnexpectedValueException();
+                }
+
+                if (($count = count($meta->primary)) != 1) {
+                    throw new Exception(
+                        "Last insert ID $lastInsertId found for class {$meta->class}. ".
+                        "Expected 1 primary field, but class defines {$count}"
+                    );
+                }
+
                 $generated = $handler->handleDbGeneratedValue($lastInsertId);
                 if ($generated) {
                     // skip using populateObject - we don't need the type handler stack because we 
