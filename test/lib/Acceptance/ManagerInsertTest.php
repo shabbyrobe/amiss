@@ -2,15 +2,30 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
+use Amiss\Test;
 
-class ManagerInsertTest extends \Amiss\Test\Helper\ModelDataTestCase
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
 {
+    public function setUp()
+    {
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     /**
      * Ensures the signature for object insertion works
      *   Amiss\Sql\Manager->insert( object $object )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testInsertObject()
     {
@@ -30,9 +45,6 @@ class ManagerInsertTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures object insertion works with a complex mapping (Venue
      * defines explicit field mappings)
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testInsertObjectWithManualNoteFields()
     {

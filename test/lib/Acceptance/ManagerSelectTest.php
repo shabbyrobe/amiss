@@ -1,32 +1,39 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
+use Amiss\Test;
+
+/**
+ * @group acceptance
+ * @group manager 
+ */
+class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 {
-    /**
-     * @group acceptance
-     * @group manager 
-     */
+    public function setUp()
+    {
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     public function testExists()
     {
         $a = $this->manager->exists('Artist', 1);
         $this->assertTrue($a);
     }
 
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testExistsFalse()
     {
         $a = $this->manager->exists('Artist', PHP_INT_MAX);
         $this->assertFalse($a);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testSingleObjectPositionalParametersShorthand()
     {
         $a = $this->manager->get('Artist', 'slug=?', ['limozeen']);
@@ -34,10 +41,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('Limozeen', $a->name);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testSingleObjectNamedParametersShorthand()
     {
         $a = $this->manager->get('Artist', 'slug=:slug', array(':slug'=>'limozeen'));
@@ -45,10 +48,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('Limozeen', $a->name);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testSingleObjectNamedParametersLongForm()
     {
         $a = $this->manager->get(
@@ -62,10 +61,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('Limozeen', $a->name);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testSingleObjectUsingQuery()
     {
         $criteria = new \Amiss\Sql\Query\Select;
@@ -78,10 +73,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('Limozeen', $a->name);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testList()
     {
         $artists = $this->manager->getList('Artist');
@@ -92,10 +83,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('taranchula', current($artists)->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testListByProperty()
     {
         $artists = $this->manager->getList('Artist', ['where'=>['artistTypeId'=>2]]);
@@ -104,10 +91,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('george-carlin', current($artists)->slug);
     }
 
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testPagedListFirstPage()
     {
         $artists = $this->manager->getList('Artist', array('page'=>array(1, 3)));
@@ -119,10 +102,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('taranchula', current($artists)->slug);
     }
 
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testPagedListSecondPage()
     {
         $artists = $this->manager->getList('Artist', array('page'=>array(2, 3)));
@@ -134,10 +113,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('david-cross', current($artists)->slug);
     }
 
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testListLimit()
     {
         $artists = $this->manager->getList('Artist', array('limit'=>3));
@@ -149,10 +124,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('taranchula', current($artists)->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testListOffset()
     {
         $artists = $this->manager->getList('Artist', array('limit'=>3, 'offset'=>3));
@@ -164,10 +135,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('david-cross', current($artists)->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderByManualImpliedAsc()
     {
         $artists = $this->manager->getList('Artist', array('order'=>'name'));
@@ -177,10 +144,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('the-sonic-manipulator', $a->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderByManualDesc()
     {
         $artists = $this->manager->getList('Artist', array('order'=>'name desc'));
@@ -190,10 +153,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('anvil', $a->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderByManualMulti()
     {
         $eventArtists = $this->manager->getList('EventArtist', array(
@@ -216,10 +175,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         ), $result);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderBySingleLongForm()
     {
         $artists = $this->manager->getList('Artist', array('order'=>array('name')));
@@ -229,10 +184,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('the-sonic-manipulator', $a->slug);
     }
 
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderBySingleLongFormDescending()
     {
         $artists = $this->manager->getList('Artist', array('order'=>array('name'=>'desc')));
@@ -243,10 +194,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals('anvil', $a->slug);
     }
     
-    /**
-     * @group acceptance
-     * @group manager 
-     */
     public function testOrderByGetterProperty()
     {
         $events = $this->manager->getList('Event', array('order'=>array('subName')));
@@ -257,10 +204,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals(1, $e->eventId);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testSelectSingleObjectFromMultipleResultWhenLimitIsOne()
     {
         $artist = $this->manager->get('Artist', array('order'=>array('name'=>'desc'), 'limit'=>1));
@@ -270,8 +213,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
     }
     
     /**
-     * @group acceptance
-     * @group manager
      * @expectedException Amiss\Exception
      */
     public function testSelectSingleObjectFailsWhenResultReturnsMany()
@@ -280,8 +221,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
     }
     
     /**
-     * @group acceptance
-     * @group manager
      * @expectedException Amiss\Exception
      */
     public function testSelectSingleObjectFailsWithoutIssuingQueryWhenLimitSetButNotOne()
@@ -291,10 +230,6 @@ class ManagerSelectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $artist = $this->manager->get('Artist', array('limit'=>2));
     }
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testOrderByMulti()
     {
         $eventArtists = $this->manager->getList('EventArtist', array(

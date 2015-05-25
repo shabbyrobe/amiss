@@ -2,15 +2,17 @@
 namespace Amiss\Test\Acceptance
 {
     use \Amiss\Sql\TableBuilder;
+    use Amiss\Test;
 
     /**
      * @group relator-assoc
      */
-    class ManagerAssocDifferentFieldColumnTest extends \Amiss\Test\Helper\ModelDataTestCase
+    class ManagerAssocDifferentFieldColumnTest extends \Amiss\Test\Helper\TestCase
     {
         public function setUp()
         {
-            parent::setUp();
+            $this->deps = Test\Factory::managerNoteDefault();
+            $this->manager = $this->deps->manager;
             $this->ns = 'Amiss\Demo\AssocDifferentFieldColumn';
             $tb = TableBuilder::create($this->manager->connector, $this->manager->mapper, [
                 $this->ns.'\Event',
@@ -29,6 +31,13 @@ namespace Amiss\Test\Acceptance
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>1, 'artistId'=>2]);
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>2, 'artistId'=>2]);
             $manager->insertTable($this->ns.'\EventArtist', ['eventId'=>2, 'artistId'=>3]);
+        }
+
+        public function tearDown()
+        {
+            $this->manager = null;
+            $this->deps = null;
+            parent::tearDown();
         }
 
         public function testAssignRelated()

@@ -1,25 +1,30 @@
 <?php
 namespace Amiss\Test\Unit;
 
+use Amiss\Test;
+
 /**
  * @group unit
+ * @group active
  */
-class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
+class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
         parent::setUp();
-        
-        \Amiss\Sql\ActiveRecord::_reset();
-        $this->db = $this->getConnector();
-        $this->mapper = new \Amiss\Mapper\Note;
-        $this->mapper->objectNamespace = 'Amiss\Demo\Active';
-        $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
+        $this->deps = Test\Factory::managerActiveDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
     }
     
     /**
      * @covers Amiss\Sql\ActiveRecord::getMeta
-     * @group active
      */
     public function testGetMeta()
     {
@@ -33,7 +38,6 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
     }
         
     /**
-     * @group active
      * @covers Amiss\Sql\ActiveRecord::getManager
      * @covers Amiss\Sql\ActiveRecord::setManager
      */
@@ -54,11 +58,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
-     * @group active
      */
     public function testGetForwarded()
     {
-        $manager = $this->getMock('Amiss\Sql\Manager', array('get'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('get'), array($this->deps->connector, $this->deps->mapper));
         $manager->expects($this->once())->method('get')->with(
             $this->equalTo(__NAMESPACE__.'\TestActiveRecord1'), 
             $this->equalTo('pants=?'), 
@@ -71,11 +74,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
-     * @group active
      */
     public function testGetById()
     {
-        $manager = $this->getMock('Amiss\Sql\Manager', array('getById'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getById'), array($this->deps->connector, $this->deps->mapper));
         \Amiss\Sql\ActiveRecord::setManager($manager);
         
         $manager->expects($this->once())->method('getById')->with(
@@ -87,13 +89,12 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
-     * @group active
      */
     public function testGetRelated()
     {
-        $this->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
+        $this->deps->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
         
-        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->deps->connector, $this->deps->mapper));
         \Amiss\Sql\ActiveRecord::setManager($manager);
         
         $manager->expects($this->once())->method('getRelated')->with(
@@ -110,11 +111,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
 
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
-     * @group active
      */
     public function testAssignRelatedStatic()
     {
-        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->deps->connector, $this->deps->mapper));
         $manager->relators = \Amiss\Sql\Factory::createRelators();
         \Amiss\Sql\ActiveRecord::setManager($manager);
 
@@ -133,11 +133,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
 
     /**
      * @covers Amiss\Sql\ActiveRecord::__callStatic
-     * @group active
      */
     public function testAssignRelatedStaticArray()
     {
-        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->db, $this->mapper));
+        $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->deps->connector, $this->deps->mapper));
         $manager->relators = \Amiss\Sql\Factory::createRelators();
         \Amiss\Sql\ActiveRecord::setManager($manager);
 
@@ -165,7 +164,6 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
      * define fields, undefined properties should throw
      * 
      * @covers Amiss\Sql\ActiveRecord::__get
-     * @group active
      * @expectedException BadMethodCallException
      */
     public function testGetUnknownPropertyWhenFieldsUndefinedOnNewObjectReturnsNull()
@@ -179,7 +177,6 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
      * If the class defines its fields, undefined properties should always throw. 
      * 
      * @covers Amiss\Sql\ActiveRecord::__get
-     * @group active
      * @expectedException BadMethodCallException
      */
     public function testGetUnknownPropertyWhenFieldsDefinedThrowsException()
@@ -194,32 +191,28 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
      * if the record has been loaded from the database as we can expect it is fully
      * populated.
      * 
-     * @group active
      * @expectedException BadMethodCallException
      */
     public function testGetUnknownPropertyWhenFieldsUndefinedAfterRetrievingFromDatabaseThrowsException()
     {
         TestActiveRecord1::setManager($this->manager);
-        $this->db->query("CREATE TABLE table_1(fooBar STRING);");
-        $this->db->query("INSERT INTO table_1(fooBar) VALUES(123)");
+        $this->deps->connector->query("CREATE TABLE table_1(fooBar STRING);");
+        $this->deps->connector->query("INSERT INTO table_1(fooBar) VALUES(123)");
         
         $ar = TestActiveRecord1::get('fooBar=123');
         $value = $ar->thisPropertyShouldNeverExist;
     }
     
-    /**
-     * @group active
-     */
     public function testUpdateTable()
     {
         $manager = $this->getMock(
             'Amiss\Sql\Manager', 
             array('updateTable'), 
-            array($this->db, $this->mapper), 
+            array($this->deps->connector, $this->deps->mapper), 
             'PHPUnitGotcha_RecordTest_'.__FUNCTION__
         );
         $manager->expects($this->once())->method('updateTable')->with(
-            $this->equalTo($this->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
+            $this->equalTo($this->deps->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
             $this->equalTo(array('pants'=>1)),
             $this->equalTo(1)
         );
@@ -227,19 +220,16 @@ class ActiveRecordTest extends \Amiss\Test\Helper\DataTestCase
         TestActiveRecord1::updateTable(array('pants'=>1), '1');
     }
 
-    /**
-     * @group active
-     */
     public function testInsertTable()
     {
         $manager = $this->getMock(
             'Amiss\Sql\Manager', 
             array('insertTable'), 
-            array($this->db, $this->mapper), 
+            array($this->deps->connector, $this->deps->mapper), 
             'PHPUnitGotcha_RecordTest_'.__FUNCTION__
         );
         $manager->expects($this->once())->method('insertTable')->with(
-            $this->equalTo($this->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
+            $this->equalTo($this->deps->mapper->getMeta(__NAMESPACE__.'\TestActiveRecord1')),
             $this->equalTo(array('pants'=>1))
         );
         TestActiveRecord1::setManager($manager);

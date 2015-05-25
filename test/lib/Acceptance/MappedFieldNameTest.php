@@ -2,6 +2,7 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\TableBuilder;
+use Amiss\Test;
 
 /**
  * Ensures objects with mapped field names (different from the property name)
@@ -10,49 +11,46 @@ use Amiss\Sql\TableBuilder;
  * @group acceptance
  * @group manager
  */
-class MappedFieldNameTest extends \Amiss\Test\Helper\DataTestCase
+class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
 {
-    /**
-     * @var Amiss\Sql\Manager
-     */
-    public $manager;
-
-    /**
-     * @var Amiss\Mapper
-     */
-    public $mapper;
-
     public function setUp()
     {
         parent::setUp();
         
-        $this->db = $this->getConnector();
-        
-        $this->manager = \Amiss\Sql\Factory::createManager($this->db);
-        $this->mapper = $this->manager->mapper;
-        
-        TableBuilder::create($this->db, $this->mapper, [
+        $this->deps = Test\Factory::managerNoteDefault();
+        $this->manager = $this->deps->manager;
+
+        TableBuilder::create($this->deps->connector, $this->deps->mapper, [
             __NAMESPACE__.'\MappedFieldNameLeft',
             __NAMESPACE__.'\MappedFieldNameAssoc',
             __NAMESPACE__.'\MappedFieldNameRight',
         ]);
-        $this->mapper->objectNamespace = __NAMESPACE__;
+        $this->deps->mapper->objectNamespace = __NAMESPACE__;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
     }
 
     public function loadTestData()
     {
-        $this->db->exec("INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(1, 'foo')");
-        $this->db->exec("INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(2, 'bar')");
-        $this->db->exec("INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(3, 'baz')");
+        $this->deps->connector->execAll([
+            "INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(1, 'foo')",
+            "INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(2, 'bar')",
+            "INSERT INTO mapped_field_name_left(mapped_field_name_left_id, my_pants) VALUES(3, 'baz')",
 
-        $this->db->exec("INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(4, 'trou 1')");
-        $this->db->exec("INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(5, 'trou 2')");
-        $this->db->exec("INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(6, 'trou 3')");
+            "INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(4, 'trou 1')",
+            "INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(5, 'trou 2')",
+            "INSERT INTO mapped_field_name_right(mapped_field_name_right_id, my_trousers) VALUES(6, 'trou 3')",
 
-        $this->db->exec("INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(1, 1, 4)");
-        $this->db->exec("INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(2, 1, 5)");
-        $this->db->exec("INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(3, 2, 5)");
-        $this->db->exec("INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(4, 3, 6)");
+            "INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(1, 1, 4)",
+            "INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(2, 1, 5)",
+            "INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(3, 2, 5)",
+            "INSERT INTO mapped_field_name_assoc(mapped_field_name_assoc_id, left_id, right_id) VALUES(4, 3, 6)",
+        ]);
     }
 
     public function testSaveNew()

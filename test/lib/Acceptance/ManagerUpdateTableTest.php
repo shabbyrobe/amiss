@@ -3,21 +3,31 @@ namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\Query\Criteria;
 use Amiss\Sql\Query\Update;
+use Amiss\Test;
 
-class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
     }
-    
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->update( string $table, array $set , array $where )
      * 
-     * @group acceptance
-     * @group manager
-     *
      * // TOO TRICKY - confused signature with criteria array.
      *     
      *     public function testUpdateTableWithArraySetAndArrayWhere()
@@ -31,10 +41,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
      *     
      */
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testUpdateTableAllowsStringSet()
     {
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -49,10 +55,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals(11, $min);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testUpdateTableAllowsStringSetWithArrayWhere()
     {
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -67,10 +69,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals(2010, $min);
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testUpdateTableAllowsStringSetWithStringWhereParameters()
     {
         $count = $this->manager->count('EventArtist');
@@ -89,8 +87,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     }
 
     /**
-     * @group acceptance
-     * @group manager
      * @expectedException InvalidArgumentException
      */
     public function testUpdateTableFailsWithNoWhereClause()
@@ -101,9 +97,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->update( string $table, array $set , string $positionalWhere, [ $param1, ... ] )
-     * 
-      * @group acceptance
-     * @group manager
      */
     public function testUpdateTableWithArraySetAndPositionalWhere()
     {
@@ -114,13 +107,9 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
     }
     
-    
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->update( string $table, array $set , string $namedWhere, array $params )
-     * 
-      * @group acceptance
-     * @group manager
      */
     public function testUpdateTableWithArraySetAndNamedWhere()
     {
@@ -134,9 +123,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->update( string $table, array $criteria )
-     * 
-      * @group acceptance
-     * @group manager
      */
     public function testUpdateTableWithArrayCriteria()
     {
@@ -150,9 +136,6 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->update( string $table, Criteria\Update $criteria )
-     * 
-      * @group acceptance
-     * @group manager
      */
     public function testUpdateTableWithObjectCriteria()
     {

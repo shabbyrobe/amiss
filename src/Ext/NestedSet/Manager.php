@@ -120,47 +120,55 @@ class Manager
         if ($conn->engine == 'mysql') {
             $conn->exec("LOCK TABLES `{$meta->table}` WRITE");
         }
-        
-        $primaryName = $meta->getField($meta->primary[0])['name'];
-        $parentIdFieldName = $meta->getField($treeMeta->parentId)['name'];
-        $leftIdName = $meta->getField($treeMeta->leftId)['name'];
-        $rightIdName = $meta->getField($treeMeta->rightId)['name'];
-        
-        $sql = "SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)";
-        $rootStmt = $conn->query("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)");
-        $rootId = $rootStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-        if (!$rootId || count($rootId) > 1) {
-            throw new \UnexpectedValueException("Could not find one and only one root id for class $class");
-        }
-        
-        if ($conn->engine == 'mysql') {
-            $conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        }
-        
-        $childIdStmt = $conn->prepare("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE `{$parentIdFieldName}` = ?");
-        $updateStmt = $conn->prepare("UPDATE `{$meta->table}` SET `{$leftIdName}`=?, `{$rightIdName}`=? WHERE `{$primaryName}`=?");
-        
-        $rebuildTree = function($nodeId, $left=1) use (&$rebuildTree, $treeMeta, $childIdStmt, $updateStmt) {
-            $right = $left+1;
+        try {
+            $primaryName = $meta->getField($meta->primary[0])['name'];
+            $parentIdFieldName = $meta->getField($treeMeta->parentId)['name'];
+            $leftIdName = $meta->getField($treeMeta->leftId)['name'];
+            $rightIdName = $meta->getField($treeMeta->rightId)['name'];
             
-            $childIdStmt->execute(array($nodeId));
-            $childIds = $childIdStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
-            
-            foreach ($childIds as $childId) {
-                $right = $rebuildTree($childId, $right);
+            $sql = "SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)";
+            $rootStmt = $conn->query("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)");
+            $rootId = $rootStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+            if (!$rootId || count($rootId) > 1) {
+                throw new \UnexpectedValueException("Could not find one and only one root id for class $class");
             }
             
-            $updateStmt->execute(array($left, $right, $nodeId));
+            $oldBuffered = null;
+            if ($conn->engine == 'mysql') {
+                $oldBuffered = $conn->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
+                $conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+            }
             
-            return $right+1;
-        };
-        
-        $rebuildTree($rootId[0]);
-        
-        $conn->commit();
-        
-        if ($conn->engine == 'mysql') {
-            $conn->exec("UNLOCK TABLES");
+            $childIdStmt = $conn->prepare("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE `{$parentIdFieldName}` = ?");
+            $updateStmt = $conn->prepare("UPDATE `{$meta->table}` SET `{$leftIdName}`=?, `{$rightIdName}`=? WHERE `{$primaryName}`=?");
+            
+            $rebuildTree = function($nodeId, $left=1) use (&$rebuildTree, $treeMeta, $childIdStmt, $updateStmt) {
+                $right = $left+1;
+                
+                $childIdStmt->execute(array($nodeId));
+                $childIds = $childIdStmt->fetchAll(\PDO::FETCH_COLUMN, 0);
+                
+                foreach ($childIds as $childId) {
+                    $right = $rebuildTree($childId, $right);
+                }
+                
+                $updateStmt->execute(array($left, $right, $nodeId));
+                
+                return $right+1;
+            };
+            
+            $rebuildTree($rootId[0]);
+            
+            $conn->commit();
+            
+        }
+        finally {
+            if ($conn->engine == 'mysql') {
+                $conn->exec("UNLOCK TABLES");
+                if ($oldBuffered !== null) {
+                    $conn->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $oldBuffered);
+                }
+            }
         }
     }
 }

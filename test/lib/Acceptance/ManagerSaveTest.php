@@ -2,15 +2,30 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
+use Amiss\Test;
 
-class ManagerSaveTest extends \Amiss\Test\Helper\ModelDataTestCase
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
 {
+    public function setUp()
+    {
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     /**
      * Ensures the signature for object insertion works
      *   Amiss\Manager->save( object $object )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testSaveNewObject()
     {
@@ -27,10 +42,6 @@ class ManagerSaveTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertEquals(1, $this->manager->count('Artist', 'slug="insert-test"'));
     }
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
     function testUpdateObjectWithSave()
     {
         $original = $this->manager->get('Artist', 'artistId=1');
@@ -58,14 +69,10 @@ class ManagerSaveTest extends \Amiss\Test\Helper\ModelDataTestCase
         // there are 3 artist types in the test data
         // with MySQL, only changed ones are counted but with Sqlite, all
         // rows matched by the clause are counted
-        $expected = $this->db->engine == 'sqlite' ? 3 : 2;
+        $expected = $this->deps->connector->engine == 'sqlite' ? 3 : 2;
         $this->assertEquals($expected, $this->manager->updateTable('ArtistType', ['type'=>'Band'], '1=1'));
     }
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testSaveFailsWhenAutoincNotDeclared()
     {
         $object = new Demo\EventArtist();

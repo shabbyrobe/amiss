@@ -15,7 +15,7 @@ class ConnectionFactory
         ++$this->activeCount;
 
         $this->info = $info;
-        $connector = \PDOK\Connector::create($info);
+        $connector = $this->getConnector();
 
         if ($info['engine'] == 'mysql') {
             if (!isset($info['dbName'])) {

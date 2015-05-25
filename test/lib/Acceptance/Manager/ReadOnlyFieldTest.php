@@ -1,8 +1,23 @@
 <?php
 namespace Amiss\Test\Acceptance\Manager;
 
-class ReadOnlyFieldTest extends \Amiss\Test\Helper\ModelDataTestCase
+use Amiss\Test;
+
+class ReadOnlyFieldTest extends \Amiss\Test\Helper\TestCase
 {
+    public function setUp()
+    {
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     function testReadOnlyGetObject()
     {
         $t = $this->manager->getById('ArtistType', 1);

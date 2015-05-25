@@ -4,6 +4,20 @@ namespace Amiss\Test;
 use Amiss\Sql\TableBuilder;
 use Amiss\Test\Helper\ClassBuilder;
 
+/**
+ * Welcome to the world of manual memory management in PHP.
+ * Don't hold on to any references to classes returned by this.
+ * If you assign them to instance properties on a test case, you
+ * MUST null them in the tearDown. Things get weird when you leak
+ * references to this stuff.
+ *
+ * The old way of managing this stuff was built off a complex
+ * and cumbersome inheritance hierarchy which didn't really work
+ * very well. This appears to be an improvement because you can
+ * at least use it for one-shot tests where everything falls out 
+ * of scope at the end of the function, in setUp/tearDown pairs
+ * and in @depends chains.
+ */
 class Factory
 {
     public static function managerNoteDefault($mapper=null)

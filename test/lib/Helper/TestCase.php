@@ -5,6 +5,12 @@ use Amiss\Sql\TableBuilder;
 
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
+    public function tearDown()
+    {
+        parent::tearDown();
+        $this->deps = null;
+    }
+
     protected function callProtected($class, $name)
     {
         $ref = new \ReflectionClass($class);
