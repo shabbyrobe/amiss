@@ -1,8 +1,10 @@
 <?php
 $usage = "Amiss test runner
-Usage: test/run.php [--no-sqlite] [--with-mysql] [--filter=<expr>]
+Usage: test/run.php [--no-sqlite] [--with=<with>] [--filter=<expr>]
            [--coverage-html=<outpath>] [--exclude-group=<group>]
            [--group=<group>]
+
+With: mysql, mysqlp (persistent)
 ";
 
 $basePath = __DIR__.'/../';
@@ -19,18 +21,21 @@ $options = array(
 );
 $options = array_merge(
     $options,
-    getopt('', array('help', 'no-sqlite', 'with-mysql', 'with-pgsql', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
+    getopt('', array('help', 'no-sqlite', 'with:', 'filter:', 'coverage-html:', 'exclude-group:', 'group:'))
 );
-$testMysql = array_key_exists('with-mysql', $options);
-$testPgsql = array_key_exists('with-pgsql', $options);
+$with = array_key_exists('with', $options) ? explode(',', $options['with']) : [];
 $help = array_key_exists('help', $options);
 if ($help) {
     echo $usage;
     exit;
 }
 
+if ($with == ['all']) {
+    $with = ['mysql', 'mysqlp'];
+}
+
 $config = array();
-if ($testMysql || $testPgsql) {
+if ($with) {
     $config = amisstest_config_load();
 }
 
@@ -70,7 +75,7 @@ if (!array_key_exists('no-sqlite', $options)) {
     $suite->addTest($sqliteSuite);
 }
 
-if ($testMysql) {
+if (in_array('mysql', $with)) {
     if (!isset($config['mysql'])) {
         throw new \Exception("Missing [mysql] section in amisstestrc file");
     }
@@ -84,6 +89,12 @@ if ($testMysql) {
     ));
     suite_add_dir($mysqlSuite, $testPath.'/lib/Acceptance/');
     $suite->addTest($mysqlSuite);
+}
+
+if (in_array('mysqlp', $with)) {
+    if (!isset($config['mysql'])) {
+        throw new \Exception("Missing [mysql] section in amisstestrc file");
+    }
 
     $mysqlPersistentSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
         'engine'=>'mysql',
@@ -97,7 +108,7 @@ if ($testMysql) {
     $suite->addTest($mysqlPersistentSuite);
 }
 
-if ($testPgsql) {
+if (in_array('pgsql', $with)) {
     if (!isset($config['pgsql'])) {
         throw new \Exception("Missing [pgsql] section in amisstestrc file");
     }

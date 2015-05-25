@@ -534,8 +534,8 @@ class Manager
 
                 $generated = $handler->handleDbGeneratedValue($lastInsertId);
                 if ($generated) {
-                    // skip using populateObject - we don't need the type handler stack because we 
-                    // already used one to handle the value
+                    // skip using populateObject - we don't need the type handler stack because
+                    // we already used one to handle the value
                     if (!isset($field['getter'])) {
                         $object->{$meta->primary[0]} = $generated;
                     }
