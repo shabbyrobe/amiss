@@ -32,13 +32,13 @@ class ManagerTest extends TestCase
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
 
-                /** :amiss = {"field": true}; */
+                /** :amiss = {"field": {"type": "integer"}}; */
                 public $treeLeft;
 
-                /** :amiss = {"field": true}; */
+                /** :amiss = {"field": {"type": "integer"}}; */
                 public $treeRight;
 
-                /** :amiss = {"field": true}; */
+                /** :amiss = {"field": {"type": "integer"}}; */
                 public $treeParentId;
 
                 /** :amiss = {"has": {"type": "tree"}}; */
