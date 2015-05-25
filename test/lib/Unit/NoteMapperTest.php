@@ -1,6 +1,8 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use \Amiss\Test\Helper\ClassBuilder;
+
 /**
  * @group mapper
  * @group unit
@@ -13,7 +15,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithDefinedTable()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             /** :amiss = {"table": "custom_table"}; */
             class Test {}
         ');
@@ -31,7 +33,8 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             ->getMock()
         ;
         $mapper->expects($this->once())->method('getDefaultTable');
-        $class = $this->createFnScopeClass('Test', "class Test {}");
+        $class = ClassBuilder::i()->registerOne('class Test {}');
+
         $meta = $mapper->getMeta($class);
     }
     
@@ -73,7 +76,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaMultiplePrimaries()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id1;
@@ -92,7 +95,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaFieldsFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": true}; */ public $foo;
                 /** :amiss = {"field": true}; */ public $bar;
@@ -108,7 +111,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaSkipsPropertiesWithNoFieldNote()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 public $notAField;
                 
@@ -125,7 +128,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaGetterWithDefaultSetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": true}; */
                 public function getFoo(){}
@@ -143,7 +146,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithDefinedConstructor()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             /** :amiss = {"constructor": "pants"}; */
             class Test {}
         ');
@@ -157,7 +160,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithDefaultConstructor()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             /** :amiss = {"table": "pants"}; */
             class Test {}
         ');
@@ -171,7 +174,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaPrimaryNoteImpliesFieldNote()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
@@ -186,7 +189,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaPrimaryNoteImpliedFieldNoteAllowsType()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
@@ -212,7 +215,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaPrimaryNoteFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
@@ -227,7 +230,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaMultiPrimaryNoteFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $idPart1;
                 /** :amiss = {"field": {"primary": true}}; */ public $idPart2;
@@ -243,7 +246,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaFieldTypeFound()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Test', '
+        $class = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"type": "foobar"}}; */
                 public $id;
@@ -260,21 +263,20 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaIgnoresParentClassByDefault()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class1 = $this->createFnScopeClass("Test1", '
+        list ($ns, ) = ClassBuilder::i()->register('
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
             }
-        ');
-        $class2 = $this->createFnScopeClass("Test2", '
             class Test2 extends Test1 {
                 /** :amiss = {"field": true}; */
                 public $bar;
             }
         ');
 
-        $meta1 = $mapper->getMeta($class1);
-        $meta2 = $mapper->getMeta($class2);
+        $mapper->objectNamespace = $ns;
+        $meta1 = $mapper->getMeta("$ns\\Test1");
+        $meta2 = $mapper->getMeta("$ns\\Test2");
         $this->assertEquals(null, $this->getProtected($meta2, 'parent'));
     }
 
@@ -284,13 +286,11 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithParentClass()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class1 = $this->createFnScopeClass("Test1", '
+        list ($mapper->objectNamespace,)  = ClassBuilder::i()->register('
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
             }
-        ');
-        $class2 = $this->createFnScopeClass("Test2", '
             /** :amiss = {"inherit": true}; */
             class Test2 extends Test1 {
                 /** :amiss = {"field": true}; */
@@ -298,8 +298,8 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         
-        $meta1 = $mapper->getMeta($class1);
-        $meta2 = $mapper->getMeta($class2);
+        $meta1 = $mapper->getMeta("Test1");
+        $meta2 = $mapper->getMeta("Test2");
         $this->assertEquals($meta1, $this->getProtected($meta2, 'parent'));
     }
 
@@ -309,7 +309,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaRelationWithInferredGetterAndInferredSetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Foo', '
+        $class = ClassBuilder::i()->registerOne('
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -341,7 +341,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testPrimaryFieldTranslation()
     {
-        $class = $this->createFnScopeClass('Foo', '
+        $class = ClassBuilder::i()->registerOne('
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $fooBarBaz;
@@ -366,7 +366,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testRelationFillGetterSetterInferSetter($prefix)
     {
-        $class = $this->createFnScopeClass("Foo$prefix", '
+        $class = ClassBuilder::i()->registerOne('
             class Foo'.$prefix.' {
                 /** :amiss = {"has": {"type": "pants"}}; */
                 function '.$prefix.'Pants() {}
@@ -397,7 +397,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaRelationWithInferredGetterAndExplicitSetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class = $this->createFnScopeClass('Foo', '
+        $class = ClassBuilder::i()->registerOne('
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -432,7 +432,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaOneToManyPropertyRelationWithNoOn()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $class1 = $this->createFnScopeClass("Class1", '
+        $class1 = ClassBuilder::i()->registerOne('
             class Class1 {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $class1id;
@@ -444,7 +444,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                 public $class2;
             }
         ');
-        $class2 = $this->createFnScopeClass("Class2", '
+        $class2 = ClassBuilder::i()->registerOne('
             class Class2 {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $class2Id;
@@ -463,7 +463,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithStringRelation()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Class1", '
+        $name = ClassBuilder::i()->registerOne('
             class Class1 {
                 /** :amiss = {"has": "test"}; */
                 public $test;
@@ -479,7 +479,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithClassIndex()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             /** :amiss = {"indexes": {"foo": {"fields": ["a"]}}}; */
             class Test {
                 /** :amiss = {"field": true}; */
@@ -494,7 +494,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithClassKeyIndex()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             /** 
              * :amiss = {
              *     "indexes": {
@@ -515,7 +515,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithMultiFieldClassIndex()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             /** 
              * :amiss = {"indexes": {
              *    "foo": {"fields": ["b", "a"]}
@@ -534,7 +534,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithDuplicateIndexDefinition()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             /** 
              * :amiss = {"indexes": {"a": {"fields": ["a"], "key": true}}};
              */
@@ -543,14 +543,14 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                  public $a;
             }
         ');
-        $this->setExpectedException(\Amiss\Exception::class, "Duplicate index name 'a' on Amiss\\Test\\");
+        $this->setExpectedException(\Amiss\Exception::class, "Duplicate index name 'a'");
         $meta = $mapper->getMeta($name);
     }
 
     public function testGetMetaWithStringFieldIndexFails()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"index": "foo"}}; */
                 public $a;
@@ -563,7 +563,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithStringFieldKey()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $a;
@@ -577,7 +577,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaAutoNamedIndexFromGetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 private $field;
                 
@@ -597,7 +597,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaAutoNamedKeyFromGetter()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 private $field;
                 
@@ -617,7 +617,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaAutoNamedIndexFromField()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"index": true}}; */
                 public $field;
@@ -634,7 +634,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaAutoNamedKeyFromField()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $field;
@@ -651,7 +651,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaPrimaryAutoFieldNameFromMethod()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 private $field;
                 /** :amiss = {"field": {"primary": true}}; */
@@ -669,7 +669,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
 
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"constructor": true}; */
                 public static function foo() {}
@@ -683,7 +683,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
 
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -702,7 +702,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
 
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -722,7 +722,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
 
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -742,7 +742,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
 
-        $name = $this->createFnScopeClass("Test", '
+        $name = ClassBuilder::i()->registerOne('
             class Test {
                 /** :amiss = {"field": "bar"}; */
                 public $foo;
@@ -755,7 +755,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testClassRelations()
     {
         $mapper = new \Amiss\Mapper\Note;
-        $name = $this->createFnScopeClass('Test', '
+        $name = ClassBuilder::i()->registerOne('
             /**
              * :amiss = {"relations": {
              *     "foo": {

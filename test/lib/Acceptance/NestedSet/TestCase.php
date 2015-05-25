@@ -19,7 +19,7 @@ abstract class TestCase extends \Amiss\Test\Helper\CustomMapperTestCase
         $ns = null;
         $classNames = [];
         if ($classes) {
-            list ($classHash, $ns, $classNames) = $this->createClasses($classes);
+            list ($ns, $classNames) = \Amiss\Test\Helper\ClassBuilder::i()->register($classes);
         }
         $nsManager = $this->createNestedSetManager(null, $classNames);
         if ($ns) {

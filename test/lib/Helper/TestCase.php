@@ -5,64 +5,6 @@ use Amiss\Sql\TableBuilder;
 
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
-    protected static $classScopeClasses = [];
-
-    protected static function classScopeClassName($name, $split=false)
-    {
-        $bt = debug_backtrace();
-        $btc = count($bt);
-        $cur = 1;
-
-        $ns = null;
-        while ($cur < $btc) {
-            if ($bt[$cur]['class'] != __CLASS__) {
-                $ns = $bt[$cur]['class'];
-                break;
-            }
-            $cur++;
-        }
-        if (!$ns) {
-            throw new \Exception();
-        }
-
-        $fqcn = $ns.'\\'.$name;
-        if ($split) {
-            return [$ns, $fqcn];
-        } else {
-            return $fqcn;
-        }
-    }
-
-    protected static function createClassScopeClass($name, $body)
-    {
-        list ($ns, $fqcn) = self::classScopeClassName($name, true);
-        self::$classScopeClasses[$fqcn] = [$ns, $name, $fqcn];
-        if (!class_exists($fqcn)) {
-            eval("namespace $ns { $body }");
-        }
-        return $fqcn;
-    }
-
-    protected function createFnScopeClass($name, $body)
-    {
-        $bt = debug_backtrace();       
-        $callClass = $bt[1]['class'];
-        $callFn = $bt[1]['function'];
-        $ns = $callClass.'\\'.$callFn;
-        $fqcn = $ns.'\\'.$name;
-        if (!class_exists($fqcn)) {
-            eval("namespace $ns { $body }");
-        }
-        return $fqcn;
-    }
-
-    protected function createClass($fqcn, $src)
-    {
-        if (!class_exists($fqcn)) {
-            eval($src);
-        }
-    }
-
     protected function callProtected($class, $name)
     {
         $ref = new \ReflectionClass($class);

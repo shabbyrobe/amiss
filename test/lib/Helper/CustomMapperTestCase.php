@@ -6,38 +6,12 @@ class CustomMapperTestCase extends \Amiss\Test\Helper\DataTestCase
     private static $classes = [];
     private $tearDownStatements = [];
 
-    protected function createClasses($classes)
-    {
-        $classes = (array)$classes;
-
-        $hash = '';
-        foreach ($classes as $k=>$v) {
-            $hash .= "$k|$v|";
-        }
-        $classHash = sha1($hash);
-        if (isset(self::$classes[$classHash])) {
-            list ($ns, $classes) = self::$classes[$classHash];
-        }
-        else {
-            $ns = "AmissTest_".$classHash;
-            $script = "namespace $ns;";
-            foreach ($classes as $k=>$v) {
-                $script .= $v;
-            }
-            $classes = get_declared_classes();
-            eval($script);
-            $classes = array_values(array_diff(get_declared_classes(), $classes));
-            self::$classes[$classHash] = [$ns, $classes];
-        }
-        return [$classHash, $ns, $classes];
-    }
-
     public function createDefaultNoteManager($classes, $connector=null)
     {
         $ns = null;
         $classNames = [];
         if ($classes) {
-            list ($classHash, $ns, $classNames) = $this->createClasses($classes);
+            list ($ns, $classNames) = \Amiss\Test\Helper\ClassBuilder::i()->register($classes);
         }
         $manager = $this->createDefaultManager(null, $connector);
         if ($ns) {

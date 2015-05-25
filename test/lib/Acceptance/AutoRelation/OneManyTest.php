@@ -28,7 +28,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     public function createDefaultMapper()
     {
         return new \Amiss\Mapper\Arrays([
-            __NAMESPACE__.'\TestChild'=>[
+            'TestChild'=>[
                 'primary'=>'id',
                 'fields'=>[
                     'id'=>['type'=>'autoinc'],
@@ -39,7 +39,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
                     'parent'=>['one', 'of'=>'TestParent', 'from'=>'parent'],
                 ],
             ],
-            __NAMESPACE__.'\TestParent'=>[
+            'TestParent'=>[
                 'primary'=>'id',
                 'fields'=>[
                     'id'=>['type'=>'autoinc'],
@@ -51,7 +51,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
                     'grandParent'=>['one', 'of'=>'TestGrandParent', 'from'=>'grandParent'],
                 ],
             ],
-            __NAMESPACE__.'\TestGrandParent'=>[
+            'TestGrandParent'=>[
                 'primary'=>'id',
                 'fields'=>['id'=>['type'=>'autoinc']],
                 'relations'=>[

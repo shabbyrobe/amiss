@@ -1,11 +1,13 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Test\Helper\ClassBuilder;
+
 class LocalMapperTest extends \Amiss\Test\Helper\TestCase
 {
     function testLocalMapper()
     {
-        $c1 = $this->createFnScopeClass("Pants", "
+        $c1 = ClassBuilder::i()->registerOne("
             class Pants {
                 static function meta() {
                     return ['fields'=>[
@@ -22,7 +24,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
 
     function testLocalMapperInherits()
     {
-        $ding = $this->createFnScopeClass("Ding", "
+        list ($ns, )  = ClassBuilder::i()->register("
             class Ding {
                 static function meta() {
                     return [
@@ -30,8 +32,6 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
                     ];
                 }
             }
-        ");
-        $dong = $this->createFnScopeClass("Dong", "
             class Dong extends Ding {
                 static function meta() {
                     return [
@@ -42,13 +42,13 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ");
         $lm = new \Amiss\Mapper\Local();
-        $meta = $lm->getMeta($dong);
+        $meta = $lm->getMeta("$ns\\Dong");
         $this->assertEquals(['foo', 'bar'], array_keys($meta->getFields()));
     }
 
     function testMetaInstance()
     {
-        $c1 = $this->createFnScopeClass("Pants", "
+        $c1 = ClassBuilder::i()->registerOne("
             class Pants {
                 static function meta() {
                     return new \Amiss\Meta(__CLASS__, ['fields'=>[
@@ -65,7 +65,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
 
     function testObjectNamespace()
     {
-        $c1 = $this->createFnScopeClass("Pants", "
+        $c1 = ClassBuilder::i()->registerOne("
             class Pants {
                 static function meta() {
                     return new \Amiss\Meta(__CLASS__, ['fields'=>[
@@ -85,7 +85,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
 
     function testMissingFunction()
     {
-        $c1 = $this->createFnScopeClass("Pants", "
+        $c1 = ClassBuilder::i()->registerOne("
             class Pants {}
         ");
         $lm = new \Amiss\Mapper\Local();
@@ -95,7 +95,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
 
     function testCustomFunction()
     {
-        $c1 = $this->createFnScopeClass("Pants", "
+        $c1 = ClassBuilder::i()->registerOne("
             class Pants {
                 static function gimmeMeta() {
                     return new \Amiss\Meta(__CLASS__, ['fields'=>['foo'=>true]]);

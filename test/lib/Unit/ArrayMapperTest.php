@@ -2,6 +2,7 @@
 namespace Amiss\Test\Unit;
 
 use Amiss\Mapper\Arrays;
+use Amiss\Test\Helper\ClassBuilder;
 
 /**
  * @group unit
@@ -43,19 +44,20 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testInherit()
     {
-        $name = 'c'.md5(uniqid('', true));
-        $name2 = $name.'2';
-        $this->createClass($name, 'class '.$name.'{} class '.$name2.' extends '.$name.'{}');
+        list ($ns, ) = ClassBuilder::i()->register("
+            class C {}
+            class Child extends C {}
+        ");
         $mappings = array(
-            $name=>array(),
-            $name2=>array('inherit'=>true),
+            'C'=>array(),
+            'Child'=>array('inherit'=>true),
         );
-        
         $mapper = new Arrays($mappings);
-        $meta = $mapper->getMeta($name2);
+        $mapper->objectNamespace = $ns;
+        $meta = $mapper->getMeta("Child");
         
         $parent = $this->getProtected($meta, 'parent');
-        $this->assertEquals($name, $parent->class);
+        $this->assertEquals("$ns\\C", $parent->class);
     }
 
     /**
@@ -63,17 +65,16 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testNoInheritByDefault()
     {
-        $name = 'c'.md5(uniqid('', true));
-        $name2 = $name.'2';
-        $this->createClass($name, 'class '.$name.'{} class '.$name2.' extends '.$name.'{}');
         $mappings = array(
-            $name=>array(),
-            $name2=>array(),
+            'C'=>array(),
+            'Child'=>array(),
         );
-        
         $mapper = new Arrays($mappings);
-        $meta = $mapper->getMeta($name2);
-        
+        list ($mapper->objectNamespace, ) = ClassBuilder::i()->register("
+            class C {}
+            class Child extends C {}
+        ");
+        $meta = $mapper->getMeta("Child");
         $parent = $this->getProtected($meta, 'parent');
         $this->assertNull($parent);
     }

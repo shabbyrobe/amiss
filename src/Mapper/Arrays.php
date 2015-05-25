@@ -8,15 +8,33 @@ class Arrays extends Base
 {
     public $arrayMap;
     
+    /**
+     * The array map may not have object namespaces prepended to the
+     * keys. $this->objectNamespace may be set after construction by
+     * existing class users.
+     * 
+     * Cheapo hack, solve the real problem another day.
+     */
+    private $arrayMapResolved = false;
+
     public function __construct($arrayMap=array())
     {
         parent::__construct();
-        
         $this->arrayMap = $arrayMap;
     }
     
     protected function createMeta($class)
     {
+        resolve_map: if (!$this->arrayMapResolved) {
+            $resolvedMap = [];
+            foreach ($this->arrayMap as $k=>$m) {
+                $k = ($this->objectNamespace ? $this->objectNamespace.'\\' : '').$k;
+                $resolvedMap[$k] = $m;
+            }
+            $this->arrayMap = $resolvedMap;
+            $this->arrayMapResolved = true;
+        }
+
         if (!isset($this->arrayMap[$class])) {
             throw new \InvalidArgumentException("Unknown class $class");
         }

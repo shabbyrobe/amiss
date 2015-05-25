@@ -71,9 +71,10 @@ if (!array_key_exists('no-sqlite', $options)) {
 }
 
 if ($testMysql) {
-    if (!isset($config['mysql']))
+    if (!isset($config['mysql'])) {
         throw new \Exception("Missing [mysql] section in amisstestrc file");
-    
+    }
+
     $mysqlSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
         'engine'=>'mysql',
         'dsn'=>"mysql:host={$config['mysql']['host']};port={$config['mysql']['port']}",
@@ -81,7 +82,7 @@ if ($testMysql) {
         'password'=>$config['mysql']['password'],
         'dbName'=>'amiss_test_'.time(),
     ));
-    suite_add_dir($mysqlSuite, $testPath.'/acceptance/');
+    suite_add_dir($mysqlSuite, $testPath.'/lib/Acceptance/');
     $suite->addTest($mysqlSuite);
 
     $mysqlPersistentSuite = new \Amiss\Test\Helper\DatabaseSuite(array(
@@ -92,19 +93,22 @@ if ($testMysql) {
         'dbName'=>'amiss_test_'.time(),
         'options'=>[\PDO::ATTR_PERSISTENT => true],
     ));
-    suite_add_dir($mysqlPersistentSuite, $testPath.'/acceptance/');
+    suite_add_dir($mysqlPersistentSuite, $testPath.'/lib/Acceptance/');
     $suite->addTest($mysqlPersistentSuite);
 }
 
 if ($testPgsql) {
-    if (!isset($config['pgsql']))
+    if (!isset($config['pgsql'])) {
         throw new \Exception("Missing [pgsql] section in amisstestrc file");
+    }
     
     $parts = [];
-    if ($config['pgsql']['host'])
+    if ($config['pgsql']['host']) {
         $parts[] = "host=".$config['pgsql']['host'];
-    if ($config['pgsql']['port'])
+    }
+    if ($config['pgsql']['port']) {
         $parts[] = "port=".$config['pgsql']['port'];
+    }
 
     $parts[] = "dbname=amiss_test";
 
@@ -115,7 +119,7 @@ if ($testPgsql) {
         'password'=>$config['pgsql']['password'],
         'dbName'=>'amiss_test_'.time(),
     ));
-    suite_add_dir($pgsqlSuite, $testPath.'/acceptance/');
+    suite_add_dir($pgsqlSuite, $testPath.'/lib/Acceptance/');
     $suite->addTest($pgsqlSuite);
 }
 
@@ -138,12 +142,14 @@ function require_tests($file)
 {
     static $cache = array();
 
-    if (!preg_match("/Test\.php$/", $file))
+    if (!preg_match("/Test\.php$/", $file)) {
         return array();
+    }
 
     $file = realpath($file);
-    if (isset($cache[$file]))
+    if (isset($cache[$file])) {
         return $cache[$file];
+    }
 
     $prevClasses = get_declared_classes();
     require $file;
