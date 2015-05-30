@@ -1,39 +1,91 @@
 Modifying
 =========
 
-Amiss supports very simple create, update and delete operations on objects, as well as update and
-delete operations on tables.
+Objects
+-------
+
+``\Amiss\Sql\Manager->insert(...)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``insert`` method inserts mapped objects into the database and supports the following
+signatures::
+
+    $manager->insert( $object )
+    $manager->insert( $object , string $table )
+
+Inserting by object is simple: just pass it directly to ``Amiss\Sql\Manager::insert``.
+
+.. code-block:: php
+    
+    <?php
+    $e = new Event;
+    $e->setName('Foo Bar');
+    $manager->insert($e);
+
+    // autoinc fields are populated automatically
+    echo $e->eventId;
 
 
-Inserting
----------
+Multiple insertions of the same object are not prevented by Amiss. An appropriately
+configured primary or unique key will allow your database to prevent undesired duplicates.
 
-The ``insert`` method has a variable signature::
+You can manually specify which table to insert into, overriding the table stored in the
+``Amiss\Meta`` for the class:
 
-    insert ( object $model )
-    insert ( string $model, array $params )
+.. code-block:: php
+    
+    <?php
+    $e = new Event;
+    $manager->insert($e, 'some_other_table');
 
 
-Object Insertion
-~~~~~~~~~~~~~~~~
+``Amiss\Sql\Manager->update(...)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Inserting by object is easy: just pass it directly to ``Amiss\Sql\Manager::insert``.
+The ``update`` method updates mapped objects into the database and supports the following
+signatures::
 
-If you have an autoincrement ID column it is populated into the corresponding object field by
-default:
+    $manager->update( $object )
+    $manager->update( $object , string $table )
+
+Updating an object requires a primary key be defined in the :doc:`metadata`.
 
 .. code-block:: php
 
     <?php
-    // exampe from the doc/demo/model.php file
-    $e = new Event;
-    $e->setName('Foo Bar');
-    
-    // assign the autoincrement PK by hand
-    $manager->insert('Event');
+    $a = $manager->getById('Artist', 1);
+    $a->name = 'foo bar';
+    $manager->update($a);
+    // UPDATE artist SET name='foo bar' WHERE artistId=1
 
-    // this will be set by insert()
-    echo $e->eventId;
+You can manually specify which table to update, overriding the table stored in the
+``Amiss\Meta`` for the class.
+
+
+``Amiss\Sql\Manager->delete(...)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``delete`` method removes a mapped object from the database and supports the following
+signatures::
+
+    $manager->delete( $object )
+    $manager->delete( $object , string $table )
+
+Deleting an object requires a primary key be defined in the :doc:`metadata`.
+
+.. code-block:: php
+
+    <?php
+    $a = $manager->getById('Artist', 1);
+    $a->name = 'foo bar';
+    $manager->delete($a);
+    unset($a);
+
+The instance of the object is not modified by the delete operation - it is up to you to
+get rid of the instance if you're done with it. You are free to re-insert it if you like.
+
+You can manually specify which table to update, overriding the table stored in the
+``Amiss\Meta`` for the class.
 
 
 Value Insertion
@@ -158,8 +210,6 @@ with an autoincrement column.
 Deleting
 --------
 
-``Amiss\Sql\Manager``'s delete methods work similarly to updating
-
 Deleting by object works the same way as updating by object::
 
     delete( object $object )
@@ -190,4 +240,11 @@ Deleting by table::
     
         <?php
         $manager->delete('Object', '1=1');
+
+
+Tables
+------
+
+    $manager->insertTable( $meta , array $propertyValues );
+    $manager->insertTable( $meta , Query\Insert $query );
 

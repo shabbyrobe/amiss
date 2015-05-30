@@ -20,7 +20,7 @@ From Martin Fowler's `Patterns of Enterprise Application Architecture
 Amiss makes some small concessions to pragmatism that may offend domain model purists when
 you use any of the :doc:`mapping methods <mapper/mapping>` that are in the core
 distribution, but overall it does a passable job of keeping its grubby mitts off your
-model considering the small codebase.
+data models considering the small codebase.
 
 
 About the examples

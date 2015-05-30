@@ -684,7 +684,8 @@ class Manager
      * 
      * Supports the following signatures:
      *   delete($object)
-     *   delete($object, $tableOrMeta)
+     *   delete($object, string $table)
+     *   delete($object, Amiss\Meta $meta)
      * 
      * @return void
      */

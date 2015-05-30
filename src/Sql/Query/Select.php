@@ -103,21 +103,34 @@ class Select extends Criteria
 
         if ($order) {
             if (is_array($order)) {
-                $oClauses = array();
+                $oClauses = '';
                 foreach ($order as $field=>$dir) {
+                    if ($oClauses) {
+                        $oClauses .= ', ';
+                    }
                     if (!($field == 0 && $field !== 0)) { // is_numeric($field)
-                        $field = $dir; $dir = 'asc';
+                        $field = $dir; $dir = '';
                     }
                     
                     $name = (isset($metaFields[$field]) ? $metaFields[$field]['name'] : $field);
                     $qname = $name[0] == '`' ? $name : '`'.$name.'`';
                     $qname = ($tableAlias ? $tableAlias.'.' : '').$qname;
-                    $oClauses[] = $qname.($dir == 'asc' ? '' : ' desc');
+                    $oClauses .= $qname;
+
+                    if ($dir) {
+                        // strpos(strtolower($dir), 'desc') === 0;
+                        if (isset($dir[3]) && ($dir[0] == 'd' || $dir[0] == 'D') && ($dir[1] == 'e' || $dir[1] == 'E') && ($dir[2] == 's' || $dir[2] == 'S') && ($dir[3] == 'c' || $dir[3] == 'C')) {
+                            $oClauses .= ' desc';
+                        }
+                        elseif (!isset($dir[2]) || !(($dir[0] == 'a' || $dir[0] == 'A') && ($dir[1] == 's' || $dir[1] == 'S') && ($dir[2] == 'c' || $dir[2] == 'C'))) {
+                            throw new \UnexpectedValueException("Order direction must be 'asc' or 'desc', found ".$dir);
+                        }
+                    }
                 }
-                $order = implode(', ', $oClauses);
+                $order = $oClauses;
             }
             else {
-                if ($metaFields && strpos($order, '{')!==false) {
+                if ($metaFields && strpos($order, '{') !== false) {
                     $order = static::replaceFields($meta, $order, $tableAlias);
                 }
             }

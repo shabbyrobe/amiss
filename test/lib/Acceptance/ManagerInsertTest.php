@@ -14,7 +14,7 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
      * Ensures the signature for object insertion works
      *   Amiss\Sql\Manager->insert( object $object )
      */
-    public function testInsertObject()
+    public function testInsertObjectWithAutoinc()
     {
         $deps = Test\Factory::managerModelDemo();
 
@@ -24,11 +24,22 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
         $artist->artistTypeId = 1;
         $artist->name = 'Insert Test';
         $artist->slug = 'insert-test';
-        $deps->manager->insert($artist);
-        
+        $ret = $deps->manager->insert($artist);
+
         $this->assertGreaterThan(0, $artist->artistId);
+        $this->assertEquals($artist->artistId, $ret);
         
         $this->assertEquals(1, $deps->manager->count('Artist', 'slug="insert-test"'));
+
+        return [$artist, $deps];
+    }
+
+    /** @depends testInsertObjectWithAutoinc */
+    public function testInsertObjectWithAutoincTwice($args)
+    {
+        list ($artist, $deps) = $args;
+        $this->setExpectedException(\PDOException::class, "Integrity constraint violation");
+        $ret = $deps->manager->insert($artist);
     }
 
     /**
