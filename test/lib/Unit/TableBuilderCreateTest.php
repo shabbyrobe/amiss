@@ -138,7 +138,11 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\TestCase
     public function testCreateTableFailsWhenConnectorIsNotPDOKConnector()
     {
         $this->deps->connector = new \PDO('sqlite::memory:');
-        $this->setExpectedException('PHPUnit_Framework_Error');
+        if (version_compare(PHP_VERSION, "7.0.0-dev") >= 0) {
+            $this->setExpectedException('TypeException');
+        } else {
+            $this->setExpectedException('PHPUnit_Framework_Error');
+        }
         TableBuilder::create($this->deps->connector, $this->deps->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
     }
 }
