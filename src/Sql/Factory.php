@@ -64,6 +64,13 @@ class Factory
         $handlers['bool'] = $handlers['boolean'] = function() {
             return new \Amiss\Sql\Type\Boolean();
         };
+
+        $handlers['decimal'] = function() {
+            return new \Amiss\Sql\Type\Decimal(
+                isset($config['decimalPrecision']) ? $config['decimalPrecision'] : 65,
+                isset($config['decimalScale'])     ? $config['decimalScale']     : 30
+            );
+        };
         
         $handlers['autoinc'] = new \Amiss\Sql\Type\Autoinc();
         
