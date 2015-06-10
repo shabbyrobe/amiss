@@ -747,6 +747,8 @@ class Manager
 
     /**
      * This is a hack to allow active record to intercept saving and fire events.
+     * You should not call it yourself as it will be removed as soon as I work out
+     * a good way to remove it.
      * @return boolean
      */
     public function shouldInsert($object, Meta $meta=null)

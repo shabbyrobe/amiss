@@ -234,7 +234,7 @@ abstract class Base extends \Amiss\Mapper
         // becomes "varchar"
         $x = preg_split('@[^A-Za-z0-9\-\_]@', trim($type), 2);
         $id = strtolower($x[0]);
-        
+
         // must be false not null for isset tests
         $h = false;
         if (isset($this->typeHandlers[$id])) {
