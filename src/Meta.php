@@ -94,8 +94,8 @@ class Meta
         // would like to get rid of this, but other things need to be dealt with first.
         $this->class  = ltrim($class, "\\");
         $this->parent = $parent;
-        $this->table  = isset($info['table'])   ? $info['table']   : array();
-        $this->schema = isset($info['schema'])  ? $info['schema']  : array();
+        $this->table  = isset($info['table'])   ? $info['table']   : null;
+        $this->schema = isset($info['schema'])  ? $info['schema']  : null;
 
         $this->defaultOrder = isset($info['defaultOrder']) ? $info['defaultOrder'] : null;
 
