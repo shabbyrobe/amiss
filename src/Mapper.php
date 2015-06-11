@@ -50,6 +50,7 @@ abstract class Mapper
      * @return \Amiss\Type\Handler
      */
     public abstract function determineTypeHandler($type);
+
     /**
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
@@ -65,6 +66,24 @@ abstract class Mapper
         $this->populateObject($object, $mapped, $meta);
 
         return $object;
+    }
+
+    public function mapObjectToProperties($object, $meta=null)
+    {
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: $object);
+        }
+
+        $output = [];
+        foreach ($meta->getFields() as $prop=>$field) {
+            if (!isset($field['getter'])) {
+                $value = $object->$prop;
+            } else {
+                $value = call_user_func(array($object, $field['getter']));
+            }
+            $output[$field['id']] = $value;    
+        }
+        return $output;
     }
 
     public function formatParams(Meta $meta, $propertyParamMap, $params)
@@ -190,7 +209,7 @@ abstract class Mapper
      * 
      * @param $meta  Amiss\Meta|string
      * @param object $object            
-     * @param array  $mapped Input after mappiing to property names and type handling
+     * @param array  $mapped Input after mapping to property names and type handling
      * @return void
      */
     public function populateObject($object, \stdClass $mapped, $meta=null)

@@ -21,7 +21,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->expects($this->exactly(2))->method('mapObjectToRow');
         $mapper->mapObjectsToRows(array('a', 'b'), null, 'foo');
     }
-    
+
     /**
      * @covers Amiss\Mapper\Base::mapObjectsToRows
      */
