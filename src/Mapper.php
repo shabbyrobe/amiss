@@ -28,6 +28,28 @@ abstract class Mapper
      */
     public abstract function getMeta($class);
 
+    public abstract function mapRowToProperties($input, $meta=null, $fieldMap=null);
+
+    public abstract function mapPropertiesToRow($input, $meta=null);
+
+    /**
+     * Get row values from an object
+     * 
+     * @param $meta Amiss\Meta or string used to call getMeta()
+     * @param $input object The object to get row values from
+     * @param $context Identifies the context in which the export is occurring. Useful
+     *     for distinguishing between inserts and updates when dealing with sql databases.
+     * 
+     * @return array
+     */
+    public abstract function mapObjectToRow($input, $meta=null, $context=null);
+
+    /**
+     * Get a type handler for a field type
+     * @param string $type The type of the field
+     * @return \Amiss\Type\Handler
+     */
+    public abstract function determineTypeHandler($type);
     /**
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
@@ -71,22 +93,6 @@ abstract class Mapper
         }
         return $out;
     }
-
-    public abstract function mapRowToProperties($input, $meta=null, $fieldMap=null);
-
-    public abstract function mapPropertiesToRow($input, $meta=null);
-
-    /**
-     * Get row values from an object
-     * 
-     * @param $meta Amiss\Meta or string used to call getMeta()
-     * @param $input object The object to get row values from
-     * @param $context Identifies the context in which the export is occurring. Useful
-     *     for distinguishing between inserts and updates when dealing with sql databases.
-     * 
-     * @return array
-     */
-    public abstract function mapObjectToRow($input, $meta=null, $context=null);
 
     /**
      * Get row values from a list of objects
@@ -209,12 +215,5 @@ abstract class Mapper
                 }
             }
         }
-    }
-    
-    /**
-     * Get a type handler for a field type
-     * @param string $type The type of the field
-     * @return \Amiss\Type\Handler
-     */
-    public abstract function determineTypeHandler($type);
+    }    
 }
