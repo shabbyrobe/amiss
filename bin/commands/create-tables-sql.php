@@ -46,7 +46,7 @@ $meta = new \Amiss\Meta('stdClass', [
         'namespaces'=>'--ns',
     ]
 ]);
-$options = $mapper->toObject($options, null, $meta);
+$options = $mapper->mapRowToObject($options, null, $meta);
 
 if (!$options->notes && !$options->namespaces) {
     echo "Please specify some notes and/or namespaces to search for\n\n".$usage; exit(1);

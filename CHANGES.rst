@@ -18,19 +18,19 @@ v5.0.0
     +    function createObject($meta, $mapped, $args=null)
     -    function createObject($meta, $row, $args=null)
 
-    +    function fromObject($input, $meta=null, $context=null)
+    +    function mapObjectToRow($input, $meta=null, $context=null)
     -    function fromObject($meta, $input, $context=null)
 
-    +    function fromObjects($input, $meta=null, $context=null)
+    +    function mapObjectsToRows($input, $meta=null, $context=null)
     -    function fromObjects($meta, $input, $context=null)
 
     +    function populateObject($object, \stdClass $mapped, $meta=null)
     -    function populateObject($meta, $object, $row)
 
-    +    function toObject($input, $args=null, $meta=null)
+    +    function mapRowToObject($input, $args=null, $meta=null)
     -    function toObject($meta, $input, $args=null)
 
-    +    function toObjects($input, $args=null, $meta=null)
+    +    function mapRowsToObjects($input, $args=null, $meta=null)
     -    function toObjects($meta, $input, $args=null)
 
 - Relations can now be automatically populated

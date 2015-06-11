@@ -52,7 +52,7 @@ abstract class Base extends \Amiss\Mapper
     
     abstract protected function createMeta($class);
 
-    public function fromProperties($input, $meta=null)
+    public function mapPropertiesToRow($input, $meta=null)
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta ?: $input);
@@ -93,7 +93,7 @@ abstract class Base extends \Amiss\Mapper
         return $fields;
     }
 
-    public function toProperties($input, $meta=null, $fieldMap=null)
+    public function mapRowToProperties($input, $meta=null, $fieldMap=null)
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta ?: $input);
@@ -185,7 +185,7 @@ abstract class Base extends \Amiss\Mapper
         return $this;
     }
 
-    public function fromObject($object, $meta=null, $context=null)
+    public function mapObjectToRow($object, $meta=null, $context=null)
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta ?: $object);

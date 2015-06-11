@@ -25,12 +25,12 @@ class Embed implements Handler
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $return[$key] = $this->mapper->fromObject($item, $embedMeta);
+                    $return[$key] = $this->mapper->mapObjectToRow($item, $embedMeta);
                 }
             }
         }
         else {
-            $return = $value ? $this->mapper->fromObject($value, $embedMeta) : null;
+            $return = $value ? $this->mapper->mapObjectToRow($value, $embedMeta) : null;
         }
         return $return;
     }
@@ -48,13 +48,13 @@ class Embed implements Handler
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $obj = $this->mapper->toObject($item, null, $embedMeta);
+                    $obj = $this->mapper->mapRowToObject($item, null, $embedMeta);
                     $return[$key] = $obj;
                 }
             }
         }
         else {
-            $return = $this->mapper->toObject($value, null, $embedMeta);
+            $return = $this->mapper->mapRowToObject($value, null, $embedMeta);
         }
         return $return;
     }

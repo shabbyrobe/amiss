@@ -22,11 +22,11 @@ class TestMapper extends \Amiss\Mapper
     
     function populateObject($object, \stdClass $mapped, $meta=null) {}
 
-    public function toProperties($input, $meta=null, $fieldMap=null) {}
+    public function mapRowToProperties($input, $meta=null, $fieldMap=null) {}
 
-    public function fromProperties($input, $meta=null) {}
+    public function mapPropertiesToRow($input, $meta=null) {}
 
-    function fromObject($object, $meta=null, $context=null) {}
+    function mapObjectToRow($object, $meta=null, $context=null) {}
     
     function determineTypeHandler($type) {}
 }    

@@ -7,13 +7,13 @@ namespace Amiss;
  * The Mapper interface provides three methods that may appear to be very
  * similar, but are necessarily distinct and separate:
  * 
- *   - toObject
+ *   - mapRowToObject
  *   - createObject
  *   - populateObject 
  * 
  * Basically, if you want:
  * 
- *   - A fully constructed and populated object based on input: use ``toObject``
+ *   - A fully constructed and populated object based on input: use ``mapRowToObject``
  *   - An instance of an object from the mapper that is not yet fully populated
  *     from input: use ``createObject``
  *   - An instance you already have lying around to be populated by the mapper:
@@ -32,13 +32,13 @@ abstract class Mapper
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function toObject($input, $args=null, $meta=null)
+    public function mapRowToObject($input, $args=null, $meta=null)
     {
         if (!$meta instanceof Meta) {
             $meta = $this->getMeta($meta ?: $input);
         }
 
-        $mapped = $this->toProperties($input, $meta);
+        $mapped = $this->mapRowToProperties($input, $meta);
         $object = $this->createObject($meta, $mapped, $args);
         $this->populateObject($object, $mapped, $meta);
 
@@ -53,7 +53,7 @@ abstract class Mapper
     /**
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function toObjects($input, $args=null, $meta=null)
+    public function mapRowsToObjects($input, $args=null, $meta=null)
     {
         if (!$input) {
             return [];
@@ -65,16 +65,16 @@ abstract class Mapper
         $out = array();
         if ($input) {
             foreach ($input as $item) {
-                $obj = $this->toObject($item, $args, $meta);
+                $obj = $this->mapRowToObject($item, $args, $meta);
                 $out[] = $obj;
             }
         }
         return $out;
     }
 
-    public abstract function toProperties($input, $meta=null, $fieldMap=null);
+    public abstract function mapRowToProperties($input, $meta=null, $fieldMap=null);
 
-    public abstract function fromProperties($input, $meta=null);
+    public abstract function mapPropertiesToRow($input, $meta=null);
 
     /**
      * Get row values from an object
@@ -86,7 +86,7 @@ abstract class Mapper
      * 
      * @return array
      */
-    public abstract function fromObject($input, $meta=null, $context=null);
+    public abstract function mapObjectToRow($input, $meta=null, $context=null);
 
     /**
      * Get row values from a list of objects
@@ -96,7 +96,7 @@ abstract class Mapper
      *
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function fromObjects($input, $meta=null, $context=null)
+    public function mapObjectsToRows($input, $meta=null, $context=null)
     {
         if (!$input) { return []; }
 
@@ -106,7 +106,7 @@ abstract class Mapper
 
         $out = [];
         foreach ($input as $key=>$item) {
-            $out[$key] = $this->fromObject($item, $meta, $context);
+            $out[$key] = $this->mapObjectToRow($item, $meta, $context);
         }
         return $out;
     }

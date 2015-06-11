@@ -90,7 +90,7 @@ class Manager
             if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $mappedRow = $mapper->toProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($row, $meta);
         }
 
         if (!$mappedRow) {
@@ -148,7 +148,7 @@ class Manager
 
         $mappedRows = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->toProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($row, $meta);
             $mappedRows[] = $mappedRow;
         }
 
@@ -445,7 +445,7 @@ class Manager
         }
 
         $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-        $query->values = $this->mapper->fromProperties($query->values, $meta);
+        $query->values = $this->mapper->mapPropertiesToRow($query->values, $meta);
         if (!$query->table) {
             $query->table = $meta->table;
         }
@@ -501,7 +501,7 @@ class Manager
         }
 
         query: {
-            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+            $query->values = $this->mapper->mapObjectToRow($object, $meta, 'insert');
             if (!$query->table) {
                 $query->table = $meta->table;
             }
@@ -637,11 +637,11 @@ class Manager
         }
 
         query: {
-            $query->set = $this->mapper->fromObject($object, $meta, 'update');
+            $query->set = $this->mapper->mapObjectToRow($object, $meta, 'update');
             $query->where = $meta->getIndexValue($object);
             
             list ($sql, $params, $props) = $query->buildQuery($meta);
-            // don't need to do formatParams - it's already covered by the fromProperties call in
+            // don't need to do formatParams - it's already covered by the mapPropertiesToRow call in
             // table update mode
 
             $return = $this->getConnector()->exec($sql, $params);
