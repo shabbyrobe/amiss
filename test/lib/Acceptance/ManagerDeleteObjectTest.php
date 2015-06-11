@@ -1,21 +1,32 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerDeleteObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
+use Amiss\Test;
+
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerDeleteObjectTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
         
-        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
-        if (!$this->artist)
+        $this->artist = $this->deps->manager->get('Artist', 'artistId=?', array(1));
+        if (!$this->artist) {
             throw new \UnexpectedValueException("Unexpected test data");
+        }
     }
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     public function testDeleteById()
     {
         $this->manager->deleteById('Artist', 1);
@@ -25,10 +36,6 @@ class ManagerDeleteObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertGreaterThan(0, $this->manager->count('Artist'));
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     */
     public function testDeleteObject()
     {
         $this->manager->delete($this->artist);
@@ -37,12 +44,7 @@ class ManagerDeleteObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
         // sanity check: make sure we didn't delete everything!
         $this->assertGreaterThan(0, $this->manager->count('Artist'));
     }
-    
-    /**
-     * @group acceptance
-     * @group manager
-     * @expectedException Amiss\Exception
-     */
+
     public function testDeleteObjectWithoutPrimaryFails()
     {
         $mapper = new \Amiss\Test\Helper\TestMapper(array(
@@ -50,6 +52,7 @@ class ManagerDeleteObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
         ));
 
         $manager = new \Amiss\Sql\Manager($this->manager->connector, $mapper);
+        $this->setExpectedException(\Amiss\Exception::class);
         $manager->delete($this->artist);
     }
 }

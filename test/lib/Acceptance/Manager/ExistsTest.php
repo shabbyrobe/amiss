@@ -2,13 +2,14 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
+use Amiss\Test;
 
 /**
  * This method takes the bulk of its logic with getById
  * and createKeyCriteria. A simple test should suffice
  * unless that changes.
  */
-class ExistsTest extends \Amiss\Test\Helper\CustomMapperTestCase
+class ExistsTest extends \Amiss\Test\Helper\TestCase
 {
     /**
      * @group acceptance
@@ -17,7 +18,7 @@ class ExistsTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testExistsKeySingle()
     {
-        list ($manager, $ns) = $this->createDefaultNoteManager('
+        $deps = Test\Factory::managerNoteModelCustom('
             class Pants {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $slug;
@@ -26,8 +27,8 @@ class ExistsTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 public $name;
             }
         ');
-        $manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
-        $this->assertTrue ($manager->exists('Pants', 'yes', 'slug'));
-        $this->assertFalse($manager->exists('Pants', 'nup', 'slug'));
+        $deps->manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
+        $this->assertTrue ($deps->manager->exists('Pants', 'yes', 'slug'));
+        $this->assertFalse($deps->manager->exists('Pants', 'nup', 'slug'));
     }
 }

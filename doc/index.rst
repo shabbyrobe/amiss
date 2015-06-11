@@ -30,14 +30,15 @@ Amiss PHP Data Mapper
 Requirements
 ------------
 
-- PHP 5.3.2 or greater
+- PHP 5.6.0 or greater
 - MySQL or SQLite
 - PDO/MySQL and/or PDO/SQLite
 
 .. note:: 
 
-    Amiss has only been tested with a minimum version of PHP 5.3.2. It may work with 5.3.0 and
-    5.3.1, but this is not guaranteed.
+    Amiss 5 requires PHP 5.6 or greater. If you need support for earlier versions back to
+    5.3.2, use Amiss 4. Amiss 4 will be supported for the forseeable future, but no new
+    features will be added.
 
 
 License
@@ -46,3 +47,4 @@ License
 Amiss is licensed under the MIT License:
 
 .. literalinclude:: ../LICENSE
+

@@ -1,52 +1,22 @@
 <?php
 namespace Amiss\Test\Acceptance\NestedSet;
 
-abstract class TestCase extends \Amiss\Test\Helper\CustomMapperTestCase
+use Amiss\Test;
+
+abstract class TestCase extends \Amiss\Test\Helper\TestCase
 {
-    protected function createNestedSetArrayManager($map)
+    protected static function managerNestedSetArrays($map)
     {
-        $mapper = new \Amiss\Mapper\Arrays($map);
-        $config = [
-            'dbTimeZone'=>'UTC',
-        ];
-        $mapper->typeHandlers = \Amiss\Sql\Factory::createTypeHandlers($config);
-        $manager = $this->createNestedSetManager($mapper, array_keys($map));
-        return $manager;
+        $deps = Test\Factory::managerArraysModelCustom($map);
+        $deps->nsManager = \Amiss\Ext\NestedSet\Manager::createWithDefaults($deps->manager);
+        return $deps;
     }
 
-    public function createNestedSetNoteManager($classes)
+    protected static function managerNestedSetNote($classes)
     {
-        $ns = null;
-        $classNames = [];
-        if ($classes) {
-            list ($ns, $classNames) = \Amiss\Test\Helper\ClassBuilder::i()->register($classes);
-        }
-        $nsManager = $this->createNestedSetManager(null, $classNames);
-        if ($ns) {
-            $nsManager->manager->mapper->objectNamespace = $ns;
-        }
-        $this->prepareManager($nsManager->manager, $classNames);
-        return [$nsManager, $ns];
-    }
-
-    protected function createNestedSetNoteMapper($map)
-    {
-        $mapper = new \Amiss\Mapper\Arrays($map);
-        $config = [
-            'dbTimeZone'=>'UTC',
-        ];
-        $mapper->typeHandlers = \Amiss\Sql\Factory::createTypeHandlers($config);
-        $manager = $this->createNestedSetManager($mapper, array_keys($map));
-        return $manager;
-    }
-
-    protected function createNestedSetManager($mapper, $classNames)
-    {
-        $connector = $this->getConnector();
-        $info = $this->getConnectionInfo();
-        $manager = $this->createDefaultManager($mapper);
-        $manager = \Amiss\Ext\NestedSet\Manager::createWithDefaults($manager);
-        return $manager;
+        $deps = Test\Factory::managerNoteModelCustom($classes);
+        $deps->nsManager = \Amiss\Ext\NestedSet\Manager::createWithDefaults($deps->manager);
+        return $deps;
     }
 
     function idTree($parent, $tree, $idProp='id', $treeProp='tree')

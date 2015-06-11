@@ -71,9 +71,9 @@ abstract class ActiveRecord
                 self::$services[$id][$class] = static::getDependency($id, $parent);
             }
         }
-        
+
         if (!isset(self::$services[$id][$class])) {
-            throw new Exception("No manager defined against $class or any parent thereof");
+            throw new Exception("No $id defined against $class or any parent thereof");
         }
         
         return self::$services[$id][$class];

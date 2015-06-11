@@ -338,7 +338,7 @@ class Meta
             }
             foreach ($this->relations as $name=>$relation) {
                 if ($relation['mode'] != 'class') {
-                    $field['source'] = 'relation';
+                    $relation['source'] = 'relation';
                     $this->properties[$name] = $relation;
                 }
             }

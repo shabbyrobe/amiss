@@ -163,9 +163,9 @@ class DateTest extends \Amiss\Test\Helper\TestCase
 
 class PantsDateTime extends \DateTime
 {
-    public static function createFromFormat($format, $time, $object=null)
+    public static function createFromFormat($format, $time, $tz=null)
     {
-        $dateTime = \DateTime::createFromFormat($format, $time, $object);
+        $dateTime = \DateTime::createFromFormat($format, $time, $tz);
         $dt = new static('@'.$dateTime->getTimeStamp(), new \DateTimeZone('UTC'));
         $dt->setTimeZone($dateTime->getTimeZone());
         return $dt;

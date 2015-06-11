@@ -1,8 +1,16 @@
 Quick Start
 ===========
 
-This quickstart will assume you wish to use an annotation-based mapper. See :doc:`mapper/mapping`
-for more details and alternatives.
+This quickstart will assume you wish to use an annotation-based mapper. See
+:doc:`mapper/mapping` for more details and alternatives.
+
+
+Install
+-------
+
+::
+
+    composer require shabbyrobe/amiss
 
 
 Loading and Configuring
@@ -14,23 +22,24 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 
     <?php
 
-    // Include and register optional autoloader (generate using composer install)
-    require_once('/path/to/amiss/src/vendor/autoload.php');
+    // Include and register autoloader (generate using composer install)
+    require 'vendor/autoload.php';
 
-    // This is basically a PDO with a bit of extra niceness. You should use it instead
-    // of PDO in your own code
-    $connector = new Amiss\Sql\Connector('mysql:host=127.0.0.1', 'user', 'password');
+    // Amiss depends on the PDOK library (http://github.com/shabbyrobe/pdok). PDOK is
+    // a thin wrapper around PDO which adds a few nice things. You should use it
+    // instead of PDO in your own code.
+    $connector = new PDOK\Connector('mysql:host=127.0.0.1', 'user', 'password');
     
-    // This will create a SQL manager using the default configuration (note mapper, default types
-    // and relators, no cache)
+    // This will create a SQL manager using the default configuration (note mapper, 
+    // default types and relators, no cache)
     $manager = Amiss\Sql\Factory::createManager($connector);
     
     // Same as above, but with a cache
-    $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
+    $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
     $manager = Amiss\Sql\Factory::createManager($connector, array('cache'=>$cache));
     
     // Configure the default mapper
-    $manager->mapper->objectNamespace = 'Your\Model';
+    $manager->mapper->objectNamespace = 'Your\Model\Namespace';
     
     // Or use your own mapper:
     $mapper = new \Amiss\Mapper\Arrays();
@@ -53,15 +62,40 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     $manager->relators['many'] = new \Amiss\Sql\Relator\OneMany($manager);
 
 
+Annotation Syntax
+-----------------
+
+Annotations in Amiss have a very simple syntax. They follow this format and MUST be
+embedded in doc block comments (``/** */``, not ``/* */``)::
+
+    /**
+     * :namespace = {"json": "object"};
+     */
+
+All Amiss annotations use the ``:amiss`` namespace.
+
+Annotations can span an arbitrary number of lines. Parsing ends when a semicolon is
+encountered as the last non-whitespace character on a line::
+
+    /**
+     * :namespace = {
+     *     "json": "object", 
+     *     "yep": [
+     *         1, 2, 3
+     *     ]
+     * };
+     */
+
+
 Defining objects
 ----------------
 
-Table names are guessed from the object name. Object names are converted from ``CamelCase`` to
-``under_scores`` by default.
+Table names are guessed from the object name. Object names are converted from
+``CamelCase`` to ``under_scores`` by default.
 
-Table field names are guessed from the property name. No name mapping is performed by default, but
-you can pass an explicit field name via the ``@field`` annotation, or pass your own automatic
-translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator``.
+Table field names are guessed from the property name. No name mapping is performed by
+default, but you can pass an explicit field name via the ``@field`` annotation, or pass
+your own automatic translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator``.
 
 See :doc:`mapper/mapping` for more details and alternative mapping options.
 
@@ -72,12 +106,10 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
     class Event
     {
         /**
-         * :amiss = {
-         *     "field": {
-         *         "type": "autoinc",
-         *         "primary": true
-         *     }
-         * };
+         * :amiss = {"field": {
+         *     "type": "autoinc",
+         *     "primary": true
+         * }};
          */
         public $eventId;
 
@@ -92,7 +124,7 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         public $startDate;
 
         /**
-         * :amiss = {"field":true};
+         * :amiss = {"field": {"index": true}};
          */
         public $venueId;
 
@@ -101,7 +133,7 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
          *     "has": {
          *         "type": "one",
          *         "of": "Venue",
-         *         "on": "venueId"
+         *         "from": "venueId"
          *     }
          * };
          */
@@ -109,11 +141,10 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
     }
 
     /**
-     * Explicit table name annotation. Leave this out and the table will default to 'venue'
+     * Explicit table name annotation. Leave this out and the table 
+     * will default to 'venue'
      *
-     * :amiss = {
-     *     "table": "venues"
-     * };
+     * :amiss = {"table": "venues"};
      */
     class Venue
     {
@@ -165,8 +196,11 @@ See :doc:`schema` for more details.
 .. code-block:: php
 
     <?php
-    $tableBuilder = new Amiss\Sql\TableBuilder($manager, 'Venue');
-    $tableBuilder->createTable();
+    // single
+    $tableBuilder = Amiss\Sql\TableBuilder::create($connector, $manager, 'Venue');
+
+    // multiple
+    $tableBuilder = Amiss\Sql\TableBuilder::create($connector, $manager, ['Venue', 'Event']);
 
 
 Selecting
@@ -180,8 +214,8 @@ See :doc:`selecting` for more details.
     // Get an event by primary key
     $event = $manager->getById('Event', 1);
 
-    // Get an event named foobar with a clause written in raw SQL. Property names wrapped in
-    // curly braces get translated to field names by the mapper.
+    // Get an event named foobar with a clause written in raw SQL. Property names 
+    // wrapped in curly braces get translated to field names by the mapper.
     $event = $manager->get('Event', '{name}=?', ['foobar']);
 
     // Get all events
@@ -229,8 +263,9 @@ See :doc:`selecting` for more details.
 Relations
 ---------
 
-Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an extension point
-for adding additional relationship retrieval methods. See :doc:`relations` for more details.
+Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an
+extension point for adding additional relationship retrieval methods. See :doc:`relations`
+for more details.
 
 One-to-one
 ~~~~~~~~~~
@@ -327,8 +362,8 @@ One-to-many
 Many-to-many
 ~~~~~~~~~~~~
 
-Many-to-many relations require the association table to be mapped to an intermediate object, and
-also require the relation to be specified on both sides:
+Many-to-many relations require the association table to be mapped to an intermediate
+object, and also require the relation to be specified on both sides:
 
 
 .. code-block:: php
@@ -434,7 +469,7 @@ Modifying by table:
 
     <?php
     // Insert a new row
-    $manager->insert('Event', array(
+    $manager->insertTable('Event', array(
         'name'=>'Abc Def',
         'slug'=>'abc-def',
         'startDate'=>'2020-01-01',
@@ -443,10 +478,10 @@ Modifying by table:
     // Update by table. Set the name field based on the start date.
     // This can work on an arbitrary number of rows, depending on the condition.
     // Clauses can be specified the same way as 'selecting'.
-    $manager->update('Event', array('name'=>'Abc: Def'), '{startDate} > ?', '2019-01-01');
+    $manager->updateTable('Event', array('name'=>'Abc: Def'), '{startDate} > ?', ['2019-01-01']);
     
     // Alternative clause syntax
-    $manager->update('Event', array(
+    $manager->updateTable('Event', array(
         'set'=>array('name'=>'Abc: Def'), 
         'where'=>array('startDate'=>'2019-01-01')
     ));

@@ -1,9 +1,9 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Demo;
+use Amiss\Test;
 
-class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
+class GetByIdTest extends \Amiss\Test\Helper\TestCase
 {
     /**
      * @group acceptance
@@ -12,7 +12,7 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdKeySingle()
     {
-        list ($manager, $ns) = $this->createDefaultNoteManager('
+        $deps = Test\Factory::managerNoteModelCustom('
             class Pants {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $slug;
@@ -21,8 +21,8 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 public $name;
             }
         ');
-        $manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
-        $a = $manager->getById('Pants', 'yes', ['key'=>'slug']);
+        $deps->manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
+        $a = $deps->manager->getById('Pants', 'yes', ['key'=>'slug']);
         $this->assertEquals('Yep!', $a->name);
     }
 
@@ -33,7 +33,7 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdKeyMultiPositional()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
                 'primary' => ['pri1', 'pri2'],
@@ -44,9 +44,9 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 ],
             ],
         ]);
-        $manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
+        $d->manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
 
-        $result = $manager->getById('Pants', ['k1', 'k2'], ['key'=>'idx']);
+        $result = $d->manager->getById('Pants', ['k1', 'k2'], ['key'=>'idx']);
         $this->assertEquals("k1", $result->key1);
         $this->assertEquals("k2", $result->key2);
     }
@@ -58,7 +58,7 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdKeyMultiNamed()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
 
@@ -73,9 +73,9 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 ],
             ],
         ]);
-        $manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
+        $d->manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
 
-        $result = $manager->getById('Pants', array('key2'=>'k2', 'key1'=>'k1'), ['key'=>'idx']);
+        $result = $d->manager->getById('Pants', array('key2'=>'k2', 'key1'=>'k1'), ['key'=>'idx']);
         $this->assertEquals("k1", $result->key1);
         $this->assertEquals("k2", $result->key2);
     }
@@ -87,7 +87,7 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdKeyMultiNamedWithTranslatedNames()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
                 'table'   => 'pa_nts',
@@ -103,14 +103,14 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 ],
             ],
         ]);
-        $manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
+        $d->manager->insertTable('Pants', ['pri1'=>'p1', 'pri2'=>'p2', 'key1'=>'k1', 'key2'=>'k2']);
 
-        $result = $manager->getById('Pants', array('key2'=>'k2', 'key1'=>'k1'), ['key'=>'idx']);
+        $result = $d->manager->getById('Pants', array('key2'=>'k2', 'key1'=>'k1'), ['key'=>'idx']);
         $this->assertEquals("k1", $result->key1);
         $this->assertEquals("k2", $result->key2);
         
         // sanity check to make sure the underlying table actually uses the translated names
-        $rows = $manager->getConnector()->query("SELECT pri_1, pri_2, key_1, key_2 FROM pa_nts")->fetchAll(\PDO::FETCH_ASSOC);
+        $rows = $d->manager->getConnector()->query("SELECT pri_1, pri_2, key_1, key_2 FROM pa_nts")->fetchAll(\PDO::FETCH_ASSOC);
         $expectedRows = [['pri_1'=>'p1', 'pri_2'=>'p2', 'key_1'=>'k1', 'key_2'=>'k2']];
         $this->assertEquals($expectedRows, $rows);
     }
@@ -122,15 +122,15 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdPrimarySingle()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
                 'primary' => 'foo',
                 'fields'  => ['foo'=>true, 'bar'=>true],
             ],
         ]);
-        $manager->insertTable('Pants', ['foo'=>1, 'bar'=>'yep']);
-        $result = $manager->getById('Pants', 1);
+        $d->manager->insertTable('Pants', ['foo'=>1, 'bar'=>'yep']);
+        $result = $d->manager->getById('Pants', 1);
         $this->assertEquals(1, $result->foo);
         $this->assertEquals('yep', $result->bar);
     }
@@ -142,7 +142,7 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdArgs()
     {
-        list ($manager, $ns) = $this->createDefaultNoteManager('
+        $d = Test\Factory::managerNoteModelCustom('
             class Pants {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -152,8 +152,8 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 }
             }
         ');
-        $manager->insertTable('Pants', ['id'=>100]);
-        $result = $manager->getById('Pants', 100, ['args'=>['ding', 'dong']]);
+        $d->manager->insertTable('Pants', ['id'=>100]);
+        $result = $d->manager->getById('Pants', 100, ['args'=>['ding', 'dong']]);
         $this->assertEquals(100, $result->id);
         $this->assertEquals("ding", $result->a);
         $this->assertEquals("dong", $result->b);
@@ -166,15 +166,15 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdPrimaryMultiPositional()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
                 'primary' => ['foo', 'bar'],
                 'fields'  => ['foo'=>true, 'bar'=>true],
             ],
         ]);
-        $manager->insertTable('Pants', ['foo'=>2, 'bar'=>1]);
-        $result = $manager->getById('Pants', array(2, 1));
+        $d->manager->insertTable('Pants', ['foo'=>2, 'bar'=>1]);
+        $result = $d->manager->getById('Pants', array(2, 1));
         $this->assertEquals(2, $result->foo);
         $this->assertEquals(1, $result->bar);
     }
@@ -186,15 +186,15 @@ class GetByIdTest extends \Amiss\Test\Helper\CustomMapperTestCase
      */
     public function testGetByIdMultiNamed()
     {
-        $manager = $this->createDefaultArrayManager([
+        $d = Test\Factory::managerArraysModelCustom([
             'Pants'=>[
                 'class'   => 'stdClass',
                 'primary' => ['foo', 'bar'],
                 'fields'  => ['foo'=>true, 'bar'=>true],
             ],
         ]);
-        $manager->insertTable('Pants', ['foo'=>2, 'bar'=>1]);
-        $result = $manager->getById('Pants', ['bar'=>1, 'foo'=>2]);
+        $d->manager->insertTable('Pants', ['foo'=>2, 'bar'=>1]);
+        $result = $d->manager->getById('Pants', ['bar'=>1, 'foo'=>2]);
         $this->assertEquals(2, $result->foo);
         $this->assertEquals(1, $result->bar);
     }

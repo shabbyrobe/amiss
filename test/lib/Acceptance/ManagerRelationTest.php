@@ -4,13 +4,27 @@ namespace Amiss\Test\Acceptance;
 use Amiss\Sql\Query\Criteria;
 use Amiss\Demo;
 use Amiss\Functions;
+use Amiss\Test;
 
 /**
  * @group acceptance
  * @group manager
  */
-class ManagerRelationTest extends \Amiss\Test\Helper\ModelDataTestCase
+class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
 {
+    public function setUp()
+    {
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
+    }
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     public function testGetRelatedSingle()
     {
         $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
@@ -36,7 +50,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\ModelDataTestCase
         $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
         $this->assertEquals('the-sonic-manipulator', $eventArtist->artist->slug);
-        $this->assertEquals(3, $this->db->queries);
+        $this->assertEquals(3, $this->deps->connector->queries);
     }
  
     public function testAssignListSourceToMultipleOneRelations()

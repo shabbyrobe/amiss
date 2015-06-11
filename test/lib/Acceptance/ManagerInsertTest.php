@@ -2,52 +2,66 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo;
+use Amiss\Test;
 
-class ManagerInsertTest extends \Amiss\Test\Helper\ModelDataTestCase
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
 {
     /**
      * Ensures the signature for object insertion works
      *   Amiss\Sql\Manager->insert( object $object )
-     * 
-     * @group acceptance
-     * @group manager
      */
-    public function testInsertObject()
+    public function testInsertObjectWithAutoinc()
     {
-        $this->assertEquals(0, $this->manager->count('Artist', 'slug="insert-test"'));
+        $deps = Test\Factory::managerModelDemo();
+
+        $this->assertEquals(0, $deps->manager->count('Artist', 'slug="insert-test"'));
             
         $artist = new Demo\Artist();
         $artist->artistTypeId = 1;
         $artist->name = 'Insert Test';
         $artist->slug = 'insert-test';
-        $this->manager->insert($artist);
-        
+        $ret = $deps->manager->insert($artist);
+
         $this->assertGreaterThan(0, $artist->artistId);
+        $this->assertEquals($artist->artistId, $ret);
         
-        $this->assertEquals(1, $this->manager->count('Artist', 'slug="insert-test"'));
+        $this->assertEquals(1, $deps->manager->count('Artist', 'slug="insert-test"'));
+
+        return [$artist, $deps];
     }
-    
+
+    /** @depends testInsertObjectWithAutoinc */
+    public function testInsertObjectWithAutoincTwice($args)
+    {
+        list ($artist, $deps) = $args;
+        $this->setExpectedException(\PDOException::class, "Integrity constraint violation");
+        $ret = $deps->manager->insert($artist);
+    }
+
     /**
      * Ensures object insertion works with a complex mapping (Venue
      * defines explicit field mappings)
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testInsertObjectWithManualNoteFields()
     {
-        $this->assertEquals(0, $this->manager->count('Venue', 'slug="insert-test"'));
+        $deps = Test\Factory::managerModelDemo();
+
+        $this->assertEquals(0, $deps->manager->count('Venue', 'slug="insert-test"'));
         
         $venue = new Demo\Venue();
         $venue->venueName = 'Insert Test';
         $venue->venueSlug = 'insert-test';
         $venue->venueAddress = 'yep';
         $venue->venueShortAddress = 'yep';
-        $this->manager->insert($venue);
+        $deps->manager->insert($venue);
         
         $this->assertGreaterThan(0, $venue->venueId);
         
-        $row = $this->manager->connector->prepare("SELECT * from venue WHERE venueId=?")
+        $row = $deps->manager->connector->prepare("SELECT * from venue WHERE venueId=?")
             ->execute(array($venue->venueId))
             ->fetch(\PDO::FETCH_ASSOC);
 
@@ -66,9 +80,11 @@ class ManagerInsertTest extends \Amiss\Test\Helper\ModelDataTestCase
      */
     public function testInsertTable()
     {
-        $this->assertEquals(0, $this->manager->count('Artist', 'slug="insert-table-test"'));
+        $deps = Test\Factory::managerModelDemo();
+
+        $this->assertEquals(0, $deps->manager->count('Artist', 'slug="insert-table-test"'));
         
-        $id = $this->manager->insertTable('Artist', array(
+        $id = $deps->manager->insertTable('Artist', array(
             'name'=>'Insert Table Test',
             'slug'=>'insert-table-test',
             'artistTypeId'=>1,
@@ -76,6 +92,6 @@ class ManagerInsertTest extends \Amiss\Test\Helper\ModelDataTestCase
         
         $this->assertGreaterThan(0, $id);
         
-        $this->assertEquals(1, $this->manager->count('Artist', 'slug="insert-table-test"'));
+        $this->assertEquals(1, $deps->manager->count('Artist', 'slug="insert-table-test"'));
     }
 }

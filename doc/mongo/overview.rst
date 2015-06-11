@@ -36,7 +36,7 @@ This extension leverages the mappers used by Amiss for relational SQL databases 
 
     $mongo = new \Mongo();
     $db = $mongo->dbname;
-    $result = $mapper->fromObject(
+    $result = $mapper->mapObjectToRow(
         $mapper->getMeta('Event'),
         $db->event->findOne(array('_id'=>new \MongoId('...')))
     );

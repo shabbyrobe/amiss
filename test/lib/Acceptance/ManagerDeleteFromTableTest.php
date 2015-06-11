@@ -2,48 +2,44 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Sql\Query\Criteria;
+use Amiss\Test;
 
-class ManagerDeleteFromTableTest extends \Amiss\Test\Helper\ModelDataTestCase
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerDeleteFromTableTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
     }
 
-    /**
-     * @group acceptance
-     * @group manager
-     */
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     public function testDeleteTableWithMatchAllClause()
     {
-        $this->assertGreaterThan(0, $this->manager->count('Artist'));
+        $this->assertGreaterThan(0, $this->deps->manager->count('Artist'));
         $this->manager->deleteTable('Artist', '1=1');
-        $this->assertEquals(0, $this->manager->count('Artist'));
+        $this->assertEquals(0, $this->deps->manager->count('Artist'));
     }
     
-    /**
-     * @group acceptance
-     * @group manager
-     * @expectedException InvalidArgumentException
-     */
     public function testDeleteTableWithoutClauseFails()
     {
         $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
-        
-        $this->manager->deleteTable('Artist');
-        
-        $this->assertEquals(0, $this->manager->count('Artist', 'artistTypeId=?', [1]));
-        
-        // sanity check: make sure we didn't delete everything!
-        $this->assertEquals(4, $this->manager->count('Artist'));
+        $this->setExpectedException(\InvalidArgumentException::class);
+        $this->deps->manager->deleteTable('Artist');
     }
     
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->deleteTable( string $table, string $positionalWhere, [ $param1, ... ] )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testDeleteTableWithArraySetAndPositionalWhere()
     {
@@ -60,9 +56,6 @@ class ManagerDeleteFromTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->deleteTable( string $table, string $namedWhere, array $params )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testDeleteTableWithArraySetAndNamedWhere()
     {
@@ -79,9 +72,6 @@ class ManagerDeleteFromTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->deleteTable( string $table, array $criteria )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testDeleteTableWithArrayCriteria()
     {
@@ -98,9 +88,6 @@ class ManagerDeleteFromTableTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the following signature works as expected:
      *   Amiss\Sql\Manager->deleteTable( string $table, Criteria\Query $criteria )
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testDeleteTableWithObjectCriteria()
     {

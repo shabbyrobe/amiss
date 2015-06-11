@@ -69,7 +69,7 @@ The following functions must be implemented:
         "object".
 
 
-.. py:function:: fromObject ( $meta , $object )
+.. py:function:: mapObjectToRow ( $meta , $object )
     
     Creates a row that will be used to insert or update the database. Must return a 1-dimensional
     associative array (or instance of `ArrayAccess
@@ -79,7 +79,7 @@ The following functions must be implemented:
     :param object:  The object containing the values which will be used for the row
 
 
-.. py:function:: toObject ( $meta , $object , $args )
+.. py:function:: mapRowToObject ( $meta , $object , $args )
     
     Create the object mapped by the passed ``Amiss\Meta`` object, assign the values from the
     ``$row``, and return the freshly minted instance.
@@ -113,7 +113,7 @@ The following functions must be implemented:
     Return an instance of ``Amiss\Type\Handler`` for the passed type. Can return ``null``.
 
     This is only really used by the ``Amiss\Sql\TableBuilder`` class when you roll your own mapper
-    unless you make use of it yourself in ``fromObject`` and ``toObject``. If you don't intend to
+    unless you make use of it yourself in ``mapObjectToRow`` and ``mapRowToObject``. If you don't intend to
     use the table builer and don't intend to use this facility to map types yourself, just leave the
     method body empty.
 

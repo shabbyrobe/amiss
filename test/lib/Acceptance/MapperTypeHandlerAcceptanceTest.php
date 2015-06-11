@@ -2,24 +2,36 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Demo\Active;
+use Amiss\Sql\TableBuilder;
 
-class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
+/**
+ * @group acceptance
+ * @group mapper
+ */
+class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
+        $this->deps = \Amiss\Test\Factory::managerActiveDemo();
+
+        // this is not ideal - need to add managerActiveCustom
         \Amiss\Sql\ActiveRecord::_reset();
-        \Amiss\Sql\ActiveRecord::setManager($this->manager);
+        \Amiss\Sql\ActiveRecord::setManager($this->deps->manager);
     }
-    
-    /**
-     * @group acceptance
-     * @group mapper
-     */
+
+    public function tearDown()
+    {
+        \Amiss\Sql\ActiveRecord::_reset();
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     public function testCustomType()
     {
-        $this->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
-        $this->createRecordMemoryDb(__NAMESPACE__.'\TestCustomFieldTypeRecord');
+        $this->deps->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
+        TableBuilder::create($this->deps->connector, $this->deps->mapper, [
+            __NAMESPACE__.'\TestCustomFieldTypeRecord'
+        ]);
         
         $r = new TestCustomFieldTypeRecord;
         $r->yep1 = 'foo';
@@ -32,24 +44,16 @@ class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\ActiveRecordDat
         $this->assertEquals('value-db-foo', $r->yep1);
     }
 
-    /**
-     * @group acceptance
-     * @group mapper
-     */
     public function testTypeMapperOnRetrieve()
     {
-        $this->mapper->addTypeHandler(new TestTypeHandler(), 'varchar');
+        $this->deps->mapper->addTypeHandler(new TestTypeHandler(), 'varchar');
         $event = \Amiss\Demo\Active\EventRecord::getById(1);
         $this->assertEquals('zAwexxomeFestz', $event->name);
     }
     
-    /**
-     * @group acceptance
-     * @group mapper
-     */
     public function testTypeMapperOnSave()
     {
-        $this->mapper->addTypeHandler(new TestTypeHandler(), 'varchar');
+        $this->deps->mapper->addTypeHandler(new TestTypeHandler(), 'varchar');
         $event = \Amiss\Demo\Active\EventRecord::getById(1);
         
         $event->save();

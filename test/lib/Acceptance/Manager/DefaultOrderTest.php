@@ -1,15 +1,15 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Demo;
+use Amiss\Test;
 
-class DefaultOrderTest extends \Amiss\Test\Helper\CustomMapperTestCase
+class DefaultOrderTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
         parent::setUp();
 
-        $this->manager = $this->createDefaultArrayManager([
+        $this->deps = Test\Factory::managerArraysModelCustom([
             'Parent'=>[
                 'class'  => 'stdClass',
                 'table'  => 't1',
@@ -31,6 +31,7 @@ class DefaultOrderTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 'defaultOrder'=>'sort',
             ],
         ]);
+        $this->manager = $this->deps->manager;
         $this->manager->insertTable('Ordered', ['id'=>1, 'yep'=>2, 'sort'=>3]);
         $this->manager->insertTable('Ordered', ['id'=>2, 'yep'=>2, 'sort'=>2]);
         $this->manager->insertTable('Ordered', ['id'=>3, 'yep'=>2, 'sort'=>1]);

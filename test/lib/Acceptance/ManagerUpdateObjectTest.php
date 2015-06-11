@@ -1,22 +1,32 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-class ManagerUpdateObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
+use Amiss\Test;
+
+/**
+ * @group acceptance
+ * @group manager
+ */
+class ManagerUpdateObjectTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
-        
+        $this->deps = Test\Factory::managerModelDemo();
+        $this->manager = $this->deps->manager;
         $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
         $this->assertEquals('Limozeen', $this->artist->name);
     }
-    
+
+    public function tearDown()
+    {
+        $this->manager = null;
+        $this->deps = null;
+        parent::tearDown();
+    }
+
     /**
      * Ensures that only the EventArtist that we selected is updated. EventArtist
      * has a multi-column primary.
-     * 
-     * @group acceptance
-     * @group manager
      */
     public function testUpdateObjectByMultiKey()
     {
@@ -44,9 +54,6 @@ class ManagerUpdateObjectTest extends \Amiss\Test\Helper\ModelDataTestCase
     /**
      * Ensures the signature for the 'autoincrement primary key' update method works
      *   Amiss\Sql\Manager->update( object $object )
-     *   
-     * @group acceptance
-     * @group manager
      */
     public function testUpdateObjectByAutoincrementPrimaryKey()
     {

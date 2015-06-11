@@ -7,13 +7,17 @@ use Amiss\Demo\Active;
  * @group active
  * @group acceptance
  */
-class ActiveRecordTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
+class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        parent::setUp();
-        \Amiss\Sql\ActiveRecord::_reset();
-        \Amiss\Sql\ActiveRecord::setManager($this->manager);
+        $this->deps = \Amiss\Test\Factory::managerActiveDemo();
+    }
+
+    public function tearDown()
+    {
+        $this->deps = null;
+        parent::tearDown();
     }
 
     public function testGetById()
@@ -71,10 +75,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
         $this->assertTrue($obj==true, "Couldn't retrieve object");
 
         $obj->delete();
-        $this->assertEquals(0, $this->manager->count('ArtistRecord', 'artistId=1'));
+        $this->assertEquals(0, $this->deps->manager->count('ArtistRecord', 'artistId=1'));
 
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
+        $this->assertGreaterThan(0, $this->deps->manager->count('ArtistRecord'));
     }
 
     public function testDeleteById()
@@ -83,10 +87,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\ActiveRecordDataTestCase
         $this->assertTrue($obj==true, "Couldn't retrieve object");
         Active\ArtistRecord::deleteById(1);
 
-        $this->assertEquals(0, $this->manager->count('ArtistRecord', 'artistId=1'));
+        $this->assertEquals(0, $this->deps->manager->count('ArtistRecord', 'artistId=1'));
 
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->manager->count('ArtistRecord'));
+        $this->assertGreaterThan(0, $this->deps->manager->count('ArtistRecord'));
     }
 
     public function testUpdateByPrimary()

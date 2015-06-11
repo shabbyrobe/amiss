@@ -4,7 +4,7 @@ require_once(__DIR__.'/../../doc/demo/model.php');
 
 $namespace = 'Amiss\Demo';
 $mapper = new Amiss\Mapper\Arrays(array(
-    $namespace.'\Artist'=>array(
+    'Artist'=>array(
         'primary'=>array('artistId'),
         'fields'=>array(
             'artistId'=>array('type'=>'autoinc'),
@@ -18,7 +18,7 @@ $mapper = new Amiss\Mapper\Arrays(array(
             'events'=>array('assoc', 'of'=>'Event', 'via'=>'EventArtist'),
         ),
     ),
-    $namespace.'\ArtistType'=>array(
+    'ArtistType'=>array(
         'table'=>'artist_type',
         'primary'=>'artistTypeId',
         'fields'=>array(

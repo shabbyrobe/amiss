@@ -1,16 +1,16 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
-use Amiss\Demo;
+use Amiss\Test;
 
 // this used to be a type handler but it never worked quite right.
 // the test has been kept to sanity check that it's actually possible
 // to do this through other means.
-class AutoGuidTest extends \Amiss\Test\Helper\CustomMapperTestCase
+class AutoGuidTest extends \Amiss\Test\Helper\TestCase
 {
     public function testInsertGeneratesGuid()
     {
-        list ($this->manager, $ns) = $this->createDefaultNoteManager('
+        $d = Test\Factory::managerNoteModelCustom('
             /**
              * :amiss = {
              *     "on": {
@@ -31,12 +31,12 @@ class AutoGuidTest extends \Amiss\Test\Helper\CustomMapperTestCase
                 }
             }
         ');
-        $cls = "$ns\\AutoGuid";
+        $cls = "{$d->ns}\\AutoGuid";
         $o = new $cls;
-        $this->manager->insert($o);
+        $d->manager->insert($o);
         $this->assertNotEmpty($o->guid);
 
-        $o = $this->manager->get('AutoGuid');
+        $o = $d->manager->get('AutoGuid');
         $this->assertNotEmpty($o->guid);
     }
 }

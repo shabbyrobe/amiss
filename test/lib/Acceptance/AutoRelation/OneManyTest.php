@@ -117,7 +117,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         $this->assertTrue($parent->children[0] instanceof TestChild);
     }
 
-    public function testAutoManyDoesntCycle()
+    public function testAutoManyDeep()
     {
         $manager = $this->manager;
         $this->setAutoRelation('TestChild', 'parent', 'children');
@@ -126,7 +126,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         $parent = $manager->getById('TestParent', 1);
         $this->assertTrue($parent->children[0] instanceof TestChild);
         $this->assertTrue($parent->grandParent instanceof TestGrandParent);
-        $this->assertNull($parent->children[0]->parent);
+        $this->assertTrue($parent->children[0]->parent instanceof TestParent);
     }
 }
 

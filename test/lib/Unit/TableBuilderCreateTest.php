@@ -2,19 +2,25 @@
 namespace Amiss\Test\Unit;
 
 use Amiss\Sql\TableBuilder;
+use Amiss\Test;
 
 /**
  * @group unit
  */
-class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
+class TableBuilderCreateTest extends \Amiss\Test\Helper\TestCase
 {
     public function setUp()
     {
-        if ($this->getConnector()->engine != 'sqlite')
+        $this->deps = Test\Factory::managerNoteDefault();
+        if ($this->deps->connector->engine != 'sqlite') {
             return $this->markTestSkipped();
-        
-        parent::setUp();
-        $this->manager = \Amiss\Sql\Factory::createManager(new \PDOK\Connector('sqlite::memory:'));
+        }
+    }
+
+    public function tearDown()
+    {
+        $this->deps = null;
+        parent::tearDown();
     }
     
     /**
@@ -33,7 +39,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
                 PRIMARY KEY (`testCreateId`)
             );
         ";
-        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $sql = TableBuilder::createSQL('sqlite', $this->deps->mapper, $class);
         $this->assertLoose($pattern, $sql[0]);
     }
     
@@ -51,7 +57,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
                 `bar` STRING NULL
             );
         ";
-        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $sql = TableBuilder::createSQL('sqlite', $this->deps->mapper, $class);
         $this->assertLoose($pattern, $sql[0]);
     }
 
@@ -71,7 +77,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
                 KEY `fooId` (`fooId`)
             ) ENGINE=InnoDB;
         ";
-        $sql = TableBuilder::createSQL('mysql', $this->manager->mapper, $class);
+        $sql = TableBuilder::createSQL('mysql', $this->deps->mapper, $class);
         $this->assertLoose($pattern, $sql[0]);
     }
 
@@ -90,7 +96,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
             );",
             "CREATE INDEX `bar_fooId` ON `bar`(`fooId`);",
         ];
-        $sql = TableBuilder::createSQL('sqlite', $this->manager->mapper, $class);
+        $sql = TableBuilder::createSQL('sqlite', $this->deps->mapper, $class);
         $this->assertLoose($patterns[0], $sql[0]);
         $this->assertLoose($patterns[1], $sql[1]);
         $this->assertCount(2, $sql);
@@ -113,7 +119,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
                 KEY `myFoo` (`myFooId`, `myOtherFooId`)
             )
         ";
-        $sql = TableBuilder::createSQL('mysql', $this->manager->mapper, $class);
+        $sql = TableBuilder::createSQL('mysql', $this->deps->mapper, $class);
         $this->assertLoose($pattern, $sql[0]);
     }
 
@@ -123,7 +129,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
      */
     public function testCreateTableFailsWhenFieldsNotDefined()
     {
-        TableBuilder::createSQL($this->manager->connector, $this->manager->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
+        TableBuilder::createSQL($this->deps->connector, $this->deps->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
     }
     
     /**
@@ -131,9 +137,13 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\DataTestCase
      */
     public function testCreateTableFailsWhenConnectorIsNotPDOKConnector()
     {
-        $this->manager->connector = new \PDO('sqlite::memory:');
-        $this->setExpectedException('PHPUnit_Framework_Error');
-        TableBuilder::create($this->manager->connector, $this->manager->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
+        $this->deps->connector = new \PDO('sqlite::memory:');
+        if (version_compare(PHP_VERSION, "7.0.0-dev") >= 0) {
+            $this->setExpectedException('TypeException');
+        } else {
+            $this->setExpectedException('PHPUnit_Framework_Error');
+        }
+        TableBuilder::create($this->deps->connector, $this->deps->mapper, __NAMESPACE__.'\TestNoFieldsCreate');
     }
 }
 

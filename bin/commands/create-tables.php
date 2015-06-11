@@ -51,7 +51,7 @@ $meta = new \Amiss\Meta('stdClass', [
         'namespaces'=>'--ns',
     ]
 ]);
-$options = $optMapper->toObject($options, null, $meta);
+$options = $optMapper->mapRowToObject($options, null, $meta);
 
 if (!$options->input) {
     echo "Input not specified\n\n";

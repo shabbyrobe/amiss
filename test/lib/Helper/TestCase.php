@@ -5,6 +5,12 @@ use Amiss\Sql\TableBuilder;
 
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
+    public function tearDown()
+    {
+        parent::tearDown();
+        $this->deps = null;
+    }
+
     protected function callProtected($class, $name)
     {
         $ref = new \ReflectionClass($class);
@@ -46,13 +52,5 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         }
         
         self::assertThat($value, $constraint, $message);
-    }
-    
-    public function createRecordMemoryDb($class)
-    {
-        if ($class instanceof \Amiss\Active\Record) {
-            forward_static_call(array($class, 'setManager'), $this->manager);
-        }
-        TableBuilder::create($this->manager->connector, $this->manager->mapper, $class);
     }
 }

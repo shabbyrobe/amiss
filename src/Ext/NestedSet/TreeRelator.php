@@ -102,7 +102,7 @@ class TreeRelator extends Relator
             }
             $query->order = $criteria->order;
         }
-        
+
         $query->stack = $criteria ? $criteria->stack : null;
         $children = $this->nestedSetManager->manager->getList($treeMeta->meta->class, $query);
         return $children;

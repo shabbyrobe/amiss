@@ -11,7 +11,7 @@ class Note extends \Amiss\Mapper\Base
     private $cache;
     
     /**
-     * @var Amiss\Note\Parser
+     * @var Nope\Parser
      */
     public $parser;
 
@@ -47,7 +47,7 @@ class Note extends \Amiss\Mapper\Base
         $ref = new \ReflectionClass($class);
         
         if (!$this->parser) {
-            $this->parser = new \Amiss\Note\Parser;
+            $this->parser = new \Nope\Parser;
         }
         
         $notes = $this->parser->parseClass($ref);

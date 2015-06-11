@@ -90,7 +90,7 @@ class Manager
             if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $mappedRow = $mapper->toProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($row, $meta);
         }
 
         if (!$mappedRow) {
@@ -148,7 +148,7 @@ class Manager
 
         $mappedRows = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->toProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($row, $meta);
             $mappedRows[] = $mappedRow;
         }
 
@@ -445,7 +445,7 @@ class Manager
         }
 
         $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-        $query->values = $this->mapper->fromProperties($query->values, $meta);
+        $query->values = $this->mapper->mapPropertiesToRow($query->values, $meta);
         if (!$query->table) {
             $query->table = $meta->table;
         }
@@ -501,7 +501,7 @@ class Manager
         }
 
         query: {
-            $query->values = $this->mapper->fromObject($object, $meta, 'insert');
+            $query->values = $this->mapper->mapObjectToRow($object, $meta, 'insert');
             if (!$query->table) {
                 $query->table = $meta->table;
             }
@@ -517,25 +517,25 @@ class Manager
         if ($object && $meta->primary) {
             $lastInsertId = $this->getConnector()->lastInsertId();
 
-            if (!$lastInsertId) {
-                throw new \UnexpectedValueException();
-            }
-
-            if (($count = count($meta->primary)) != 1) {
-                throw new Exception(
-                    "Last insert ID $lastInsertId found for class {$meta->class}. ".
-                    "Expected 1 primary field, but class defines {$count}"
-                );
-            }
-
             $field = $meta->getField($meta->primary[0]);
             $handler = $this->mapper->determineTypeHandler($field['type']['id']);
             
             if ($handler instanceof \Amiss\Type\Identity) {
+                if (!$lastInsertId) {
+                    throw new \UnexpectedValueException();
+                }
+
+                if (($count = count($meta->primary)) != 1) {
+                    throw new Exception(
+                        "Last insert ID $lastInsertId found for class {$meta->class}. ".
+                        "Expected 1 primary field, but class defines {$count}"
+                    );
+                }
+
                 $generated = $handler->handleDbGeneratedValue($lastInsertId);
                 if ($generated) {
-                    // skip using populateObject - we don't need the type handler stack because we 
-                    // already used one to handle the value
+                    // skip using populateObject - we don't need the type handler stack because
+                    // we already used one to handle the value
                     if (!isset($field['getter'])) {
                         $object->{$meta->primary[0]} = $generated;
                     }
@@ -637,11 +637,11 @@ class Manager
         }
 
         query: {
-            $query->set = $this->mapper->fromObject($object, $meta, 'update');
+            $query->set = $this->mapper->mapObjectToRow($object, $meta, 'update');
             $query->where = $meta->getIndexValue($object);
             
             list ($sql, $params, $props) = $query->buildQuery($meta);
-            // don't need to do formatParams - it's already covered by the fromProperties call in
+            // don't need to do formatParams - it's already covered by the mapPropertiesToRow call in
             // table update mode
 
             $return = $this->getConnector()->exec($sql, $params);
@@ -684,7 +684,8 @@ class Manager
      * 
      * Supports the following signatures:
      *   delete($object)
-     *   delete($object, $tableOrMeta)
+     *   delete($object, string $table)
+     *   delete($object, Amiss\Meta $meta)
      * 
      * @return void
      */
@@ -746,6 +747,8 @@ class Manager
 
     /**
      * This is a hack to allow active record to intercept saving and fire events.
+     * You should not call it yourself as it will be removed as soon as I work out
+     * a good way to remove it.
      * @return boolean
      */
     public function shouldInsert($object, Meta $meta=null)

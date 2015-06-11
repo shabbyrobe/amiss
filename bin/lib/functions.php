@@ -64,7 +64,7 @@ function filter_classes_by_notes($classes, $notes)
     if (!is_array($notes))
         $notes = array($notes);
     
-    $parser = new \Amiss\Note\Parser();
+    $parser = new \Nope\Parser();
     $found = array();
     foreach ($classes as $c) {
         $classNotes = $parser->parseClass(new \ReflectionClass($c));
