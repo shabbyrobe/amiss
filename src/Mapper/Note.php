@@ -49,8 +49,8 @@ class Note extends \Amiss\Mapper\Base
         if (!$this->parser) {
             $this->parser = new \Nope\Parser;
         }
-        
-        $notes = $this->parser->parseClass($ref);
+
+        $notes = $this->parser->parseClass($ref, \ReflectionProperty::IS_PUBLIC, \ReflectionMethod::IS_PUBLIC);
         $classNotes = $notes->notes;
 
         $info = isset($classNotes[$this->annotationNamespace]) ? $classNotes[$this->annotationNamespace] : [];
