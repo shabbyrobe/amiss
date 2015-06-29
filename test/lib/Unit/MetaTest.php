@@ -6,7 +6,7 @@ namespace Amiss\Test\Acceptance;
  */
 class MetaTest extends \Amiss\Test\Helper\TestCase
 {
-    public $fieldDefaults = ['type'=>null, 'nullable'=>true];
+    public $fieldDefaults = ['type'=>null, 'required'=>false];
 
     /**
      * @covers Amiss\Meta::__construct

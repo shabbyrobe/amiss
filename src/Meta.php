@@ -266,8 +266,8 @@ class Meta
             if (!isset($field['name'])) {
                 $field['name'] = $name;
             }
-            if (!isset($field['nullable'])) {
-                $field['nullable'] = true;
+            if (!isset($field['required'])) {
+                $field['required'] = false;
             }
             if (isset($field['type'])) {
                 if (!is_array($field['type'])) {

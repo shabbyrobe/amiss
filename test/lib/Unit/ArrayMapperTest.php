@@ -9,7 +9,7 @@ use Amiss\Test\Helper\ClassBuilder;
  */
 class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
 {
-    public $fieldDefaults = ['type'=>null, 'nullable'=>true];
+    public $fieldDefaults = ['type'=>null, 'required'=>false];
 
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
@@ -136,7 +136,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = [
-            'id'=>['id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar'], 'nullable'=>true],
+            'id'=>['id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar'], 'required'=>false],
         ];
         $this->assertEquals($expected, $meta->getFields());
     }
@@ -160,7 +160,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $meta = $mapper->getMeta('foo');
         
         $expected = [
-            'id'=>['id'=>'id', 'name'=>'pants', 'type'=>['id'=>'foobar'], 'nullable'=>true],
+            'id'=>['id'=>'id', 'name'=>'pants', 'type'=>['id'=>'foobar'], 'required'=>false],
         ];
         
         $this->assertEquals($expected, $meta->getFields());
