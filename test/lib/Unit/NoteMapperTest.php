@@ -136,7 +136,11 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $expected = array('id'=>'foo', 'name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo');
+        $expected = [
+            'id'=>'foo',
+            'name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo',
+            'nullable'=>true,
+        ];
         $this->assertEquals($expected, $meta->getField('foo'));
     }
 
@@ -203,6 +207,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                     'name'=>'id',
                     'type'=>array('id'=>'autoinc'),
                     'primary'=>true,
+                    'nullable'=>true,
                 )
             ),
             $meta->getFields()
@@ -749,7 +754,8 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($name);
-        $this->assertEquals(['id'=>'foo', 'name'=>'bar', 'type'=>null], $meta->getField('foo'));
+        $expected = ['id'=>'foo', 'name'=>'bar', 'type'=>null, 'nullable'=>true];
+        $this->assertEquals($expected, $meta->getField('foo'));
     }
 
     public function testClassRelations()

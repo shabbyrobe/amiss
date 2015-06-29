@@ -6,6 +6,8 @@ namespace Amiss\Test\Acceptance;
  */
 class MetaTest extends \Amiss\Test\Helper\TestCase
 {
+    public $fieldDefaults = ['type'=>null, 'nullable'=>true];
+
     /**
      * @covers Amiss\Meta::__construct
      */
@@ -25,9 +27,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals('std_class',  $meta->table);
         $this->assertEquals(array('pri'), $meta->primary);
         
-        $this->assertEquals(array('f'=>array('name'=>'f', 'type'=>null, 'id'=>'f')), $this->getProtected($meta, 'fields'));
-        $this->assertEquals(array('r'=>array('name'=>'r', 'mode'=>'default')), $this->getProtected($meta, 'relations'));
-        $this->assertEquals(array('id'=>'def'),  $this->getProtected($meta, 'defaultFieldType'));
+        $this->assertEquals(['f'=>['name'=>'f', 'id'=>'f'] + $this->fieldDefaults], $this->getProtected($meta, 'fields'));
+        $this->assertEquals(['r'=>['name'=>'r', 'mode'=>'default']], $this->getProtected($meta, 'relations'));
+        $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'defaultFieldType'));
     }
     
     /**
@@ -116,13 +118,13 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
             ),
         ), $parent);
         
-        $expected = array(
-            'field1'=>array('id'=>'field1', 'name'=>'field1', 'type'=>null),
-            'field2'=>array('id'=>'field2', 'name'=>'field2', 'type'=>null),
-            'field3'=>array('id'=>'field3', 'name'=>'field3', 'type'=>null),
-            'field4'=>array(2, 'id'=>'field4', 'name'=>'field4', 'type'=>null),
-            'field5'=>array('id'=>'field5', 'name'=>'field5', 'type'=>null),
-        );
+        $expected = [
+            'field1'=>['id'=>'field1', 'name'=>'field1'] + $this->fieldDefaults,
+            'field2'=>['id'=>'field2', 'name'=>'field2'] + $this->fieldDefaults,
+            'field3'=>['id'=>'field3', 'name'=>'field3'] + $this->fieldDefaults,
+            'field4'=>[2, 'id'=>'field4', 'name'=>'field4'] + $this->fieldDefaults,
+            'field5'=>['id'=>'field5', 'name'=>'field5'] + $this->fieldDefaults,
+        ];
         $this->assertEquals($expected, $child->getFields());
     }
     

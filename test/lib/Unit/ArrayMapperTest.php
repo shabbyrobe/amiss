@@ -9,6 +9,8 @@ use Amiss\Test\Helper\ClassBuilder;
  */
 class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
 {
+    public $fieldDefaults = ['type'=>null, 'nullable'=>true];
+
     /**
      * @covers Amiss\Mapper\Arrays::createMeta
      * @expectedException InvalidArgumentException
@@ -100,11 +102,11 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new Arrays($mappings);
         $meta = $mapper->getMeta('foo');
         
-        $expected = array(
-            'a'=>array('id'=>'a', 'name'=>'a', 'type'=>null),
-            'b'=>array('id'=>'b', 'name'=>'b', 'type'=>null),
-            'c'=>array('id'=>'c', 'name'=>'c', 'type'=>null),
-        );
+        $expected = [
+            'a' => ['id'=>'a', 'name'=>'a'] + $this->fieldDefaults,
+            'b' => ['id'=>'b', 'name'=>'b'] + $this->fieldDefaults,
+            'c' => ['id'=>'c', 'name'=>'c'] + $this->fieldDefaults,
+        ];
         $this->assertEquals($expected, $meta->getFields());
     }
 
@@ -133,9 +135,9 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new Arrays($mappings);
         $meta = $mapper->getMeta('foo');
         
-        $expected = array(
-            'id'=>array('id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar']),
-        );
+        $expected = [
+            'id'=>['id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar'], 'nullable'=>true],
+        ];
         $this->assertEquals($expected, $meta->getFields());
     }
     
@@ -157,9 +159,9 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->defaultPrimaryType = 'flobadoo';
         $meta = $mapper->getMeta('foo');
         
-        $expected = array(
-            'id'=>array('id'=>'id', 'name'=>'pants', 'type'=>array('id'=>'foobar')),
-        );
+        $expected = [
+            'id'=>['id'=>'id', 'name'=>'pants', 'type'=>['id'=>'foobar'], 'nullable'=>true],
+        ];
         
         $this->assertEquals($expected, $meta->getFields());
     }
