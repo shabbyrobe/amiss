@@ -11,6 +11,7 @@ class Meta
     public $primary;
     public $constructor;
     public $constructorArgs = [];
+    public $nullable = true;
     
     // queries that use this Meta which do not explicitly pass 'null' as their
     // order will use this.
@@ -82,7 +83,7 @@ class Meta
             'class', 'table', 'schema', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on',
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on', 'nullable',
         ); 
     }
 
@@ -98,17 +99,16 @@ class Meta
         $this->schema = isset($info['schema'])  ? $info['schema']  : null;
 
         $this->defaultOrder = isset($info['defaultOrder']) ? $info['defaultOrder'] : null;
+        $this->nullable     = isset($info['nullable'])     ? $info['nullable']     : null;
 
         primary: {
             if (isset($info['primary'])) {
-                if ($info['primary'] == 0 && $info['primary'] !== "0") {
-                    // it's a string!
+                if ($info['primary'] == 0 && $info['primary'] !== "0") { // it's a string!
                     $this->primary = [$info['primary']];
                 } else {
                     $this->primary = $info['primary'];
                 }
-            }
-            else {
+            } else {
                 $this->primary = [];
             }
         }
