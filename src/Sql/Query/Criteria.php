@@ -107,16 +107,19 @@ class Criteria extends Sql\Query
                     $k = $p;
                 }
                 if (is_array($v)) {
-                    $inparms = array();
+                    $inKeys = array();
                     $v = array_unique($v);
                     foreach ($v as $val) {
-                        $inparms[':zp_'.$fidx++] = $val;
+                        $inKey = ':zp_'.$fidx++;
+                        $params[$inKey] = $val;
+                        $inKeys[] = $inKey;
                     }
-                    $params = array_merge($params, $inparms);
+                    $inClause = "IN(".implode(',', $inKeys).")";
+
                     $qk = preg_quote($k, '@');
                     $where = preg_replace(
                         " @ IN \s* \( \s* ($qk) \s* \) @ix", 
-                        "IN(".implode(',', array_keys($inparms)).")",
+                        $inClause, 
                         $where
                     );
                 }
