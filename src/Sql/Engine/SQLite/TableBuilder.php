@@ -48,8 +48,8 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         }
 
         if ($foundPrimaries) {
-            if (array_diff($foundPrimaries, $this->meta->primary)) {
-                throw new \Exception();
+            if ($diff = array_diff($foundPrimaries, $this->meta->primary)) {
+                throw new \Exception('primary key properties extracted ('.implode(', ', $diff).'), but did not exist in meta');
             }
             if (array_diff($this->meta->primary, $foundPrimaries)) {
                 throw new \Exception();

@@ -145,9 +145,12 @@ abstract class Base extends \Amiss\Mapper
         $fields = $meta->getFields();
         $defaultType = $meta->getDefaultFieldType();
 
-        foreach ($propertyParamMap as $prop=>$param) {
+        foreach ($propertyParamMap as $prop=>$propParams) {
             if (!isset($fields[$prop])) {
                 throw new \UnexpectedValueException("Field $prop does not exist for class {$meta->class}");
+            }
+            if ($propParams == 0 && $propParams !== 0) {
+                $propParams = [$propParams];
             }
             $field = $fields[$prop];
 
@@ -159,7 +162,9 @@ abstract class Base extends \Amiss\Mapper
                     $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
                 if ($this->typeHandlerMap[$typeId]) {
-                    $params[$param] = $this->typeHandlerMap[$typeId]->prepareValueForDb($params[$param], $field);
+                    foreach ($propParams as $propParam) {
+                        $params[$propParam] = $this->typeHandlerMap[$typeId]->prepareValueForDb($params[$propParam], $field);
+                    }
                 }
             }
         }

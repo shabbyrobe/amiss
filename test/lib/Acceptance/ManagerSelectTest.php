@@ -91,6 +91,39 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals('george-carlin', current($artists)->slug);
     }
 
+    public function testListByPropertyIn()
+    {
+        $artists = $this->manager->getList('Artist', ['where'=>['artistId'=>[1, 2]]]);
+        $this->assertTrue(is_array($artists));
+        $this->assertCount(2, $artists);
+        $this->assertEquals(1, $artists[0]->artistId);
+        $this->assertEquals(2, $artists[1]->artistId);
+    }
+
+    /**
+     * Select using an array where clause, but using values that get mapped through
+     * a type handler.
+     */
+    public function testListByTypePropertyIn()
+    {
+        $deps = Test\Factory::managerArraysModelCustom([
+            'Pants'=>[
+                'class'   => 'stdClass',
+                'table'   => 't1',
+                'primary' => 'id',
+                'fields'  => ['id'=>['type'=>'autoinc'], 'd'=>['type'=>'date']],
+            ],
+        ]);
+        $d1 = new \DateTime('2015-01-01', new \DateTimeZone('UTC'));
+        $d2 = new \DateTime('2015-01-02', new \DateTimeZone('UTC'));
+        $deps->manager->insertTable('Pants', ['d'=>$d1]);
+        $deps->manager->insertTable('Pants', ['d'=>$d2]);
+        $deps->manager->insertTable('Pants', ['d'=>new \DateTime('2015-01-03', new \DateTimeZone('UTC'))]);
+        $result = $deps->manager->getList('Pants', ['where'=>['d'=>[$d1, $d2]]]);
+        $this->assertEquals($d1, $result[0]->d);
+        $this->assertEquals($d2, $result[1]->d);
+    }
+
     public function testPagedListFirstPage()
     {
         $artists = $this->manager->getList('Artist', array('page'=>array(1, 3)));

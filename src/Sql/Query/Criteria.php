@@ -67,9 +67,13 @@ class Criteria extends Sql\Query
         $properties = [];
         
         $fields = null;
-        if ($meta) $fields = $meta->getFields();
+        if ($meta) {
+            $fields = $meta->getFields();
+        }
         
         if (is_array($where)) {
+            // build a where clause from an array
+
             $wh = array();
             foreach ($where as $p=>$v) {
                 $name = $p;
@@ -79,24 +83,42 @@ class Criteria extends Sql\Query
                     $name  = !isset($mf['source']) ? $mf['name']  : $mf['source'];
                     $table =  isset($mf['table'])  ? $mf['table'] : null;
                 }
-                $qk = ($table ?        ($table[0] == '`' ? $table : '`'.$table.'`.') : '') .
-                      ($name  ?        ($name[0]  == '`' ? $name  : '`'.$name.'`')   : '');
+                $qk = ($table ? ($table[0] == '`' ? $table : '`'.$table.'`.') : '') .
+                      ($name  ? ($name[0]  == '`' ? $name  : '`'.$name .'`' ) : '');
 
-                $pidx = 'zp_'.$fidx++;
-                $wh[] = "$qk=:$pidx";
-                $properties[$p] = ":$pidx";
-                $params[":$pidx"] = $v;
+                if (is_array($v)) {
+                    $inKeys = [];
+                    foreach (array_unique($v, SORT_REGULAR) as $val) {
+                        $inKey = ':zp_'.$fidx++;
+                        $params[$inKey] = $val;
+                        $properties[$p][] = $inKey;
+                        $inKeys[] = $inKey;
+                    }
+                    $wh[] = "$qk IN(".implode(',', $inKeys).")";
+                }
+                else {
+                    $pidx = ':zp_'.$fidx++;
+                    $wh[] = "$qk=$pidx";
+                    $properties[$p] = $pidx;
+                    $params[$pidx] = $v;
+                }
             }
             $where = implode(' AND ', $wh);
             $namedParams = true;
         }
         else {
+            // the where clause is a string, so replace '{prop}' tokens
+            // with field names
             if ($fields && strpos($where, '{') !== false) {
                 $where = static::replaceFields($meta, $where);
             }
         }
 
         if ($namedParams) {
+            // if the parameters are named parameters, normalise them and handle
+            // dynamic IN clauses. there is some repeated logic with the array where
+            // handler above, which could perhaps be reduced.
+
             foreach ($this->params as $p=>$v) {
                 // ($k == 0 && $k !== 0) == faster !is_numeric($k) for array keys
                 if (($p == 0 && $p !== 0) && $p[0] != ':') {
@@ -108,7 +130,7 @@ class Criteria extends Sql\Query
                 }
                 if (is_array($v)) {
                     $inKeys = array();
-                    $v = array_unique($v);
+                    $v = array_unique($v, SORT_REGULAR);
                     foreach ($v as $val) {
                         $inKey = ':zp_'.$fidx++;
                         $params[$inKey] = $val;
