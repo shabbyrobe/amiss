@@ -93,7 +93,7 @@ class Select extends Criteria
     // damn, this is pretty much identical to the above. FIXME, etc.
     public function buildOrder($meta, $tableAlias=null)
     {
-    // Careful! $meta might be null.
+        // Careful! $meta might be null.
         $metaFields = $meta ? $meta->getFields() : null;
         
         $order = $this->order;
@@ -118,6 +118,9 @@ class Select extends Criteria
                     $oClauses .= $qname;
 
                     if ($dir) {
+                        if ($dir === true) {
+                            $dir = 'asc';
+                        }
                         // strpos(strtolower($dir), 'desc') === 0;
                         if (isset($dir[3]) && ($dir[0] == 'd' || $dir[0] == 'D') && ($dir[1] == 'e' || $dir[1] == 'E') && ($dir[2] == 's' || $dir[2] == 'S') && ($dir[3] == 'c' || $dir[3] == 'C')) {
                             $oClauses .= ' desc';

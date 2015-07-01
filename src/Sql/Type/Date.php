@@ -7,49 +7,70 @@ class Date implements \Amiss\Type\Handler
     public $appTimeZone;
     public $dbTimeZone;
     public $dateClass;
+    public $forceTime;
 
-    public function __construct($formats='datetime', $dbTimeZone, $appTimeZone=null, $dateClass=null)
+    public function __construct(array $options=[])
     {
-        // compat. remove for v5
-        if ($formats === true) {
-            $formats = 'datetime';
-        } elseif ($formats === false) {
-            $formats = 'date';
+        $defaults = [
+            'formats'=>'datetime',
+            'dbTimeZone'=>null,
+            'appTimeZone'=>null,
+            'dateClass'=>null,
+            'forceTime'=>null,
+        ];
+
+        $options = array_merge($defaults, $options);
+        if ($diff = array_diff_key($options, $defaults)) {
+            throw new \InvalidArgumentException("Unknown keys: ".implode(', ', array_keys($diff)));
         }
         
-        if ($formats == 'datetime') {
-            $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
-        } elseif ($formats == 'date') {
-            $this->formats = array('Y-m-d');
-        } else {
-            $this->formats = is_array($formats) ? $formats : array($formats);
+        switch ($formats = $options['formats']) {
+            case 'datetime':
+                $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
+            break;
+            case 'date':
+                $this->formats = array('Y-m-d');
+            break;
+            default:
+                $this->formats = is_array($formats) ? $formats : array($formats);
         }
-        
+
+        $appTimeZone = $options['appTimeZone'];
         if ($appTimeZone && is_string($appTimeZone)) {
             $appTimeZone = new \DateTimeZone($appTimeZone);
         }
+
+        $dbTimeZone = $options['dbTimeZone'];
         if ($dbTimeZone && is_string($dbTimeZone)) {
             $dbTimeZone = new \DateTimeZone($dbTimeZone);
         }
         
-        $this->dbTimeZone = $dbTimeZone;
+        $this->dbTimeZone  = $dbTimeZone;
         $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
+        $this->forceTime   = $options['forceTime'];
 
-        if ($dateClass) {
-            if (!is_subclass_of($dateClass, 'DateTime')) {
-                throw new \InvalidArgumentException("Custom date class must inherit DateTime");
+        if ($this->forceTime && $this->forceTime == 0 && $this->forceTime !== 0) {
+            $this->forceTime = explode(':', $this->forceTime);
+            if (!isset($this->forceTime[0]) || !isset($this->forceTime[1]) || isset($this->forceTime[3])) {
+                throw new \InvalidArgumentException("forceTime must be a 2- or 3-tuple of integers [H, M, S] or a colon-separated string of numbers H:M:S");
+            }
+        }
+
+        if ($dateClass = $options['dateClass']) {
+            if (!is_subclass_of($dateClass, \DateTimeInterface::class)) {
+                throw new \InvalidArgumentException("Custom date class must implement DateTimeInterface");
             }
             $this->dateClass = $dateClass;
         }
         else {  
-            $this->dateClass = 'DateTime';
+            $this->dateClass = \DateTime::class;
         }
         // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
     }
     
     public static function unixTime($appTimeZone=null)
     {
-        return new static('U', 'UTC', $appTimeZone);
+        return new static(['formats'=>'U', 'dbTimeZone'=>'UTC', 'appTimeZone'=>$appTimeZone]);
     }
     
     function prepareValueForDb($value, array $fieldInfo)
@@ -65,7 +86,11 @@ class Date implements \Amiss\Type\Handler
             if ($value->getTimeZone() != $this->appTimeZone) {
                 throw new \UnexpectedValueException();
             }
-            $value->setTimeZone($this->dbTimeZone);
+            $value = clone $value;
+            $value = $value->setTimeZone($this->dbTimeZone);
+            if ($this->forceTime) {
+                $value = $value->setTime(...$this->forceTime);
+            }
             $out = $value->format($this->formats[0]);
         }
         elseif ($value) {
@@ -88,7 +113,10 @@ class Date implements \Amiss\Type\Handler
             foreach ($this->formats as $format) {
                 $out = $dateClass::createFromFormat($format, $value, $this->dbTimeZone);
                 if ($out instanceof $dateClass) {
-                    $out->setTimeZone($this->appTimeZone);
+                    $out = $out->setTimeZone($this->appTimeZone);
+                    if ($this->forceTime) {
+                        $out = $out->setTime(...$this->forceTime);
+                    }
                     break;
                 }
             }

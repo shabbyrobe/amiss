@@ -69,7 +69,7 @@ class EncoderTest extends \Amiss\Test\Helper\TestCase
     
     public function dataForNested()
     {
-        $inner = new Sql\Type\Date('datetime', 'UTC', 'UTC');
+        $inner = new Sql\Type\Date(['formats'=>'datetime', 'appTimeZone'=>'UTC', 'dbTimeZone'=>'UTC']);
         
         return array(new Type\Encoder('serialize', 'unserialize', $inner), array(
             array(new \DateTime('2012-01-01', new \DateTimeZone('UTC')), 's:19:"2012-01-01 00:00:00";'),
