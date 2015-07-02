@@ -127,7 +127,12 @@ abstract class Base extends \Amiss\Mapper
                     $this->typeHandlerMap[$typeId] = $this->determineTypeHandler($typeId);
                 }
                 if ($this->typeHandlerMap[$typeId]) {
-                    $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $property, $input);
+                    try {
+                        $value = $this->typeHandlerMap[$typeId]->handleValueFromDb($value, $property, $input);
+                    }
+                    catch (\Exception $ex) {
+                        throw new \RuntimeException("An exception occurred while attempting to read {$meta->class}->{$propId} from the database", null, $ex);
+                    }
                 }
             }
 

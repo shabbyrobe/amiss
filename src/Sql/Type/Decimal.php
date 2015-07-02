@@ -7,15 +7,23 @@ class Decimal implements \Amiss\Type\Handler
 {
     public $defaultPrecision;
     public $defaultScale;
+    public $zeroIfNull;
 
-    public function __construct($defaultPrecision=null, $defaultScale=null)
+    public function __construct($defaultPrecision=null, $defaultScale=null, $zeroIfNull=false)
     {
         $this->defaultPrecision = $defaultPrecision;
         $this->defaultScale = $defaultScale;
+        $this->zeroIfNull = $zeroIfNull;
     }
 
     function prepareValueForDb($value, array $fieldInfo)
     {
+        if ($value === null) {
+            return $this->zeroIfNull ? 0 : null;
+        }
+        if (!$value instanceof BigNumbers\Decimal) {
+            throw new \UnexpectedValueException();
+        }
         if (isset($fieldInfo['scale'])) {
             $value = $value->round($fieldInfo['scale']);
         }
@@ -25,7 +33,12 @@ class Decimal implements \Amiss\Type\Handler
 
     function handleValueFromDb($value, array $fieldInfo, $row)
     {
-        return BigNumbers\Decimal::fromString($value);
+        if ($value === null && $this->zeroIfNull) {
+            $value = "0";
+        }
+        if ($value !== null) {
+            return BigNumbers\Decimal::fromString($value);
+        }
     }
     
     function createColumnType($engine, array $fieldInfo)
