@@ -6,8 +6,10 @@ class Date implements \Amiss\Type\Handler
     public $formats;
     public $appTimeZone;
     public $dbTimeZone;
-    public $dateClass;
     public $forceTime;
+    public $classes;
+
+    private $mainClass;
 
     public function __construct(array $options=[])
     {
@@ -15,15 +17,15 @@ class Date implements \Amiss\Type\Handler
             'formats'=>'datetime',
             'dbTimeZone'=>null,
             'appTimeZone'=>null,
-            'dateClass'=>null,
             'forceTime'=>null,
+            'classes'=>[\DateTime::class, \DateTimeImmutable::class],
         ];
 
         $options = array_merge($defaults, $options);
         if ($diff = array_diff_key($options, $defaults)) {
             throw new \InvalidArgumentException("Unknown keys: ".implode(', ', array_keys($diff)));
         }
-        
+ 
         switch ($formats = $options['formats']) {
             case 'datetime':
                 $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
@@ -56,20 +58,25 @@ class Date implements \Amiss\Type\Handler
             }
         }
 
-        if ($dateClass = $options['dateClass']) {
-            if (
-                !is_a($dateClass, \DateTimeImmutable::class, true) && 
-                !is_a($dateClass, \DateTime::class, true)
-            ) {
-                throw new \InvalidArgumentException("Custom date class must extend DateTime or DateTimeImmutable");
-            }
-            if (!method_exists($dateClass, 'createFromFormat')) {
-                throw new \InvalidArgumentException("Custom date class must contain static createFromFormat() method");
-            }
-            $this->dateClass = $dateClass;
+        if (!$options['classes']) {
+            throw new \InvalidArgumentException("Date classes missing");
         }
-        else {  
-            $this->dateClass = \DateTime::class;
+        $this->classes = (array) $options['classes'];
+        if (!is_array($this->classes)) {
+            throw new \InvalidArgumentException("Date classes must be string or array of strings");
+        }
+
+        $this->mainClass = $this->classes[0];
+        foreach ($this->classes as $class) {
+            if (
+                !is_a($class, \DateTimeImmutable::class, true) && 
+                !is_a($class, \DateTime::class, true)
+            ) {
+                throw new \InvalidArgumentException("Date class $class does not extend from DateTime or DateTimeImmutable");
+            }
+            if (!method_exists($class, 'createFromFormat')) {
+                throw new \InvalidArgumentException("Date class $class must contain static createFromFormat() method");
+            }
         }
         // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
     }
@@ -83,39 +90,49 @@ class Date implements \Amiss\Type\Handler
     function prepareValueForDb($value, array $fieldInfo)
     {
         $out = null;
-        if ($value instanceof $this->dateClass) {
-            // This conversion may not be an issue. Wait until it is raised
-            // before making a decision.
-            // also - this doesn't seem to work right as of 5.5.1:
-            // var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
-            // bool(true)
-            // https://bugs.php.net/bug.php?id=54655
-            if ($value->getTimeZone() != $this->appTimeZone) {
-                throw new \UnexpectedValueException();
-            }
-            $value = clone $value;
-            $value = $value->setTimeZone($this->dbTimeZone);
-            if ($this->forceTime) {
-                $value = $value->setTime(...$this->forceTime);
-            }
-            $out = $value->format($this->formats[0]);
+        if ($value === null) {
+            return $value;
         }
-        elseif ($value) {
+
+        $ok = false;
+        foreach ($this->classes as $c) {
+            if ($value instanceof $c) {
+                $ok = true;
+                break;
+            }
+        }
+        
+        if (!$ok) {
             $type = gettype($value);
+            $classes = implode(', ', $this->classes);
             throw new \UnexpectedValueException(
-                "Date value was invalid. Expected {$this->dateClass}, found ".
+                "Date value was invalid. Expected {$classes}, found ".
                 ($type == 'object' ? get_class($value) : $type)
             );
         }
 
-        return $out;
+        // This conversion may not be an issue. Wait until it is raised
+        // before making a decision.
+        // also - this doesn't seem to work right as of 5.5.1:
+        // var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
+        // bool(true)
+        // https://bugs.php.net/bug.php?id=54655
+        if ($value->getTimeZone() != $this->appTimeZone) {
+            throw new \UnexpectedValueException();
+        }
+        $value = clone $value;
+        $value = $value->setTimeZone($this->dbTimeZone);
+        if ($this->forceTime) {
+            $value = $value->setTime(...$this->forceTime);
+        }
+        return $value->format($this->formats[0]);
     }
     
     function handleValueFromDb($value, array $fieldInfo, $row)
     {
         $out = null;
         if ($value !== null && $value !== '' && $value !== false) {
-            $dateClass = $this->dateClass;
+            $dateClass = $this->mainClass;
 
             foreach ($this->formats as $format) {
                 $out = $dateClass::createFromFormat($format, $value, $this->dbTimeZone);

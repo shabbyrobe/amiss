@@ -106,7 +106,6 @@ class DateTest extends \Amiss\Test\Helper\TestCase
             'formats'=>'Y-m-d H:i:s',
             'appTimeZone'=>'Australia/Melbourne',
             'dbTimeZone'=>'Australia/Melbourne',
-            'dateClass'=>\DateTimeImmutable::class,
         ]);
         $out = $handler->prepareValueForDb(new \DateTimeImmutable('2012-01-01 12:00:00', new \DateTimeZOne('Australia/Melbourne')), []);
         $this->assertEquals('2012-01-01 12:00:00', $out);
@@ -133,7 +132,12 @@ class DateTest extends \Amiss\Test\Helper\TestCase
     {
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
-        $handler = new \Amiss\Sql\Type\Date(['formats'=>'Y-m-d H:i:s', 'appTimeZone'=>'UTC', 'dbTimeZone'=>'UTC', 'dateClass'=>$class]); 
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'Y-m-d H:i:s',
+            'appTimeZone'=>'UTC',
+            'dbTimeZone'=>'UTC',
+            'classes'=>[$class],
+        ]); 
         $out = $handler->prepareValueForDb(new PantsDateTime('2015-01-01', $tz), array());
         $this->assertEquals('2015-01-01 00:00:00', $out);
     }
@@ -142,7 +146,12 @@ class DateTest extends \Amiss\Test\Helper\TestCase
     {
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
-        $handler = new \Amiss\Sql\Type\Date(['formats'=>'Y-m-d H:i:s', 'appTimeZone'=>'UTC', 'dbTimeZone'=>'UTC', 'dateClass'=>$class]); 
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'Y-m-d H:i:s',
+            'appTimeZone'=>'UTC',
+            'dbTimeZone'=>'UTC',
+            'classes'=>$class
+        ]); 
         $out = $handler->handleValueFromDb('2015-01-01 00:00:00', [], array());
         $this->assertInstanceOf($class, $out);
     }
@@ -151,7 +160,12 @@ class DateTest extends \Amiss\Test\Helper\TestCase
     {
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
-        $handler = new \Amiss\Sql\Type\Date(['formats'=>'Y-m-d H:i:s', 'appTimeZone'=>'UTC', 'dbTimeZone'=>'UTC', 'dateClass'=>$class]); 
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'Y-m-d H:i:s',
+            'appTimeZone'=>'UTC',
+            'dbTimeZone'=>'UTC', 
+            'classes'=>$class
+        ]); 
 
         $this->setExpectedException(
             'UnexpectedValueException',
@@ -164,7 +178,12 @@ class DateTest extends \Amiss\Test\Helper\TestCase
     {
         $class = __NAMESPACE__.'\PantsDateTime';
         $tz = new \DateTimeZone('UTC');
-        $handler = new \Amiss\Sql\Type\Date(['formats'=>'Y-m-d H:i:s', 'appTimeZone'=>'UTC', 'dbTimeZone'=>'UTC', 'dateClass'=>$class]); 
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'Y-m-d H:i:s',
+            'appTimeZone'=>'UTC', 
+            'dbTimeZone'=>'UTC', 
+            'classes'=>$class
+        ]); 
 
         $this->setExpectedException(
             'UnexpectedValueException',
