@@ -99,6 +99,18 @@ class DateTest extends \Amiss\Test\Helper\TestCase
         $out = $handler->prepareValueForDb($this->createDate('2012-01-01 12:00:00', 'Australia/Melbourne'), array());
         $this->assertEquals('2012-01-01 12:00:00', $out);
     }
+
+    public function testDateTimeImmutablePrepareForDb()
+    {
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'Y-m-d H:i:s',
+            'appTimeZone'=>'Australia/Melbourne',
+            'dbTimeZone'=>'Australia/Melbourne',
+            'dateClass'=>\DateTimeImmutable::class,
+        ]);
+        $out = $handler->prepareValueForDb(new \DateTimeImmutable('2012-01-01 12:00:00', new \DateTimeZOne('Australia/Melbourne')), []);
+        $this->assertEquals('2012-01-01 12:00:00', $out);
+    }
     
     public function testDateTimePrepareForDbWithDifferentDbTimeZone()
     {
@@ -111,8 +123,9 @@ class DateTest extends \Amiss\Test\Helper\TestCase
     
     private function createDate($date, $tz)
     {
-        if ($tz && is_string($tz))
+        if ($tz && is_string($tz)) {
             $tz = new \DateTimeZone($tz);
+        }
         return \DateTime::createFromFormat('Y-m-d H:i:s', $date, $tz);
     }
 

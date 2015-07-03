@@ -44,24 +44,19 @@ class Factory
             $config['appTimeZone'] = isset($config['appTimeZone']) ? $config['appTimeZone'] : null;
 
             $handlers['date'] = function() use ($config) {
-                return new \Amiss\Sql\Type\Date([
-                    'formats'=>'date',
-                    'dbTimeZone'=>$config['dbTimeZone'], 
-                    'appTimeZone'=>$config['appTimeZone'],
-                    'forceTime'=>'00:00:00'
-                ]);
+                $config['formats'] = 'date';
+                $config['forceTime'] = '00:00:00';
+                return new \Amiss\Sql\Type\Date($config);
             };
-            
+
             $handlers['datetime'] = $handlers['timestamp'] = function() use ($config) {
-                return new \Amiss\Sql\Type\Date([
-                    'formats'=>'datetime', 
-                    'dbTimeZone'=>$config['dbTimeZone'], 
-                    'appTimeZone'=>$config['appTimeZone'],
-                ]);
+                $config['formats'] = 'datetime';
+                unset($config['forceTime']);
+                return new \Amiss\Sql\Type\Date($config);
             };
             
             $handlers['unixtime'] = function() use ($config) {
-                return \Amiss\Sql\Type\Date::unixTime($config['appTimeZone']);
+                return \Amiss\Sql\Type\Date::unixTime($config);
             };
         }
         else {

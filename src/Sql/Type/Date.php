@@ -57,8 +57,14 @@ class Date implements \Amiss\Type\Handler
         }
 
         if ($dateClass = $options['dateClass']) {
-            if (!is_subclass_of($dateClass, \DateTimeInterface::class)) {
-                throw new \InvalidArgumentException("Custom date class must implement DateTimeInterface");
+            if (
+                !is_a($dateClass, \DateTimeImmutable::class, true) && 
+                !is_a($dateClass, \DateTime::class, true)
+            ) {
+                throw new \InvalidArgumentException("Custom date class must extend DateTime or DateTimeImmutable");
+            }
+            if (!method_exists($dateClass, 'createFromFormat')) {
+                throw new \InvalidArgumentException("Custom date class must contain static createFromFormat() method");
             }
             $this->dateClass = $dateClass;
         }
@@ -68,9 +74,10 @@ class Date implements \Amiss\Type\Handler
         // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
     }
     
-    public static function unixTime($appTimeZone=null)
+    public static function unixTime(array $config=[])
     {
-        return new static(['formats'=>'U', 'dbTimeZone'=>'UTC', 'appTimeZone'=>$appTimeZone]);
+        $config = array_merge($config, ['formats'=>'U', 'dbTimeZone'=>'UTC']);
+        return new static($config);
     }
     
     function prepareValueForDb($value, array $fieldInfo)
