@@ -108,7 +108,7 @@ class Select extends Criteria
                     if ($oClauses) {
                         $oClauses .= ', ';
                     }
-                    if (!($field == 0 && $field !== 0)) { // is_numeric($field)
+                    if (!is_string($field)) {
                         $field = $dir; $dir = '';
                     }
                     

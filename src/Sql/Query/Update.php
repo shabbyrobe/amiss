@@ -44,7 +44,7 @@ class Update extends Criteria
         else {
             $clause = [];
             foreach ($this->set as $name=>$value) {
-                if (!($name == 0 && $name !== 0)) { // is_numeric($name)
+                if (!is_string($name)) {
                     // this allows arrays of manual "set"s, i.e. array('foo=foo+10', 'bar=baz')
                     // TODO: integrate {property} substitution
                     $clause[] = $value;

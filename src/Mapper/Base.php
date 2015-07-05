@@ -63,7 +63,7 @@ abstract class Base extends \Amiss\Mapper
         $properties = $meta->getProperties();
         $fields = [];
         foreach ($input as $propId=>$value) {
-            if (!($propId == 0 && $propId !== 0)) {
+            if (!is_string($propId)) {
                 continue;
             }
             if (!isset($properties[$propId])) {
@@ -154,7 +154,7 @@ abstract class Base extends \Amiss\Mapper
             if (!isset($fields[$prop])) {
                 throw new \UnexpectedValueException("Field $prop does not exist for class {$meta->class}");
             }
-            if ($propParams == 0 && $propParams !== 0) {
+            if (!is_array($propParams)) {
                 $propParams = [$propParams];
             }
             $field = $fields[$prop];

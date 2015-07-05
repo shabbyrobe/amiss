@@ -120,8 +120,7 @@ class Criteria extends Sql\Query
             // handler above, which could perhaps be reduced.
 
             foreach ($this->params as $p=>$v) {
-                // ($k == 0 && $k !== 0) == faster !is_numeric($k) for array keys
-                if (($p == 0 && $p !== 0) && $p[0] != ':') {
+                if (is_string($p) && $p[0] != ':') {
                     $k = ':'.$p;
                     $fields && isset($fields[$p]) && $properties[$p] = $k;
                 }
