@@ -28,13 +28,13 @@ class Date implements \Amiss\Type\Handler
  
         switch ($formats = $options['formats']) {
             case 'datetime':
-                $this->formats = array('Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i:s');
+                $this->formats = ['Y-m-d H:i:s', 'Y-m-d H:i'];
             break;
             case 'date':
-                $this->formats = array('Y-m-d');
+                $this->formats = ['Y-m-d'];
             break;
             default:
-                $this->formats = is_array($formats) ? $formats : array($formats);
+                $this->formats = is_array($formats) ? $formats : [$formats];
         }
 
         $appTimeZone = $options['appTimeZone'];
@@ -51,7 +51,7 @@ class Date implements \Amiss\Type\Handler
         $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
         $this->forceTime   = $options['forceTime'];
 
-        if ($this->forceTime && $this->forceTime == 0 && $this->forceTime !== 0) {
+        if ($this->forceTime && is_string($this->forceTime)) {
             $this->forceTime = explode(':', $this->forceTime);
             if (!isset($this->forceTime[0]) || !isset($this->forceTime[1]) || isset($this->forceTime[3])) {
                 throw new \InvalidArgumentException("forceTime must be a 2- or 3-tuple of integers [H, M, S] or a colon-separated string of numbers H:M:S");
@@ -135,7 +135,7 @@ class Date implements \Amiss\Type\Handler
             $dateClass = $this->mainClass;
 
             foreach ($this->formats as $format) {
-                $out = $dateClass::createFromFormat($format, $value, $this->dbTimeZone);
+                $out = $dateClass::createFromFormat("$format", $value, $this->dbTimeZone);
                 if ($out instanceof $dateClass) {
                     $out = $out->setTimeZone($this->appTimeZone);
                     if ($this->forceTime) {

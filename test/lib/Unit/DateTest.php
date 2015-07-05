@@ -100,6 +100,30 @@ class DateTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals('2012-01-01 12:00:00', $out);
     }
 
+    public function dateFromDbZeroesTimeProvider()
+    {
+        return [
+            ['00:00', '00:00:00'],
+            ['23:59', '23:59:00'],
+            ['23:59:59', '23:59:59'],
+            ['00:00:00', '00:00:00'],
+            [['00', '00', '00'], '00:00:00'],
+        ];
+    }
+
+    /** @dataProvider dateFromDbZeroesTimeProvider */
+    public function testDateFromDbZeroesTime($in, $out)
+    {
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>'date',
+            'appTimeZone'=>'Australia/Melbourne',
+            'dbTimeZone'=>'Australia/Melbourne',
+            'forceTime'=>$in,
+        ]);
+        $result = $handler->handleValueFromDb('2012-03-04', [], []);
+        $this->assertEquals($result, new \DateTime('2012-03-04 '.$out, new \DateTimeZone('Australia/Melbourne')));
+    }
+
     public function testDateTimeImmutablePrepareForDb()
     {
         $handler = new \Amiss\Sql\Type\Date([
