@@ -25,6 +25,7 @@ Amiss PHP Data Mapper
         
     development
     glossary
+    docmodels
 
 
 Requirements
@@ -34,11 +35,13 @@ Requirements
 - MySQL or SQLite
 - PDO/MySQL and/or PDO/SQLite
 
-.. note:: 
+Unlike earlier versions, Amiss 5 requires PHP 5.6 or greater. If you need support for
+earlier versions back to 5.3.2, use Amiss 4. Amiss 4 will be supported for the forseeable
+future, but no new features will be added.
 
-    Amiss 5 requires PHP 5.6 or greater. If you need support for earlier versions back to
-    5.3.2, use Amiss 4. Amiss 4 will be supported for the forseeable future, but no new
-    features will be added.
+Documentation for Amiss 4 can be found here:
+
+    http://shabbyrobe.org/code/amiss/doc/4/
 
 
 License

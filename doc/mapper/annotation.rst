@@ -1,14 +1,15 @@
 Annotation Mapper
 =================
 
-``Amiss\Sql\Factory::createManager()`` uses ``Amiss\Mapper\Note`` with certain :doc:`types`
-preconfigured by default. This should be used as a default starting point. You can access
-the mapper for further configuration after you create the manager like so:
+``Amiss\Sql\Factory::createManager()`` uses ``Amiss\Mapper\Note`` with certain
+:doc:`types` preconfigured by default. This should be used as a default starting point.
+You can access the mapper for further configuration after you create the manager like so:
 
 .. code-block:: php
 
     <?php
-    $manager = \Amiss\Sql\Factory::createManager($db, array('cache'=>$cache));
+    $config = ['appTimeZone'=>'UTC', 'cache'=>$cache];
+    $manager = \Amiss\Sql\Factory::createManager($db, $config);
     $mapper = $manager->mapper;
 
 This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance
@@ -16,117 +17,36 @@ already assigned. The mapper will have the following :doc:`types` pre-configured
 
 - autoinc
 - bool
+- decimal - Big number handling provided by http://github.com/litipk/php-bignumbers
 
-If you set the ``dbTimeZone`` and ``appTimeZone`` keys in the config array, you will also get type
-handlers for:
+If you set the ``dbTimeZone`` and ``appTimeZone`` keys in the config array, you will also
+get :doc:`type handlers <types>` for dates:
 
 - datetime
 - date
 - unixtime
 
-See :doc:`common` and :doc:`types` for more information on how to tweak Amiss' default mapping
-behaviour.
-
-
-Overview
---------
-
-Using the Annotation mapper, object/table mappings are defined in this way:
-
-.. code-block:: php
-
-    <?php
-    /**
-     * :amiss = {
-     *     "table": "your_table",
-     *     "fieldType": "VARCHAR(255)"
-     * };
-     */
-    class Foo
-    {
-        /** :amiss = {"field":{"primary":true}}; */
-        public $id;
-
-        /** :amiss = {"field":"some_column"}; */
-        public $name;
-
-        /** :amiss = {"field":true}; */
-        public $barId;
-
-        /**
-         * One-to-one relation: 
-         *
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Baz",
-         *         "on": "bazId"
-         *     }
-         * };
-         */
-        public $baz;
-
-        /** 
-         * One-to-many relation:
-         *
-         * :amiss = {
-         *     "has": {
-         *         "type": "many",
-         *         "of": "Bar",
-         *         "inverse": "foo"
-         *     }
-         * };
-         */
-        public $bars;
-
-        // field is defined below using getter/setter
-        private $fooDate;
-
-        /**
-         * :amiss = {
-         *     "field": {
-         *         "type": "date"
-         *     }
-         * };
-         */
-        public function getFooDate()
-        {
-            return $this->fooDate;
-        }
-
-        public function setFooDate($value)
-        {
-            $this->fooDate = $value;
-        }
-    }
-
-It is assumed by this mapper that an object and a table are corresponding entities. More complex
-mapping should be handled using a :doc:`custom mapper <custom>`.
+See :doc:`common` and :doc:`types` for more information on how to tweak Amiss' default
+mapping behaviour.
 
 
 Annotations
 -----------
 
-Annotations are defined in PHP docblocks and follow the format::
+*Amiss* uses the `Nope library <http://github.com/shabbyrobe/nope>`_ for annotation
+support. Annotations in *Nope* have a very simple syntax. They follow this format and
+MUST be embedded in doc block comments (``/** */``, not ``/* */``)::
 
     /**
-     * :namespace = {"json": "object"};
+     * :namespace = JSON;
      */
 
 Parsing of an annotation starts as soon as a ``:namespace`` token is seen at the **start
-of a line**::
+of a line** (the docblock margin and indentation are not counted)::
 
     /**
      * :parsed = {"json": "object"};
      * This won't be parsed: :notparsed = {"json": "object"};
-     */
-
-Namespace tokens should not contain any characters that you could not use in
-PHP variable names::
-
-    /**
-     * :good = {"json": "object"};
-     * :This is not good = {"json": "object"};
      */
 
 The JSON object starts immediately after the ``=`` sign and continues until the first
@@ -146,7 +66,68 @@ semicolon found which is the last character on a line (excluding horizontal whit
      * ; not the last thing on the line
      */
 
-Annotations used by Amiss are always placed into the ``:amiss`` namespace.
+
+Overview
+--------
+
+All Amiss annotations use the ``:amiss`` namespace.
+
+Using the Annotation mapper, object/table mappings are defined in this way:
+
+.. code-block:: php
+
+    <?php
+    /**
+     * :amiss = {
+     *     "table": "your_table",
+     *     "fieldType": "VARCHAR(255)"
+     * };
+     */
+    class Foo
+    {
+        /** :amiss = {"field": {"primary": true}}; */
+        public $id;
+   
+        /** :amiss = {"field": "some_column"}; */
+        public $name;
+   
+        /** :amiss = {"field": true}; */
+        public $barId;
+   
+        /**
+         * One-to-one relation: 
+         *
+         * :amiss = {"has": {
+         *     "type": "one", "of": "Baz", "on": "bazId"
+         * }};
+         */
+        public $baz;
+   
+        /** 
+         * One-to-many relation:
+         *
+         * :amiss = {
+         *     "has": {
+         *         "type": "many",
+         *         "of": "Bar",
+         *         "inverse": "foo"
+         *     }
+         * };
+         */
+        public $bars;
+   
+        // field is defined below using getter/setter
+        private $fooDate;
+   
+        /**
+         * :amiss = {"field": {"type": "date"}};
+         */
+        public function getFooDate()   { return $this->fooDate; }
+        public function setFooDate($v) { $this->fooDate = $v; }
+    }
+
+It is assumed by this mapper that an object and a table are corresponding entities. More
+complex mapping should be handled using a :doc:`custom mapper <custom>`.
 
 
 Class Mapping
@@ -169,34 +150,34 @@ These values must be assigned in the class' docblock:
 
 The following class level annotations are available:
 
-.. py:attribute:: @table value
+``table``:
 
-    When declared, this forces the mapper to use this table name. It may include a schema name as
-    well. If not provided, the table name will be determined by the mapper. See 
+    When declared, this forces the mapper to use this table name. It may include a schema
+    name as well. If not provided, the table name will be determined by the mapper. See
     :ref:`name-translation` for details on this process.
 
 
-.. py:attribute:: @fieldType value
+``fieldType``:
 
-    This sets a default field type to use for for all of the properties that do not have a field
-    type set against them explicitly. This will inherit from a parent class if one is set. See
-    :doc:`types` for more details.
+    This sets a default field type to use for for all of the properties that do not have a
+    field type set against them explicitly. This will inherit from a parent class if one
+    is set. See :doc:`types` for more details.
 
 
-.. py:attribute:: @constructor value
+``constructor``:
 
     The name of a static constructor to use when creating the object instead of the
     default ``__construct``. The method must be static and must return an instance of the
     class.
 
-    If no constructor arguments are found in the meta, the entire unmapped input record is
-    passed as the first argument.
+    If no constructor arguments are found in the metadata (see ``constructorArgs``), the
+    entire unmapped input record is passed as the first argument.
 
     .. code-block:: php
 
         <?php
         /**
-         * @constructor pants
+         * :amiss = {"constructor": "pants"};
          */
         class Foo
         {
@@ -212,31 +193,68 @@ The following class level annotations are available:
 Property mapping
 ----------------
 
-Mapping a property to a column is done inside a property or getter method's docblock.
+Mapping a property to a column is done inside a property or getter method's docblock using
+a JSON object with the key ``field``.
 
-The following annotations are available to define this mapping:
+If the value for ``field`` is ``true``, no special additional metadata is required and the
+column name is determined by the base mapper. See :ref:`name-translation` for more details
+on this process::
 
-.. py:attribute:: @field columnName
+    /** :amiss = {"field": true}; */
+    public $theField;
+    
+If the value for ``field`` is a string, it is used as the column name::
 
-    This marks whether a property or a getter method represents a value that should be stored in a
-    column.
+    /** :amiss = {"field": "my_column"}; */
+    public $theField;
 
-    The ``columnName`` value is optional. If it isn't specified, the column name is determined by
-    the base mapper. See :ref:`name-translation` for more details on this process.
+More complex mapping is possible by assigning an object to ``field`` with any of the
+following keys::
 
+``name``
 
-.. py:attribute:: @type fieldType
+    This marks whether a property or a getter method represents a value that should be
+    stored in a column.
 
-    Optional type for the field. If this is not specified, the ``@fieldType`` class level attribute
-    is used. See :doc:`types` for more details.
+    This value is optional. If it isn't specified, the column name is determined by the
+    base mapper. See :ref:`name-translation` for more details on this process.
 
+``type``
 
-.. py:attribute:: @setter setterName
+    Optional type for the field. If this is not specified, the ``defaultFieldType`` class
+    level attribute is used. See :doc:`types` for more details.
 
-    If the ``@field`` attribute is set against a getter method as opposed to a property, this
-    defines the method that is used to set the value when loading an object from the database. It is
-    required if the ``@field`` attribute is defined against a property that has a getter/setter name
-    pair that doesn't follow the traditional ``getFoo``/``setFoo`` pattern.
+    The value for ``type`` can be a string representing a type handler::
+        
+        /** :amiss = {"field": {"type": "decimal"}}; */
+        public $theField;
+    
+    For type handlers that take additional configuration, you can pass an object
+    containing the type handler name assigned to the ``id`` key::
+
+        /** :amiss = {"field": {"type": {"id": "decimal", "scale": 3}}}; */
+        public $theField;
+
+``index``
+
+    If this is true, an single-field index with the same name as the property is created::
+        
+        class Pants {
+            /** :amiss = {"field": {"index": true}}; */
+            public $myIndexedField;
+        }
+        $meta = $mapper->getMeta(Pants::class);
+        assert($meta->indexes['myIndexedField']['fields'] == ['myIndexedField']);
+
+``setter``
+
+    If the ``field`` attribute is set against a getter method as opposed to a property,
+    and the getter/setter pair does not follow one of the common formats listed below, you
+    can explicitly define the setter using this key::
+
+        /** :amiss = {"field": {"setter": "assignTheFoo"}}; */
+        public function gimmeTheFoo()    { ... }
+        public function assignTheFoo($v) { ... }
 
     See :ref:`annotations-getters-setters` for more details.
 
@@ -244,152 +262,131 @@ The following annotations are available to define this mapping:
 Relation mapping
 ----------------
 
-Mapping an object relation is done inside a property or getter method's docblock.
+Mapping a property to a column is done inside a property or getter method's docblock using
+a JSON object with the key ``has``.
 
-The following annotations are available to define this mapping:
+If the value for ``has`` is a string, it is used as the relator name::
 
-.. py:attribute:: @has
+    /** :amiss = {"has": "theRelator"}; */
+    public $theRelation;
 
-    Defines a relation against a property or getter method.
+More complex mapping is possible by assigning an object to ``has`` with the key ``type``.
+This is equivalent to the previous example::
 
-    It supports a basic syntax when the relator requires no additional config::
-    
-        @has relationType
+    /** :amiss = {"has": {"type": "theRelator"}}; */
+    public $theRelation;
+
+``type`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
+``one``, ``many`` and ``assoc`` relators are available by default, which all require
+additional configuration using an object.
+
+**One-to-one** (``one``) relationships require, at a minimum, the target object of the
+relation and the indexes on which the relation is established. You should read the
+:ref:`relator-one` documentation for a full description of the data this relator requires.
+A simple one-to-one is annotated like so:
+
+.. code-block:: php
         
-    And a more complex syntax when the relator does require more config::
-    
-        @has.relationType.key1 value1
-        @has.relationType.key2 value2
-        
-    
-    ``relationType`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
-    ``one``, ``many`` and ``assoc`` relators are available by default, which all require config.
-
-    **One-to-one** (``one``) relationships require, at a minimum, the target object of the
-    relation and the field(s) on which the relation is established. You should read the 
-    :ref:`relator-one` documentation for a full description of the data this relator requires. A
-    simple one-to-one is annotated like so:
-
-    .. code-block:: php
-        
-        <?php
-        class Artist
-        {
-            /**
-             * :amiss = {"field":{"primary":true}};
-             */
-            public $artistId;
-
-            /**
-             * :amiss = {"field":true};
-             */
-            public $artistTypeId;
+    <?php
+    class Artist
+    {
+        /** :amiss = {"field": {"primary": true}}; */
+        public $artistId;
+   
+        /** :amiss = {"field":true}; */
+        public $artistTypeId;
             
-            /**
-             * :amiss = {
-             *     "has": {
-             *         "type": "one",
-             *         "of": "ArtistType",
-             *         "on": "artistTypeId"
-             *     }
-             * };
-             */
-            public $artist;
-        }
+        /**
+         * :amiss = {"has": {
+         *     "type": "one",
+         *     "of": "ArtistType",
+         *     "on": "artistTypeId"
+         * }};
+         */
+        public $artist;
+    }
     
 
-    A one-to-one relationship where the left and right side have different field names::
+A one-to-one relationship where the left and right side have different field names::
 
-        @has.one.of ArtistType
-        @has.one.on.typeId artistTypeId
-
-
-    A one-to-one relationship on a composite key::
-
-        @has.one.of ArtistType
-        @has.one.on typeIdPart1
-        @has.one.on typeIdPart2
+    @has.one.of ArtistType
+    @has.one.on.typeId artistTypeId
 
 
-    A one-to-one relationship on a composite key with different field names::
+A one-to-one relationship on a composite key::
 
-        @has.one.of ArtistType
-        @has.one.on.typeIdPart1 idPart1
-        @has.one.on.typeIdPart2 idPart2
+    @has.one.of ArtistType
+    @has.one.on typeIdPart1
+    @has.one.on typeIdPart2
+
+
+A one-to-one relationship on a composite key with different field names::
+
+    @has.one.of ArtistType
+    @has.one.on.typeIdPart1 idPart1
+    @has.one.on.typeIdPart2 idPart2
         
     
-    A one-to-one relationship with a matching one-to-many on the related object, where the ``on``
-    values are to be determined from the related object::
+A one-to-one relationship with a matching one-to-many on the related object, where the ``on``
+values are to be determined from the related object::
         
-        @has.one.of ArtistType
-        @has.one.inverse artist
+    @has.one.of ArtistType
+    @has.one.inverse artist
+
     
-    
-    **One-to-many** (``many``) relationships support all the same options as one-to-one
-    relationships. You should read the :ref:`relator-many` documentation for a full description of 
-    the data this relator requires. The simplest one-to-many is annotated like so:
+**One-to-many** (``many``) relationships support all the same options as one-to-one
+relationships. You should read the :ref:`relator-many` documentation for a full description of 
+the data this relator requires. The simplest one-to-many is annotated like so:
 
-    .. code-block:: php
+.. code-block:: php
 
-        <?php
-        class ArtistType
-        {
-            /**
-             * :amiss = {"field":{"primary":true}};
-             */
-            public $artistTypeId;
-
-            /**
-             * :amiss = {
-             *     "has": {
-             *         "type": "many",
-             *         "of": "Artist",
-             *         "on": "artistTypeId"
-             *     }
-             * };
-             */
-            public $artists;
-        }
+    <?php
+    class ArtistType
+    {
+        /** :amiss = {"field": {"primary": true}}; */
+        public $artistTypeId;
+   
+        /**
+         * :amiss = {"has": {
+         *     "type": "many",
+         *     "of": "Artist",
+         *     "on": "artistTypeId"
+         * }};
+         */
+        public $artists;
+    }
 
 
-    **Association** (``assoc``) relationships are annotated quite differently. You should read
-    the :ref:`relator-assoc` documentation for a full description of the data this relator requires.
-    A quick example:
+**Association** (``assoc``) relationships are annotated quite differently. You should read
+the :ref:`relator-assoc` documentation for a full description of the data this relator
+requires.  A quick example:
 
-    .. code-block:: php
+.. code-block:: php
 
-        <?php
-        class Event
-        {
-            /**
-             * :amiss = {"field":{"primary":true}};
-             */
-            public $eventId;
-
-            /**
-             * :amiss = {
-             *     "has": {
-             *         "type": "many",
-             *         "of": "EventArtist",
-             *         "on": "eventId"
-             *     }
-             * };
-             */
-            public $eventArtists;
-
-            /**
-             * :amiss = {
-             *     "has": {
-             *         "type": "assoc",
-             *         "of": "Artist",
-             *         "via": "EventArtist"
-             *     }
-             * };
-             */
-            public $artists;
-        }
-    
-
+    <?php
+    class Event
+    {
+        /** :amiss = {"field": {"primary": true}}; */
+        public $eventId;
+   
+        /**
+         * :amiss = {"has": {
+         *     "type": "many",
+         *     "of": "EventArtist",
+         *     "on": "eventId"
+         * }};
+         */
+        public $eventArtists;
+   
+        /**
+         * :amiss = {"has": {
+         *     "type": "assoc",
+         *     "of": "Artist",
+         *     "via": "EventArtist"
+         * }};
+         */
+        public $artists;
+    }
 
 
 .. py:attribute:: @setter setterName
@@ -407,18 +404,9 @@ The following annotations are available to define this mapping:
 Getters and setters
 -------------------
 
-Properties should almost always be defined against your object as class-level fields in PHP. Don't
-use getters and setters when you are doing no more than getting or setting a private field value -
-it's a total waste of resources. See my `stackoverflow rant
-<http://stackoverflow.com/a/813099/15004>`_ for a more thorough explanation of why you shouldn't,
-and for a brief explanation of how to get all of the benefits anyway.
-
-Having said that, getters and setters are essential when you need to do more than just set a private
-value.
-
-Getters and setters can be used for both fields and relations. When using the annotation mapper,
-this should be done against the getter in exactly the same way as you would do it against a
-property:
+Getters and setters can be used for both fields and relations. When using the annotation
+mapper, this should be done against the getter in exactly the same way as you would do it
+against a property:
 
 .. code-block:: php
 
@@ -427,7 +415,7 @@ property:
     {
         private $baz;
         private $qux;
-
+   
         /**
          * :amiss = {"field":true};
          */
@@ -435,7 +423,7 @@ property:
         {
             return $this->baz;
         }
-
+   
         /**
          * :amiss = {
          *     "has": {
@@ -451,10 +439,11 @@ property:
         }
     }
 
-There is a problem with the above example: we have provided a way to get the values, but not to set
-them. This will make it impossible to retrieve the object from the database. If you provide matching
-``setBaz`` and ``setQux`` methods, Amiss will guess that these are paired with ``getBaz`` and
-``getQux`` respectively and don't require any special annotations:
+There is a problem with the above example: we have provided a way to get the values, but
+not to set them. This will make it impossible to retrieve the object from the database. If
+you provide matching ``setBaz`` and ``setQux`` methods, Amiss will guess that these are
+paired with ``getBaz`` and ``getQux`` respectively and don't require any special
+annotations:
 
 .. code-block:: php
 
@@ -462,13 +451,13 @@ them. This will make it impossible to retrieve the object from the database. If 
     class Foo
     {
         // snip
-
+   
         public function setBaz($value)
         {
             $value->thingy = $this;
             $this->baz = $value;
         }
-
+   
         public function setQux($value)
         {
             $value->thingy = $this;
@@ -477,10 +466,11 @@ them. This will make it impossible to retrieve the object from the database. If 
     }
 
 
-If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you can specify the setter
-directly against both relations and fields using the ``@setter`` annotation. The following example
-should give you some idea of my opinion on going outside the standard, but Amiss tries not to be too
-opinionated so you can go ahead and make your names whatever you please:
+If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you can specify
+the setter directly against both relations and fields using the ``@setter`` annotation.
+The following example should give you some idea of my opinion on going outside the
+standard, but Amiss tries not to be too opinionated so you can go ahead and make your
+names whatever you please:
 
 .. code-block:: php
 
@@ -489,7 +479,7 @@ opinionated so you can go ahead and make your names whatever you please:
     {
         private $baz;
         private $qux;
-
+   
         /**
          * :amiss = {
          *     "field": {
@@ -501,13 +491,13 @@ opinionated so you can go ahead and make your names whatever you please:
         {
             return $this->baz;
         }
-
+   
         public function assignAValueToBaz($value)
         {
             $value->thingy = $this;
             $this->baz = $value;
         }
-
+   
         /**
          * :amiss = {
          *     "has": {
@@ -524,7 +514,7 @@ opinionated so you can go ahead and make your names whatever you please:
         
             return $this->qux;
         }
-
+   
         public function makeQuxEqualTo($value)
         {
             $value->thingy = $this;
@@ -572,7 +562,7 @@ to the cache's constructor (the third argument is explained later), or set it ag
     <?php
     // Using the constructor
     $cache = new \Amiss\Cache('apc_fetch', 'apc_store', null, 86400);
-
+   
     // Or setting by hand
     $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
     $cache->expiration = 86400;
@@ -653,8 +643,9 @@ by passing the names of the getter and setter methods and your own class:
         $env = getenv('your_app_environment');
         
         $cache = null;
-        if ($env != 'dev')
+        if ($env != 'dev') {
             $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
+        }
         
         $mapper = new \Amiss\Mapper\Note($cache);
 

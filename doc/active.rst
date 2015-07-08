@@ -1,45 +1,39 @@
 Active Records
 ==============
 
-From `P of EAA`_: An object that wraps a row in a database table or view, encapsulates the database
-access, and adds domain logic on that data.
+From `P of EAA`_: An object that wraps a row in a database table or view, encapsulates the
+database access, and adds domain logic on that data.
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not wild about Active Records, but they can be very effective for rapid development and people
-seem to like them, so why not throw them in?
+I'm not wild about Active Records, but they can be very effective for rapid development
+and people seem to like them, so why not throw them in?
 
 
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class. Configure everything
-else just like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class. Configure
+everything else just like you would when using Amiss as a Data Mapper.
 
 This guide will assume you are using the :doc:`mapper/annotation`. For more information on
-alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping
-configuration that works with the data mapper.
+alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any
+mapping configuration that works with the data mapper.
 
 .. code-block:: php
 
     <?php
     class Artist extends Amiss\Sql\ActiveRecord
     {
-        /**
-         * :amiss = {"field":{"primary":true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $artistId;
-
-        /**
-         * :amiss = {"field":true};
-         */
+   
+        /** :amiss = {"field": true}; */
         public $name;
-
-        /**
-         * :amiss = {"field":true};
-         */
+   
+        /** :amiss = {"field":true}; */
         public $artistTypeId;
-
+   
         /**
          * :amiss = {
          *     "has": {
@@ -56,8 +50,8 @@ configuration that works with the data mapper.
 Connecting
 ----------
 
-As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an ``Amiss\Mapper`` and
-pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
+As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an
+``Amiss\Mapper`` and pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
 ``Amiss\Sql\ActiveRecord::setManager()``.
 
 .. code-block:: php
@@ -72,8 +66,8 @@ pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
     var_dump($conn === $manager); // outputs true
 
 
-Multiple connections are possible, but require subclasses. The separate connections are then
-assigned to their respective base class:
+Multiple connections are possible, but require subclasses. The separate connections are
+then assigned to their respective base class:
 
 .. code-block:: php
 
@@ -95,11 +89,11 @@ Querying and Modifying
 ----------------------
 
 All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied by
-``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or object instance,
-``Amiss\Sql\ActiveRecord`` takes care of passing itself.
+``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or object
+instance, ``Amiss\Sql\ActiveRecord`` takes care of passing itself.
 
-When an instance is not required, the methods are called statically against your specific active
-record.
+When an instance is not required, the methods are called statically against your specific
+active record.
 
 Consider the following equivalents:
 
@@ -199,8 +193,8 @@ simply a bit of syntactic sugar:
 Lazy Loading
 ------------
 
-``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can implement it yourself 
-using a wrapper function:
+``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can implement it
+yourself using a wrapper function:
 
 .. code-block:: php
 
@@ -259,8 +253,8 @@ The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to 
     
 .. note:: 
 
-    ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition to 
-    ``beforeInsert()`` and ``beforeUpdate()``.
+    ``beforeSave()`` is called when an item is inserted *or* updated. It is called in
+    addition to ``beforeInsert()`` and ``beforeUpdate()``.
 
 ALWAYS call the parent method of the hook when overriding:
 
@@ -270,7 +264,7 @@ ALWAYS call the parent method of the hook when overriding:
     class MyRecord extends \Amiss\Sql\ActiveRecord
     {
         // snipped fields, etc
-
+   
         function beforeUpdate()
         {
             parent::beforeUpdate();

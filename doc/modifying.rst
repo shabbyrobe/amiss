@@ -21,7 +21,7 @@ Inserting by object is simple: just pass it directly to ``Amiss\Sql\Manager::ins
     $e = new Event;
     $e->setName('Foo Bar');
     $manager->insert($e);
-
+   
     // autoinc fields are populated automatically
     echo $e->eventId;
 
@@ -136,22 +136,24 @@ To update an object's representation in the database, call the ``update`` method
 Tables
 ~~~~~~
 
-To update a table, call the ``update`` method of ``Amiss\Sql\Manager`` but pass the object's name as
-the first parameter instead of an instance. The following signatures are available::
+To update a table, call the ``updateTable`` method of ``Amiss\Sql\Manager`` but pass the
+object's name as the first parameter instead of an instance. The following signatures are
+available::
 
-    update( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
-    update( string $class, array $set , string $namedWhere, array $params )
-    update( string $class, array $criteria )
-    update( string $class, Amiss\Sql\Criteria\Update $criteria )
+    updateTable( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
+    updateTable( string $class, array $set , string $namedWhere, array $params )
+    updateTable( string $class, array $criteria )
+    updateTable( string $class, Amiss\Sql\Criteria\Update $criteria )
 
 
-The ``class`` parameter should just be the name of a class, otherwise the "Object" updating method
-described above will kick in.
+The ``class`` parameter should just be the name of a class, otherwise the "Object"
+updating method described above will kick in.
 
-In the first two signatures, the ``set`` parameter is an array of key=>value pairs containing fields
-to set. The key should be the object's property name, not the column in the database (though these
-may be identical). The ``positionalWhere`` or ``namedWhere`` are, like select, just parameterised
-query clauses. See :ref:`clauses` for more information.
+In the first two signatures, the ``set`` parameter is an array of ``key => value`` pairs
+containing fields to set. The key should be the object's property name, not the column in
+the database (though these may be identical). The ``positionalWhere`` or ``namedWhere``
+are, like select, just parameterised query clauses. See :ref:`clauses` for more
+information.
 
 .. code-block:: php
 
@@ -190,8 +192,8 @@ can be passed:
 Saving
 ------
 
-"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for objects 
-with an autoincrement column.
+"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for
+objects with an autoincrement column.
 
 .. code-block:: php
 
@@ -244,6 +246,8 @@ Deleting by table::
 
 Tables
 ------
+
+::
 
     $manager->insertTable( $meta , array $propertyValues );
     $manager->insertTable( $meta , Query\Insert $query );

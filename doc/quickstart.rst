@@ -21,10 +21,10 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 .. code-block:: php
 
     <?php
-
+   
     // Include and register autoloader (generate using composer install)
     require 'vendor/autoload.php';
-
+   
     // Amiss depends on the PDOK library (http://github.com/shabbyrobe/pdok). PDOK is
     // a thin wrapper around PDO which adds a few nice things. You should use it
     // instead of PDO in your own code.
@@ -32,41 +32,38 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     
     // This will create a SQL manager using the default configuration (note mapper, 
     // default types and relators, no cache)
-    $manager = Amiss\Sql\Factory::createManager($connector);
+    $config = [
+        // app timezone is required if you want date/datetime/timestamp types
+        'appTimeZone' => 'UTC',
+    ];
+    $manager = Amiss\Sql\Factory::createManager($connector, $config);
     
     // Same as above, but with a cache
     $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
-    $manager = Amiss\Sql\Factory::createManager($connector, array('cache'=>$cache));
+    $manager = Amiss\Sql\Factory::createManager($connector, $config + ['cache'=>$cache]);
     
-    // Configure the default mapper
-    $manager->mapper->objectNamespace = 'Your\Model\Namespace';
+    // Replace the default note mapper with a different mapper:
+    $manager = Amiss\Sql\Factory::createManager($connector, [
+        'mapper' => new \Amiss\Mapper\Arrays(),
+        'appTimeZone' => 'UTC'
+    ]);
     
-    // Or use your own mapper:
-    $mapper = new \Amiss\Mapper\Arrays();
-
-    // shorthand
-    $manager = Amiss\Sql\Factory::createManager($connector, $mapper); 
-
-    // longhand
-    $manager = Amiss\Sql\Factory::createManager($connector, array(
-        'mapper'=>$mapper, 
-        'cache'=>$cache
-    ));
-    
-    // Or use your own everything:
+    // Or go lean and mean and don't use any defaults at all:
     $mapper = new \Amiss\Mapper\Arrays();
     $mapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
     $mapper->addTypeHandler(new \Amiss\Sql\Type\Boolean, 'bool');
+   
     $manager = new \Amiss\Sql\Manager($connector, $mapper);
-    $manager->relators['one'] = new \Amiss\Sql\Relator\OneMany($manager);
+    $manager->relators['one']  = new \Amiss\Sql\Relator\OneMany($manager);
     $manager->relators['many'] = new \Amiss\Sql\Relator\OneMany($manager);
 
 
 Annotation Syntax
 -----------------
 
-Annotations in Amiss have a very simple syntax. They follow this format and MUST be
-embedded in doc block comments (``/** */``, not ``/* */``)::
+*Amiss* uses the `Nope library <http://github.com/shabbyrobe/nope>`_ for annotation
+support. Annotations in *Nope* have a very simple syntax. They follow this format and
+MUST be embedded in doc block comments (``/** */``, not ``/* */``)::
 
     /**
      * :namespace = {"json": "object"};
@@ -80,9 +77,7 @@ encountered as the last non-whitespace character on a line::
     /**
      * :namespace = {
      *     "json": "object", 
-     *     "yep": [
-     *         1, 2, 3
-     *     ]
+     *     "yep": [1, 2, 3]
      * };
      */
 
@@ -93,8 +88,8 @@ Defining objects
 Table names are guessed from the object name. Object names are converted from
 ``CamelCase`` to ``under_scores`` by default.
 
-Table field names are guessed from the property name. No name mapping is performed by
-default, but you can pass an explicit field name via the ``@field`` annotation, or pass
+Table field names are taken from the property name. No name mapping is performed by
+default, but you can pass an explicit field name via the ``field`` annotation, or pass
 your own automatic translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator``.
 
 See :doc:`mapper/mapping` for more details and alternative mapping options.
@@ -102,87 +97,79 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
 .. code-block:: php
 
     <?php
-
+   
     class Event
     {
         /**
-         * :amiss = {"field": {
-         *     "type": "autoinc",
-         *     "primary": true
-         * }};
+         * The "autoinc" type handler will come pre-configured if you use the
+         * Amiss\Sql\Factory::createManager(...) method.
+         *
+         * :amiss = {"field": {"type": "autoinc", "primary": true}};
          */
         public $eventId;
-
+   
         /**
-         * :amiss = {"field":true};
+         * This is just a plain old field, with no special properties. Amiss
+         * will not handle the field's type - it will be treated as a string in
+         * both directions.
+         * 
+         * :amiss = {"field": true};
          */
         public $name;
-
+   
         /**
-         * :amiss = {"field":true};
+         * :amiss = {"field": {"type": "datetime"}};
          */
-        public $startDate;
-
+        public $dateStart;
+   
         /**
+         * This field contains an ID for a related object, so an index is required.
+         * The index name is taken from the property name when the index is specified
+         * in this way, so in this case it will be "venueId"
+         *
          * :amiss = {"field": {"index": true}};
          */
         public $venueId;
-
+   
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Venue",
-         *         "from": "venueId"
-         *     }
-         * };
+         * Simple relationship - an event has one venue. "one" relations are
+         * specified "from" an index on the current model "to" an index on the
+         * related model. In this case the "venueId" index declared above relates
+         * to the primary key on the Venue model.
+         *
+         * :amiss = {"has": {"type": "one", "of": "Venue", "from": "venueId"}};
          */
         public $venue;
     }
-
+   
     /**
      * Explicit table name annotation. Leave this out and the table 
-     * will default to 'venue'
+     * name will default to 'venue'
      *
      * :amiss = {"table": "venues"};
      */
     class Venue
     {
         /**
-         * :amiss = {
-         *     "field": {
-         *         "type": "autoinc",
-         *         "primary": true
-         *     }
-         * };
+         * An index with the name "primary" is automatically defined for a primary key.
+         *
+         * :amiss = {"field": {"type": "autoinc", "primary": true}};
          */
         public $venueId;
-
-        /**
-         * :amiss = {"field":"venueName"};
-         */
+   
+        /** :amiss = {"field": "venueName"}; */
         public $name;
-
-        /**
-         * :amiss = {"field":true};
-         */
+   
+        /** :amiss = {"field": true}; */
         public $slug;
-
-        /**
-         * :amiss = {"field":true};
-         */
+   
+        /** :amiss = {"field": true}; */
         public $address;
-
+   
         /** 
          * Inverse relationship of Event->venue
          *
-         * :amiss = {
-         *     "has": {
-         *         "type": "many",
-         *         "of": "Event",
-         *         "inverse": "venue"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "many", "of": "Event", "inverse": "venue"}};
          */
         public $events;
     }
@@ -197,10 +184,14 @@ See :doc:`schema` for more details.
 
     <?php
     // single
-    $tableBuilder = Amiss\Sql\TableBuilder::create($connector, $manager, 'Venue');
-
+    Amiss\Sql\TableBuilder::create($connector, $manager, 'Venue');
+   
     // multiple
-    $tableBuilder = Amiss\Sql\TableBuilder::create($connector, $manager, ['Venue', 'Event']);
+    Amiss\Sql\TableBuilder::create($connector, $manager, ['Venue', 'Event']);
+   
+    // get the SQL for your own nefarious purposes:
+    $query   = Amiss\Sql\TableBuilder::createSQL($connector, $manager, 'Venue');
+    $queries = Amiss\Sql\TableBuilder::createSQL($connector, $manager, ['Venue', 'Event']);
 
 
 Selecting
@@ -211,52 +202,68 @@ See :doc:`selecting` for more details.
 .. code-block:: php
 
     <?php
-    // Get an event by primary key
+    // Get a single event by primary key
     $event = $manager->getById('Event', 1);
-
-    // Get an event named foobar with a clause written in raw SQL. Property names 
-    // wrapped in curly braces get translated to field names by the mapper.
+   
+    // Get a single event by name using a raw SQL clause and positional parameters. 
+    // Property names wrapped in curly braces get translated to field names by 
+    // the mapper:
     $event = $manager->get('Event', '{name}=?', ['foobar']);
-
+   
+    // Get a single event by start date using a raw SQL clause and named parameters. 
+    // In addition to field name unwrapping, if the named parameter names match a 
+    // property name in your model, type handling is also performed:
+    $event = $manager->get(
+        'Event', 
+        '{dateStart} = :dateStart', 
+        ['dateStart'=>new \DateTime('2020-06-02')]
+    );
+   
     // Get all events
     $events = $manager->getList('Event');
-
+   
     // Get all events named foo that start on the 2nd of June, 2020 using an array
-    $events = $manager->getList('Event', array(
-        'where'=>array('name'=>'foo', 'startDate'=>'2020-06-02')
-    ));
-
+    // clause. Array clauses are combined using "AND", must be keyed by property name,
+    // and type handling is performed on values:
+    $events = $manager->getList('Event', [
+        'where' => ['name'=>'foo', 'dateStart'=>new \DateTime('2020-06-02')]
+    ]);
+   
     // Get all events with 'foo' in the name using positional parameters
-    $events = $manager->getList('Event', array(
-        'where'=>'{name} LIKE ?', 
-        'params'=>array('%foo%')
-    ));
+    $events = $manager->getList('Event', [
+        'where'  => '{name} LIKE ?', 
+        'params' => ['%foo%']
+    ]);
     
     // Paged list, limit/offset
-    $events = $manager->getList('Event', array(
-        'where'=>'{name}=?',
-        'params'=>array('foo'),
-        'limit'=>10, 
-        'offset'=>30
-    ));
-
+    $events = $manager->getList('Event', [
+        'where'  => '{name}=?',
+        'params' => ['foo'],
+        'limit'  => 10, 
+        'offset' => 30
+    ]);
+   
     // Paged list, alternate style (number, size)
-    $events = $manager->getList('Event', array(
-        'where'=>'{name}=?',
-        'params'=>array('foo'),
-        'page'=>array(1, 30)
+    $events = $manager->getList('Event', [
+        'where'  => '{name}=?',
+        'params' => ['foo'],
+        'page'   => [1, 30]
     ));
-
-    // Amiss will unroll and properly parameterise IN() clauses
-    $events = $manager->getList('Event', 'IN (:foo)', array('foo'=>array(1, 2, 3)));
-
+   
+    // Amiss will unroll and properly parameterise IN() clauses when using
+    // named parameter clauses:
+    $events = $manager->getList('Event', '{eventId} IN (:foo)', ['foo'=>[1, 2, 3]]);
+   
+    // IN() clauses are also generated when using array clauses:
+    $events = $manager->getList('Event', ['where' => ['foo' => [1, 2, 3]]]);
+   
     // FOR UPDATE InnoDB row locking
     $manager->connector->beginTransaction();
     $rows = $manager->getList('Event', array(
         'where'=>'...',
         'forUpdate'=>true,
     ));
-    // do the update
+    // make your changes
     $manager->connector->commit();
 
 
@@ -276,30 +283,24 @@ One-to-one
     class Event
     {
         /**
-         * :amiss = {"field":{"primary":true}};
+         * :amiss = {"field": {"primary": true}};
          */
         public $eventId;
         
         // snip
-
+   
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Venue",
-         *         "on": "venueId"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "one", "of": "Venue", "on": "venueId"}};
          */
         public $venue;
     }
-    
+   
     // get a one-to-one relation for an event
     $venue = $manager->getRelated($event, 'venue');
-
+   
     // assign a one-to-one to an event
     $manager->assignRelated($event, 'venue');
-
+   
     // get each one-to-one relation for all events in a list
     $events = $manager->getList('Event');
     $venueMap = $manager->getRelated($events, 'venue');
@@ -317,31 +318,23 @@ One-to-many
     <?php
     class Venue
     {
-        /**
-         * :amiss = {"field":{"primary":true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $venueId;
         
         // snip
-
+   
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "many",
-         *         "of": "Event",
-         *         "on": "venueId"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "many", "of": "Event", "on": "venueId"}};
          */
         public $events;
     }
-
+   
     // get a one-to-many relation for a venue. this will return an array
     $events = $manager->getRelated($venue, 'events');
-
+   
     // assign a one-to-many relation to a venue.
     $manager->assignRelated($venue, 'events');
-
+   
     // get each one-to-many relation for all events in a list.
     // this will return an array of arrays. the order corresponds
     // to the order of the events passed.
@@ -350,7 +343,7 @@ One-to-many
     foreach ($venues as $idx=>$v) {
         echo "Found ".count($events[$idx])." events for venue ".$v->venueId."\n";
     }
-
+   
     // assign each one-to-many relation to all venues in a list
     $venues = $manager->getList('Venue');
     $manager->assignRelated($venues, 'events');
@@ -365,69 +358,44 @@ Many-to-many
 Many-to-many relations require the association table to be mapped to an intermediate
 object, and also require the relation to be specified on both sides:
 
-
 .. code-block:: php
 
     <?php
     class Event
     {
-        // snip
-        
+        /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
+        public $eventId;
+   
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "assoc",
-         *         "of": "Artist",
-         *         "via": "EventArtist"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "assoc", "of": "Artist", "via": "EventArtist"}};
          */
         public $artists;
     }
-
+   
     class EventArtist
     {
-        // snip
-
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Event",
-         *         "on": "eventId"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "one", "of": "Event", "on": "eventId"}};
          */
         public $event;
-
+   
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Artist",
-         *         "on": "artistId"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "one", "of": "Artist", "on": "artistId"}};
          */
         public $artist;
     }
-
+   
     class Artist
     {
-        // snip
-
+        /** :amiss = {"field": {"primary": true}}; */
+        public $artistId;
+        
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "assoc",
-         *         "of": "Event",
-         *         "via": "EventArtist"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "assoc", "of": "Event", "via": "EventArtist"}};
          */
         public $events;
     }
-
+   
     $event = $manager->getById('Event', 1);
     $artists = $manager->getRelated($event, 'artists');
 
@@ -445,22 +413,19 @@ Modifying by object:
     // Inserting an object:
     $event = new Event;
     $event->setName('Abc Def');
-    $event->startDate = '2020-01-01';
+    $event->dateStart = new \DateTime('2020-01-01');
     $manager->insert($event);
     
     // Updating an existing object:
     $event = $manager->getById('Event', 1);
-    $event->startDate = '2020-01-02';
+    $event->dateStart = new \DateTime('2020-01-02');
     $manager->update($event);
-
+   
     // Using the 'save' method if the object contains an autoincrement primary:
     $event = new Event;
-    // ...
-    $manager->save($event);
-
-    $event = $manager->getById('Event', 1);
-    $event->startDate = '2020-01-02';
-    $manager->save($event);
+    $manager->save($event); // inserts
+    $event->dateStart = new \DateTime('2020-01-02');
+    $manager->save($event); // update
 
 
 Modifying by table:
@@ -472,17 +437,22 @@ Modifying by table:
     $manager->insertTable('Event', array(
         'name'=>'Abc Def',
         'slug'=>'abc-def',
-        'startDate'=>'2020-01-01',
+        'dateStart'=>new \DateTime('2020-01-01'),
     );
-
+   
     // Update by table. Set the name field based on the start date.
     // This can work on an arbitrary number of rows, depending on the condition.
     // Clauses can be specified the same way as 'selecting'.
-    $manager->updateTable('Event', array('name'=>'Abc: Def'), '{startDate} > ?', ['2019-01-01']);
+    $manager->updateTable(
+        'Event', 
+        ['name'=>'Abc: Def'],
+        '{dateStart} > :dateStart',
+        ['dateStart' => new \DateTime('2019-01-01')]
+    );
     
     // Alternative clause syntax
-    $manager->updateTable('Event', array(
-        'set'=>array('name'=>'Abc: Def'), 
-        'where'=>array('startDate'=>'2019-01-01')
-    ));
+    $manager->updateTable('Event', [
+        'set'   => ['name'      => 'Abc: Def'], 
+        'where' => ['dateStart' => new \DateTime('2019-01-01')],
+    ]);
 

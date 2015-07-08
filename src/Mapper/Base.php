@@ -16,6 +16,12 @@ abstract class Base extends \Amiss\Mapper
     
     public $typeHandlers = array();
     
+    /**
+     * @deprecated Scheduled for removal in Amiss 6. Pre PHP 5.5 helper. Don't
+     * use any more, use this pattern instead:
+     *     use My\Name\Space;
+     *     $mapper->getMeta(Space::class);
+     */
     public $objectNamespace;
 
     public $skipNulls = false;

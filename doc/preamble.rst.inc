@@ -1,9 +1,9 @@
 **Amiss** v5 is a Data Mapper and Active Record implementation for MySQL and PHP
 5.6 or greater.
 
-**Amiss** does not try to be a fully-fledged ORM that cooks you breakfast, walks
-the dog and gives your schema its daily back massage, it only tries to take
-the monotony and repetition out of retrieving simple objects and simple
+**Amiss** does not try to be a fully-fledged ORM that cooks you breakfast,
+walks the dog and gives your schema its daily back massage, it only tries to
+take the monotony and repetition out of retrieving simple objects and simple
 relationships from a database that already exists.
 
 It's not the fanciest ORM on the block, but its brutal simplicity may make it a

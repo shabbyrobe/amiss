@@ -143,7 +143,7 @@ class Note extends \Amiss\Mapper\Base
                     unset($field['id']);
                     $info['fields'][$manualKey ?: $key] = $field;
                 }
-                
+
                 field_relation: if (isset($itemNotes['has'])) {
                     $relation = $itemNotes['has'];
                     if (is_string($relation)) {

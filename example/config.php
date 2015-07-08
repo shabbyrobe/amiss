@@ -2,16 +2,18 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 // temporary: preload classes to avoid autoloads distorting performance numbers
-$iter = new \RecursiveIteratorIterator(
-    new \RecursiveDirectoryIterator(__DIR__.'/../src'),
-    \RecursiveIteratorIterator::LEAVES_ONLY);
+pre_autoload: {
+    $iter = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator(__DIR__.'/../src'),
+        \RecursiveIteratorIterator::LEAVES_ONLY);
 
-foreach ($iter as $item) {
-    $name = $item->getFilename();
-    if ($item->isDir() || $name[0] == '.' || $item->getExtension() != 'php') {
-        continue;
+    foreach ($iter as $item) {
+        $name = $item->getFilename();
+        if ($item->isDir() || $name[0] == '.' || $item->getExtension() != 'php') {
+            continue;
+        }
+        require_once($item);    
     }
-    require_once($item);    
 }
 
 function e($val)

@@ -8,9 +8,9 @@ subsequent arguments are used to define criteria for the query.
 
 The selection methods are:
 
-.. py:method:: Amiss\\Sql\\Manager::getById( $model , $primaryKeyValue )
+``object Amiss\Sql\Manager::getById( $model , $primaryKeyValue )``
 
-Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
+    Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
 
     .. code-block:: php
     
@@ -34,7 +34,7 @@ Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
         $eventArtist = $manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>3));
 
 
-.. py:method:: object Amiss\\Sql\\Manager::get( $model , $criteria... )
+``object Amiss\\Sql\\Manager::get( $model , $criteria... )``
 
     Retrieve a single instance of ``$model``, determined by ``$criteria``. This will throw
     an exception if the criteria you specify fails to limit the result to a single object.
@@ -47,7 +47,7 @@ Retrieve a single instance of ``$model`` represented by ``$primaryKeyValue``:
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
 
-.. py:method:: array Amiss\\Sql\\Manager::getList( $mode , $criteria... )
+``array Amiss\\Sql\\Manager::getList( $mode , $criteria... )``
 
     Retrieve a list of instances of ``$model``, determined by ``$criteria``. Exactly the
     same as ``get``, but allows you to find many objects and will always return an array.
@@ -210,7 +210,7 @@ combo:
     <?php
     // limit to 30 rows
     $artists = $manager->getList('Artist', array('limit'=>30);
-
+   
     // limit to 30 rows, skip 60
     $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
 
@@ -223,7 +223,7 @@ number/page size. This is passed as a :term:`2-tuple` using the ``page`` key:
     <?php
     // retrieve page 1, page size 30. equivalent to LIMIT 30
     $artists = $manager->getList('Artist', array('page'=>array(1, 30)));
-
+   
     // retrieve page 3, page size 30. equivalent to LIMIT 30, OFFSET 60
     $artists = $manager->getList('Artist', array('page'=>array(3, 30)));
 
@@ -282,10 +282,10 @@ count rows:
     <?php
     // positional parameters
     $dukeCount = $manager->count('Artist', '{slug}=?', array('duke-nukem'));
-
+   
     // named parameters, shorthand:
     $dukeCount = $manager->count('Artist', '{slug}=:slug', array(':slug'=>'duke-nukem'));
-
+   
     // long form
     $criteria = new \Amiss\Sql\Query\Criteria();
     $criteria->where = '{slug}=:slug';
@@ -339,66 +339,62 @@ You can use this with ``Amiss\Sql\Manager`` easily:
 
     This does not work with positional parameters (question-mark style).
 
-.. warning::
+Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not
+that you should be doing this anyway). The following example may not work quite like
+you expect:
 
-    Do not mix and match hand-interpolated query arguments and "in"-clause parameters (not
-    that you should be doing this anyway). The following example may not work quite like
-    you expect:
+.. code-block:: php
 
-    .. code-block:: php
-
-        <?php
-        $criteria = new \Amiss\Sql\Query\Criteria;
-        $criteria->params = array(
-            ':foo'=>array(1, 2),
-            ':bar'=>array(3, 4),
-        );
-        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
+   <?php
+   $criteria = new \Amiss\Sql\Query\Criteria;
+   $criteria->params = array(
+       ':foo'=>array(1, 2),
+       ':bar'=>array(3, 4),
+   );
+   $criteria->where = 'foo IN (:foo) AND bar="hey IN(:bar)"';
         
-        list ($where, $params) = $criteria->buildClause();
-        echo $where;
+   list ($where, $params) = $criteria->buildClause();
+   echo $where;
+
+You'd be forgiven for assuming that the output would be::
+
+   foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
     
-    You'd be forgiven for assuming that the output would be::
-
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar)"
-    
-    However, the output will actually be::
+However, the output will actually be::
         
-        foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
+   foo IN(:foo_0,:foo_1) AND bar="hey IN(:bar_0,:bar_1)"
 
-    This is because Amiss does no parsing of your WHERE clause. It does a fairly naive
-    regex substitution that is more than adequate if you heed this warning (and
-    substantially faster).
+This is because Amiss does no parsing of your WHERE clause. It does a fairly naive
+regex substitution that is more than adequate if you heed this warning (and
+substantially faster).
 
-    You can get around this limitation easily (and arguably this is how you should do
-    something like that anyway):
+You can get around this limitation easily (and arguably this is how you should do
+something like that anyway):
 
-    .. code-block:: php
+.. code-block:: php
 
-        <?php
-        $criteria = new \Amiss\Sql\Query\Criteria;
-        $criteria->params = array(
-            ':foo'=>array(1, 2),
-            ':otre'=>'hey IN (:bar)',
-        );
-        $criteria->where = 'foo IN (:foo) AND bar=:otre';
-        list ($where, $params) = $criteria->buildClause();
+   <?php
+   $criteria = new \Amiss\Sql\Query\Criteria;
+   $criteria->params = array(
+       ':foo'=>array(1, 2),
+       ':otre'=>'hey IN (:bar)',
+   );
+   $criteria->where = 'foo IN (:foo) AND bar=:otre';
+   list ($where, $params) = $criteria->buildClause();
 
-    Substitution will only happen if you are trying to substitute an array parameter.  If
-    not, this warning does not apply. The following works fine::
+Substitution will only happen if you are trying to substitute an array parameter. If
+not, this warning does not apply. The following works fine:
 
-    .. code-block:: php
+.. code-block:: php
 
-        <?php
-        $criteria = new \Amiss\Sql\Query\Criteria;
-        $criteria->params = array(
-            // note that this is not an array(), so IN substitution does not
-            // ever kick in
-            ':foo'=>1
-        );
-        // consequently, the "hey IN(:foo)" is preserved
-        $criteria->where = 'foo IN (:foo) AND bar="hey IN(:foo)"';
-        
+   <?php
+   $criteria = new \Amiss\Sql\Query\Criteria;
+   $criteria->params = array(
+       // note that this is not an array(), so IN substitution does not ever kick in
+       ':foo'=>1
+   );
+   // consequently, the "hey IN(:foo)" is preserved
+   $criteria->where = 'foo IN (:foo) AND bar="hey IN(:foo)"';
 
 
 Constructor Arguments
@@ -416,25 +412,25 @@ criteria.
          * :amiss = {"field":{"primary":true}};
          */
         public $id;
-
+   
         public function __construct(Bar $bar)
         {
             $this->bar = $bar;
         }
     }
-
+   
     class Bar {}
-
+   
     // retrieving by primary with args
     $manager->getById('Foo', 1, array(new Bar));
-
+   
     // retrieving single object by criteria with args
     $manager->get('Foo', array(
         'where'=>'id=?',
         'params'=>array(1),
         'args'=>array(new Bar)
     ));
-
+   
     // retrieving list by criteria with args
     $manager->getList('Foo', array(
         'args'=>array(new Bar)
@@ -460,12 +456,12 @@ If you are using InnoDB and wish to select rows using ``FOR UPDATE``, you can se
         'where'=>'{pantsTypeId}=1',
         'forUpdate'=>true,
     ]);
-
+   
     // there are better ways to do this, it just illustrates the locking example
     foreach ($rows as $pants) {
         $pants->counter++;
         $manager->update($pants); 
     }
-
+   
     $manager->connector->commit();
 

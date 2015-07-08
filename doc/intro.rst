@@ -32,12 +32,14 @@ a very simple set of related objects representing a set of events for a music fe
 
 There is also a set of examples in the - you guessed it - ``example`` folder in the source
 distribution that will allow you to click through some scripts that are built on this
-schema.
+schema. You should never expose those scripts over a public web server - they are for
+development machines only.
 
 
 Model Classes
 -------------
 
-The model classes referred to in the documentation are as follows:
+The model classes referred to in the documentation are available in the
+:download:`demo/modeldefs.php` file, and are included in this manual in the 
+:doc:`docmodels` section.
 
-.. include:: _build/example.rst
