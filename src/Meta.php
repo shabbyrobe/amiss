@@ -255,6 +255,11 @@ class Meta
         $indexes = [];
         $fields  = [];
         foreach ($inFields as $name=>&$field) {
+            // TODO: Amiss v6 - remove this check.
+            if (is_numeric($name)) {
+                throw new \UnexpectedValueException("Received field with numeric index. This is no longer supported. Config: ".serialize($field));
+            }
+
             if ($field === true) {
                 $field = [];
             } elseif (is_string($field)) {
