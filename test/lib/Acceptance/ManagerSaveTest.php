@@ -78,7 +78,7 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         $object = new Demo\EventArtist();
         $this->setExpectedException(
             'Amiss\Exception', 
-            "Manager requires a single-column autoincrement primary if you want to call 'save'"
+            "Primary must have one and only one autoinc column"
         );
         $this->manager->save($object);
     }

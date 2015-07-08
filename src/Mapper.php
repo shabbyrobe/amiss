@@ -235,6 +235,9 @@ abstract class Mapper
 
         $properties = $meta->getProperties();
         foreach ($mapped as $prop=>$value) {
+            if (!isset($properties[$prop])) {
+                throw new \UnexpectedValueException("Property $prop does not exist on class {$meta->class}");
+            }
             $property = $properties[$prop];
             if (!isset($property['setter'])) {
                 $object->{$prop} = $value;

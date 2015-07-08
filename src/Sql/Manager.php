@@ -754,21 +754,26 @@ class Manager
     public function shouldInsert($object, Meta $meta=null)
     {
         $meta = $meta ?: $this->mapper->getMeta(get_class($object));
-        $nope = false;
-        if (!$meta->primary || count($meta->primary) > 1) {
-            $nope = true;
+        if (!$meta->primary) {
+            throw new Exception("No primary key for {$meta->class}");
         }
-        else {
-            $field = $meta->getField($meta->primary[0]);
-            if ($field['type']['id'] != 'autoinc') {
-                $nope = true;
+
+        $autoIncCnt = 0;
+        $autoIncField = null;
+        foreach ($meta->primary as $fieldName) {
+            $field = $meta->getField($fieldName);
+
+            // FIXME: this is horrible. what if you have a completely custom mapper
+            // and the autoinc has a different name?
+            if ($field['type']['id'] == 'autoinc') {
+                ++$autoIncCnt;
+                $autoIncField = $fieldName;
             }
         }
-        if ($nope) {
-            throw new Exception("Manager requires a single-column autoincrement primary if you want to call 'save'.");
+        if ($autoIncCnt != 1) {
+            throw new Exception("Primary must have one and only one autoinc column");
         }
-        
-        $prival = $meta->getIndexValue($object);
+        $prival = $meta->getValue($object, $autoIncField);
         return $prival == false;
     }
     
