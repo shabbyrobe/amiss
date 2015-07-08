@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0ab7fe974c04ade47c1528931cacc68a",
+    "hash": "7bafe5b1816bfd35eb0b1b1854b3c5f8",
     "packages": [
         {
             "name": "docopt/docopt",
@@ -54,27 +54,27 @@
         },
         {
             "name": "litipk/php-bignumbers",
-            "version": "0.7.2",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Litipk/php-bignumbers.git",
-                "reference": "c76a4f17df0e983734cedd6f64b66bead3187b9c"
+                "reference": "59bc3c2c84210b98461d14a8a2fa93e97854906f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Litipk/php-bignumbers/zipball/c76a4f17df0e983734cedd6f64b66bead3187b9c",
-                "reference": "c76a4f17df0e983734cedd6f64b66bead3187b9c",
+                "url": "https://api.github.com/repos/Litipk/php-bignumbers/zipball/59bc3c2c84210b98461d14a8a2fa93e97854906f",
+                "reference": "59bc3c2c84210b98461d14a8a2fa93e97854906f",
                 "shasum": ""
             },
             "require": {
                 "ext-bcmath": "*",
                 "litipk/php-exceptions": ">=0.1.3",
-                "php": ">=5.3.0"
+                "php": ">=5.4.0"
             },
             "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
                 "phpunit/phpunit": "4.5.*",
                 "psy/psysh": ">=0.4.4",
-                "satooshi/php-coveralls": "dev-master",
                 "squizlabs/php_codesniffer": "2.3.*"
             },
             "type": "library",
@@ -101,7 +101,7 @@
                 "gmp",
                 "number"
             ],
-            "time": "2015-04-03 07:55:55"
+            "time": "2015-07-02 05:55:22"
         },
         {
             "name": "litipk/php-exceptions",
@@ -141,24 +141,72 @@
             "time": "2015-03-25 18:03:08"
         },
         {
-            "name": "shabbyrobe/nope",
-            "version": "1.0.1",
+            "name": "seld/jsonlint",
+            "version": "1.3.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/shabbyrobe/nope.git",
-                "reference": "f81a63fa948958339582ab08eb3c5b356ed47c06"
+                "url": "https://github.com/Seldaek/jsonlint.git",
+                "reference": "863ae85c6d3ef60ca49cb12bd051c4a0648c40c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shabbyrobe/nope/zipball/f81a63fa948958339582ab08eb3c5b356ed47c06",
-                "reference": "f81a63fa948958339582ab08eb3c5b356ed47c06",
+                "url": "https://api.github.com/repos/Seldaek/jsonlint/zipball/863ae85c6d3ef60ca49cb12bd051c4a0648c40c4",
+                "reference": "863ae85c6d3ef60ca49cb12bd051c4a0648c40c4",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.6.0"
+                "php": ">=5.3.0"
+            },
+            "bin": [
+                "bin/jsonlint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Seld\\JsonLint\\": "src/Seld/JsonLint/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                }
+            ],
+            "description": "JSON Linter",
+            "keywords": [
+                "json",
+                "linter",
+                "parser",
+                "validator"
+            ],
+            "time": "2015-01-04 21:18:15"
+        },
+        {
+            "name": "shabbyrobe/nope",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shabbyrobe/nope.git",
+                "reference": "42c308ee6b3dc46d92d979cf0fd3072b82615c0b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shabbyrobe/nope/zipball/42c308ee6b3dc46d92d979cf0fd3072b82615c0b",
+                "reference": "42c308ee6b3dc46d92d979cf0fd3072b82615c0b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "seld/jsonlint": "*"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.*"
+                "phpunit/phpunit": "4.*",
+                "symfony/var-dumper": "*"
             },
             "type": "library",
             "autoload": {
@@ -176,13 +224,13 @@
                     "email": "blake@shabbyrobe.org"
                 }
             ],
-            "description": "Annotation parser",
+            "description": "JSON Docblock Annotation Parser",
             "keywords": [
                 "annotation",
                 "parser",
                 "php"
             ],
-            "time": "2015-06-12 02:38:24"
+            "time": "2015-07-05 10:06:39"
         },
         {
             "name": "shabbyrobe/pdok",
@@ -743,16 +791,16 @@
         },
         {
             "name": "phpunit/phpunit-mock-objects",
-            "version": "2.3.4",
+            "version": "2.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit-mock-objects.git",
-                "reference": "92408bb1968a81b3217a6fdf6c1a198da83caa35"
+                "reference": "1c330b1b6e1ea8fd15f2fbea46770576e366855c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/92408bb1968a81b3217a6fdf6c1a198da83caa35",
-                "reference": "92408bb1968a81b3217a6fdf6c1a198da83caa35",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit-mock-objects/zipball/1c330b1b6e1ea8fd15f2fbea46770576e366855c",
+                "reference": "1c330b1b6e1ea8fd15f2fbea46770576e366855c",
                 "shasum": ""
             },
             "require": {
@@ -794,7 +842,7 @@
                 "mock",
                 "xunit"
             ],
-            "time": "2015-06-11 15:55:48"
+            "time": "2015-07-04 05:41:32"
         },
         {
             "name": "sebastian/comparator",
@@ -1278,7 +1326,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "litipk/php-bignumbers": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

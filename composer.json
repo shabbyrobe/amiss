@@ -20,7 +20,7 @@
         "shabbyrobe/pdok": "1.0.*",
         "shabbyrobe/nope": "^1.0.1",
         "docopt/docopt": "1.0.*",
-        "litipk/php-bignumbers": "0.7.*"
+        "litipk/php-bignumbers": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
