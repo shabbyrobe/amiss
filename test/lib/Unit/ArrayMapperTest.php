@@ -9,7 +9,7 @@ use Amiss\Test\Helper\ClassBuilder;
  */
 class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
 {
-    public $fieldDefaults = ['type'=>null, 'required'=>false];
+    public $fieldDefaults = ['type'=>['id'=>null], 'required'=>false];
 
     /**
      * @covers Amiss\Mapper\Arrays::createMeta

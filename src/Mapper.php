@@ -21,6 +21,8 @@ namespace Amiss;
  */
 abstract class Mapper
 {
+    const AUTOINC_TYPE = 'autoinc';
+
     /**
      * Get the metadata for the class
      * @param mixed  String class name or object
@@ -236,7 +238,7 @@ abstract class Mapper
         $properties = $meta->getProperties();
         foreach ($mapped as $prop=>$value) {
             if (!isset($properties[$prop])) {
-                throw new \UnexpectedValueException("Property $prop does not exist on class {$meta->class}");
+                throw new \UnexpectedValueException("Property $prop does not exist on class {$meta->getClass()}");
             }
             $property = $properties[$prop];
             if (!isset($property['setter'])) {

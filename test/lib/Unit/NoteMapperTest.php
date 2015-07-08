@@ -138,7 +138,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $meta = $mapper->getMeta($class);
         $expected = [
             'id'=>'foo',
-            'name'=>'foo', 'type'=>null, 'getter'=>'getFoo', 'setter'=>'setFoo',
+            'name'=>'foo', 'type'=>['id'=>null], 'getter'=>'getFoo', 'setter'=>'setFoo',
             'required'=>false,
         ];
         $this->assertEquals($expected, $meta->getField('foo'));
@@ -754,7 +754,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($name);
-        $expected = ['id'=>'foo', 'name'=>'bar', 'type'=>null, 'required'=>false];
+        $expected = ['id'=>'foo', 'name'=>'bar', 'type'=>['id'=>null], 'required'=>false];
         $this->assertEquals($expected, $meta->getField('foo'));
     }
 

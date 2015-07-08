@@ -78,7 +78,7 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         $object = new Demo\EventArtist();
         $this->setExpectedException(
             'Amiss\Exception', 
-            "Primary must have one and only one autoinc column"
+            'No autoinc for Amiss\Demo\EventArtist'
         );
         $this->manager->save($object);
     }

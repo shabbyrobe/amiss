@@ -1,6 +1,8 @@
 <?php
 namespace Amiss\Sql;
 
+use Amiss\Mapper;
+
 class Factory
 {
     public static function createManager($connector, $config=null)
@@ -18,7 +20,13 @@ class Factory
         $mapper = new \Amiss\Mapper\Note(
             isset($config['cache']) ? $config['cache'] : null
         );
-        $mapper->typeHandlers = isset($config['typeHandlers']) ? $config['typeHandlers'] : static::createTypeHandlers($config);
+        $mapper->identityHandlerId = !isset($config['identityHandlerId']) 
+            ? Mapper::AUTOINC_TYPE
+            : $config['identityHandlerId'];
+        $mapper->typeHandlers = isset($config['typeHandlers']) 
+            ? $config['typeHandlers'] 
+            : static::createTypeHandlers($config);
+
         return $mapper;
     }
     
@@ -80,7 +88,7 @@ class Factory
             );
         };
         
-        $handlers['autoinc'] = new \Amiss\Sql\Type\Autoinc();
+        $handlers[Mapper::AUTOINC_TYPE] = new \Amiss\Sql\Type\Autoinc();
         
         return $handlers;
     }

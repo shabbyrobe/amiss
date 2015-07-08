@@ -11,6 +11,7 @@ class Meta
     public $primary;
     public $constructor;
     public $constructorArgs = [];
+    public $autoinc;
     
     // queries that use this Meta which do not explicitly pass 'null' as their
     // order will use this.
@@ -82,7 +83,7 @@ class Meta
             'class', 'table', 'schema', 'primary', 'relations', 'fields', 'allFields', 
             'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
-            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on',
+            'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on', 'autoinc',
         ); 
     }
 
@@ -254,6 +255,8 @@ class Meta
         $primary = [];
         $indexes = [];
         $fields  = [];
+        $autoinc = null;
+
         foreach ($inFields as $name=>&$field) {
             // TODO: Amiss v6 - remove this check.
             if (is_numeric($name)) {
@@ -271,16 +274,25 @@ class Meta
             if (!isset($field['name'])) {
                 $field['name'] = $name;
             }
+            if (!isset($field['id'])) {
+                $field['id'] = $name;
+            }
             if (!isset($field['required'])) {
                 $field['required'] = false;
             }
             if (isset($field['type'])) {
                 if (!is_array($field['type'])) {
-                    $field['type'] = array('id'=>$field['type']);
+                    $field['type'] = ['id' => $field['type']];
                 }
             }
             else {
-                $field['type'] = null;
+                $field['type'] = ['id' => null];
+            }
+            if ($field['type']['id'] == Mapper::AUTOINC_TYPE) {
+                if ($autoinc !== null) {
+                    throw new \Exception("More than one autoinc found against meta");
+                }
+                $autoinc = $field['id'];
             }
             if (isset($field['primary'])) {
                 $primary[] = $name;
@@ -298,10 +310,6 @@ class Meta
                 $indexes[$name] = $index;
             }
 
-            if (!isset($field['id'])) {
-                $field['id'] = $name;
-            }
-            
             $fields[$field['id']] = $field;
         }
 
@@ -315,6 +323,8 @@ class Meta
         if ($indexes) {
             $this->setIndexes($indexes);
         }
+        $this->autoinc = $autoinc;
+
         return $this;
     }
     

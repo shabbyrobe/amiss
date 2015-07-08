@@ -516,37 +516,17 @@ class Manager
         // we need to be careful with "lastInsertId": SQLite generates one even without a PRIMARY
         if ($object && $meta->primary) {
             $lastInsertId = $this->getConnector()->lastInsertId();
+            if ($lastInsertId) {
+                if (!$meta->autoinc) {
+                    throw new \UnexpectedValueException("lastInsertId returned, but class {$meta->class} had no autoinc field to receive it");
+                }
 
-            $field = $meta->getField($meta->primary[0]);
-            $handler = $this->mapper->determineTypeHandler($field['type']['id']);
-            
-            if ($handler instanceof \Amiss\Type\Identity) {
-                if (!$lastInsertId) {
+                $field = $meta->getField($meta->autoinc);
+                $handler = $this->mapper->determineTypeHandler(Mapper::AUTOINC_TYPE);
+                if (!$handler) {
                     throw new \UnexpectedValueException();
                 }
-
-                if (($count = count($meta->primary)) != 1) {
-                    throw new Exception(
-                        "Last insert ID $lastInsertId found for class {$meta->class}. ".
-                        "Expected 1 primary field, but class defines {$count}"
-                    );
-                }
-
-                $generated = $handler->handleDbGeneratedValue($lastInsertId);
-                if ($generated) {
-                    // skip using populateObject - we don't need the type handler stack because
-                    // we already used one to handle the value
-                    if (!isset($field['getter'])) {
-                        $object->{$meta->primary[0]} = $generated;
-                    }
-                    elseif (isset($field['setter'])) {
-                        if ($field['setter'] !== false) {
-                            $object->{$field['setter']}($generated);
-                        } else {
-                            throw new Exception("Tried to assign ID to read-only setter on {$meta->class}");
-                        }
-                    }
-                }
+                $meta->setValue($object, $meta->autoinc, $lastInsertId);
             }
         }
         
@@ -757,23 +737,10 @@ class Manager
         if (!$meta->primary) {
             throw new Exception("No primary key for {$meta->class}");
         }
-
-        $autoIncCnt = 0;
-        $autoIncField = null;
-        foreach ($meta->primary as $fieldName) {
-            $field = $meta->getField($fieldName);
-
-            // FIXME: this is horrible. what if you have a completely custom mapper
-            // and the autoinc has a different name?
-            if ($field['type']['id'] == 'autoinc') {
-                ++$autoIncCnt;
-                $autoIncField = $fieldName;
-            }
+        if (!$meta->autoinc) {
+            throw new Exception("No autoinc for {$meta->class}");
         }
-        if ($autoIncCnt != 1) {
-            throw new Exception("Primary must have one and only one autoinc column");
-        }
-        $prival = $meta->getValue($object, $autoIncField);
+        $prival = $meta->getValue($object, $meta->autoinc);
         return $prival == false;
     }
     

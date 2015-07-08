@@ -61,7 +61,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
              * :amiss = {"on": {"beforeUpdate": ["a", "b"]}};
              */
             class Pants {
-                /** :amiss = {"field": {"primary": true}}; */
+                /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
 
                 /** :amiss = {"field": true}; */
@@ -98,7 +98,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
              * :amiss = {"on": {"afterUpdate": ["a", "b"]}};
              */
             class Pants {
-                /** :amiss = {"field": {"primary": true}}; */
+                /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
 
                 /** :amiss = {"field": true}; */
@@ -139,7 +139,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
              * :amiss = {"on": {"beforeDelete": ["a"]}};
              */
             class Pants {
-                /** :amiss = {"field": {"primary": true}}; */
+                /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
 
                 function a() { $this->id = 99; }
@@ -180,7 +180,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
              * :amiss = {"on": {"afterDelete": ["a"]}};
              */
             class Pants {
-                /** :amiss = {"field": {"primary": true}}; */
+                /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
 
                 function a() { $this->id = 99; }

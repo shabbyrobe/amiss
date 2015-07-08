@@ -77,9 +77,14 @@ $id2))``:
     $mapper->addTypeHandler($dateHandler, array('datetime', 'timestamp'));
 
 
+Type handler IDs can be anything you like, with one important caveat: the ID ``autoinc``
+is reserved for an autoincrement type. If you implement your own autoincrement handler,
+feel free to use ``autoinc`` as your ID, but **Amiss** does treat this one ID as special.
+Everything else is yours to do with as you see fit.
+
 Type handler IDs are always lower case, even if the field type contains uppercase letters.
 The base mapper will also ignore everything in your field type definitions following the
-first space or opening bracket
+first space or opening bracket.
 
 .. code-block:: php
 
