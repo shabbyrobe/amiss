@@ -68,6 +68,18 @@ abstract class Mapper
         return $object;
     }
 
+    public function mapObjectsToProperties($objects, $meta=null)
+    {
+        $output = [];
+        foreach ($objects as $idx=>$object) {
+            if (!$meta instanceof Meta) {
+                $meta = $this->getMeta($meta ?: $object);
+            }
+            $output[$idx] = $this->mapObjectToProperties($object, $meta);
+        }
+        return $output;
+    }
+
     public function mapObjectToProperties($object, $meta=null)
     {
         if (!$meta instanceof Meta) {
