@@ -14,7 +14,11 @@ class Date implements \Amiss\Type\Handler
     public function __construct(array $options=[])
     {
         $defaults = [
+            // Can be 'date', 'datetime', or an array of date formats supported by
+            // DateTime->format(). When the date is parsed from the db, `|` is appended
+            // in order to zero unparsed fields
             'formats'=>'datetime',
+
             'dbTimeZone'=>null,
             'appTimeZone'=>null,
             'forceTime'=>null,
@@ -28,7 +32,7 @@ class Date implements \Amiss\Type\Handler
  
         switch ($formats = $options['formats']) {
             case 'datetime':
-                $this->formats = ['Y-m-d H:i:s', 'Y-m-d H:i'];
+                $this->formats = ['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d'];
             break;
             case 'date':
                 $this->formats = ['Y-m-d'];
@@ -135,7 +139,9 @@ class Date implements \Amiss\Type\Handler
             $dateClass = $this->mainClass;
 
             foreach ($this->formats as $format) {
-                $out = $dateClass::createFromFormat("$format", $value, $this->dbTimeZone);
+                $format .= '|'; // pipe resets all unparsed fields to 0
+
+                $out = $dateClass::createFromFormat($format, $value, $this->dbTimeZone);
                 if ($out instanceof $dateClass) {
                     $out = $out->setTimeZone($this->appTimeZone);
                     if ($this->forceTime) {

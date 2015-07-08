@@ -50,11 +50,16 @@ class DateTest extends \Amiss\Test\Helper\TestCase
      */
     public function testDateTimeHandleFromDbWithMultipleFormats($format, $value, $expected)
     {
-        // Handler order is deliberate - it ensures that the third one is picked up before the second when the
-        // incoming value contains the extra values.
-        $handler = new \Amiss\Sql\Type\Date(['formats'=>['Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i'], 'appTimeZone'=>'Australia/Melbourne', 'dbTimeZone'=>'Australia/Melbourne']);
+        // Handler order is deliberate - it ensures that the third one is
+        // picked up before the second when the incoming value contains the
+        // extra values.
+        $handler = new \Amiss\Sql\Type\Date([
+            'formats'=>['Y-m-d H:i:s', 'Y-m-d', 'Y-m-d H:i'],
+            'appTimeZone'=>'Australia/Melbourne', 
+            'dbTimeZone'=>'Australia/Melbourne'
+        ]);
         $out = $handler->handleValueFromDb($value, array(), array());
-        $expected = \DateTime::createFromFormat($format, $value, new \DateTimeZone('Australia/Melbourne')); 
+        $expected = \DateTime::createFromFormat("Y-m-d H:i:s", $expected, new \DateTimeZone('Australia/Melbourne')); 
         $this->assertEquals($expected, $out);
     }
 
@@ -227,4 +232,3 @@ class PantsDateTime extends \DateTime
         return $dt;
     }
 }
-

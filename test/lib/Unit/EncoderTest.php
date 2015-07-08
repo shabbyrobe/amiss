@@ -43,10 +43,10 @@ class EncoderTest extends \Amiss\Test\Helper\TestCase
         $obj = new \stdClass;
 
         $result = $enc->prepareValueForDb($raw, array());
-        $this->assertEquals($result, $serialised);
+        $this->assertEquals($serialised, $result);
 
         $result = $enc->handleValueFromDb($serialised, array(), array());
-        $this->assertEquals($result, $raw);
+        $this->assertEquals($raw, $result);
     }
 
     public function dataForEncodeDecode()

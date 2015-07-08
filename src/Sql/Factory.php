@@ -28,8 +28,8 @@ class Factory
         $oneMany = function($manager) use (&$oneMany) {
             return $oneMany = new \Amiss\Sql\Relator\OneMany($manager);
         };
-        $relators['one'] = &$oneMany;
-        $relators['many'] = &$oneMany;
+        $relators['one']   = &$oneMany;
+        $relators['many']  = &$oneMany;
         $relators['assoc'] = function($manager) {
             return new \Amiss\Sql\Relator\Association($manager);
         };
