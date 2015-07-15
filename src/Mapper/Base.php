@@ -195,9 +195,7 @@ abstract class Base extends \Amiss\Mapper
 
     public function addTypeHandlers($handlers)
     {
-        foreach ($handlers as $type=>$handler) {
-            $this->typeHandlers[strtolower($type)] = $handler;
-        }
+        $this->typeHandlers = array_change_key_case($handlers);
         return $this;
     }
 

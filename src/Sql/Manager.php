@@ -195,6 +195,65 @@ class Manager
         return $objects;
     }
 
+    /**
+     * Dunno about this. Consider it unstable, don't count on it still
+     * being here in v6
+     */
+    public function selectList($class, ...$args)
+    {
+        if (!$args) {
+            throw new \InvalidArgumentException();
+        }
+        
+        $fields = null;
+        $query = null;
+        if (!isset($args[1]) && $args[0] instanceof Query\Select) {
+            $query = $args[0];
+        }
+        elseif ((is_array($args[0]) || is_string($args[0])) && !isset($args[2])) {
+            $fields = $args[0];
+            $query = isset($args[1]) ? $args[1] : null;
+        }
+        else {
+            throw new \InvalidArgumentException();
+        }
+
+        $query = $query instanceof Query\Select ? $query : Query\Select::fromParamArgs([$query]);
+        if ($fields) {
+            $query->fields = $fields;
+        }
+        if (!$query->fields) {
+            throw new \InvalidArgumentException();
+        }
+        $singleMode = false;
+        if (is_string($query->fields)) {
+            $singleMode = true;
+            $query->fields = [$query->fields];
+        }
+
+        $mapper = $this->mapper;
+        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+
+        list ($sql, $params, $props) = $query->buildQuery($meta);
+        if ($props) {
+            $params = $this->mapper->formatParams($meta, $props, $params);
+        }
+
+        $stmt = $this->getConnector()->prepare($sql)->execute($params);
+
+        $mappedRows = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $mappedRow = $mapper->mapRowToProperties($row, $meta);
+            if ($singleMode) {
+                $mappedRows[] = current($mappedRow);
+            } else {
+                $mappedRows[] = $mappedRow;
+            }
+        }
+
+        return $mappedRows;
+    }
+
     public function getById($class, $id, array $criteria=null)
     {
         $key = isset($criteria['key']) ? $criteria['key'] : null;

@@ -2,7 +2,22 @@
 require __DIR__."/vendor/autoload.php";
 define('AMISS_BASE_PATH', __DIR__);
 
-echo "Amiss Boris\n\n";
+echo <<<'EOS'
+Amiss Boris
+===========
+
+Available functions:
+
+`demo_model() / dm()`
+    Creates an Amiss\Sql\Manager instance configured to work with the default
+    types and the models defined in doc/demo/model.php (Artist, Event, etc)
+
+`demo_active() / da()`
+    Creates an Amiss\Sql\Manager configured to work with the default types and
+    the Active Records defined in doc/demo/ar.php (ArtistRecord, EventRecord, etc)
+
+
+EOS;
 
 class AmissInspector extends \Boris\ColoredInspector
 {
@@ -27,7 +42,10 @@ class AmissInspector extends \Boris\ColoredInspector
 
 $boris->setInspector(new AmissInspector());
 
-function note()
+function dm() { return demo_model();  }
+function da() { return demo_active(); }
+
+function demo_model()
 {
     $connector = new \PDOK\Connector('sqlite::memory:');
     $manager = Amiss\Sql\Factory::createManager($connector, [
@@ -50,7 +68,7 @@ function note()
     return $manager;
 }
 
-function ar()
+function demo_active()
 {
     $connector = new \PDOK\Connector('sqlite::memory:');
     $manager = Amiss\Sql\Factory::createManager($connector, [
