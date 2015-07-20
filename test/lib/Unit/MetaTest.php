@@ -27,8 +27,8 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals('std_class',  $meta->table);
         $this->assertEquals(array('pri'), $meta->primary);
         
-        $this->assertEquals(['f'=>['name'=>'f', 'id'=>'f'] + $this->fieldDefaults], $this->getProtected($meta, 'fields'));
-        $this->assertEquals(['r'=>['name'=>'r', 'mode'=>'default']], $this->getProtected($meta, 'relations'));
+        $this->assertEquals(['f'=>['id'=>'f', 'name'=>'f'] + $this->fieldDefaults], $this->getProtected($meta, 'fields'));
+        $this->assertEquals(['r'=>['id'=>'r', 'mode'=>'default']], $this->getProtected($meta, 'relations'));
         $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'defaultFieldType'));
     }
     

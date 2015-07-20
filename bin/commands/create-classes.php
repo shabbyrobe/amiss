@@ -128,7 +128,7 @@ while ($table = $stmt->fetchColumn()) {
             $columns = array();
             $relatedColumns = array();
             
-            $relation['name'] = $match['name'];
+            $relation['id'] = $match['name'];
             foreach (explode(",", $match['fields']) as $f) {
                 $columns[] = trim($f, '\` ');
             }
@@ -142,7 +142,7 @@ while ($table = $stmt->fetchColumn()) {
                 $relation['columns'] = array($columns, $relatedColumns);
             //}
             $relation['relatedTableName'] = $match['reftable'];
-            $relations[$relation['name']] = $relation;
+            $relations[$relation['id']] = $relation;
         }
     }
     */

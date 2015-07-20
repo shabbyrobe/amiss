@@ -7,7 +7,7 @@ abstract class Relator implements \Amiss\Sql\Relator
     {
         foreach ($result as $idx=>$item) {
             if (!isset($relation['setter'])) {
-                $source[$idx]->{$relation['name']} = $item;
+                $source[$idx]->{$relation['id']} = $item;
             } else {
                 call_user_func(array($source[$idx], $relation['setter']), $item);
             }

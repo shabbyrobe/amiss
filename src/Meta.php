@@ -24,7 +24,7 @@ class Meta
      *   $rel = ['one'];
      * 
      * The meta also looks for the following keys:
-     * - name (will be assigned by this class)
+     * - id   (will be assigned by this class)
      * - mode (default, auto, class)
      * 
      * All other values in the array are ignored by the meta and passed 
@@ -201,7 +201,9 @@ class Meta
                     "and specify an index name as the value rather than field names"
                 );
             }
-            $r['name'] = $id;
+            if (!isset($r['id'])) {
+                $r['id'] = $id;
+            }
             if (isset($r['mode'])) {
                 if ($r['mode'] == 'auto') {
                     $this->autoRelations[] = $id;

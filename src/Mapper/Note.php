@@ -163,6 +163,8 @@ class Note extends \Amiss\Mapper\Base
                     } else {
                         $key = $name;
                     }
+                    $key = isset($relation['id']) ? $relation['id'] : $key;
+                    unset($relation['id']);
                     if (isset($info['relations'][$key])) {
                         throw new \UnexpectedValueException("Duplicate relation {$name} on class {$class}");
                     }

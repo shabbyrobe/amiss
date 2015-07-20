@@ -379,7 +379,7 @@ class Manager
             // no read only support... why would you be assigning relations to
             // a read only object?
             if (!isset($relation['setter'])) {
-                $source[$idx]->{$relation['name']} = $item;
+                $source[$idx]->{$relation['id']} = $item;
             } else {
                 call_user_func(array($source[$idx], $relation['setter']), $item);
             }
@@ -390,7 +390,7 @@ class Manager
                 }
                 foreach ($item as $i) {
                     if (!isset($relatedRelation['setter'])) {
-                        $i->{$relatedRelation['name']} = $source[$idx];
+                        $i->{$relatedRelation['id']} = $source[$idx];
                     } else {
                         call_user_func(array($i, $relatedRelation['setter']), $i);
                     }

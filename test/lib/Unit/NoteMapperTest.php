@@ -336,7 +336,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar', 'name'=>'bar', 'mode'=>'default'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setBar', 'id'=>'bar', 'mode'=>'default'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -385,7 +385,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                 'getter'=>"{$prefix}Pants",
                 'setter'=>'setPants',
                 'mode'=>'default',
-                'name'=>'pants',
+                'id'=>'pants',
             ],
         ];
         $this->assertEquals($expected, $meta->relations);
@@ -426,7 +426,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($class);
         $expected = array(
-            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar', 'name'=>'bar', 'mode'=>'default'),
+            'bar'=>array('one', 'of'=>"Bar", 'from'=>'barId', 'getter'=>'getBar', 'setter'=>'setLaDiDaBar', 'id'=>'bar', 'mode'=>'default'),
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -457,7 +457,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($class1);
         $expected = array(
-            'class2'=>array('many', 'of'=>"Class2", 'name'=>'class2', 'mode'=>'default')
+            'class2'=>array('many', 'of'=>"Class2", 'id'=>'class2', 'mode'=>'default')
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -476,7 +476,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($name);
         $expected = array(
-            'test'=>array('test', 'name'=>'test', 'mode'=>'default')
+            'test'=>array('test', 'id'=>'test', 'mode'=>'default')
         );
         $this->assertEquals($expected, $meta->relations);
     }
@@ -775,7 +775,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($name);
         $expected = ['foo'=>[
-            'one', 'of'=>'Pants', 'mode'=>'class', 'name'=>'foo',
+            'one', 'of'=>'Pants', 'mode'=>'class', 'id'=>'foo',
         ]];
         $this->assertEquals($expected, $meta->relations);
     }
