@@ -194,7 +194,10 @@ trait MapperTrait
 
         if ($meta->constructorArgs) {
             $actualArgs = [];
-            foreach ($meta->constructorArgs as list($type, $id)) {
+            foreach ($meta->constructorArgs as $argInfo) {
+                $type = $argInfo[0];
+                $id   = isset($argInfo[1]) ? $argInfo[1] : null;
+
                 switch ($type) {
                 case 'property':
                     $actualArgs[] = isset($mapped->{$id}) ? $mapped->{$id} : null;
@@ -207,6 +210,11 @@ trait MapperTrait
                     }
                     $actualArgs[] = $args[$id];
                 break;
+
+                case 'all': $actualArgs[] = $mapped; break;
+
+                // NO! leaky abstraction.
+                // case 'meta': $actualArgs[] = $meta; break;
 
                 default:
                     throw new Exception("Invalid constructor argument type {$type}");
