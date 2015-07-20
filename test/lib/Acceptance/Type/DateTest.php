@@ -34,7 +34,7 @@ class DateTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $d->connector->exec("INSERT INTO pants(`date`) VALUES('2014-01-01');");
-        $date = new \DateTime('2014-01-01T12:00:00+0000');
+        $date = new \DateTime('2014-01-01T12:00:00Z');
         $result = $d->manager->getList('Pants', '{date}>=:date', ['date'=>$date]);
         $this->assertCount(1, $result);
     }

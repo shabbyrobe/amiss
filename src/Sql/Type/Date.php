@@ -115,14 +115,12 @@ class Date implements \Amiss\Type\Handler
             );
         }
 
-        // This conversion may not be an issue. Wait until it is raised
-        // before making a decision.
-        // also - this doesn't seem to work right as of 5.5.1:
-        // var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
-        // bool(true)
-        // https://bugs.php.net/bug.php?id=54655
-        if ($value->getTimeZone() != $this->appTimeZone) {
-            throw new \UnexpectedValueException();
+        if (!static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
+            // Actually performing this conversion may not be an issue. Wait
+            // until it is raised before making a decision.
+            throw new \UnexpectedValueException(
+                "Incoming time zone {$value->getTimeZone()->getName()} did not match app time zone {$this->appTimeZone->getName()}"
+            );
         }
         $value = clone $value;
         $value = $value->setTimeZone($this->dbTimeZone);
@@ -169,5 +167,25 @@ class Date implements \Amiss\Type\Handler
         } else {
             return $engine == 'sqlite' ? 'STRING' : 'VARCHAR(32)';
         }
+    }
+
+    static function timeZoneEqual(\DateTimeZone $a, \DateTimeZone $b)
+    {
+        // This doesn't seem to work right as of 5.5.1:
+        //     var_dump(new DateTimeZone('Australia/Melbourne') == new DateTimeZone('UTC'));
+        //     bool(true)
+        // Some more info here (though not much): https://bugs.php.net/bug.php?id=54655
+        //
+        // In the case of named zones, we can infer offsets from existing DateTime objects, 
+        // but that would mean that two zones compare for certain portions of the
+        // year and don't compare for the rest, which is crap.
+
+        $aName = $a->getName();
+        $bName = $b->getName();
+
+        if ($aName == 'Z' || $aName == '+00:00') { $aName = 'UTC'; }
+        if ($aName == 'Z' || $bName == '+00:00') { $bName = 'UTC'; }
+
+        return $aName == $bName;
     }
 }
