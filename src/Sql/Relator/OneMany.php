@@ -39,6 +39,8 @@ class OneMany extends Base
         );
         if ($relation[0] == 'one' && $result) {
             $result = current($result);
+        } else {
+            $result = null;
         }
         return $result;
     }
