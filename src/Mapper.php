@@ -19,7 +19,7 @@ namespace Amiss;
  *   - An instance you already have lying around to be populated by the mapper:
  *     use ``populateObject``.
  */
-abstract class Mapper
+interface Mapper
 {
     const AUTOINC_TYPE = 'autoinc';
 
@@ -28,11 +28,11 @@ abstract class Mapper
      * @param mixed  String class name or object
      * @return \Amiss\Meta
      */
-    public abstract function getMeta($class);
+    function getMeta($class);
 
-    public abstract function mapRowToProperties($input, $meta=null, $fieldMap=null);
+    function mapRowToProperties($input, $meta=null, $fieldMap=null);
 
-    public abstract function mapPropertiesToRow($input, $meta=null);
+    function mapPropertiesToRow($input, $meta=null);
 
     /**
      * Get row values from an object
@@ -44,19 +44,41 @@ abstract class Mapper
      * 
      * @return array
      */
-    public abstract function mapObjectToRow($input, $meta=null, $context=null);
+    function mapObjectToRow($input, $meta=null, $context=null);
 
     /**
      * Get a type handler for a field type
      * @param string $type The type of the field
      * @return \Amiss\Type\Handler
      */
-    public abstract function determineTypeHandler($type);
+    function determineTypeHandler($type);
 
     /**
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
+    function mapRowToObject($input, $args=null, $meta=null);
+
+    function mapObjectsToProperties($objects, $meta=null);
+
+    function mapObjectToProperties($object, $meta=null);
+
+    function formatParams(Meta $meta, $propertyParamMap, $params);
+
+    function mapRowsToObjects($input, $args=null, $meta=null);
+
+    function mapObjectsToRows($input, $meta=null, $context=null);
+
+    function createObject($meta, $mapped, $args=null);
+
+    function populateObject($object, \stdClass $mapped, $meta=null);
+}
+
+/**
+ * Default implementations for common mapper implementations
+ */
+trait MapperTrait
+{
     public function mapRowToObject($input, $args=null, $meta=null)
     {
         if (!$meta instanceof Meta) {

@@ -1,8 +1,10 @@
 <?php
 namespace Amiss\Test\Helper;
 
-class TestMapper extends \Amiss\Mapper
+class TestMapper implements \Amiss\Mapper
 {
+    use \Amiss\MapperTrait;
+
     public $meta;
     
     function __construct($meta=array())

@@ -6,8 +6,10 @@ use Amiss\Meta;
 /**
  * @package Mapper
  */
-abstract class Base extends \Amiss\Mapper
+abstract class Base implements \Amiss\Mapper
 {
+    use \Amiss\MapperTrait;
+
     public $unnamedPropertyTranslator;
     
     public $defaultTableNameTranslator;
