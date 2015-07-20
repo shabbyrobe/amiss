@@ -268,7 +268,7 @@ trait MapperTrait
         $properties = $meta->getProperties();
         foreach ($mapped as $prop=>$value) {
             if (!isset($properties[$prop])) {
-                throw new \UnexpectedValueException("Property $prop does not exist on class {$meta->getClass()}");
+                throw new \UnexpectedValueException("Property $prop does not exist on class {$meta->class}");
             }
             $property = $properties[$prop];
             if (!isset($property['setter'])) {
