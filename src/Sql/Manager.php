@@ -108,6 +108,9 @@ class Manager
 
                 $relQuery = new Criteria;
                 foreach ((array) $rel as $relationId) {
+                    if (!isset($meta->relations[$relationId])) {
+                        throw new \UnexpectedValueException("Unknown relation $relationId on {$meta->class}");
+                    }
                     $relation = $meta->relations[$relationId];
                     $relator = isset($relators[$relation[0]]) 
                         ? $relators[$relation[0]] 
@@ -160,15 +163,19 @@ class Manager
         $related = [];
 
         auto_relations: {
-            $relations = [];
-            $relators = [];
             $rel = $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
             }
             if ($rel) {
+                $relations = [];
+                $relators = [];
+
                 $relQuery = new Criteria;
                 foreach ((array) $rel as $relationId) {
+                    if (!isset($meta->relations[$relationId])) {
+                        throw new \UnexpectedValueException("Unknown relation $relationId on {$meta->class}");
+                    }
                     $relation = $meta->relations[$relationId];
                     $relator = isset($relators[$relation[0]]) 
                         ? $relators[$relation[0]] 
