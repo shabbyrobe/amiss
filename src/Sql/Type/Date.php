@@ -93,7 +93,6 @@ class Date implements \Amiss\Type\Handler
     
     function prepareValueForDb($value, array $fieldInfo)
     {
-        $out = null;
         if ($value === null) {
             return $value;
         }
@@ -115,6 +114,11 @@ class Date implements \Amiss\Type\Handler
             );
         }
 
+        return $this->prepareDateTime($value)->format($this->formats[0]);
+    }
+
+    protected function prepareDateTime(\DateTime $value)
+    {
         if (!static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
             // Actually performing this conversion may not be an issue. Wait
             // until it is raised before making a decision.
@@ -127,7 +131,7 @@ class Date implements \Amiss\Type\Handler
         if ($this->forceTime) {
             $value = $value->setTime(...$this->forceTime);
         }
-        return $value->format($this->formats[0]);
+        return $value;
     }
     
     function handleValueFromDb($value, array $fieldInfo, $row)
