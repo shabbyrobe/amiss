@@ -117,7 +117,7 @@ class Date implements \Amiss\Type\Handler
         return $this->prepareDateTime($value)->format($this->formats[0]);
     }
 
-    protected function prepareDateTime(\DateTime $value)
+    protected function prepareDateTime($value)
     {
         if (!static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
             // Actually performing this conversion may not be an issue. Wait
