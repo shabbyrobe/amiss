@@ -56,6 +56,16 @@ class RelatedGetterTest extends \Amiss\Test\Helper\TestCase
         $this->assertCount(2, $c);
         $this->assertInstanceOf(RelatedGetterTestChild::class, $c[0]);
     }
+
+    function testAssignRelatedGetterCalledWhenNoRelatedData()
+    {
+        $p = $this->getMockBuilder(RelatedGetterTestParent::class)
+            ->setMethods(['setChildren'])
+            ->getMock();
+        $p->id = 999;
+        $p->expects($this->once())->method('setChildren');
+        $this->manager->assignRelated($p, 'children');
+    }
 }
 
 /** :amiss = {"table": "child"}; */

@@ -370,7 +370,7 @@ class Manager
         }
     }
  
-    private function populateObjectsWithRelated(array $source, array $result, $relation)
+    private function populateObjectsWithRelated(array $source, array $result, $relation, $default=null)
     {
         $relatedMeta = null;
 
@@ -392,6 +392,7 @@ class Manager
             }
 
             if ($relatedMeta) {
+                // FIXME: leaky abstraction
                 if ($relation[0] == 'one') {
                     $item = [$item];
                 }
@@ -402,6 +403,16 @@ class Manager
                         call_user_func(array($i, $relatedRelation['setter']), $i);
                     }
                 }
+            }
+
+            unset($source[$idx]);
+        }
+
+        foreach ($source as $item) {
+            if (!isset($relation['setter'])) {
+                $item->{$relation['id']} = $default;
+            } else {
+                call_user_func(array($item, $relation['setter']), $default);
             }
         }
     }

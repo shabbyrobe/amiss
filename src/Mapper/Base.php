@@ -19,10 +19,10 @@ abstract class Base implements \Amiss\Mapper
     public $typeHandlers = array();
     
     /**
-     * @deprecated Scheduled for removal in Amiss 6. Pre PHP 5.5 helper. Don't
-     * use any more, use this pattern instead:
+     * @deprecated Don't use any more, use this pattern instead:
      *     use My\Name\Space;
      *     $mapper->getMeta(Space::class);
+     * It will be removed as soon as I work out a neater way to do the Test\Factory without it.
      */
     public $objectNamespace;
 

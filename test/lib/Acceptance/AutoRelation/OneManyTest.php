@@ -2,6 +2,7 @@
 namespace Amiss\Test\Acceptance\AutoRelation;
 
 use Amiss\Sql\TableBuilder;
+use Amiss\Test;
 
 class OneManyTest extends \Amiss\Test\Helper\TestCase
 {
@@ -17,10 +18,10 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         foreach ($this->mapper->arrayMap as $class=>$meta) {
             TableBuilder::create($this->manager->connector, $this->mapper, $class);
         }
-        $this->manager->connector->exec("INSERT INTO test_child VALUES(1, 1)");
-        $this->manager->connector->exec("INSERT INTO test_child VALUES(2, 1)");
-        $this->manager->connector->exec("INSERT INTO test_parent VALUES(1, 1)");
-        $this->manager->connector->exec("INSERT INTO test_grand_parent VALUES(1)");
+        $this->manager->connector->exec("INSERT INTO test_child(id, parentId) VALUES(1, 1)");
+        $this->manager->connector->exec("INSERT INTO test_child(id, parentId) VALUES(2, 1)");
+        $this->manager->connector->exec("INSERT INTO test_parent(id, grandParentId) VALUES(1, 1)");
+        $this->manager->connector->exec("INSERT INTO test_grand_parent(id) VALUES(1)");
 
         $this->db->queries = 0;
     }
@@ -127,6 +128,25 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         $this->assertTrue($parent->children[0] instanceof TestChild);
         $this->assertTrue($parent->grandParent instanceof TestGrandParent);
         $this->assertTrue($parent->children[0]->parent instanceof TestParent);
+    }
+
+    public function testAutoOneQuery()
+    {
+        $manager = $this->manager;
+
+        $child = $manager->getById('TestChild', 1, ['with'=>['parent']]);
+        $this->assertTrue($child->parent instanceof TestParent);
+
+        // alternate syntax
+        $child = $manager->getById('TestChild', 1, ['with'=>'parent']);
+        $this->assertTrue($child->parent instanceof TestParent);
+    }
+
+    public function testAutoManyQuery()
+    {
+        $manager = $this->manager;
+        $parent = $manager->getById('TestParent', 1, ['with'=>'children']);
+        $this->assertTrue($parent->children[0] instanceof TestChild);
     }
 }
 

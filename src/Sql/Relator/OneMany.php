@@ -37,10 +37,8 @@ class OneMany extends Base
         list ($result, $relatedMeta, $relatedFields, $on, $index, $resultIndex) = $this->fetchRelated(
             $meta, $source, $relation, $criteria
         );
-        if ($relation[0] == 'one' && $result) {
-            $result = current($result);
-        } else {
-            $result = null;
+        if ($relation[0] == 'one') {
+            $result = $result ? current($result) : null;
         }
         return $result;
     }
