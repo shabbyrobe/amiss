@@ -117,6 +117,10 @@ class Date implements \Amiss\Type\Handler
         return $this->prepareDateTime($value)->format($this->formats[0]);
     }
 
+    /**
+     * Don't type hint here - there's no common interface between DateTime and DateTimeImmutable
+     * at 5.6 that supports all the methods we are using, though both objects remain largely interchangeable.
+     */
     protected function prepareDateTime($value)
     {
         if (!static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
