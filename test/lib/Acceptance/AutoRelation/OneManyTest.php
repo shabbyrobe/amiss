@@ -148,6 +148,14 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         $parent = $manager->getById('TestParent', 1, ['with'=>'children']);
         $this->assertTrue($parent->children[0] instanceof TestChild);
     }
+
+    public function testAutoQueryGetRelated()
+    {
+        $manager = $this->manager;
+        $child = $manager->getById('TestChild', 1);
+        $related = $manager->getRelated($child, 'parent', ['with'=>'grandParent']);
+        $this->assertInstanceOf(TestGrandParent::class, $related->grandParent);
+    }
 }
 
 class TestGrandParent extends \Amiss\Test\Helper\DummyClass {}

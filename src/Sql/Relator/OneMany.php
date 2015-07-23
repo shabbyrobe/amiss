@@ -87,6 +87,7 @@ class OneMany extends Base
             $query->page      = $criteria->page;
             $query->limit     = $criteria->limit;
             $query->args      = $criteria->args;
+            $query->with      = $criteria->with;
             $query->offset    = $criteria->offset;
             $query->order     = $criteria->order;
             $query->forUpdate = $criteria->forUpdate;

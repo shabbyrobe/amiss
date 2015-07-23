@@ -98,7 +98,7 @@ class Manager
         }
 
         auto_relations: {
-            $rel = $query->with;
+            $rel = (array) $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
             }
@@ -163,7 +163,7 @@ class Manager
         $related = [];
 
         auto_relations: {
-            $rel = $query->with;
+            $rel = (array) $query->with;
             if ($meta->autoRelations && $query->follow) {
                 $rel = $rel ? array_merge($rel, $meta->autoRelations) : $meta->autoRelations;
             }
