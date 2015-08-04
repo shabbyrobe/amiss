@@ -5,7 +5,7 @@ use Amiss\Exception;
 
 class TableBuilder extends \Amiss\Sql\TableBuilder
 {
-    public $defaultFieldType = 'STRING NULL';
+    public $fieldType = 'STRING NULL';
 
     protected $engine = 'sqlite';
 

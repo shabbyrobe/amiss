@@ -79,12 +79,12 @@ Object mappings have the following structure:
 
     <?php
     $mapping = array(
-        'primary'          => ...,
-        'table'            => 'table',
-        'defaultFieldType' => null,
-        'constructor'      => null,
-        'fields'           => [...],
-        'relations'        => [...],
+        'primary'     => ...,
+        'table'       => 'table',
+        'fieldType'   => null,
+        'constructor' => null,
+        'fields'      => [...],
+        'relations'   => [...],
     );
 
 
@@ -106,10 +106,10 @@ Object mappings have the following structure:
     :ref:`name-translation` for more details on how this works.
 
 
-``defaultFieldType``
+``fieldType``
 
-    All fields that do not specify a type will assume this type. See :doc:`types` for more
-    details.
+    All fields that do not specify a type will assume this type. See
+    :doc:`types` for more details.
 
     This value is *optional*.
 
@@ -139,7 +139,7 @@ Object mappings have the following structure:
         );
 
     In the above case, the column name will be guessed from the property name (see
-    :ref:`name-translation`), and the type will either use the ``defaultFieldType`` or, if
+    :ref:`name-translation`), and the type will either use the ``fieldType`` or, if
     one is not defined, no type at all.
 
     You can set the column and type yourself if you need to:

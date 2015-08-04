@@ -4,14 +4,33 @@ Changelog
 v5.0.0
 ------
 
-- Object and table modes for ``update``, ``insert`` and ``delete`` have been broken into
-  separate methods, ``updateTable``, ``insertTable`` and ``deleteTable`` respectively.
+- Object and table modes for ``update``, ``insert`` and ``delete`` have been
+  broken into separate methods, ``updateTable``, ``insertTable`` and
+  ``deleteTable`` respectively.
 
-- Permissions: ``@readOnly`` objects, also ``@canUpdate 0``, ``@canDelete 0`` and
-  ``@canInsert 0``. These are easily bypassed with some fiddling, but they're a useful
-  guide and safety feature.
+- ``Amiss\Mapper\Base->objectNamespace`` has been removed. The addition of 
+  ``::class`` to the language in PHP 5.5 renders it unnecessary.
+
+- Permissions: ``readOnly`` objects, also ``canUpdate``, ``canDelete``
+  and ``canInsert``. These are easily bypassed with some fiddling, but they're
+  a useful guide and safety feature.
+
+- Local mapper added: define metadata mappings like the Arrays mapper, but using
+  a static method on the model itself.
+
+- Static lookup relator: relations can be defined which retrieve an object from
+  a static function on another object.
+
+- Annotation syntax changed (again) to use the http://github.com/shabbyrobe/nope
+  library. Migrations can be automated using the ``migrate-notes`` command in
+  the :ref:`cli`.
 
 - Issue #14 - Order By support for getRelated
+
+- Meta methods removed:
+  - ``Meta->getDefaultFieldType()`` becomes ``Meta->fieldType``
+  - ``Meta->getFields()`` becomes ``Meta->fields``
+  - ``Meta->getField()`` becomes ``Meta->field[$id]``
 
 - Mapper API has changed significantly::
 
@@ -33,10 +52,9 @@ v5.0.0
     +    function mapRowsToObjects($input, $args=null, $meta=null)
     -    function toObjects($meta, $input, $args=null)
 
-- Relations can now be automatically populated
+- Relations can now be automatically populated (with some limits)
 
 - Objects can now use properties and auto relations as constructor arguments
-
 
 
 v4.2.0

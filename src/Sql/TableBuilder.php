@@ -20,7 +20,7 @@ abstract class TableBuilder
     
     protected $engine;
 
-    protected $defaultFieldType;
+    protected $fieldType;
     
     public function __construct(Mapper $mapper, $class)
     {
@@ -115,9 +115,9 @@ abstract class TableBuilder
 
         $primary = $this->meta->primary;
         
-        $defaultType = $this->meta->defaultFieldType;
+        $defaultType = $this->meta->fieldType;
         if (!$defaultType) {
-            $defaultType = $this->defaultFieldType;
+            $defaultType = $this->fieldType;
         }
 
         $f = array();

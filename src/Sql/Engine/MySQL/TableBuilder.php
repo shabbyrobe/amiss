@@ -5,7 +5,7 @@ use Amiss\Exception;
 
 class TableBuilder extends \Amiss\Sql\TableBuilder
 {
-    public $defaultFieldType = 'VARCHAR(255) NULL';
+    public $fieldType = 'VARCHAR(255) NULL';
     public $tableType = 'InnoDB';
 
     protected $engine = 'mysql';

@@ -67,7 +67,7 @@ abstract class Base implements \Amiss\Mapper
             }
             $property = $properties[$propId];
 
-            $type = isset($property['type']) ? $property['type'] : $meta->defaultFieldType;
+            $type = isset($property['type']) ? $property['type'] : $meta->fieldType;
             
             if ($type) {
                 $typeId = $type['id'];
@@ -103,7 +103,7 @@ abstract class Base implements \Amiss\Mapper
             }
 
             $property = $properties[$propId];
-            $type = isset($property['type']) ? $property['type'] : $meta->defaultFieldType;
+            $type = isset($property['type']) ? $property['type'] : $meta->fieldType;
             
             if ($type) {
                 $typeId = $type['id'];
@@ -142,7 +142,7 @@ abstract class Base implements \Amiss\Mapper
             }
             $field = $fields[$prop];
 
-            $type = $field['type'] ?: $meta->defaultFieldType;
+            $type = $field['type'] ?: $meta->fieldType;
             $typeId = $type['id'];
             
             if ($type) {
@@ -194,7 +194,7 @@ abstract class Base implements \Amiss\Mapper
                 $value = call_user_func(array($object, $field['getter']));
             }
             
-            $type = $field['type'] ?: $meta->defaultFieldType;
+            $type = $field['type'] ?: $meta->fieldType;
             $typeId = $type['id'];
             
             if ($type) {

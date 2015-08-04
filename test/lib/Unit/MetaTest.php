@@ -19,7 +19,7 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
             'primary'=>'pri',
             'fields'=>array('f'=>array()),
             'relations'=>array('r'=>array()),
-            'defaultFieldType'=>'def',
+            'fieldType'=>'def',
         );
         $meta = new \Amiss\Meta('stdClass', $info, $parent);
         
@@ -29,7 +29,7 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         
         $this->assertEquals(['f'=>['id'=>'f', 'name'=>'f'] + $this->fieldDefaults], $this->getProtected($meta, 'fields'));
         $this->assertEquals(['r'=>['id'=>'r', 'mode'=>'default']], $this->getProtected($meta, 'relations'));
-        $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'defaultFieldType'));
+        $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'fieldType'));
     }
 
     /**

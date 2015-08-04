@@ -66,7 +66,7 @@ class Meta
     protected $properties;
     
     /** @var array|null */
-    public $defaultFieldType;
+    public $fieldType;
 
     function __sleep()
     {
@@ -75,7 +75,7 @@ class Meta
 
         return array(
             'class', 'table', 'schema', 'primary', 'relations', 'fields',
-            'defaultFieldType', 'columnMap', 'autoRelations',
+            'fieldType', 'columnMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
             'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on', 'autoinc',
         ); 
@@ -153,12 +153,12 @@ class Meta
             }
         }
 
-        default_field_type: if (isset($info['defaultFieldType'])) {
-            $ft = $info['defaultFieldType'];
+        default_field_type: if (isset($info['fieldType'])) {
+            $ft = $info['fieldType'];
             if (!is_array($ft)) {
                 $ft = array('id'=>$ft);
             }
-            $this->defaultFieldType = $ft;
+            $this->fieldType = $ft;
         }
     }
 

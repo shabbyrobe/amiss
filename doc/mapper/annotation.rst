@@ -2,8 +2,9 @@ Annotation Mapper
 =================
 
 ``Amiss\Sql\Factory::createManager()`` uses ``Amiss\Mapper\Note`` with certain
-:doc:`types` preconfigured by default. This should be used as a default starting point.
-You can access the mapper for further configuration after you create the manager like so:
+:doc:`types` preconfigured by default. This should be used as a default starting
+point.  You can access the mapper for further configuration after you create the
+manager like so:
 
 .. code-block:: php
 
@@ -12,45 +13,48 @@ You can access the mapper for further configuration after you create the manager
     $manager = \Amiss\Sql\Factory::createManager($db, $config);
     $mapper = $manager->mapper;
 
-This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note`` instance
-already assigned. The mapper will have the following :doc:`types` pre-configured:
+This will create an ``Amiss\Sql\Manager`` instance with an ``Amiss\Mapper\Note``
+instance already assigned. The mapper will have the following :doc:`types`
+pre-configured:
 
 - autoinc
 - bool
 - decimal - Big number handling provided by http://github.com/litipk/php-bignumbers
 
-If you set the ``dbTimeZone`` and ``appTimeZone`` keys in the config array, you will also
-get :doc:`type handlers <types>` for dates:
+If you set the ``dbTimeZone`` and ``appTimeZone`` keys in the config array, you
+will also get :doc:`type handlers <types>` for dates:
 
 - datetime
 - date
 - unixtime
 
-See :doc:`common` and :doc:`types` for more information on how to tweak Amiss' default
-mapping behaviour.
+See :doc:`common` and :doc:`types` for more information on how to tweak Amiss'
+default mapping behaviour.
 
 
 Annotations
 -----------
 
-*Amiss* uses the `Nope library <http://github.com/shabbyrobe/nope>`_ for annotation
-support. Annotations in *Nope* have a very simple syntax. They follow this format and
-MUST be embedded in doc block comments (``/** */``, not ``/* */``)::
+*Amiss* uses the `Nope library <http://github.com/shabbyrobe/nope>`_ for
+annotation support. Annotations in *Nope* have a very simple syntax. They follow
+this format and MUST be embedded in doc block comments (``/** */``, not ``/*
+*/``)::
 
     /**
      * :namespace = JSON;
      */
 
-Parsing of an annotation starts as soon as a ``:namespace`` token is seen at the **start
-of a line** (the docblock margin and indentation are not counted)::
+Parsing of an annotation starts as soon as a ``:namespace`` token is seen at the
+**start of a line** (the docblock margin and indentation are not counted)::
 
     /**
      * :parsed = {"json": "object"};
      * This won't be parsed: :notparsed = {"json": "object"};
      */
 
-The JSON object starts immediately after the ``=`` sign and continues until the first
-semicolon found which is the last character on a line (excluding horizontal whitespace)::
+The JSON object starts immediately after the ``=`` sign and continues until the
+first semicolon found which is the last character on a line (excluding
+horizontal whitespace)::
 
     /**
      * :newlines_galore = {
@@ -126,8 +130,9 @@ Using the Annotation mapper, object/table mappings are defined in this way:
         public function setFooDate($v) { $this->fooDate = $v; }
     }
 
-It is assumed by this mapper that an object and a table are corresponding entities. More
-complex mapping should be handled using a :doc:`custom mapper <custom>`.
+It is assumed by this mapper that an object and a table are corresponding
+entities. More complex mapping should be handled using a :doc:`custom mapper
+<custom>`.
 
 
 Class Mapping
@@ -152,16 +157,16 @@ The following class level annotations are available:
 
 ``table``:
 
-    When declared, this forces the mapper to use this table name. It may include a schema
-    name as well. If not provided, the table name will be determined by the mapper. See
-    :ref:`name-translation` for details on this process.
+    When declared, this forces the mapper to use this table name. It may include
+    a schema name as well. If not provided, the table name will be determined by
+    the mapper. See :ref:`name-translation` for details on this process.
 
 
 ``fieldType``:
 
-    This sets a default field type to use for for all of the properties that do not have a
-    field type set against them explicitly. This will inherit from a parent class if one
-    is set. See :doc:`types` for more details.
+    This sets a default field type to use for for all of the properties that do
+    not have a field type set against them explicitly. This will inherit from a
+    parent class if one is set. See :doc:`types` for more details.
 
 
 ``constructor``:
@@ -221,7 +226,7 @@ following keys::
 
 ``type``
 
-    Optional type for the field. If this is not specified, the ``defaultFieldType`` class
+    Optional type for the field. If this is not specified, the ``fieldType`` class
     level attribute is used. See :doc:`types` for more details.
 
     The value for ``type`` can be a string representing a type handler::

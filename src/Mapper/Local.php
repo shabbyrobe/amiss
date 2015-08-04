@@ -15,7 +15,7 @@ class Local extends Base
 
     public function mapsClass($class)
     {
-        return method_exists($class, $localName);
+        return method_exists($class, $this->localName);
     }
     
     protected function createMeta($id)

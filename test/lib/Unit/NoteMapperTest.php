@@ -276,7 +276,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         list ($ns, ) = ClassBuilder::i()->register('
-            /** :amiss = {"defaultFieldType": "string"}; */
+            /** :amiss = {"fieldType": "string"}; */
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
@@ -286,7 +286,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
 
         $meta2 = $mapper->getMeta("$ns\\Test2");
-        $this->assertEquals(['id'=>'string'], $meta2->defaultFieldType);
+        $this->assertEquals(['id'=>'string'], $meta2->fieldType);
     }
 
     public function testGetMetaPropertyNoteInherits()

@@ -27,7 +27,7 @@ use Amiss\Sql\Query\Criteria;
  *          *     "has": "static", 
  *          *     "of": "Thing", 
  *          *     "call": "gimmeThing", 
- *          *     "argfields": ["thingId"], 
+ *          *     "argFields": ["thingId"], 
  *          *     "mode": "auto"
  *          * };
  *          *../
