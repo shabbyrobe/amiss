@@ -19,7 +19,7 @@ class Insert extends Sql\Query
             throw new Exception("No values found for insert into {$this->table}");
         }
 
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
 
         // right, now that we have handled all the crazy arguments, let's insert!
         $columns = array();

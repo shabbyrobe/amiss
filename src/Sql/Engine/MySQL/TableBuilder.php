@@ -16,7 +16,7 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         foreach ($this->meta->indexes as $k=>$details) {
             $fields = [];
             foreach ($details['fields'] as $p) {
-                $fields[] = $this->meta->getField($p)['name'];
+                $fields[] = $this->meta->fields[$p]['name'];
             }
             $colStr = '(`'.implode('`, `', $fields).'`)';
             if ($k == 'primary') {

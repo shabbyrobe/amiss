@@ -24,7 +24,7 @@ class ActiveRecordInheritanceTest extends \Amiss\Test\Helper\TestCase
     public function testFieldInheritance()
     {
         $meta = Active\PlannedEvent::getMeta();
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
         $this->assertArrayHasKey('name', $fields);
         $this->assertArrayHasKey('completeness', $fields);
     }

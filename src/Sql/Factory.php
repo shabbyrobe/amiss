@@ -78,7 +78,7 @@ class Factory
         }
         
         $handlers['bool'] = $handlers['boolean'] = function() {
-            return new \Amiss\Sql\Type\Boolean();
+            return new \Amiss\Sql\Type\Boolean_();
         };
 
         $handlers['decimal'] = function() {

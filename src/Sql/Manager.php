@@ -598,7 +598,7 @@ class Manager
                     throw new \UnexpectedValueException("lastInsertId returned, but class {$meta->class} had no autoinc field to receive it");
                 }
 
-                $field = $meta->getField($meta->autoinc);
+                $field = $meta->fields[$meta->autoinc];
                 $handler = $this->mapper->determineTypeHandler(Mapper::AUTOINC_TYPE);
                 if (!$handler) {
                     throw new \UnexpectedValueException();

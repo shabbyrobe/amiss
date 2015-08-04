@@ -42,45 +42,6 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
     }
 
     /**
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function testInherit()
-    {
-        list ($ns, ) = ClassBuilder::i()->register("
-            class C {}
-            class Child extends C {}
-        ");
-        $mappings = array(
-            "$ns\\C"     => array(),
-            "$ns\\Child" => array('inherit' => true),
-        );
-        $mapper = new Arrays($mappings);
-        $meta = $mapper->getMeta("$ns\\Child");
-        
-        $parent = $this->getProtected($meta, 'parent');
-        $this->assertEquals("$ns\\C", $parent->class);
-    }
-
-    /**
-     * @covers Amiss\Mapper\Arrays::createMeta
-     */
-    public function testNoInheritByDefault()
-    {
-        list ($ns, ) = ClassBuilder::i()->register("
-            class C {}
-            class Child extends C {}
-        ");
-        $mappings = array(
-            "$ns\\C"     => array(),
-            "$ns\\Child" => array(),
-        );
-        $mapper = new Arrays($mappings);
-        $meta = $mapper->getMeta("$ns\\Child");
-        $parent = $this->getProtected($meta, 'parent');
-        $this->assertNull($parent);
-    }
-
-    /**
      * @covers Amiss\Mapper\Arrays::__construct
      */
     public function testConstruct()
@@ -106,7 +67,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
             'b' => ['id'=>'b', 'name'=>'b'] + $this->fieldDefaults,
             'c' => ['id'=>'c', 'name'=>'c'] + $this->fieldDefaults,
         ];
-        $this->assertEquals($expected, $meta->getFields());
+        $this->assertEquals($expected, $meta->fields);
     }
 
     /**
@@ -120,7 +81,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new Arrays($mappings);
         $meta = $mapper->getMeta('foo');
         
-        $this->assertEquals([], $meta->getFields());
+        $this->assertEquals([], $meta->fields);
     }
 
     /**
@@ -137,7 +98,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $expected = [
             'id'=>['id'=>'id', 'name'=>'id', 'type'=>['id'=>'foobar'], 'required'=>false],
         ];
-        $this->assertEquals($expected, $meta->getFields());
+        $this->assertEquals($expected, $meta->fields);
     }
     
     /**
@@ -162,7 +123,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
             'id'=>['id'=>'id', 'name'=>'pants', 'type'=>['id'=>'foobar'], 'required'=>false],
         ];
         
-        $this->assertEquals($expected, $meta->getFields());
+        $this->assertEquals($expected, $meta->fields);
     }
 
     /**
@@ -184,7 +145,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->unnamedPropertyTranslator = new \Amiss\Name\CamelToUnderscore();
         $meta = $mapper->getMeta('foo');
         
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
         $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
         $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
     }

@@ -30,18 +30,6 @@ class Local extends Base
             return $info;
         }
 
-        $parent = null;
-        parent_class: {
-            if (isset($info['inherit']) && $info['inherit']) {
-                $parent = null;
-                $parentClass = get_parent_class($class);
-                if ($parentClass) {
-                    $parent = $this->getMeta($parentClass);
-                }
-                unset($info['inherit']);
-            }
-        }
-
         if (!isset($info['table'])) {
             $info['table'] = $this->getDefaultTable($class);
         }
@@ -50,6 +38,6 @@ class Local extends Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
         
-        return new \Amiss\Meta($class, $info, $parent);
+        return new \Amiss\Meta($class, $info);
     }
 }

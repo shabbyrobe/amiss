@@ -18,8 +18,8 @@
     "require": {
         "php": ">=5.6.0",
         "shabbyrobe/pdok": "1.0.*",
-        "shabbyrobe/nope": "^1.0.1",
-        "docopt/docopt": "1.0.*",
+        "shabbyrobe/nope": "^1.0.3",
+        "docopt/docopt": "^1.0.1",
         "litipk/php-bignumbers": "dev-master"
     },
     "require-dev": {

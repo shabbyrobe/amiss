@@ -74,7 +74,7 @@ class Note extends \Amiss\Mapper\Base
             $this->parser = new \Nope\Parser;
         }
 
-        $notes = $this->parser->parseClass($ref, \ReflectionProperty::IS_PUBLIC, \ReflectionMethod::IS_PUBLIC);
+        $notes = $this->parser->parseHierarchy($ref, \ReflectionProperty::IS_PUBLIC, \ReflectionMethod::IS_PUBLIC);
         $classNotes = $notes->notes;
 
         if (!isset($classNotes[$this->annotationNamespace])) {
@@ -86,23 +86,9 @@ class Note extends \Amiss\Mapper\Base
             $info = [];
         }
 
-        $parent = null;
-
         table: {
             if (!isset($info['table'])) {
                 $info['table'] = $this->getDefaultTable($class);
-            }
-        }
-
-        parent_class: {
-            if (isset($info['inherit']) && $info['inherit']) {
-                // really important to prepend a backslash - without it, non-namespaced classes
-                // fool the class name resolver into thinking they're not fully qualified
-                $parentClass = get_parent_class($class);
-                if ($parentClass) {
-                    $parent = $this->getMeta("\\".$parentClass);
-                }
-                unset($info['inherit']);
             }
         }
 
@@ -133,7 +119,7 @@ class Note extends \Amiss\Mapper\Base
         foreach (array('property'=>$notes->properties, 'method'=>$notes->methods) as $noteType=>$noteBag) {
             foreach ($noteBag as $name=>$itemNotes) {
                 if (!isset($itemNotes[$this->annotationNamespace])) {
-                    continue;
+                    goto next_note_bag;
                 }
 
                 $itemNotes = $itemNotes[$this->annotationNamespace];
@@ -161,6 +147,9 @@ class Note extends \Amiss\Mapper\Base
                         $field = [];
                     } elseif (is_string($field)) {
                         $field = ['name'=>$field];
+                    } elseif ($field === false) {
+                        // allows us to remove properties from consideration in child classes, i.e. :amiss = {"field": false};
+                        goto next_note_bag;
                     } elseif (!is_array($field)) {
                         throw new \UnexpectedValueException();
                     }
@@ -180,6 +169,8 @@ class Note extends \Amiss\Mapper\Base
                     $relation = $itemNotes['has'];
                     if (is_string($relation)) {
                         $relation = ["type"=>$relation];
+                    } elseif ($relation === false) {
+                        goto next_note_bag;
                     } elseif (!is_array($relation)) {
                         throw new \UnexpectedValueException();
                     }
@@ -218,6 +209,8 @@ class Note extends \Amiss\Mapper\Base
                         $info['constructorArgs'] = $itemNotes['constructor'];
                     }
                 }
+
+            next_note_bag:
             }
         }
 
@@ -225,7 +218,7 @@ class Note extends \Amiss\Mapper\Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
 
-        return new \Amiss\Meta($class, $info, $parent);
+        return new \Amiss\Meta($class, $info);
     }
 
     protected function fillGetterSetter($name, &$itemNotes, $readOnlyAllowed=false)

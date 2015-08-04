@@ -66,7 +66,7 @@ class StaticLookup implements \Amiss\Sql\Relator
         $method = isset($relation['call']) ? $relation['call'] : $this->staticConstructor;
 
         $argFieldsMeta = [];
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
         foreach ($argFields as $argField) {
             $argFieldsMeta[$argField] = $fields[$argField];
         }

@@ -339,7 +339,7 @@ Before we go any further, let's outline a relation graph present in the ``doc/de
         $manager->getChildren($events, 'eventArtists/artist'), 
         'artistType'
     );
-
+   
     // this will show an ArtistType instance
     var_dump($events->eventArtists[0]->artist->artistType);
 

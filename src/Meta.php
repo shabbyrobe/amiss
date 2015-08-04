@@ -59,42 +59,31 @@ class Meta
     /**
      * Array of fields, hashed by property name
      */
-    protected $fields;
-    protected $allFields;
+    public $fields = [];
+
+    public $columnMap;
+
     protected $properties;
-    protected $parent;
-    protected $columnToPropertyMap;
     
-    /**
-     * @var array|false|null  Array of type if found, false if checked and none found, 
-     *                        null if not yet checked
-     */
-    protected $defaultFieldType;
+    /** @var array|null */
+    public $defaultFieldType;
 
     function __sleep()
     {
         // precache this stuff before serialization
-        $this->getFields();
         $this->getProperties();
-        $this->getDefaultFieldType();
-        $this->getColumnToPropertyMap();
 
         return array(
-            'class', 'table', 'schema', 'primary', 'relations', 'fields', 'allFields', 
-            'parent', 'defaultFieldType', 'columnToPropertyMap', 'autoRelations',
+            'class', 'table', 'schema', 'primary', 'relations', 'fields',
+            'defaultFieldType', 'columnMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
             'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on', 'autoinc',
         ); 
     }
 
-    public function __construct($class, array $info, Meta $parent=null)
+    public function __construct($class, array $info)
     {
-        // due to some other hacks where we need to guarantee parent class lookups
-        // are always fully qualified, we get inconsistent input here - a leading
-        // backslash when the lookup is for a parent class.
-        // would like to get rid of this, but other things need to be dealt with first.
         $this->class  = ltrim($class, "\\");
-        $this->parent = $parent;
         $this->table  = isset($info['table'])   ? $info['table']   : null;
         $this->schema = isset($info['schema'])  ? $info['schema']  : null;
 
@@ -102,11 +91,7 @@ class Meta
 
         primary: {
             if (isset($info['primary'])) {
-                if ($info['primary'] == 0 && $info['primary'] !== "0") { // it's a string!
-                    $this->primary = [$info['primary']];
-                } else {
-                    $this->primary = $info['primary'];
-                }
+                $this->primary = (array)$info['primary'];
             } else {
                 $this->primary = [];
             }
@@ -257,6 +242,7 @@ class Meta
         $primary = [];
         $indexes = [];
         $fields  = [];
+        $reverse = [];
         $autoinc = null;
 
         foreach ($inFields as $name=>&$field) {
@@ -312,10 +298,12 @@ class Meta
                 $indexes[$name] = $index;
             }
 
+            $reverse[$field['name']] = $field['id'];
             $fields[$field['id']] = $field;
         }
 
         $this->fields = $fields;
+        $this->columnMap = $reverse;
         if ($primary) {
             if ($this->primary) {
                 throw new Exception("Primary can not be defined at class level and field level simultaneously in class '{$this->class}'");
@@ -329,28 +317,11 @@ class Meta
 
         return $this;
     }
-    
-    public function getFields()
-    {
-        if ($this->allFields===null) {
-            $fields = $this->fields;
-            
-            $current = $this;
-            while ($current->parent) {
-                $fields = array_merge($current->parent->getFields(), $fields);
-                $current = $current->parent;
-            }
-            
-            $this->allFields = $fields ?: array();
-        }
-
-        return $this->allFields;
-    }
 
     public function getProperties()
     {
         if ($this->properties === null) {
-            foreach ($this->getFields() as $name=>$field) {
+            foreach ($this->fields as $name=>$field) {
                 $field['source'] = 'field';
                 $this->properties[$name] = $field;
             }
@@ -364,37 +335,6 @@ class Meta
         return $this->properties;
     }
 
-    public function getColumnToPropertyMap()
-    {
-        if ($this->columnToPropertyMap===null) {
-            $map = array();
-            foreach ($this->getFields() as $prop=>$f) {
-                $map[$f['name']] = $prop;
-            }
-            $this->columnToPropertyMap = $map;
-        }
-        
-        return $this->columnToPropertyMap;
-    }
-    
-    function getField($field)
-    {
-        if (!$this->allFields) {
-            $this->getFields();
-        }
-        if (isset($this->allFields[$field])) {
-            return $this->allFields[$field];
-        }
-    }
-    
-    function getDefaultFieldType()
-    {
-        if ($this->defaultFieldType===null && $this->parent) {
-            $this->defaultFieldType = $this->parent->getDefaultFieldType() ?: false;
-        }
-        return $this->defaultFieldType;
-    }
-
     function getIndexValue($object, $indexName='primary')
     {
         $foundValue = false;
@@ -404,7 +344,11 @@ class Meta
         }
         $indexValue = array();
         foreach ($this->indexes[$indexName]['fields'] as $p) {
-            $field = $this->getField($p);
+            if (!isset($this->fields[$p])) {
+                throw new \InvalidArgumentException("Unknown field '$p' on {$this->class}");
+            }
+            $field = $this->fields[$p];
+
             $value = !isset($field['getter']) 
                 ? $object->{$p} 
                 : call_user_func(array($object, $field['getter']));
@@ -422,7 +366,15 @@ class Meta
     
     function getValue($object, $property)
     {
-        $field = $this->getField($property);
+        if ($this->properties === null) {
+            $this->getProperties();
+        }
+
+        if (!isset($this->properties[$property])) {
+            throw new \InvalidArgumentException("Unknown property '$property' on {$this->class}");
+        }
+        $field = $this->properties[$property];
+
         $value = !isset($field['getter']) 
             ? $object->{$property} 
             : call_user_func(array($object, $field['getter']));
@@ -432,7 +384,15 @@ class Meta
     
     function setValue($object, $property, $value)
     {
-        $field = $this->getField($property);
+        if ($this->properties === null) {
+            $this->getProperties();
+        }
+
+        if (!isset($this->properties[$property])) {
+            throw new \InvalidArgumentException("Unknown property '$property' on {$this->class}");
+        }
+        $field = $this->properties[$property];
+
         if (!isset($field['setter'])) {
             $object->{$property} = $value;
         } else {

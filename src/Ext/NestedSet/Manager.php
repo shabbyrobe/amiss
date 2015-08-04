@@ -72,11 +72,11 @@ class Manager
         $rightField  = isset($ext['rightId'])  ? $ext['rightId']  : 'treeRight';
         $parentField = isset($ext['parentId']) ? $ext['parentId'] : 'parentId';
         
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
         $treeMeta = (object)array(
             'meta'       => $meta,
-            'leftId'     => isset($fields[$leftField]) ? $leftField : null,
-            'rightId'    => isset($fields[$rightField]) ? $rightField : null,
+            'leftId'     => isset($fields[$leftField])   ? $leftField   : null,
+            'rightId'    => isset($fields[$rightField])  ? $rightField  : null,
             'parentId'   => isset($fields[$parentField]) ? $parentField : null,
             'parentRel'  => null,
             'parentsRel' => null,
@@ -121,10 +121,10 @@ class Manager
             $conn->exec("LOCK TABLES `{$meta->table}` WRITE");
         }
         try {
-            $primaryName = $meta->getField($meta->primary[0])['name'];
-            $parentIdFieldName = $meta->getField($treeMeta->parentId)['name'];
-            $leftIdName = $meta->getField($treeMeta->leftId)['name'];
-            $rightIdName = $meta->getField($treeMeta->rightId)['name'];
+            $primaryName = $meta->fields[$meta->primary[0]]['name'];
+            $parentIdFieldName = $meta->fields[$treeMeta->parentId]['name'];
+            $leftIdName = $meta->fields[$treeMeta->leftId]['name'];
+            $rightIdName = $meta->fields[$treeMeta->rightId]['name'];
             
             $sql = "SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)";
             $rootStmt = $conn->query("SELECT `{$primaryName}` FROM `{$meta->table}` WHERE (`{$parentIdFieldName}` IS NULL OR `{$parentIdFieldName}` = 0)");

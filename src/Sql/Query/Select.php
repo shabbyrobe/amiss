@@ -46,7 +46,7 @@ class Select extends Criteria
     public function buildFields($meta, $tablePrefix=null)
     {
     // Careful! $meta might be null.
-        $metaFields = $meta ? $meta->getFields() : null;
+        $metaFields = $meta ? $meta->fields : null;
         
         $fields = $this->fields;
         if (!$fields) {
@@ -94,7 +94,7 @@ class Select extends Criteria
     public function buildOrder($meta, $tableAlias=null)
     {
         // Careful! $meta might be null.
-        $metaFields = $meta ? $meta->getFields() : null;
+        $metaFields = $meta ? $meta->fields : null;
         
         $order = $this->order;
         if ($meta && $meta->defaultOrder && $order !== null) {

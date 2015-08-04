@@ -1,15 +1,10 @@
 <?php
 namespace Amiss\Sql\Type;
 
-class Autoinc implements \Amiss\Type\Handler, \Amiss\Type\Identity
+class Autoinc implements \Amiss\Type\Handler
 {
     public $type = 'INTEGER';
     
-    function handleDbGeneratedValue($value)
-    {
-        return (int)$value;
-    }
-
     function prepareValueForDb($value, array $fieldInfo)
     {
         return $value;
