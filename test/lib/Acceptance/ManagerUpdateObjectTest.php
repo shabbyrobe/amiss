@@ -1,6 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Demo;
 use Amiss\Test;
 
 /**
@@ -13,7 +14,7 @@ class ManagerUpdateObjectTest extends \Amiss\Test\Helper\TestCase
     {
         $this->deps = Test\Factory::managerModelDemo();
         $this->manager = $this->deps->manager;
-        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
+        $this->artist = $this->manager->get(Demo\Artist::class, 'artistId=?', array(1));
         $this->assertEquals('Limozeen', $this->artist->name);
     }
 
@@ -30,7 +31,7 @@ class ManagerUpdateObjectTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateObjectByMultiKey()
     {
-        $original = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
+        $original = $this->manager->get(Demo\EventArtist::class, 'eventId=1 AND artistId=1');
         
         // make sure we have the right object
         $this->assertEquals(1, $original->artistId);
@@ -40,14 +41,14 @@ class ManagerUpdateObjectTest extends \Amiss\Test\Helper\TestCase
         
         $original->sequence = 3000;
         
-        $beforeEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
+        $beforeEventArtists = $this->manager->getList(Demo\EventArtist::class, 'eventId=1 AND artistId!=1');
         $this->manager->update($original);
-        $afterEventArtists = $this->manager->getList('EventArtist', 'eventId=1 AND artistId!=1');
+        $afterEventArtists = $this->manager->getList(Demo\EventArtist::class, 'eventId=1 AND artistId!=1');
         
         $this->assertEquals($beforeEventArtists, $afterEventArtists);
         
         // ensure all of the objects other than the one we are messing with are untouched
-        $found = $this->manager->get('EventArtist', 'eventId=1 AND artistId=1');
+        $found = $this->manager->get(Demo\EventArtist::class, 'eventId=1 AND artistId=1');
         $this->assertEquals(3000, $found->sequence);
     }
     
@@ -59,13 +60,13 @@ class ManagerUpdateObjectTest extends \Amiss\Test\Helper\TestCase
     {
         $this->artist->name = 'Foobar';
         
-        $this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
+        $this->assertEquals(0, $this->manager->count(Demo\Artist::class, 'name="Foobar"'));
         
         $this->manager->update($this->artist);
         
-        $this->artist = $this->manager->get('Artist', 'artistId=?', array(1));
+        $this->artist = $this->manager->get(Demo\Artist::class, 'artistId=?', array(1));
         $this->assertEquals('Foobar', $this->artist->name);
         
-        $this->assertEquals(1, $this->manager->count('Artist', 'name="Foobar"'));
+        $this->assertEquals(1, $this->manager->count(Demo\Artist::class, 'name="Foobar"'));
     }
 }

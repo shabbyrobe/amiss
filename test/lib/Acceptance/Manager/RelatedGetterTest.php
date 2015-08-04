@@ -97,9 +97,7 @@ class RelatedGetterTestChild
     }
 }
 
-/**
- * :amiss = {"table": "parent"};
- */
+/** :amiss = {"table": "parent"}; */
 class RelatedGetterTestParent
 {
     /** :amiss = {"field": {"primary": true}}; */

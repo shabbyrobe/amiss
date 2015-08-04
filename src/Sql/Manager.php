@@ -52,12 +52,12 @@ class Manager
      * @param string Class name
      * @return \Amiss\Meta 
      */
-    public function getMeta($class)
+    public function getMeta($class, $strict=true)
     {
         // Do not put any logic in here at all. this is just syntactic sugar.
         // If you override this, nothing will actually call it - this class
         // uses $this->mapper->getMeta() internally
-        return $this->mapper->getMeta($class);
+        return $this->mapper->getMeta($class, $strict);
     }
 
     public function get($class, ...$args)

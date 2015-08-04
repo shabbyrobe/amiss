@@ -2,6 +2,8 @@
 namespace Amiss\Test\Unit;
 
 use Amiss\Demo;
+use Amiss\Mapper;
+use Amiss\Meta;
 
 /**
  * @group unit
@@ -14,10 +16,11 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testMapObjectsToRows()
     {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')
-            ->setMethods(array('mapObjectToRow'))
+        $mapper = $this->getMockBuilder(Mapper\Base::class)
+            ->setMethods(array('getMeta', 'mapObjectToRow'))
             ->getMockForAbstractClass()
         ;
+        $mapper->expects($this->any())->method('getMeta')->will($this->returnValue(new Meta('a', [])));
         $mapper->expects($this->exactly(2))->method('mapObjectToRow');
         $mapper->mapObjectsToRows(array('a', 'b'), null, 'foo');
     }
@@ -104,40 +107,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
         $mapper->mapRowsToObjects(array('a', 'b'), null, 'foo');
     }
-    
-    /**
-     * @covers Amiss\Mapper\Base::resolveObjectName
-     */
-    public function testResolveObjectNameWithNonNamespacedName()
-    {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $mapper->objectNamespace = 'abcd';
-        $found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
-        $this->assertEquals('abcd\foobar', $found);
-    }
-    
-    /**
-     * @covers Amiss\Mapper\Base::resolveObjectName
-     */
-    public function testResolveObjectNameWithNamespacedName()
-    {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $mapper->objectNamespace = 'abcd';
-        $found = $this->callProtected($mapper, 'resolveObjectName', 'efgh\foobar');
-        $this->assertEquals('efgh\foobar', $found);
-    }
-    
-    /**
-     * @covers Amiss\Mapper\Base::resolveObjectName
-     */
-    public function testResolveObjectNameWithoutNamespaceWhenNoNamespaceSet()
-    {
-        $mapper = $this->getMockBuilder('Amiss\Mapper\Base')->getMockForAbstractClass();
-        $mapper->objectNamespace = null;
-        $found = $this->callProtected($mapper, 'resolveObjectName', 'foobar');
-        $this->assertEquals('foobar', $found);
-    }
-    
+
     /**
      * @dataProvider dataForDefaultTableName
      * @covers Amiss\Mapper\Base::getDefaultTable

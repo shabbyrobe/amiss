@@ -75,10 +75,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
         $this->assertTrue($obj==true, "Couldn't retrieve object");
 
         $obj->delete();
-        $this->assertEquals(0, $this->deps->manager->count('ArtistRecord', 'artistId=1'));
+        $this->assertEquals(0, $this->deps->manager->count(Active\ArtistRecord::class, 'artistId=1'));
 
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->deps->manager->count('ArtistRecord'));
+        $this->assertGreaterThan(0, $this->deps->manager->count(Active\ArtistRecord::class));
     }
 
     public function testDeleteById()
@@ -87,10 +87,10 @@ class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
         $this->assertTrue($obj==true, "Couldn't retrieve object");
         Active\ArtistRecord::deleteById(1);
 
-        $this->assertEquals(0, $this->deps->manager->count('ArtistRecord', 'artistId=1'));
+        $this->assertEquals(0, $this->deps->manager->count(Active\ArtistRecord::class, 'artistId=1'));
 
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->deps->manager->count('ArtistRecord'));
+        $this->assertGreaterThan(0, $this->deps->manager->count(Active\ArtistRecord::class));
     }
 
     public function testUpdateByPrimary()

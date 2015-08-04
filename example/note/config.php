@@ -8,7 +8,5 @@ $manager = Amiss\Sql\Factory::createManager($connector, array(
     'typeHandlers'=>array(),
 ));
 
-$manager->mapper->objectNamespace = 'Amiss\Demo';
-
 $connector->exec(file_get_contents(__DIR__.'/../../doc/demo/schema.sqlite.sql'));
 $connector->exec(file_get_contents(__DIR__.'/../../doc/demo/testdata.sql'));

@@ -29,7 +29,7 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
      */
     public function testSaveNewObject()
     {
-        $this->assertEquals(0, $this->manager->count('Artist', 'slug="insert-test"'));
+        $this->assertEquals(0, $this->manager->count(Demo\Artist::class, 'slug="insert-test"'));
         
         $artist = new Demo\Artist();
         $artist->artistTypeId = 1;
@@ -39,12 +39,12 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         
         $this->assertGreaterThan(0, $artist->artistId);
         
-        $this->assertEquals(1, $this->manager->count('Artist', 'slug="insert-test"'));
+        $this->assertEquals(1, $this->manager->count(Demo\Artist::class, 'slug="insert-test"'));
     }
 
     function testUpdateObjectWithSave()
     {
-        $original = $this->manager->get('Artist', 'artistId=1');
+        $original = $this->manager->get(Demo\Artist::class, 'artistId=1');
 
         // make sure we have the right object
         $this->assertEquals(1, $original->artistId);
@@ -53,14 +53,14 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         
         $original->name = "Yep yep yep";
         
-        $beforeArtists = $this->manager->getList('Artist', 'artistId!=1');
+        $beforeArtists = $this->manager->getList(Demo\Artist::class, 'artistId!=1');
         $this->manager->save($original);
-        $afterArtists = $this->manager->getList('Artist', 'artistId!=1');
+        $afterArtists = $this->manager->getList(Demo\Artist::class, 'artistId!=1');
         
         // ensure all of the objects other than the one we are messing with are untouched
         $this->assertEquals($beforeArtists, $afterArtists);
         
-        $found = $this->manager->get('Artist', 'artistId=1');
+        $found = $this->manager->get(Demo\Artist::class, 'artistId=1');
         $this->assertEquals("Yep yep yep", $found->name);
     }
 
@@ -70,7 +70,7 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         // with MySQL, only changed ones are counted but with Sqlite, all
         // rows matched by the clause are counted
         $expected = $this->deps->connector->engine == 'sqlite' ? 3 : 2;
-        $this->assertEquals($expected, $this->manager->updateTable('ArtistType', ['type'=>'Band'], '1=1'));
+        $this->assertEquals($expected, $this->manager->updateTable(Demo\ArtistType::class, ['type'=>'Band'], '1=1'));
     }
 
     public function testSaveFailsWhenAutoincNotDeclared()

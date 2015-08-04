@@ -36,7 +36,7 @@ class AutoGuidTest extends \Amiss\Test\Helper\TestCase
         $d->manager->insert($o);
         $this->assertNotEmpty($o->guid);
 
-        $o = $d->manager->get('AutoGuid');
+        $o = $d->manager->get($cls);
         $this->assertNotEmpty($o->guid);
     }
 }

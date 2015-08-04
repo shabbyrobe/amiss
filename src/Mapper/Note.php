@@ -16,6 +16,8 @@ class Note extends \Amiss\Mapper\Base
     public $parser;
 
     public $annotationNamespace = 'amiss';
+
+    private $mapsCache = [];
     
     public function __construct($cache=null, $parser=null)
     {
@@ -28,18 +30,40 @@ class Note extends \Amiss\Mapper\Base
     protected function createMeta($class)
     {
         $meta = null;
-        
+
+        $key = "note-class-$class";
         if ($this->cache) {
-            $meta = $this->cache->get($class);
+            $meta = $this->cache->get($key);
         }
         if (!$meta) {
             $meta = $this->loadMeta($class);
             if ($this->cache) {
-                $this->cache->set($class, $meta);
+                $this->cache->set($key, $meta);
             }
         }
-        
         return $meta;
+    }
+
+    function mapsClass($class)
+    {
+        if (isset($this->mapsCache[$class])) {
+            return $this->mapsCache[$class];
+        }
+
+        $key = "note-maps-$class";
+        $maps = null;
+        if ($this->cache) {
+            $maps = $this->cache->get($key);
+        }
+
+        if ($maps === null) {
+            $maps = $this->loadMeta($class) === true;
+            $this->mapsCache[$class] = $maps;
+            if ($this->cache) {
+                $this->cache->set($key, $maps);
+            }
+        }
+        return $maps;
     }
     
     protected function loadMeta($class)
@@ -53,7 +77,15 @@ class Note extends \Amiss\Mapper\Base
         $notes = $this->parser->parseClass($ref, \ReflectionProperty::IS_PUBLIC, \ReflectionMethod::IS_PUBLIC);
         $classNotes = $notes->notes;
 
-        $info = isset($classNotes[$this->annotationNamespace]) ? $classNotes[$this->annotationNamespace] : [];
+        if (!isset($classNotes[$this->annotationNamespace])) {
+            return null;
+        }
+        
+        $info = $classNotes[$this->annotationNamespace];
+        if ($info === true) {
+            $info = [];
+        }
+
         $parent = null;
 
         table: {

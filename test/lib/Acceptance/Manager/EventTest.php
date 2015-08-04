@@ -22,11 +22,11 @@ class EventTest extends \Amiss\Test\Helper\TestCase
             $object->foo -= 5;
         };
         $result = ((123 * 2) + 3) - 5; // 244
-        $cls = "{$d->ns}\\Pants";
+        $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
-        $o = $d->manager->getList('Pants');
+        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $o = $d->manager->getList($cls);
         $this->assertEquals($result, $o[0]->foo);
     }
 
@@ -45,12 +45,12 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $d->manager->on['afterInsert'][] = function($object) {
             $object->foo -= 5;
         };
-        $cls = "{$d->ns}\\Pants";
+        $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
+        $d->manager->insert($o, $d->manager->getMeta($cls));
         $this->assertEquals(244, $o->foo);
-        $o = $d->manager->getList('Pants');
+        $o = $d->manager->getList($cls);
         $this->assertEquals(123, $o[0]->foo);
     }
 
@@ -75,16 +75,16 @@ class EventTest extends \Amiss\Test\Helper\TestCase
             $object->foo -= 5;
         };
 
-        $cls = "{$d->ns}\\Pants";
+        $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->id = 1;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
+        $d->manager->insert($o, $d->manager->getMeta($cls));
         $this->assertEquals(123, $o->foo);
 
         $o = $d->manager->getById($o, 1);
         $this->assertEquals(123, $o->foo);
-        $d->manager->update($o, $d->manager->getMeta('Pants'));
+        $d->manager->update($o, $d->manager->getMeta($cls));
         $this->assertEquals(244, $o->foo);
 
         $o = $d->manager->getById($o, 1);
@@ -112,17 +112,17 @@ class EventTest extends \Amiss\Test\Helper\TestCase
             $object->foo -= 5;
         };
 
-        $cls = "{$d->ns}\\Pants";
+        $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->id = 1;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
+        $d->manager->insert($o, $d->manager->getMeta($cls));
         $this->assertEquals(123, $o->foo);
 
         // update
         $o = $d->manager->getById($o, 1);
         $this->assertEquals(123, $o->foo);
-        $d->manager->update($o, $d->manager->getMeta('Pants'));
+        $d->manager->update($o, $d->manager->getMeta($cls));
 
         // it will change in the instance
         $this->assertEquals(244, $o->foo);
@@ -145,15 +145,16 @@ class EventTest extends \Amiss\Test\Helper\TestCase
                 function a() { $this->id = 99; }
             }
         ');
-        $d->manager->insertTable('Pants', ['id'=>94]);
+        $cls = $d->classes['Pants'];
+
+        $d->manager->insertTable($cls, ['id'=>94]);
         $d->manager->on['beforeDelete'][] = function($object) {
             $object->id -= 5;
         };
 
-        $cls = "{$d->ns}\\Pants";
         $o = new $cls;
         $o->id = 1;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
+        $d->manager->insert($o, $d->manager->getMeta($cls));
 
         // delete
         $o = $d->manager->getById($o, 1);
@@ -170,7 +171,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals(1, $o->id);
 
         // but the other one shouldn't
-        $this->assertFalse($d->manager->exists('Pants', 94));
+        $this->assertFalse($d->manager->exists($cls, 94));
     }
 
     function testMetaAfterDelete()
@@ -186,15 +187,16 @@ class EventTest extends \Amiss\Test\Helper\TestCase
                 function a() { $this->id = 99; }
             }
         ');
-        $d->manager->insertTable('Pants', ['id'=>94]);
+        $cls = $d->classes['Pants'];
+
+        $d->manager->insertTable($cls, ['id'=>94]);
         $d->manager->on['afterDelete'][] = function($object) {
             $object->id -= 5;
         };
 
-        $cls = "{$d->ns}\\Pants";
         $o = new $cls;
         $o->id = 1;
-        $d->manager->insert($o, $d->manager->getMeta('Pants'));
+        $d->manager->insert($o, $d->manager->getMeta($cls));
 
         // delete
         $o = $d->manager->getById($o, 1);
@@ -209,7 +211,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $this->assertNull($o);
 
         // but the other one should
-        $this->assertTrue($d->manager->exists('Pants', 94));
+        $this->assertTrue($d->manager->exists($cls, 94));
     }
 
     function testMetaEventFailsWhenClosure()

@@ -16,8 +16,7 @@ Options:
   --note <note>       Search for all classes that have this note set at 
                       class level 
   --ns <ns>           Search for all classes in this namespace. Can specify 
-                      more than once. If only specified once, will be set as 
-                      Amiss\Mapper\Base->objectNamespace
+                      more than once.
 
 Examples:
 Use all classes with the @foo annotation at class level:
@@ -84,9 +83,6 @@ if (!$manager) {
 $toCreate = find_classes($options->input);
 if ($options->namespaces) {
     $toCreate = filter_classes_by_namespaces($toCreate, $options->namespaces);
-    if (count($options->namespaces) == 1 && $mapper instanceof \Amiss\Mapper\Base) {
-        $mapper->objectNamespace = $options->namespaces[0];
-    }
 }
 if ($options->notes) {
     $toCreate = filter_classes_by_notes($toCreate, $options->notes);

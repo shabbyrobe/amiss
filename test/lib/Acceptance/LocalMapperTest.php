@@ -77,8 +77,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
         
         $ns = substr($c1, 0, strrpos($c1, '\\'));
         $lm = new \Amiss\Mapper\Local();
-        $lm->objectNamespace = $ns;
-        $meta = $lm->getMeta("Pants");
+        $meta = $lm->getMeta($c1);
         $this->assertEquals(['foo'], array_keys($meta->getFields()));
         $this->assertEquals($c1, $meta->class);
     }

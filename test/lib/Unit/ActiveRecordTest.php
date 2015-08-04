@@ -92,8 +92,6 @@ class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelated()
     {
-        $this->deps->mapper->objectNamespace = 'Amiss\Test\Unit\Active';
-        
         $manager = $this->getMock('Amiss\Sql\Manager', array('getRelated'), array($this->deps->connector, $this->deps->mapper));
         \Amiss\Sql\ActiveRecord::setManager($manager);
         
@@ -255,29 +253,35 @@ class TestActiveRecord2 extends \Amiss\Sql\ActiveRecord
     public $testActiveRecord2Id;
 }
 
+/** :amiss = true; */
 class TestActiveRecord3 extends \Amiss\Sql\ActiveRecord
 {
     /** :amiss = {"field": {"primary": true}}; */
     public $testActiveRecord3Id;
 }
 
+/** :amiss = true; */
 abstract class OtherConnBase extends \Amiss\Sql\ActiveRecord {}
 
+/** :amiss = true; */
 class TestOtherConnRecord1 extends OtherConnBase {}
 
+/** :amiss = true; */
 class TestOtherConnRecord2 extends OtherConnBase {}
 
+/** :amiss = true; */
 class TestRelatedParent extends \Amiss\Sql\ActiveRecord
 {
     /** :amiss = {"field": {"primary": true}}; */
     public $parentId;
     
     /**
-     * :amiss = {"has": {"type": "many", "of": "TestRelatedChild"}};
+     * :amiss = {"has": {"type": "many", "of": "Amiss\\Test\\Unit\\TestRelatedChild"}};
      */
     public $children;
 }
 
+/** :amiss = true; */
 class TestRelatedChild extends \Amiss\Sql\ActiveRecord
 {
     /** :amiss = {"field": {"primary": true}}; */
@@ -289,7 +293,7 @@ class TestRelatedChild extends \Amiss\Sql\ActiveRecord
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "TestRelatedParent",
+     *     "of"  : "Amiss\\Test\\Unit\\TestRelatedParent",
      *     "from": "parentId"
      * }};
      */

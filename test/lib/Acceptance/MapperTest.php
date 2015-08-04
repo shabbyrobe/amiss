@@ -71,6 +71,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
     public function testObjectToPropertiesWithGetters()
     {
         $deps = Test\Factory::managerNoteModelCustom('
+            /** :amiss = true; */
             class Pants {
                 /** :amiss = {"field": true}; */
                 function getId() { return $this->id; }

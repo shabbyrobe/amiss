@@ -12,13 +12,21 @@ class TestMapper implements \Amiss\Mapper
         $this->meta = $meta;
     }
     
-    function getMeta($class)
+    function getMeta($class, $strict=true)
     {
         if (is_object($class)) {
             $class = get_class($class);
         }
-        return isset($this->meta[$class]) ? $this->meta[$class] : null;
+        if (isset($this->meta[$class])) {
+            return $this->meta[$class];
+        } elseif ($strict) {
+            throw new \InvalidArgumentException();
+        } else {
+            return null;
+        }
     }
+
+    function mapsClass($class) { return isset($this->meta[$class]); }
 
     function createObject($meta, $row, $args=null) {}
     

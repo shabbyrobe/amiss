@@ -14,8 +14,7 @@ class CookbookTablePrefixTest extends \Amiss\Test\Helper\TestCase
         $this->mapper->defaultTableNameTranslator = function($objectName) use ($mapper, $translator) {
             return 'yep_'.$mapper->convertUnknownTableName($objectName);
         };
-        $this->mapper->objectNamespace = __NAMESPACE__;
-        
+
         $this->manager = new \Amiss\Sql\Manager(array(), $this->mapper);
     }
     
@@ -24,22 +23,21 @@ class CookbookTablePrefixTest extends \Amiss\Test\Helper\TestCase
      */
     public function testRetrieve()
     {
-        $meta = $this->manager->getMeta('CookbookTablePrefixObject');
+        $meta = $this->manager->getMeta(CookbookTablePrefixObject::class);
         $this->assertEquals('yep_cookbook_table_prefix_object', $meta->table);
     }
 }
 
+/** :amiss = true; */
 class CookbookTablePrefixObject
 {
     /**
-     * @primary
-     * @type autoinc
+     * :amiss = {"field": {"primary": true, "type": "autoinc"}};
      */
     public $id;
     
     /**
-     * @field thing_part1
-     * @type pants
+     * :amiss = {"field": {"type": "pants", "name": "thing_part1"}};
      */
     public $thing;
 }

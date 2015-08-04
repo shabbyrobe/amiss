@@ -22,6 +22,13 @@ class ManagerTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelatedFailsWhenRelationNameUnknown()
     {
+        $this->manager->mapper = $this->getMockBuilder(\Amiss\Mapper::class)
+            ->setMethods(['getMeta'])
+            ->getMockForAbstractClass()
+        ;
+        $meta = new \Amiss\Meta('stdClass', ['table' => 'stdClass']);
+        $this->manager->mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
+
         $source = new \stdClass;
         $this->setExpectedException("Amiss\Exception", "Unknown relation flobadoo on stdClass");
         $this->manager->getRelated($source, 'flobadoo');
@@ -33,18 +40,18 @@ class ManagerTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelatedFailsWhenRelatorUnknown()
     {
-        $this->manager->mapper = $this->getMockBuilder("Amiss\Mapper")
-            ->setMethods(array('getMeta'))
+        $this->manager->mapper = $this->getMockBuilder(\Amiss\Mapper::class)
+            ->setMethods(['getMeta'])
             ->getMockForAbstractClass()
         ;
-        $meta = new \Amiss\Meta('stdClass', array('table'=>'stdClass'));
+        $meta = new \Amiss\Meta('stdClass', ['table' => 'stdClass']);
         $meta->relations = array(
-            'a'=>array('wahey')
+            'a' => ['wahey']
         );
         $this->manager->mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
 
         $source = new \stdClass;
-        $this->setExpectedException("Amiss\Exception", "Relator wahey not found");
+        $this->setExpectedException(\Amiss\Exception::class, "Relator wahey not found");
         $this->manager->getRelated($source, 'a');
     }
 }

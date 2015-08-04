@@ -21,11 +21,10 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
         $this->manager = $this->deps->manager;
 
         TableBuilder::create($this->deps->connector, $this->deps->mapper, [
-            __NAMESPACE__.'\MappedFieldNameLeft',
-            __NAMESPACE__.'\MappedFieldNameAssoc',
-            __NAMESPACE__.'\MappedFieldNameRight',
+            MappedFieldNameLeft::class,
+            MappedFieldNameAssoc::class,
+            MappedFieldNameRight::class,
         ]);
-        $this->deps->mapper->objectNamespace = __NAMESPACE__;
     }
 
     public function tearDown()
@@ -65,7 +64,7 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
     public function testGetById()
     {
         $this->loadTestData();
-        $obj = $this->manager->getById('MappedFieldNameLeft', 1);
+        $obj = $this->manager->getById(MappedFieldNameLeft::class, 1);
         $this->assertEquals(1, $obj->id);
         $this->assertEquals('foo', $obj->pants);
     }
@@ -73,7 +72,7 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
     public function testGetOneRelated()
     {
         $this->loadTestData();
-        $obj = $this->manager->getById('MappedFieldNameAssoc', 1);
+        $obj = $this->manager->getById(MappedFieldNameAssoc::class, 1);
         $left = $this->manager->getRelated($obj, 'left');
         $this->assertEquals(1, $left->id);
         $this->assertEquals('foo', $left->pants);
@@ -82,7 +81,7 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
     public function testGetManyRelatedWithExplicitOn()
     {
         $this->loadTestData();
-        $obj = $this->manager->getById('MappedFieldNameLeft', 1);
+        $obj = $this->manager->getById(MappedFieldNameLeft::class, 1);
         $assocs = $this->manager->getRelated($obj, 'assocs');
         $this->assertCount(2, $assocs);
     }
@@ -90,12 +89,13 @@ class MappedFieldNameTest extends \Amiss\Test\Helper\TestCase
     public function testGetManyRelatedWithInverseOn()
     {
         $this->loadTestData();
-        $obj = $this->manager->getById('MappedFieldNameRight', 5);
+        $obj = $this->manager->getById(MappedFieldNameRight::class, 5);
         $assocs = $this->manager->getRelated($obj, 'assocs');
         $this->assertCount(2, $assocs);
     }
 }
 
+/** :amiss = true; */
 class MappedFieldNameLeft
 {
     /** 
@@ -113,7 +113,7 @@ class MappedFieldNameLeft
     /**
      * :amiss = {"has": {
      *     "type": "many",
-     *     "of"  : "MappedFieldNameAssoc",
+     *     "of"  : "Amiss\\Test\\Acceptance\\MappedFieldNameAssoc",
      *     "to"  : "leftId"
      * }};
      */
@@ -122,13 +122,14 @@ class MappedFieldNameLeft
     /**
      * :amiss = {"has": {
      *     "type": "assoc",
-     *     "of"  : "MappedFieldNameRight",
-     *     "via" : "MappedFieldNameAssoc"
+     *     "of"  : "Amiss\\Test\\Acceptance\\MappedFieldNameRight",
+     *     "via" : "Amiss\\Test\\Acceptance\\MappedFieldNameAssoc"
      * }};
      */
     public $rights = array();
 }
 
+/** :amiss = true; */
 class MappedFieldNameAssoc
 {
     /** 
@@ -149,7 +150,7 @@ class MappedFieldNameAssoc
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "MappedFieldNameLeft",
+     *     "of"  : "Amiss\\Test\\Acceptance\\MappedFieldNameLeft",
      *     "from": "leftId"
      * }};
      */
@@ -157,12 +158,13 @@ class MappedFieldNameAssoc
 
     /** :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "MappedFieldNameRight",
+     *     "of"  : "Amiss\\Test\\Acceptance\\MappedFieldNameRight",
      *     "from": "rightId"
      * }}; */
     public $right;
 }
 
+/** :amiss = true; */
 class MappedFieldNameRight
 {
     /** :amiss = {"field": { "primary": true, "name": "mapped_field_name_right_id", "type": "autoinc" }}; */
@@ -174,7 +176,7 @@ class MappedFieldNameRight
     /**
      * :amiss = {"has": {
      *     "type"   : "many",
-     *     "of"     : "MappedFieldNameAssoc",
+     *     "of"     : "Amiss\\Test\\Acceptance\\MappedFieldNameAssoc",
      *     "inverse": "right"
      * }};
      */
@@ -183,8 +185,8 @@ class MappedFieldNameRight
     /**
      * :amiss = {"has": {
      *     "type": "assoc",
-     *     "of"  : "MappedFieldNameLeft",
-     *     "via" : "MappedFieldNameAssoc"
+     *     "of"  : "Amiss\\Test\\Acceptance\\MappedFieldNameLeft",
+     *     "via" : "Amiss\\Test\\Acceptance\\MappedFieldNameAssoc"
      * }};
      */
     public $lefts = array();

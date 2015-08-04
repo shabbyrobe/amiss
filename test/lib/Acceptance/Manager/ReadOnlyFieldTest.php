@@ -1,6 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance\Manager;
 
+use Amiss\Demo;
 use Amiss\Test;
 
 class ReadOnlyFieldTest extends \Amiss\Test\Helper\TestCase
@@ -20,13 +21,13 @@ class ReadOnlyFieldTest extends \Amiss\Test\Helper\TestCase
 
     function testReadOnlyGetObject()
     {
-        $t = $this->manager->getById('ArtistType', 1);
+        $t = $this->manager->getById(Demo\ArtistType::class, 1);
         $this->assertEquals('band', $t->getSlug());
     }
 
     function testReadOnlySave()
     {
-        $t = $this->manager->getById('ArtistType', 1);
+        $t = $this->manager->getById(Demo\ArtistType::class, 1);
         $t->type = 'Hello Hello';
         $this->manager->save($t);
 

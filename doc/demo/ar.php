@@ -28,7 +28,7 @@ class ArtistRecord extends DemoRecord
     private $type;
     
     /**
-     * :amiss = {"has": {"type": "one", "of": "ArtistType", "from": "artistTypeId"}};
+     * :amiss = {"has": {"type": "one", "of": "Amiss\\Demo\\Active\\ArtistType", "from": "artistTypeId"}};
      */
     public function getType()
     {
@@ -39,6 +39,7 @@ class ArtistRecord extends DemoRecord
     }
 }
 
+/** :amiss = true; */
 class ArtistType extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
@@ -58,7 +59,7 @@ class ArtistType extends DemoRecord
     /**
      * :amiss = {"has": {
      *     "type": "many",
-     *     "of"  : "ArtistRecord",
+     *     "of"  : "Amiss\\Demo\\Active\\ArtistRecord",
      *     "to"  : "artistTypeId"
      * }};
      */
@@ -105,7 +106,7 @@ class EventRecord extends DemoRecord
     private $venue;
     
     /**
-     * :amiss = {"has": {"type": "one", "of": "VenueRecord", "from": "venueId"}};
+     * :amiss = {"has": {"type": "one", "of": "Amiss\\Demo\\Active\\VenueRecord", "from": "venueId"}};
      */
     public function getVenue()
     {
@@ -118,7 +119,7 @@ class EventRecord extends DemoRecord
     /**
      * :amiss = {"has": {
      *     "type"   : "many",
-     *     "of"     : "EventArtist",
+     *     "of"     : "Amiss\\Demo\\Active\\EventArtist",
      *     "inverse": "event"
      * }};
      */
@@ -134,7 +135,7 @@ class EventRecord extends DemoRecord
 /**
  * :amiss = {
  *     "relations": {
- *         "event": {"type": "one", "of": "EventRecord", "from": "eventId"}
+ *         "event": {"type": "one", "of": "Amiss\\Demo\\Active\\EventRecord", "from": "eventId"}
  *     }
  * };
  */
@@ -159,12 +160,14 @@ class Ticket extends DemoRecord
     public $numSold;
 }
 
+/** :amiss = true; */
 class PlannedEvent extends EventRecord
 {
     /** :amiss = {"field": {"type": "tinyint"}}; */
     public $completeness;
 }
 
+/** :amiss = true; */
 class EventArtist extends DemoRecord
 {
     /** :amiss = {"field": { "primary": true }}; */
@@ -185,7 +188,7 @@ class EventArtist extends DemoRecord
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "EventRecord"
+     *     "of"  : "Amiss\\Demo\\Active\\EventRecord"
      * }};
      * @var Amiss\Demo\Active\EventRecord
      */
@@ -194,7 +197,7 @@ class EventArtist extends DemoRecord
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "ArtistRecord",
+     *     "of"  : "Amiss\\Demo\\Active\\ArtistRecord",
      *     "from": "artistId"
      * }};
      * @var Amiss\Demo\Active\ArtistRecord

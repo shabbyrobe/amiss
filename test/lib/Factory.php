@@ -20,33 +20,32 @@ use Amiss\Test\Helper\ClassBuilder;
  */
 class Factory
 {
-    public static function managerNoteDefault($mapper=null)
+    public static function managerNoteDefault($deps=null)
     {
+        if (!$deps) {
+            $deps = (object)[];
+        }
+
         $cf = new ConnectionFactory(\Amiss\Test\Helper\Env::instance()->getConnectionInfo());
-        if (!$mapper) {
-            $mapper = \Amiss\Sql\Factory::createMapper(array(
+        if (!isset($deps->mapper) || !$deps->mapper) {
+            $deps->mapper = \Amiss\Sql\Factory::createMapper(array(
                 'dbTimeZone'=>'UTC',
             ));
         }
-        $connector = $cf->getConnector();
-        $manager = \Amiss\Sql\Factory::createManager($connector, $mapper);
-        return (object)[
-            'mapper'=>$mapper,
-            'manager'=>$manager,
-            'connector'=>$connector,
+        if (!isset($deps->connector) || !$deps->connector) {
+            $deps->connector = $cf->getConnector();
+        }
 
-            // We have to hold on to this otherwise it goes out of scope and
-            // gets destructed. I would not recommend using it
-            '_connectionFactory'=>$cf,
-        ];
+        $deps->manager = \Amiss\Sql\Factory::createManager($deps->connector, $deps->mapper);
+        $deps->_connectionFactory = $cf;
+        return $deps;
     }
 
     public static function managerNoteModelCustom($classes, $deps=null)
     {
-        $deps = $deps ?: self::managerNoteDefault();
-        list ($ns, $classNames) = ClassBuilder::i()->register($classes);
+        $deps = self::managerNoteDefault($deps);
+        list ($ns, $classNames, $deps->classes) = ClassBuilder::i()->register($classes);
         if ($ns) {
-            $deps->mapper->objectNamespace = $ns;
             $deps->ns = $ns;
         }
         TableBuilder::create($deps->connector, $deps->mapper, $classNames);
@@ -59,8 +58,11 @@ class Factory
         $config = [
             'dbTimeZone'=>'UTC',
         ];
+
+        $deps = (object)['mapper' => $mapper];
+
         $mapper->typeHandlers = \Amiss\Sql\Factory::createTypeHandlers($config);
-        $deps = self::managerNoteDefault($mapper);
+        $deps = self::managerNoteDefault($deps);
         TableBuilder::create($deps->connector, $mapper, array_keys($map));
         return $deps;
     }
@@ -68,7 +70,6 @@ class Factory
     public static function managerModelDemo()
     {
         $deps = self::managerNoteDefault();
-        $deps->mapper->objectNamespace = 'Amiss\Demo';
 
         $connector = $deps->connector;
         $connector->exec(file_get_contents(AMISS_BASE_PATH."/doc/demo/schema.{$connector->engine}.sql"));
@@ -83,7 +84,6 @@ class Factory
         $deps = new Helper\SelfDestructing(self::managerNoteDefault(), function() {
             \Amiss\Demo\Active\DemoRecord::_reset();
         });
-        $deps->mapper->objectNamespace = 'Amiss\Demo\Active';
 
         \Amiss\Demo\Active\DemoRecord::setManager($deps->manager);
 

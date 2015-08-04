@@ -19,6 +19,7 @@ class ExistsTest extends \Amiss\Test\Helper\TestCase
     public function testExistsKeySingle()
     {
         $deps = Test\Factory::managerNoteModelCustom('
+            /** :amiss = true; */
             class Pants {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $slug;
@@ -27,8 +28,9 @@ class ExistsTest extends \Amiss\Test\Helper\TestCase
                 public $name;
             }
         ');
-        $deps->manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
-        $this->assertTrue ($deps->manager->exists('Pants', 'yes', 'slug'));
-        $this->assertFalse($deps->manager->exists('Pants', 'nup', 'slug'));
+        $class = $deps->classes['Pants'];
+        $deps->manager->insertTable($class, ['slug'=>'yes', 'name'=>'Yep!']);
+        $this->assertTrue ($deps->manager->exists($class, 'yes', 'slug'));
+        $this->assertFalse($deps->manager->exists($class, 'nup', 'slug'));
     }
 }

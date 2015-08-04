@@ -1,4 +1,4 @@
 <?php
 
-$artists = $manager->getList('Artist');
+$artists = $manager->getList(\Amiss\Demo\Artist::class);
 return $artists;

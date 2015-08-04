@@ -2,6 +2,9 @@
 namespace Amiss\Test\Acceptance;
 
 use Amiss\Test;
+use Amiss\Demo\Artist;
+use Amiss\Demo\Event;
+use Amiss\Demo\EventArtist;
 
 /**
  * @group acceptance
@@ -24,26 +27,26 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testExists()
     {
-        $a = $this->manager->exists('Artist', 1);
+        $a = $this->manager->exists(Artist::class, 1);
         $this->assertTrue($a);
     }
 
     public function testExistsFalse()
     {
-        $a = $this->manager->exists('Artist', PHP_INT_MAX);
+        $a = $this->manager->exists(Artist::class, PHP_INT_MAX);
         $this->assertFalse($a);
     }
     
     public function testSingleObjectPositionalParametersShorthand()
     {
-        $a = $this->manager->get('Artist', 'slug=?', ['limozeen']);
+        $a = $this->manager->get(Artist::class, 'slug=?', ['limozeen']);
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
     }
     
     public function testSingleObjectNamedParametersShorthand()
     {
-        $a = $this->manager->get('Artist', 'slug=:slug', array(':slug'=>'limozeen'));
+        $a = $this->manager->get(Artist::class, 'slug=:slug', array(':slug'=>'limozeen'));
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
     }
@@ -51,7 +54,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     public function testSingleObjectNamedParametersLongForm()
     {
         $a = $this->manager->get(
-            'Artist', 
+            Artist::class, 
             array(
                 'where'=>'slug=:slug', 
                 'params'=>array(':slug'=>'limozeen')
@@ -67,7 +70,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
         $criteria->where = 'slug=:slug';
         $criteria->params[':slug'] = 'limozeen';
         
-        $a = $this->manager->get('Artist', $criteria);
+        $a = $this->manager->get(Artist::class, $criteria);
         
         $this->assertTrue($a instanceof \Amiss\Demo\Artist);
         $this->assertEquals('Limozeen', $a->name);
@@ -75,7 +78,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testList()
     {
-        $artists = $this->manager->getList('Artist');
+        $artists = $this->manager->getList(Artist::class);
         $this->assertTrue(is_array($artists));
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
         $this->assertEquals('limozeen', current($artists)->slug);
@@ -85,7 +88,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testListByProperty()
     {
-        $artists = $this->manager->getList('Artist', ['where'=>['artistTypeId'=>2]]);
+        $artists = $this->manager->getList(Artist::class, ['where'=>['artistTypeId'=>2]]);
         $this->assertTrue(is_array($artists));
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
         $this->assertEquals('george-carlin', current($artists)->slug);
@@ -93,7 +96,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testListByPropertyIn()
     {
-        $artists = $this->manager->getList('Artist', ['where'=>['artistId'=>[1, 2]]]);
+        $artists = $this->manager->getList(Artist::class, ['where'=>['artistId'=>[1, 2]]]);
         $this->assertTrue(is_array($artists));
         $this->assertCount(2, $artists);
         $this->assertEquals(1, $artists[0]->artistId);
@@ -126,7 +129,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testPagedListFirstPage()
     {
-        $artists = $this->manager->getList('Artist', array('page'=>array(1, 3)));
+        $artists = $this->manager->getList(Artist::class, array('page'=>array(1, 3)));
         $this->assertEquals(3, count($artists));
         
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
@@ -137,7 +140,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testPagedListSecondPage()
     {
-        $artists = $this->manager->getList('Artist', array('page'=>array(2, 3)));
+        $artists = $this->manager->getList(Artist::class, array('page'=>array(2, 3)));
         $this->assertEquals(3, count($artists));
         
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
@@ -148,7 +151,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testListLimit()
     {
-        $artists = $this->manager->getList('Artist', array('limit'=>3));
+        $artists = $this->manager->getList(Artist::class, array('limit'=>3));
         $this->assertEquals(3, count($artists));
         
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
@@ -159,7 +162,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testListOffset()
     {
-        $artists = $this->manager->getList('Artist', array('limit'=>3, 'offset'=>3));
+        $artists = $this->manager->getList(Artist::class, array('limit'=>3, 'offset'=>3));
         $this->assertEquals(3, count($artists));
         
         $this->assertTrue(current($artists) instanceof \Amiss\Demo\Artist);
@@ -170,7 +173,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testOrderByManualImpliedAsc()
     {
-        $artists = $this->manager->getList('Artist', array('order'=>'name'));
+        $artists = $this->manager->getList(Artist::class, array('order'=>'name'));
         $this->assertTrue(is_array($artists));
         $this->assertEquals('anvil', current($artists)->slug);
         foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
@@ -179,7 +182,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testOrderByManualDesc()
     {
-        $artists = $this->manager->getList('Artist', array('order'=>'name desc'));
+        $artists = $this->manager->getList(Artist::class, array('order'=>'name desc'));
         $this->assertTrue(is_array($artists));
         $this->assertEquals('the-sonic-manipulator', current($artists)->slug);
         foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
@@ -188,7 +191,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testOrderByManualMulti()
     {
-        $eventArtists = $this->manager->getList('EventArtist', array(
+        $eventArtists = $this->manager->getList(EventArtist::class, array(
             'limit'=>3, 
             'where'=>'eventId=1',
             'order'=>'priority, sequence desc',
@@ -210,7 +213,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testOrderBySingleLongForm()
     {
-        $artists = $this->manager->getList('Artist', array('order'=>array('name')));
+        $artists = $this->manager->getList(Artist::class, array('order'=>array('name')));
         $this->assertEquals('anvil', current($artists)->slug);
         $this->assertTrue(is_array($artists));
         foreach ($artists as $a); // get the last element regardless of if the array is keyed or indexed
@@ -219,7 +222,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
 
     public function testOrderBySingleLongFormDescending()
     {
-        $artists = $this->manager->getList('Artist', array('order'=>array('name'=>'desc')));
+        $artists = $this->manager->getList(Artist::class, array('order'=>array('name'=>'desc')));
         $this->assertTrue(is_array($artists));
         
         $this->assertEquals('the-sonic-manipulator', current($artists)->slug);
@@ -229,7 +232,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testOrderByGetterProperty()
     {
-        $events = $this->manager->getList('Event', array('order'=>array('subName')));
+        $events = $this->manager->getList(Event::class, array('order'=>array('subName')));
         $this->assertTrue(is_array($events));
         
         $this->assertEquals(2, current($events)->eventId);
@@ -239,7 +242,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     
     public function testSelectSingleObjectFromMultipleResultWhenLimitIsOne()
     {
-        $artist = $this->manager->get('Artist', array('order'=>array('name'=>'desc'), 'limit'=>1));
+        $artist = $this->manager->get(Artist::class, array('order'=>array('name'=>'desc'), 'limit'=>1));
         $this->assertTrue($artist instanceof \Amiss\Demo\Artist);
         
         $this->assertEquals('the-sonic-manipulator', $artist->slug);
@@ -250,7 +253,7 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
      */
     public function testSelectSingleObjectFailsWhenResultReturnsMany()
     {
-        $artist = $this->manager->get('Artist', array('order'=>array('name'=>'desc')));
+        $artist = $this->manager->get(Artist::class, array('order'=>array('name'=>'desc')));
     }
     
     /**
@@ -260,12 +263,12 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
     {
         $this->manager->connector = $this->getMock('PDOK\Connector', array('prepare'), array(''));
         $this->manager->connector->expects($this->never())->method('prepare');
-        $artist = $this->manager->get('Artist', array('limit'=>2));
+        $artist = $this->manager->get(Artist::class, array('limit'=>2));
     }
 
     public function testOrderByMulti()
     {
-        $eventArtists = $this->manager->getList('EventArtist', array(
+        $eventArtists = $this->manager->getList(EventArtist::class, array(
             'limit'=>3, 
             'where'=>'eventId=1',
             'order'=>array('priority', 'sequence'=>'desc')
@@ -284,14 +287,4 @@ class ManagerSelectTest extends \Amiss\Test\Helper\TestCase
             array(2, 1),
         ), $result);
     }
-    
-    /*
-    public function testWhereClauseBuiltFromArray()
-    {
-        // TODO: this won't work at the moment as it can't tell the difference between the 'where' array
-        // and a criteria array 
-        $artists = $this->manager->getList('Artist', array('artistType'=>2));
-        $this->assertEquals(2, count($artists));
-    }
-    */
 }

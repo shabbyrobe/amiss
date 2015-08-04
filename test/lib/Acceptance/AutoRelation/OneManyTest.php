@@ -12,7 +12,6 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     {
         $this->db = new \PDOK\Connector('sqlite::memory:');
         $this->mapper = $this->createDefaultMapper();
-        $this->mapper->objectNamespace = __NAMESPACE__;
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
         $this->manager->relators = \Amiss\Sql\Factory::createRelators();
         foreach ($this->mapper->arrayMap as $class=>$meta) {
@@ -29,7 +28,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     public function createDefaultMapper()
     {
         return new \Amiss\Mapper\Arrays([
-            'TestChild'=>[
+            TestChild::class=>[
                 'primary'=>'id',
                 'fields'=>[
                     'id'=>['type'=>'autoinc'],
@@ -37,10 +36,10 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
                 ],
                 'indexes'=>['parent'=>['fields'=>'parentId']],
                 'relations'=>[
-                    'parent'=>['one', 'of'=>'TestParent', 'from'=>'parent'],
+                    'parent'=>['one', 'of'=>TestParent::class, 'from'=>'parent'],
                 ],
             ],
-            'TestParent'=>[
+            TestParent::class=>[
                 'primary'=>'id',
                 'fields'=>[
                     'id'=>['type'=>'autoinc'],
@@ -48,15 +47,15 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
                 ],
                 'indexes'=>['grandParent'=>['fields'=>'grandParentId']],
                 'relations'=>[
-                    'children'=>['many', 'of'=>'TestChild', 'to'=>'parent'],
-                    'grandParent'=>['one', 'of'=>'TestGrandParent', 'from'=>'grandParent'],
+                    'children'=>['many', 'of'=>TestChild::class, 'to'=>'parent'],
+                    'grandParent'=>['one', 'of'=>TestGrandParent::class, 'from'=>'grandParent'],
                 ],
             ],
-            'TestGrandParent'=>[
+            TestGrandParent::class=>[
                 'primary'=>'id',
                 'fields'=>['id'=>['type'=>'autoinc']],
                 'relations'=>[
-                    'parents'=>['many', 'of'=>'TestParent', 'to'=>'grandParent'],
+                    'parents'=>['many', 'of'=>TestParent::class, 'to'=>'grandParent'],
                 ],
             ],
         ]);
@@ -76,18 +75,18 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     public function testAutoOne()
     {
         $manager = $this->manager;
-        $this->setAutoRelation('TestChild', 'parent');
+        $this->setAutoRelation(TestChild::class, 'parent');
 
-        $child = $manager->getById('TestChild', 1);
+        $child = $manager->getById(TestChild::class, 1);
         $this->assertTrue($child->parent instanceof TestParent);
     }
 
     public function testAutoOneWithInverseMany()
     {
         $manager = $this->manager;
-        $this->setAutoRelation('TestChild', 'parent', 'children');
+        $this->setAutoRelation(TestChild::class, 'parent', 'children');
 
-        $child = $manager->getById('TestChild', 1);
+        $child = $manager->getById(TestChild::class, 1);
         $this->assertEquals(3, $this->db->queries);
 
         $this->assertTrue($child->parent instanceof TestParent);
@@ -97,10 +96,10 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     public function testAutoOneDeep()
     {
         $manager = $this->manager;
-        $this->setAutoRelation('TestChild', 'parent', 'children');
-        $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
+        $this->setAutoRelation(TestChild::class, 'parent', 'children');
+        $this->setAutoRelation(TestGrandParent::class, 'parents', 'grandParent');
 
-        $child = $manager->getById('TestChild', 1);
+        $child = $manager->getById(TestChild::class, 1);
         $this->assertEquals(4, $this->db->queries);
 
         $this->assertTrue($child->parent instanceof TestParent);
@@ -111,20 +110,20 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     public function testAutoMany()
     {
         $manager = $this->manager;
-        $this->setAutoRelation('TestChild', 'parent', 'children');
-        $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
+        $this->setAutoRelation(TestChild::class, 'parent', 'children');
+        $this->setAutoRelation(TestGrandParent::class, 'parents', 'grandParent');
 
-        $parent = $manager->getById('TestParent', 1);
+        $parent = $manager->getById(TestParent::class, 1);
         $this->assertTrue($parent->children[0] instanceof TestChild);
     }
 
     public function testAutoManyDeep()
     {
         $manager = $this->manager;
-        $this->setAutoRelation('TestChild', 'parent', 'children');
-        $this->setAutoRelation('TestGrandParent', 'parents', 'grandParent');
+        $this->setAutoRelation(TestChild::class, 'parent', 'children');
+        $this->setAutoRelation(TestGrandParent::class, 'parents', 'grandParent');
 
-        $parent = $manager->getById('TestParent', 1);
+        $parent = $manager->getById(TestParent::class, 1);
         $this->assertTrue($parent->children[0] instanceof TestChild);
         $this->assertTrue($parent->grandParent instanceof TestGrandParent);
         $this->assertTrue($parent->children[0]->parent instanceof TestParent);
@@ -134,25 +133,25 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
     {
         $manager = $this->manager;
 
-        $child = $manager->getById('TestChild', 1, ['with'=>['parent']]);
+        $child = $manager->getById(TestChild::class, 1, ['with'=>['parent']]);
         $this->assertTrue($child->parent instanceof TestParent);
 
         // alternate syntax
-        $child = $manager->getById('TestChild', 1, ['with'=>'parent']);
+        $child = $manager->getById(TestChild::class, 1, ['with'=>'parent']);
         $this->assertTrue($child->parent instanceof TestParent);
     }
 
     public function testAutoManyQuery()
     {
         $manager = $this->manager;
-        $parent = $manager->getById('TestParent', 1, ['with'=>'children']);
+        $parent = $manager->getById(TestParent::class, 1, ['with'=>'children']);
         $this->assertTrue($parent->children[0] instanceof TestChild);
     }
 
     public function testAutoQueryGetRelated()
     {
         $manager = $this->manager;
-        $child = $manager->getById('TestChild', 1);
+        $child = $manager->getById(TestChild::class, 1);
         $related = $manager->getRelated($child, 'parent', ['with'=>'grandParent']);
         $this->assertInstanceOf(TestGrandParent::class, $related->grandParent);
     }

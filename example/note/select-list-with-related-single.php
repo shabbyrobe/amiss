@@ -1,5 +1,5 @@
 <?php
 
-$artists = $manager->getList('Artist');
+$artists = $manager->getList(\Amiss\Demo\Artist::class);
 $manager->assignRelated($artists, 'artistType');
 return $artists;

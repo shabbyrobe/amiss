@@ -51,12 +51,11 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
             class Child extends C {}
         ");
         $mappings = array(
-            'C'=>array(),
-            'Child'=>array('inherit'=>true),
+            "$ns\\C"     => array(),
+            "$ns\\Child" => array('inherit' => true),
         );
         $mapper = new Arrays($mappings);
-        $mapper->objectNamespace = $ns;
-        $meta = $mapper->getMeta("Child");
+        $meta = $mapper->getMeta("$ns\\Child");
         
         $parent = $this->getProtected($meta, 'parent');
         $this->assertEquals("$ns\\C", $parent->class);
@@ -67,16 +66,16 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
      */
     public function testNoInheritByDefault()
     {
-        $mappings = array(
-            'C'=>array(),
-            'Child'=>array(),
-        );
-        $mapper = new Arrays($mappings);
-        list ($mapper->objectNamespace, ) = ClassBuilder::i()->register("
+        list ($ns, ) = ClassBuilder::i()->register("
             class C {}
             class Child extends C {}
         ");
-        $meta = $mapper->getMeta("Child");
+        $mappings = array(
+            "$ns\\C"     => array(),
+            "$ns\\Child" => array(),
+        );
+        $mapper = new Arrays($mappings);
+        $meta = $mapper->getMeta("$ns\\Child");
         $parent = $this->getProtected($meta, 'parent');
         $this->assertNull($parent);
     }

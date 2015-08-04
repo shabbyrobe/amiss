@@ -28,7 +28,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\TestCase
      */
     public function testCreateDefaultTableSql()
     {
-        $class = __NAMESPACE__.'\TestCreate';
+        $class = TestCreate::class;
          
         $pattern = "
             CREATE TABLE `test_create` (
@@ -147,11 +147,13 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\TestCase
     }
 }
 
+/** :amiss = true; */
 class TestNoFieldsCreate
 {
     
 }
 
+/** :amiss = true; */
 class TestCreate
 {
     /** :amiss = {"field": { "primary": true, "type": "int" }}; */
@@ -167,6 +169,7 @@ class TestCreate
     public $pants;
 }
     
+/** :amiss = true; */
 class TestCreateDefaultField
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */

@@ -1,10 +1,9 @@
 <?php
-
 require_once(__DIR__.'/../../doc/demo/model.php');
 
 $namespace = 'Amiss\Demo';
 $mapper = new Amiss\Mapper\Arrays(array(
-    'Artist'=>array(
+    \Amiss\Demo\Artist::class => array(
         'primary'=>array('artistId'),
         'fields'=>array(
             'artistId'=>array('type'=>'autoinc'),
@@ -14,11 +13,11 @@ $mapper = new Amiss\Mapper\Arrays(array(
             'bio'=>true,
         ),
         'relations'=>array(
-            'artistType'=>array('one', 'of'=>'ArtistType', 'from'=>'artistTypeId'),
-            'events'=>array('assoc', 'of'=>'Event', 'via'=>'EventArtist'),
+            'artistType'=>array('one', 'of'=>\Amiss\Demo\ArtistType::class, 'from'=>'artistTypeId'),
+            'events'=>array('assoc', 'of'=>\Amiss\Demo\Event::class, 'via'=>\Amiss\Demo\EventArtist::class),
         ),
     ),
-    'ArtistType'=>array(
+    \Amiss\Demo\ArtistType::class => array(
         'table'=>'artist_type',
         'primary'=>'artistTypeId',
         'fields'=>array(
@@ -26,11 +25,10 @@ $mapper = new Amiss\Mapper\Arrays(array(
             'type'=>array(),
         ),
         'relations'=>array(
-            'artists'=>array('many', 'of'=>'Artist'),
+            'artists'=>array('many', 'of'=>\Amiss\Demo\Artist::class),
         ),
     ),
 ));
-$mapper->objectNamespace = $namespace;
 
 $connector = new \PDOK\Connector('sqlite::memory:');
 $manager = Amiss\Sql\Factory::createManager($connector, array(

@@ -19,7 +19,6 @@ class MultiSchemaNoteTest extends \Amiss\Test\Helper\TestCase
         
         $this->manager = \Amiss\Sql\Factory::createManager($this->connector);
         $this->mapper = $this->manager->mapper;
-        $this->mapper->objectNamespace = __NAMESPACE__;
     }
     
     public function testInsert()
@@ -37,7 +36,7 @@ class MultiSchemaNoteTest extends \Amiss\Test\Helper\TestCase
     {
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName) VALUES(1, "bleargh")');
         
-        $obj = $this->manager->getById('MultiSchemaNoteTestOne', 1);
+        $obj = $this->manager->getById(MultiSchemaNoteTestOne::class, 1);
         
         $this->assertEquals('bleargh', $obj->oneName);
         $this->assertEquals(1, $obj->id);
@@ -48,7 +47,7 @@ class MultiSchemaNoteTest extends \Amiss\Test\Helper\TestCase
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(1, "bleargh", 1)');
         $this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getById('MultiSchemaNoteTestOne', 1);
+        $obj = $this->manager->getById(MultiSchemaNoteTestOne::class, 1);
         $this->manager->assignRelated($obj, 'two');
         
         $this->assertTrue($obj->two instanceof MultiSchemaNoteTestTwo);
@@ -61,7 +60,7 @@ class MultiSchemaNoteTest extends \Amiss\Test\Helper\TestCase
         $this->connector->query('INSERT INTO schema_one.table_one(id, oneName, twoId) VALUES(2, "weehaw", 1)');
         $this->connector->query('INSERT INTO schema_two.table_two(id, twoName) VALUES(1, "wahey")');
         
-        $obj = $this->manager->getById('MultiSchemaNoteTestTwo', 1);
+        $obj = $this->manager->getById(MultiSchemaNoteTestTwo::class, 1);
         $this->manager->assignRelated($obj, 'ones');
         
         $this->assertTrue(is_array($obj->ones));
@@ -88,7 +87,7 @@ class MultiSchemaNoteTestOne
     /**
      * :amiss = {"has": {
      *     "type": "one",
-     *     "of"  : "MultiSchemaNoteTestTwo",
+     *     "of"  : "Amiss\\Test\\Cookbook\\MultiSchemaNoteTestTwo",
      *     "from": "twoId"
      * }};
      */
@@ -109,7 +108,7 @@ class MultiSchemaNoteTestTwo
     /**
      * :amiss = {"has": {
      *     "type": "many",
-     *     "of"  : "MultiSchemaNoteTestOne",
+     *     "of"  : "Amiss\\Test\\Cookbook\\MultiSchemaNoteTestOne",
      *     "to"  : "twoId"
      * }};
      */

@@ -28,16 +28,30 @@ class MapperTypeHandlerAcceptanceTest extends \Amiss\Test\Helper\TestCase
 
     public function testCustomType()
     {
-        $this->deps->mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
-        TableBuilder::create($this->deps->connector, $this->deps->mapper, [
-            __NAMESPACE__.'\TestCustomFieldTypeRecord'
-        ]);
-        
-        $r = new TestCustomFieldTypeRecord;
+        $mapper = \Amiss\Sql\Factory::createMapper();
+        $mapper->addTypeHandler(new TestCustomFieldTypeHandler(), 'foo');
+
+        $deps = \Amiss\Test\Factory::managerNoteModelCustom('
+            /** :amiss = true; */
+            class TestCustomFieldTypeModel
+            {
+                /** :amiss = {"field": {"primary": true, "type": "autoinc" }}; */
+                public $testCustomFieldTypeRecordId;
+                
+                /**
+                 * :amiss = {"field": {"type": "foo bar"}};
+                 */
+                public $yep1;
+            }
+        ', (object)['mapper'=>$mapper]);
+
+        $class = $deps->classes['TestCustomFieldTypeModel'];
+
+        $r = new $class;
         $r->yep1 = 'foo';
-        $r->save();
+        $deps->manager->save($r);
         
-        $r = TestCustomFieldTypeRecord::getById(1);
+        $r = $deps->manager->getById($class, 1);
         
         // this will have passed through the prepareValueForDb first, then
         // through the handleValueFromDb method
@@ -85,17 +99,6 @@ class TestTypeHandler implements \Amiss\Type\Handler
     {
         return "TEXT";
     }
-}
-
-class TestCustomFieldTypeRecord extends \Amiss\Sql\ActiveRecord
-{
-    /** :amiss = {"field": {"primary": true, "type": "autoinc" }}; */
-    public $testCustomFieldTypeRecordId;
-    
-    /**
-     * :amiss = {"field": {"type": "foo bar"}};
-     */
-    public $yep1;
 }
 
 class TestCustomFieldTypeHandler implements \Amiss\Type\Handler

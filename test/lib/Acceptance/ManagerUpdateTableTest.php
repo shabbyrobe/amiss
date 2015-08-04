@@ -1,6 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Demo;
 use Amiss\Sql\Query\Criteria;
 use Amiss\Sql\Query\Update;
 use Amiss\Test;
@@ -31,7 +32,7 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->updateTable('EventArtist', array('set'=>'priority=priority+10', 'where'=>'1=1'));
+        $this->manager->updateTable(Demo\EventArtist::class, array('set'=>'priority=priority+10', 'where'=>'1=1'));
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
@@ -45,7 +46,7 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->updateTable('EventArtist', 'priority=priority+10', ['where'=>'priority>=3']);
+        $this->manager->updateTable(Demo\EventArtist::class, 'priority=priority+10', ['where'=>'priority>=3']);
         $stmt = $this->manager->getConnector()->prepare("SELECT MAX(priority) FROM event_artist");
         $stmt->execute();
         $min = $stmt->fetchColumn();
@@ -54,7 +55,7 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
     
     public function testUpdateTableAllowsStringSetWithStringWhereParameters()
     {
-        $count = $this->manager->count('EventArtist');
+        $count = $this->manager->count(Demo\EventArtist::class);
         $this->assertGreaterThan(0, $count);
         
         $stmt = $this->manager->getConnector()->prepare("SELECT MIN(priority) FROM event_artist");
@@ -62,7 +63,7 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
         $min = $stmt->fetchColumn();
         $this->assertEquals(1, $min);
         
-        $this->manager->updateTable('EventArtist', 'priority=priority+?', 'priority>=?', [10, 3]);
+        $this->manager->updateTable(Demo\EventArtist::class, 'priority=priority+?', 'priority>=?', [10, 3]);
         $stmt = $this->manager->getConnector()->prepare("SELECT priority, COUNT(priority) as cnt FROM event_artist GROUP BY priority");
         $stmt->execute();
         $priorities = $stmt->fetchAll(\PDO::FETCH_NUM);
@@ -74,7 +75,7 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateTableFailsWithNoWhereClause()
     {
-        $this->manager->updateTable('EventArtist', array('set'=>'priority=priority+10'));
+        $this->manager->updateTable(Demo\EventArtist::class, array('set'=>'priority=priority+10'));
     }
     
     /**
@@ -83,11 +84,11 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateTableWithArraySetAndPositionalWhere()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(9, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
         
-        $this->manager->updateTable('Artist', array('artistTypeId'=>1), 'artistTypeId=?', [2]);
+        $this->manager->updateTable(Demo\Artist::class, array('artistTypeId'=>1), 'artistTypeId=?', [2]);
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(12, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
     }
     
     /**
@@ -96,11 +97,11 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateTableWithArraySetAndNamedWhere()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(9, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
         
-        $this->manager->updateTable('Artist', array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
+        $this->manager->updateTable(Demo\Artist::class, array('artistTypeId'=>1), 'artistTypeId=:id', array(':id'=>2));
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(12, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
     }
     
     /**
@@ -109,11 +110,11 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateTableWithArrayCriteria()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(9, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
         
-        $this->manager->updateTable('Artist', array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
+        $this->manager->updateTable(Demo\Artist::class, array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(12, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
     }
     
     /**
@@ -122,25 +123,25 @@ class ManagerUpdateTableTest extends \Amiss\Test\Helper\TestCase
      */
     public function testUpdateTableWithObjectCriteria()
     {
-        $this->assertEquals(9, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(9, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
         
         $criteria = new Update(array('set'=>array('artistTypeId'=>1), 'where'=>'artistTypeId=:id', 'params'=>array(':id'=>2)));
-        $this->manager->updateTable('Artist', $criteria);
+        $this->manager->updateTable(Demo\Artist::class, $criteria);
         
-        $this->assertEquals(12, $this->manager->count('Artist', 'artistTypeId=?', [1]));
+        $this->assertEquals(12, $this->manager->count(Demo\Artist::class, 'artistTypeId=?', [1]));
     }
 
     public function testUpdateTableValuesUseTypeHandlers()
     {
         $this->manager->updateTable(
-            'Event', 
+            Demo\Event::class, 
             [
                 'dateStart'=>new \DateTime('2030-01-01 11:11+00:00'),
                 'dateEnd'=>new \DateTime('2030-02-02 11:11+00:00'),
             ],
             ['where'=>['eventId'=>1]]
         );
-        $event = $this->manager->getById('Event', 1);
+        $event = $this->manager->getById(Demo\Event::class, 1);
         $this->assertEquals(new \DateTime('2030-01-01 11:11+00:00'), $event->dateStart);
         $this->assertEquals(new \DateTime('2030-02-02 11:11+00:00'), $event->dateEnd);
     }

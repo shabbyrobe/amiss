@@ -2,6 +2,7 @@
 namespace Amiss\Test\Acceptance
 {
     use Amiss\Sql\TableBuilder;
+    use Amiss\Demo;
 
     class ClassRelationTest extends \Amiss\Test\Helper\TestCase
     {
@@ -14,39 +15,38 @@ namespace Amiss\Test\Acceptance
             $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
             $this->manager->relators = \Amiss\Sql\Factory::createRelators();
 
-            foreach (['Artist', 'ArtistType'] as $c) {
-                TableBuilder::create($this->manager->connector, $this->mapper, __CLASS__.'\\'.$c);
+            foreach ([Demo\Artist::class, Demo\ArtistType::class] as $c) {
+                TableBuilder::create($this->manager->connector, $this->mapper, $c);
             }
 
-            $this->manager->connector->exec("INSERT INTO artist (artistId, typeId) VALUES(1, 1)");
-            $this->manager->connector->exec("INSERT INTO artist (artistId, typeId) VALUES(2, 1)");
-            $this->manager->connector->exec("INSERT INTO artist_type (typeId) VALUES(1)");
+            $this->manager->connector->exec("INSERT INTO artist (artistId, artistTypeId) VALUES(1, 1)");
+            $this->manager->connector->exec("INSERT INTO artist (artistId, artistTypeId) VALUES(2, 1)");
+            $this->manager->connector->exec("INSERT INTO artist_type (artistTypeId) VALUES(1)");
         }
 
         public function createDefaultMapper()
         {
             $mapper = new \Amiss\Mapper\Note();
-            $mapper->objectNamespace = __CLASS__;
             return $mapper;
         }
 
         function testHasOneGetRelated()
         {
-            $artist = $this->manager->getById('Artist', 1);
-            $type = $this->manager->getRelated($artist, 'type');
+            $artist = $this->manager->getById(ClassRelationTest\Artist::class, 1);
+            $type = $this->manager->getRelated($artist, 'artistType');
             $this->assertInstanceOf(ClassRelationTest\ArtistType::class, $type);
         }
 
         function testHasOneAssignRelatedFails()
         {
-            $artist = $this->manager->getById('Artist', 1);
-            $this->setExpectedException(\Amiss\Exception::class, 'Relation type is not assignable');
-            $this->manager->assignRelated($artist, 'type');
+            $artist = $this->manager->getById(ClassRelationTest\Artist::class, 1);
+            $this->setExpectedException(\Amiss\Exception::class, 'Relation artistType is not assignable');
+            $this->manager->assignRelated($artist, 'artistType');
         }
 
         function testHasManyGetRelated()
         {
-            $type = $this->manager->getById('ArtistType', 1);
+            $type = $this->manager->getById(ClassRelationTest\ArtistType::class, 1);
             $artists = $this->manager->getRelated($type, 'artists');
             $this->assertInternalType('array', $artists);
             $this->assertCount(1, $artists);
@@ -55,7 +55,7 @@ namespace Amiss\Test\Acceptance
 
         function testHasManyAssignRelatedFails()
         {
-            $type = $this->manager->getById('ArtistType', 1);
+            $type = $this->manager->getById(ClassRelationTest\ArtistType::class, 1);
             $this->setExpectedException(\Amiss\Exception::class, 'Relation artists is not assignable');
             $this->manager->assignRelated($type, 'artists');
         }
@@ -67,14 +67,14 @@ namespace Amiss\Test\Acceptance\ClassRelationTest
     /**
      * :amiss = {
      *     "relations": {
-     *         "type": {
+     *         "artistType": {
      *             "type": "one",
-     *             "of"  : "ArtistType",
-     *             "from": "typeId"
+     *             "of"  : "Amiss\\Test\\Acceptance\\ClassRelationTest\\ArtistType",
+     *             "from": "artistTypeId"
      *         }
      *     },
      *     "indexes": {
-     *         "typeId": true
+     *         "artistTypeId": true
      *     }
      * };
      */
@@ -83,16 +83,16 @@ namespace Amiss\Test\Acceptance\ClassRelationTest
         public $artistId;
 
         /** :amiss = {"field": true}; */
-        public $typeId;
+        public $artistTypeId;
     }
 
     /**
      * :amiss = {"relations": {
-     *     "artists": {"type": "many", "of": "Artist"}
+     *     "artists": {"type": "many", "of": "Amiss\\Test\\Acceptance\\ClassRelationTest\\Artist"}
      * }};
      */
     class ArtistType {
         /** :amiss = {"field": {"primary": true}}; */
-        public $typeId;
+        public $artistTypeId;
     }
 }

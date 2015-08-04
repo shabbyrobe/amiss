@@ -1,6 +1,7 @@
 <?php
 namespace Amiss\Test\Acceptance;
 
+use Amiss\Demo;
 use Amiss\Test;
 
 /**
@@ -14,7 +15,7 @@ class ManagerDeleteObjectTest extends \Amiss\Test\Helper\TestCase
         $this->deps = Test\Factory::managerModelDemo();
         $this->manager = $this->deps->manager;
         
-        $this->artist = $this->deps->manager->get('Artist', 'artistId=?', array(1));
+        $this->artist = $this->deps->manager->get(Demo\Artist::class, 'artistId=?', array(1));
         if (!$this->artist) {
             throw new \UnexpectedValueException("Unexpected test data");
         }
@@ -29,26 +30,26 @@ class ManagerDeleteObjectTest extends \Amiss\Test\Helper\TestCase
 
     public function testDeleteById()
     {
-        $this->manager->deleteById('Artist', 1);
-        $this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
+        $this->manager->deleteById(Demo\Artist::class, 1);
+        $this->assertEquals(0, $this->manager->count(Demo\Artist::class, 'name="Foobar"'));
         
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->manager->count('Artist'));
+        $this->assertGreaterThan(0, $this->manager->count(Demo\Artist::class));
     }
     
     public function testDeleteObject()
     {
         $this->manager->delete($this->artist);
-        $this->assertEquals(0, $this->manager->count('Artist', 'name="Foobar"'));
+        $this->assertEquals(0, $this->manager->count(Demo\Artist::class, 'name="Foobar"'));
         
         // sanity check: make sure we didn't delete everything!
-        $this->assertGreaterThan(0, $this->manager->count('Artist'));
+        $this->assertGreaterThan(0, $this->manager->count(Demo\Artist::class));
     }
 
     public function testDeleteObjectWithoutPrimaryFails()
     {
         $mapper = new \Amiss\Test\Helper\TestMapper(array(
-            'Amiss\Demo\Artist'=>new \Amiss\Meta('Artist', ['table'=>'artist']),
+            Demo\Artist::class => new \Amiss\Meta(Demo\Artist::class, ['table'=>'artist']),
         ));
 
         $manager = new \Amiss\Sql\Manager($this->manager->connector, $mapper);

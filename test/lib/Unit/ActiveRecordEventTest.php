@@ -111,6 +111,7 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
     }
 }
 
+/** :amiss = {}; */
 class RecordEventTestRecord extends ActiveRecord
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */

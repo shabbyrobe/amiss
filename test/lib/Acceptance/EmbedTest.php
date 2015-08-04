@@ -30,8 +30,6 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $embed = new Type\Embed($this->deps->mapper);
         $encoder = new Type\Encoder('serialize', 'unserialize', $embed);
         $this->deps->mapper->addTypeHandler($encoder, 'embed');
-
-        $this->deps->mapper->objectNamespace = __NAMESPACE__;
     }
 
     public function testPrepareValueForDbWithOne()
@@ -41,7 +39,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent = new TestEmbedOneParent;
         $parent->child = new TestEmbedChild;
         $parent->child->foo = 'yep';
-        $meta = $this->deps->mapper->getMeta('TestEmbedOneParent');
+        $meta = $this->deps->mapper->getMeta(TestEmbedOneParent::class);
         $field = $meta->getField('child');
         $result = $embed->prepareValueForDb($parent->child, $field);
         $expected = array('pants'=>'yep');
@@ -61,7 +59,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $child->foo = 'yep2';
         $parent->children[] = $child;
 
-        $meta = $this->deps->mapper->getMeta('TestEmbedManyParent');
+        $meta = $this->deps->mapper->getMeta(TestEmbedManyParent::class);
         $field = $meta->getField('children');
         $result = $embed->prepareValueForDb($parent->children, $field);
         $expected = array(array('pants'=>'yep'), array('pants'=>'yep2'));
@@ -77,7 +75,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $expected = $parent->child = new TestEmbedChild;
         $parent->child->foo = 'yep';
 
-        $meta = $this->deps->mapper->getMeta('TestEmbedOneParent');
+        $meta = $this->deps->mapper->getMeta(TestEmbedOneParent::class);
         $field = $meta->getField('child');
         $value = array('pants'=>'yep');
         $result = $embed->handleValueFromDb($value, $field, array());
@@ -97,7 +95,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $child->foo = 'yep2';
         $parent->children[] = $child;
 
-        $meta = $this->deps->mapper->getMeta('TestEmbedManyParent');
+        $meta = $this->deps->mapper->getMeta(TestEmbedManyParent::class);
         $field = $meta->getField('children');
         $value = array(array('pants'=>'yep'), array('pants'=>'yep2'));
         $result = $embed->handleValueFromDb($value, $field, array());
@@ -112,7 +110,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->child->foo = array(1, 2, 3);
         $this->deps->manager->save($parent);
 
-        $result = $this->deps->manager->getById('TestEmbedOneParent', 1);
+        $result = $this->deps->manager->getById(TestEmbedOneParent::class, 1);
         $this->assertEquals($parent, $result);
     }
 
@@ -127,29 +125,32 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->children[] = $child;
         $this->deps->manager->save($parent);
 
-        $result = $this->deps->manager->getById('TestEmbedManyParent', 1);
+        $result = $this->deps->manager->getById(TestEmbedManyParent::class, 1);
         $this->assertEquals($parent, $result);
     }
 }
 
+/** :amiss = true; */
 class TestEmbedOneParent
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
 
-    /** :amiss = {"field": {"type": {"id": "embed", "class": "TestEmbedChild"}}}; */
+    /** :amiss = {"field": {"type": {"id": "embed", "class": "Amiss\\Test\\Acceptance\\TestEmbedChild"}}}; */
     public $child;
 }
 
+/** :amiss = true; */
 class TestEmbedManyParent
 {
     /** :amiss = {"field": { "primary": true, "type": "autoinc" }}; */
     public $id;
     
-    /** :amiss = {"field": {"type": {"id": "embed", "class": "TestEmbedChild", "many": true}}}; */
+    /** :amiss = {"field": {"type": {"id": "embed", "class": "Amiss\\Test\\Acceptance\\TestEmbedChild", "many": true}}}; */
     public $children = array();
 }
 
+/** :amiss = true; */
 class TestEmbedChild
 {
     /** :amiss = {"field": "pants"}; */

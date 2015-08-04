@@ -18,7 +18,7 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
     {
         $deps = Test\Factory::managerModelDemo();
 
-        $this->assertEquals(0, $deps->manager->count('Artist', 'slug="insert-test"'));
+        $this->assertEquals(0, $deps->manager->count(Demo\Artist::class, 'slug="insert-test"'));
             
         $artist = new Demo\Artist();
         $artist->artistTypeId = 1;
@@ -29,7 +29,7 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
         $this->assertGreaterThan(0, $artist->artistId);
         $this->assertEquals($artist->artistId, $ret);
         
-        $this->assertEquals(1, $deps->manager->count('Artist', 'slug="insert-test"'));
+        $this->assertEquals(1, $deps->manager->count(Demo\Artist::class, 'slug="insert-test"'));
 
         return [$artist, $deps];
     }
@@ -50,7 +50,7 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
     {
         $deps = Test\Factory::managerModelDemo();
 
-        $this->assertEquals(0, $deps->manager->count('Venue', 'slug="insert-test"'));
+        $this->assertEquals(0, $deps->manager->count(Demo\Venue::class, 'slug="insert-test"'));
         
         $venue = new Demo\Venue();
         $venue->venueName = 'Insert Test';
@@ -82,9 +82,9 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
     {
         $deps = Test\Factory::managerModelDemo();
 
-        $this->assertEquals(0, $deps->manager->count('Artist', 'slug="insert-table-test"'));
+        $this->assertEquals(0, $deps->manager->count(Demo\Artist::class, 'slug="insert-table-test"'));
         
-        $id = $deps->manager->insertTable('Artist', array(
+        $id = $deps->manager->insertTable(Demo\Artist::class, array(
             'name'=>'Insert Table Test',
             'slug'=>'insert-table-test',
             'artistTypeId'=>1,
@@ -92,6 +92,6 @@ class ManagerInsertTest extends \Amiss\Test\Helper\TestCase
         
         $this->assertGreaterThan(0, $id);
         
-        $this->assertEquals(1, $deps->manager->count('Artist', 'slug="insert-table-test"'));
+        $this->assertEquals(1, $deps->manager->count(Demo\Artist::class, 'slug="insert-table-test"'));
     }
 }

@@ -3,9 +3,6 @@ namespace Amiss\Mapper;
 
 use Amiss\Meta;
 
-/**
- * @package Mapper
- */
 class Local extends Base
 {
     public $localName;
@@ -14,6 +11,11 @@ class Local extends Base
     {
         parent::__construct();
         $this->localName = $localName;
+    }
+
+    public function mapsClass($class)
+    {
+        return method_exists($class, $localName);
     }
     
     protected function createMeta($id)

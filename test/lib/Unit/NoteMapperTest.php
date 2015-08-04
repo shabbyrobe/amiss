@@ -2,6 +2,7 @@
 namespace Amiss\Test\Acceptance;
 
 use \Amiss\Test\Helper\ClassBuilder;
+use \Amiss\Demo;
 
 /**
  * @group mapper
@@ -33,7 +34,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             ->getMock()
         ;
         $mapper->expects($this->once())->method('getDefaultTable');
-        $class = ClassBuilder::i()->registerOne('class Test {}');
+        $class = ClassBuilder::i()->registerOne('/** :amiss = true; */ class Test {}');
 
         $meta = $mapper->getMeta($class);
     }
@@ -56,16 +57,16 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                 $cacheData[$key] = $value;
             }
         );
-        $mapper = new \Amiss\Mapper\Note($cache);
         
-        $this->assertArrayNotHasKey('stdClass', $cacheData);
-        $meta = $mapper->getMeta('stdClass');
-        $this->assertArrayHasKey('stdClass', $cacheData);
+        $mapper = new \Amiss\Mapper\Note($cache);
+        $this->assertCount(0, $cacheData);
+        $meta = $mapper->getMeta(Demo\Artist::class);
+        $this->assertCount(1, $cacheData);
         $this->assertEquals(1, $getCount);
         $this->assertEquals(1, $setCount);
-        
+
         $mapper = new \Amiss\Mapper\Note($cache);
-        $meta = $mapper->getMeta('stdClass');
+        $meta = $mapper->getMeta(Demo\Artist::class);
         $this->assertEquals(2, $getCount);
         $this->assertEquals(1, $setCount);
     }
@@ -77,6 +78,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id1;
@@ -96,6 +98,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": true}; */ public $foo;
                 /** :amiss = {"field": true}; */ public $bar;
@@ -112,6 +115,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 public $notAField;
                 
@@ -129,6 +133,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": true}; */
                 public function getFoo(){}
@@ -179,6 +184,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
@@ -194,6 +200,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
                 public $id;
@@ -221,6 +228,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $id;
             }
@@ -236,6 +244,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"primary": true}}; */ public $idPart1;
                 /** :amiss = {"field": {"primary": true}}; */ public $idPart2;
@@ -252,6 +261,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"type": "foobar"}}; */
                 public $id;
@@ -269,17 +279,19 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         list ($ns, ) = ClassBuilder::i()->register('
+            /** :amiss = true; */
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
             }
+
+            /** :amiss = true; */
             class Test2 extends Test1 {
                 /** :amiss = {"field": true}; */
                 public $bar;
             }
         ');
 
-        $mapper->objectNamespace = $ns;
         $meta1 = $mapper->getMeta("$ns\\Test1");
         $meta2 = $mapper->getMeta("$ns\\Test2");
         $this->assertEquals(null, $this->getProtected($meta2, 'parent'));
@@ -291,7 +303,8 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testGetMetaWithParentClass()
     {
         $mapper = new \Amiss\Mapper\Note;
-        list ($mapper->objectNamespace,)  = ClassBuilder::i()->register('
+        list ($ns,)  = ClassBuilder::i()->register('
+            /** :amiss = true; */
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
@@ -303,8 +316,8 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         
-        $meta1 = $mapper->getMeta("Test1");
-        $meta2 = $mapper->getMeta("Test2");
+        $meta1 = $mapper->getMeta("$ns\\Test1");
+        $meta2 = $mapper->getMeta("$ns\\Test2");
         $this->assertEquals($meta1, $this->getProtected($meta2, 'parent'));
     }
 
@@ -315,6 +328,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -347,6 +361,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testPrimaryFieldTranslation()
     {
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $fooBarBaz;
@@ -372,6 +387,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     public function testRelationFillGetterSetterInferSetter($prefix)
     {
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Foo'.$prefix.' {
                 /** :amiss = {"has": {"type": "pants"}}; */
                 function '.$prefix.'Pants() {}
@@ -403,6 +419,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Foo {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -438,6 +455,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $class1 = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Class1 {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $class1id;
@@ -450,6 +468,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $class2 = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Class2 {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $class2Id;
@@ -469,6 +488,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Class1 {
                 /** :amiss = {"has": "test"}; */
                 public $test;
@@ -556,6 +576,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"index": "foo"}}; */
                 public $a;
@@ -569,6 +590,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $a;
@@ -583,6 +605,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 private $field;
                 
@@ -603,6 +626,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 private $field;
                 
@@ -623,6 +647,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"index": true}}; */
                 public $field;
@@ -640,6 +665,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $field;
@@ -657,6 +683,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mapper = new \Amiss\Mapper\Note;
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 private $field;
                 /** :amiss = {"field": {"primary": true}}; */
@@ -675,6 +702,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new \Amiss\Mapper\Note;
 
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"constructor": true}; */
                 public static function foo() {}
@@ -689,6 +717,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new \Amiss\Mapper\Note;
 
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -708,6 +737,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new \Amiss\Mapper\Note;
 
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -728,6 +758,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new \Amiss\Mapper\Note;
 
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /**
                  * :amiss = {"constructor": [
@@ -748,6 +779,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper = new \Amiss\Mapper\Note;
 
         $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
             class Test {
                 /** :amiss = {"field": "bar"}; */
                 public $foo;

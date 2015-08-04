@@ -24,7 +24,7 @@ class ClassBuilder
         }
         $classHash = hash('sha256', $hash);
         if (isset(self::$classes[$classHash])) {
-            list ($ns, $classes) = self::$classes[$classHash];
+            list ($ns, $classes, $classMap) = self::$classes[$classHash];
         }
         else {
             $ns = "__AmissTest_".$classHash;
@@ -32,12 +32,24 @@ class ClassBuilder
             foreach ($classes as $k=>$v) {
                 $script .= $v;
             }
+
+            $script = strtr($script, ['{{ns}}'=>addslashes($ns.'\\')]);
+
             $classes = get_declared_classes();
             eval($script);
             $classes = array_values(array_diff(get_declared_classes(), $classes));
-            self::$classes[$classHash] = [$ns, $classes];
+
+            $classMap = [];
+            $nsLen = strlen($ns);
+            foreach ($classes as $class) {
+                if (strpos($class, $ns) === 0) {
+                    $classMap[substr($class, $nsLen+1)] = $class;
+                }
+            }
+
+            self::$classes[$classHash] = [$ns, $classes, $classMap];
         }
-        return [$ns, $classes];
+        return [$ns, $classes, $classMap];
     }
 
     public function registerOne($class)

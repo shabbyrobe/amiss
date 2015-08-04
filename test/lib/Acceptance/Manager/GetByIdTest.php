@@ -13,6 +13,7 @@ class GetByIdTest extends \Amiss\Test\Helper\TestCase
     public function testGetByIdKeySingle()
     {
         $deps = Test\Factory::managerNoteModelCustom('
+            /** :amiss = {}; */
             class Pants {
                 /** :amiss = {"field": {"index": {"key": true}}}; */
                 public $slug;
@@ -21,8 +22,8 @@ class GetByIdTest extends \Amiss\Test\Helper\TestCase
                 public $name;
             }
         ');
-        $deps->manager->insertTable('Pants', ['slug'=>'yes', 'name'=>'Yep!']);
-        $a = $deps->manager->getById('Pants', 'yes', ['key'=>'slug']);
+        $deps->manager->insertTable($deps->classes['Pants'], ['slug'=>'yes', 'name'=>'Yep!']);
+        $a = $deps->manager->getById($deps->classes['Pants'], 'yes', ['key'=>'slug']);
         $this->assertEquals('Yep!', $a->name);
     }
 
@@ -143,6 +144,7 @@ class GetByIdTest extends \Amiss\Test\Helper\TestCase
     public function testGetByIdArgs()
     {
         $d = Test\Factory::managerNoteModelCustom('
+            /** :amiss = {}; */
             class Pants {
                 /** :amiss = {"field": {"primary": true}}; */
                 public $id;
@@ -152,8 +154,8 @@ class GetByIdTest extends \Amiss\Test\Helper\TestCase
                 }
             }
         ');
-        $d->manager->insertTable('Pants', ['id'=>100]);
-        $result = $d->manager->getById('Pants', 100, ['args'=>['ding', 'dong']]);
+        $d->manager->insertTable($d->classes['Pants'], ['id'=>100]);
+        $result = $d->manager->getById($d->classes['Pants'], 100, ['args'=>['ding', 'dong']]);
         $this->assertEquals(100, $result->id);
         $this->assertEquals("ding", $result->a);
         $this->assertEquals("dong", $result->b);

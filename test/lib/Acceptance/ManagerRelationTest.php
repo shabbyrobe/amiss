@@ -27,7 +27,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
 
     public function testGetRelatedSingle()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
+        $eventArtist = $this->manager->get(Demo\EventArtist::class, 'eventId=? AND artistId=?', [2, 6]);
         $event = $this->manager->getRelated($eventArtist, 'event');
         
         $this->assertTrue($event instanceof Demo\Event);
@@ -36,7 +36,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
     
     public function testAssignSingleSourceToOneRelation()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
+        $eventArtist = $this->manager->get(Demo\EventArtist::class, 'eventId=? AND artistId=?', [2, 6]);
         $this->manager->assignRelated($eventArtist, 'event');
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertEquals('awexxome-fest-20x6', $eventArtist->event->getSlug());
@@ -44,7 +44,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
 
     public function testAssignSingleSourceToMultipleOneRelations()
     {
-        $eventArtist = $this->manager->get('EventArtist', 'eventId=? AND artistId=?', [2, 6]);
+        $eventArtist = $this->manager->get(Demo\EventArtist::class, 'eventId=? AND artistId=?', [2, 6]);
         $this->manager->assignRelated($eventArtist, ['event', 'artist']);
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
@@ -55,7 +55,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
  
     public function testAssignListSourceToMultipleOneRelations()
     {
-        $eventArtist = $this->manager->getList('EventArtist', 'eventId=?', [1]);
+        $eventArtist = $this->manager->getList(Demo\EventArtist::class, 'eventId=?', [1]);
         $this->manager->assignRelated($eventArtist, ['event', 'artist']);
         
         $current = current($eventArtist);
@@ -65,7 +65,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
 
     public function testGetRelatedList()
     {
-        $event = $this->manager->get('Event', 'eventId=1');
+        $event = $this->manager->get(Demo\Event::class, 'eventId=1');
         $eventArtists = $this->manager->getRelated($event, 'eventArtists');
         
         $this->assertTrue(is_array($eventArtists));
@@ -79,7 +79,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelatedAssocForSingle()
     {
-        $event = $this->manager->get('Event', 'eventId=1');
+        $event = $this->manager->get(Demo\Event::class, 'eventId=1');
         $artists = $this->manager->getRelated($event, 'artists');
         
         $this->assertTrue(is_array($artists));
@@ -97,7 +97,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelatedAssocForList()
     {
-        $events = $this->manager->getList('Event');
+        $events = $this->manager->getList(Demo\Event::class);
         $this->manager->assignRelated($events, 'artists');
         
         $ids = array();
@@ -121,7 +121,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetRelatedAssocWithCriteria()
     { 
-        $event = $this->manager->get('Event', 'eventId=1');
+        $event = $this->manager->get(Demo\Event::class, 'eventId=1');
         $criteria = new Criteria();
         $criteria->where = 'artistTypeId=:tid';
         $criteria->params = array('tid'=>1);
@@ -138,7 +138,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
     
     public function testAssignSingleSourceToManyRelation()
     {
-        $event = $this->manager->get('Event', 'eventId=1');
+        $event = $this->manager->get(Demo\Event::class, 'eventId=1');
         $this->manager->assignRelated($event, 'eventArtists');
         
         $this->assertTrue(is_array($event->eventArtists));
@@ -149,7 +149,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
     
     public function testAssignSingleSourceToMultipleManyRelations()
     {
-        $event = $this->manager->get('Event', 'eventId=1');
+        $event = $this->manager->get(Demo\Event::class, 'eventId=1');
         $this->manager->assignRelated($event, ['eventArtists', 'tickets']);
         
         $this->assertTrue($event->eventArtists[0] instanceof Demo\EventArtist);
@@ -158,7 +158,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
     
     public function testAssignListSourceToManyRelation()
     {
-        $types = $this->manager->getList('ArtistType');
+        $types = $this->manager->getList(Demo\ArtistType::class);
         
         $this->assertTrue(is_array($types));
         $this->assertTrue(current($types) instanceof Demo\ArtistType);
@@ -172,7 +172,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
     
     public function testAssignListSourceToMultipleManyRelations()
     {
-        $events = $this->manager->getList('Event');
+        $events = $this->manager->getList(Demo\Event::class);
         $this->assertCount(2, $events);
         $this->manager->assignRelated($events, ['eventArtists', 'tickets']);
         
@@ -187,7 +187,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
      */
     public function testAssignRelatedDeepThroughAssocToSingle()
     {
-        $event = $this->manager->getById('Event', 1);
+        $event = $this->manager->getById(Demo\Event::class, 1);
         
         // Relation 1: populate each Event object's list of artists through EventArtists
         $this->manager->assignRelated($event, 'artists');
@@ -195,10 +195,10 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
         // Relation 2: populate each Artist object's artistType property
         $this->manager->assignRelated(Functions::getChildren($event, 'artists'), 'artistType');
         
-        $this->assertInstanceOf('Amiss\Demo\Event', $event);
+        $this->assertInstanceOf(Demo\Event::class, $event);
         $this->assertGreaterThan(0, count($event->artists));
-        $this->assertInstanceOf('Amiss\Demo\Artist', $event->artists[0]);
-        $this->assertInstanceOf('Amiss\Demo\ArtistType', $event->artists[0]->artistType);
+        $this->assertInstanceOf(Demo\Artist::class, $event->artists[0]);
+        $this->assertInstanceOf(Demo\ArtistType::class, $event->artists[0]->artistType);
     }
 
     public function testGetAssignsToOneRelationUsingCriteria()
@@ -208,7 +208,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
             'where'=>'eventId=? AND artistId=?',
             'with'=>'event',
         ];
-        $eventArtist = $this->manager->get('EventArtist', $query);
+        $eventArtist = $this->manager->get(Demo\EventArtist::class, $query);
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
     }
     
@@ -219,7 +219,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
             'where'=>'eventId=? AND artistId=?',
             'with'=>['event', 'artist'],
         ];
-        $eventArtist = $this->manager->get('EventArtist', $query);
+        $eventArtist = $this->manager->get(Demo\EventArtist::class, $query);
         $this->assertTrue($eventArtist->event instanceof Demo\Event);
         $this->assertTrue($eventArtist->artist instanceof Demo\Artist);
     }
@@ -231,7 +231,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
             'where'=>'eventId=?',
             'with'=>'event',
         ];
-        $eventArtist = $this->manager->getList('EventArtist', $query);
+        $eventArtist = $this->manager->getList(Demo\EventArtist::class, $query);
         $current = current($eventArtist);
         $this->assertTrue($current->event instanceof Demo\Event);
         $this->assertEquals('awexxome-fest', $current->event->getSlug());

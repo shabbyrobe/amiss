@@ -18,14 +18,6 @@ abstract class Base implements \Amiss\Mapper
     
     public $typeHandlers = array();
     
-    /**
-     * @deprecated Don't use any more, use this pattern instead:
-     *     use My\Name\Space;
-     *     $mapper->getMeta(Space::class);
-     * It will be removed as soon as I work out a neater way to do the Test\Factory without it.
-     */
-    public $objectNamespace;
-
     public $skipNulls = false;
     
     private $typeHandlerMap = array();
@@ -33,7 +25,7 @@ abstract class Base implements \Amiss\Mapper
     public function __construct()
     {}
     
-    public function getMeta($class)
+    public function getMeta($class, $strict=true)
     {
         if (is_object($class)) {
             $class = get_class($class);
@@ -44,20 +36,17 @@ abstract class Base implements \Amiss\Mapper
         
         $meta = null;
         if (!isset($this->meta[$class])) {
-            if ($this->objectNamespace) {
-                $resolved = $this->resolveObjectName($class);
-                $meta = $this->meta[$class] = $this->createMeta($resolved);
-                if ($resolved != $class) {
-                    $this->meta[$resolved] = $meta;
-                }
+            $meta = $this->meta[$class] = $this->createMeta($class);
+            if (!$meta && $strict) {
+                throw new \RuntimeException("No metadata for class $class");
             }
-            else {
-                $meta = $this->meta[$class] = $this->createMeta($class);
-            }
+            return $meta;
         }
-        return $meta ?: $this->meta[$class];
+        else {
+            return $this->meta[$class];
+        }
     }
-    
+
     abstract protected function createMeta($class);
 
     public function mapPropertiesToRow($input, $meta=null)
@@ -262,20 +251,7 @@ abstract class Base implements \Amiss\Mapper
         
         return $h;
     }
-    
-    /**
-     * Assumes that any name that contains a backslash is already resolved.
-     * This allows you to use fully qualified class names that are outside
-     * the mapped namespace.
-     */
-    protected function resolveObjectName($name)
-    {
-        $base = ($this->objectNamespace && strpos($name, '\\') === false 
-            ? $this->objectNamespace . '\\' 
-            : '');
-        return $base.$name;
-    }
-    
+
     protected function getDefaultTable($class)
     {
         $table = null;
