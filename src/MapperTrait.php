@@ -40,7 +40,7 @@ trait MapperTrait
         }
 
         $output = [];
-        foreach ($meta->getFields() as $prop=>$field) {
+        foreach ($meta->fields as $prop=>$field) {
             if (!isset($field['getter'])) {
                 $value = $object->$prop;
             } else {

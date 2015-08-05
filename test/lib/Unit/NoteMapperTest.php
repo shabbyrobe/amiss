@@ -105,7 +105,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $this->assertEquals(array('foo', 'bar'), array_keys($meta->getFields()));
+        $this->assertEquals(array('foo', 'bar'), array_keys($meta->fields));
     }
     
     /**
@@ -123,7 +123,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $this->assertEquals(array('yepAField'), array_keys($meta->getFields()));
+        $this->assertEquals(array('yepAField'), array_keys($meta->fields));
     }
     
     /**
@@ -146,7 +146,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             'name'=>'foo', 'type'=>['id'=>null], 'getter'=>'getFoo', 'setter'=>'setFoo',
             'required'=>false,
         ];
-        $this->assertEquals($expected, $meta->getField('foo'));
+        $this->assertEquals($expected, $meta->fields['foo']);
     }
 
     /**
@@ -190,7 +190,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $this->assertEquals(array('id'), array_keys($meta->getFields()));
+        $this->assertEquals(array('id'), array_keys($meta->fields));
     }
 
     /**
@@ -217,7 +217,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                     'required'=>false,
                 )
             ),
-            $meta->getFields()
+            $meta->fields
         );
     }
     
@@ -268,39 +268,28 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $meta = $mapper->getMeta($class);
-        $field = $meta->getField('id');
+        $field = $meta->fields['id'];
         $this->assertEquals(array('id'=>'foobar'), $field['type']);
     }
 
-    /**
-     * @covers Amiss\Mapper\Note::loadMeta
-     */
-    public function testGetMetaIgnoresParentClassByDefault()
+    public function testGetMetaClassNoteInheritance()
     {
         $mapper = new \Amiss\Mapper\Note;
         list ($ns, ) = ClassBuilder::i()->register('
-            /** :amiss = true; */
+            /** :amiss = {"fieldType": "string"}; */
             class Test1 {
                 /** :amiss = {"field": true}; */
                 public $foo;
             }
 
-            /** :amiss = true; */
-            class Test2 extends Test1 {
-                /** :amiss = {"field": true}; */
-                public $bar;
-            }
+            class Test2 extends Test1 {}
         ');
 
-        $meta1 = $mapper->getMeta("$ns\\Test1");
         $meta2 = $mapper->getMeta("$ns\\Test2");
-        $this->assertEquals(null, $this->getProtected($meta2, 'parent'));
+        $this->assertEquals(['id'=>'string'], $meta2->fieldType);
     }
 
-    /**
-     * @covers Amiss\Mapper\Note::loadMeta
-     */
-    public function testGetMetaWithParentClass()
+    public function testGetMetaPropertyNoteInherits()
     {
         $mapper = new \Amiss\Mapper\Note;
         list ($ns,)  = ClassBuilder::i()->register('
@@ -309,16 +298,69 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
                 /** :amiss = {"field": true}; */
                 public $foo;
             }
-            /** :amiss = {"inherit": true}; */
             class Test2 extends Test1 {
-                /** :amiss = {"field": true}; */
-                public $bar;
+                public $foo;
             }
         ');
         
-        $meta1 = $mapper->getMeta("$ns\\Test1");
         $meta2 = $mapper->getMeta("$ns\\Test2");
-        $this->assertEquals($meta1, $this->getProtected($meta2, 'parent'));
+        $this->assertArraySubset(['name'=>'foo', 'id'=>'foo'], $meta2->fields['foo']);
+    }
+
+    public function testGetMetaPropertyNoteMasking()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        list ($ns,)  = ClassBuilder::i()->register('
+            /** :amiss = true; */
+            class Test1 {
+                /** :amiss = {"field": true}; */
+                public $foo;
+            }
+            class Test2 extends Test1 {
+                /** :amiss = {"field": false}; */
+                public $foo;
+            }
+        ');
+        
+        $meta2 = $mapper->getMeta("$ns\\Test2");
+        $this->assertFalse(isset($meta2->fields['foo']));
+    }
+
+    public function testGetMetaPropertyRelationInherits()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        list ($ns,)  = ClassBuilder::i()->register('
+            /** :amiss = true; */
+            class Test1 {
+                /** :amiss = {"has": {"type": "pants"}}; */
+                public $foo;
+            }
+            class Test2 extends Test1 {
+                public $foo;
+            }
+        ');
+        
+        $meta2 = $mapper->getMeta("$ns\\Test2");
+        $this->assertArraySubset(['pants', 'id' => 'foo'], $meta2->relations['foo']);
+    }
+
+    public function testGetMetaPropertyRelationMasking()
+    {
+        $mapper = new \Amiss\Mapper\Note;
+        list ($ns,)  = ClassBuilder::i()->register('
+            /** :amiss = true; */
+            class Test1 {
+                /** :amiss = {"has": {"type": "pants"}}; */
+                public $foo;
+            }
+            class Test2 extends Test1 {
+                /** :amiss = {"has": false}; */
+                public $foo;
+            }
+        ');
+        
+        $meta2 = $mapper->getMeta("$ns\\Test2");
+        $this->assertEmpty($meta2->relations);
     }
 
     /**
@@ -375,7 +417,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->unnamedPropertyTranslator = new \Amiss\Name\CamelToUnderscore();
         $meta = $mapper->getMeta($class);
         
-        $fields = $meta->getFields();
+        $fields = $meta->fields;
         $this->assertEquals('foo_bar_baz',  $fields['fooBarBaz']['name']);
         $this->assertEquals('baz_qux_ding', $fields['bazQuxDing']['name']);
     }
@@ -787,7 +829,7 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ');
         $meta = $mapper->getMeta($name);
         $expected = ['id'=>'foo', 'name'=>'bar', 'type'=>['id'=>null], 'required'=>false];
-        $this->assertEquals($expected, $meta->getField('foo'));
+        $this->assertEquals($expected, $meta->fields['foo']);
     }
 
     public function testClassRelations()

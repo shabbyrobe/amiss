@@ -69,14 +69,14 @@ class Association extends Base
             $source = array($source);
         }
         
-        $sourceFields = $meta->getFields();
+        $sourceFields = $meta->fields;
         
         // find all the necessary metadata
         $relatedMeta = $this->manager->getMeta($relation['of']);
-        $relatedFields = $relatedMeta->getFields();
+        $relatedFields = $relatedMeta->fields;
         
         $viaMeta = $this->manager->getMeta($relation['via']);
-        $viaFields = $viaMeta->getFields();
+        $viaFields = $viaMeta->fields;
         $sourceToViaRelationName = isset($relation['rel']) ? $relation['rel'] : null;
         $sourceToViaRelation = null;
         $viaToDestRelationName = null;
@@ -148,8 +148,8 @@ class Association extends Base
     
     protected function buildQuery($index, $relatedMeta, $viaMeta, $sourceToViaOn, $viaToDestOn, $criteria)
     {
-        $viaFields = $viaMeta->getFields();
-        $relatedFields = $relatedMeta->getFields();
+        $viaFields = $viaMeta->fields;
+        $relatedFields = $relatedMeta->fields;
         
         $query = new Query\Select();
         

@@ -5,6 +5,7 @@ use Amiss\Sql\ActiveRecord;
 
 /**
  * @group unit
+ * @group active
  */
 class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
 {
@@ -27,7 +28,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
 
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeUpdate
-     * @group active
      */
     public function testBeforeUpdate()
     {
@@ -39,7 +39,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
 
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeInsert
-     * @group active
      */
     public function testBeforeInsert()
     {
@@ -51,7 +50,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::delete
-     * @group active
      */
     public function testBeforeDelete()
     {
@@ -63,7 +61,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
 
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeSave
-     * @group active
      */
     public function testBeforeSaveCalledOnInsert()
     {
@@ -75,7 +72,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeSave
-     * @group active
      */
     public function testBeforeSaveCalledOnUpdate()
     {
@@ -84,9 +80,9 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
         $this->manager->expects($this->once())->method('update');
         $ret->update();
     }
+
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeInsert
-     * @group active
      */
     public function testBeforeInsertCalledOnSave()
     {
@@ -99,7 +95,6 @@ class ActiveRecordEventTest extends \Amiss\Test\Helper\TestCase
     
     /**
      * @covers Amiss\Sql\ActiveRecord::beforeUpdate
-     * @group active
      */
     public function testBeforeUpdateCalledOnSave()
     {

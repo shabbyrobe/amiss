@@ -56,7 +56,6 @@ abstract class Base implements \Amiss\Mapper
             if (!$meta) { throw new \InvalidArgumentException(); }
         }
 
-        $defaultType = null;
         $properties = $meta->getProperties();
         $fields = [];
         foreach ($input as $propId=>$value) {
@@ -67,13 +66,8 @@ abstract class Base implements \Amiss\Mapper
                 throw new \UnexpectedValueException("Unknown property '$propId' for meta {$meta->class}");
             }
             $property = $properties[$propId];
-            $type = isset($property['type']) ? $property['type'] : null;
-            if (!$type) {
-                if ($defaultType === null) {
-                    $defaultType = $meta->getDefaultFieldType() ?: false;
-                }
-                $type = $defaultType;
-            }
+
+            $type = isset($property['type']) ? $property['type'] : $meta->fieldType;
             
             if ($type) {
                 $typeId = $type['id'];
@@ -97,11 +91,10 @@ abstract class Base implements \Amiss\Mapper
             if (!$meta) { throw new \InvalidArgumentException(); }
         }
 
-        if (!$fieldMap) { $fieldMap = $meta->getColumnToPropertyMap(); }
+        if (!$fieldMap) { $fieldMap = $meta->columnMap; }
 
         $mapped = [];
         $properties = $meta->getProperties();
-        $defaultType = null;
 
         foreach ($input as $col=>$value) {
             $propId = isset($fieldMap[$col]) ? $fieldMap[$col] : $col;
@@ -110,13 +103,7 @@ abstract class Base implements \Amiss\Mapper
             }
 
             $property = $properties[$propId];
-            $type = isset($property['type']) ? $property['type'] : null;
-            if (!$type) {
-                if ($defaultType === null) {
-                    $defaultType = $meta->getDefaultFieldType() ?: false;
-                }
-                $type = $defaultType;
-            }
+            $type = isset($property['type']) ? $property['type'] : $meta->fieldType;
             
             if ($type) {
                 $typeId = $type['id'];
@@ -144,8 +131,7 @@ abstract class Base implements \Amiss\Mapper
 
     public function formatParams(Meta $meta, $propertyParamMap, $params)
     {
-        $fields = $meta->getFields();
-        $defaultType = $meta->getDefaultFieldType();
+        $fields = $meta->fields;
 
         foreach ($propertyParamMap as $prop=>$propParams) {
             if (!isset($fields[$prop])) {
@@ -156,7 +142,7 @@ abstract class Base implements \Amiss\Mapper
             }
             $field = $fields[$prop];
 
-            $type = $field['type'] ?: $defaultType;
+            $type = $field['type'] ?: $meta->fieldType;
             $typeId = $type['id'];
             
             if ($type) {
@@ -201,16 +187,14 @@ abstract class Base implements \Amiss\Mapper
 
         $output = array();
         
-        $defaultType = $meta->getDefaultFieldType();
-
-        foreach ($meta->getFields() as $prop=>$field) {
+        foreach ($meta->fields as $prop=>$field) {
             if (!isset($field['getter'])) {
                 $value = $object->$prop;
             } else {
                 $value = call_user_func(array($object, $field['getter']));
             }
             
-            $type = $field['type'] ?: $defaultType;
+            $type = $field['type'] ?: $meta->fieldType;
             $typeId = $type['id'];
             
             if ($type) {

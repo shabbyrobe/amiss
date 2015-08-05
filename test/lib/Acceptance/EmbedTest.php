@@ -40,7 +40,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->child = new TestEmbedChild;
         $parent->child->foo = 'yep';
         $meta = $this->deps->mapper->getMeta(TestEmbedOneParent::class);
-        $field = $meta->getField('child');
+        $field = $meta->fields['child'];
         $result = $embed->prepareValueForDb($parent->child, $field);
         $expected = array('pants'=>'yep');
 
@@ -60,7 +60,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->children[] = $child;
 
         $meta = $this->deps->mapper->getMeta(TestEmbedManyParent::class);
-        $field = $meta->getField('children');
+        $field = $meta->fields['children'];
         $result = $embed->prepareValueForDb($parent->children, $field);
         $expected = array(array('pants'=>'yep'), array('pants'=>'yep2'));
 
@@ -76,7 +76,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->child->foo = 'yep';
 
         $meta = $this->deps->mapper->getMeta(TestEmbedOneParent::class);
-        $field = $meta->getField('child');
+        $field = $meta->fields['child'];
         $value = array('pants'=>'yep');
         $result = $embed->handleValueFromDb($value, $field, array());
 
@@ -96,7 +96,7 @@ class EmbedTest extends \Amiss\Test\Helper\TestCase
         $parent->children[] = $child;
 
         $meta = $this->deps->mapper->getMeta(TestEmbedManyParent::class);
-        $field = $meta->getField('children');
+        $field = $meta->fields['children'];
         $value = array(array('pants'=>'yep'), array('pants'=>'yep2'));
         $result = $embed->handleValueFromDb($value, $field, array());
 

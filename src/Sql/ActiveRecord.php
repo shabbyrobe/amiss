@@ -176,8 +176,7 @@ abstract class ActiveRecord
     {
         $meta = static::getMeta();
         
-        $fields = $meta->getFields();
-        if (!isset($fields[$name])) {
+        if (!isset($meta->fields[$name])) {
             throw new \BadMethodCallException("Unknown property $name on class ".get_class($this));
         }
         else {
@@ -190,8 +189,7 @@ abstract class ActiveRecord
     {
         $meta = static::getMeta();
         
-        $fields = $meta->getFields();
-        if (!isset($fields[$name])) {
+        if (!isset($meta->fields[$name])) {
             throw new \BadMethodCallException("Unknown property $name on class ".get_class($this));
         }
         else {

@@ -19,7 +19,7 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
             'primary'=>'pri',
             'fields'=>array('f'=>array()),
             'relations'=>array('r'=>array()),
-            'defaultFieldType'=>'def',
+            'fieldType'=>'def',
         );
         $meta = new \Amiss\Meta('stdClass', $info, $parent);
         
@@ -29,105 +29,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         
         $this->assertEquals(['f'=>['id'=>'f', 'name'=>'f'] + $this->fieldDefaults], $this->getProtected($meta, 'fields'));
         $this->assertEquals(['r'=>['id'=>'r', 'mode'=>'default']], $this->getProtected($meta, 'relations'));
-        $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'defaultFieldType'));
+        $this->assertEquals(['id'=>'def'],  $this->getProtected($meta, 'fieldType'));
     }
-    
-    /**
-     * @covers Amiss\Meta::getDefaultFieldType
-     */
-    public function testGetDefaultFieldTypeInheritsFromDirectParent()
-    {
-        $parent = new \Amiss\Meta('parent', array(
-            'table'=>'parent',
-            'defaultFieldType'=>'def',
-        ));
-        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
-        $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
-    }
-    
-    /**
-     * @covers Amiss\Meta::getDefaultFieldType
-     */
-    public function testGetDefaultFieldTypeInheritsFromGrandparent()
-    {
-        $grandParent = new \Amiss\Meta('grandparent', array(
-            'table'=>'grandparent',
-            'defaultFieldType'=>'def',
-        ));
-        $parent = new \Amiss\Meta('parent', array('table'=>'parent'), $grandParent);
-        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
-        $this->assertEquals(array('id'=>'def'), $meta->getDefaultFieldType());
-    }
-    
-    /**
-     * @covers Amiss\Meta::getDefaultFieldType
-     * @dataProvider dataForGetDefaultFieldTypeFromParentOnlyCallsParentOnce
-     */
-    public function testGetDefaultFieldTypeFromParentOnlyCallsParentOnce($defaultType)
-    {
-        $parent = $this->getMockBuilder('Amiss\Meta')
-            ->disableOriginalConstructor()
-            ->setMethods(array('getDefaultFieldType'))
-            ->getMock()
-        ;
-        $parent->expects($this->once())->method('getDefaultFieldType')->will($this->returnValue($defaultType));
-        
-        $meta = new \Amiss\Meta('child', array('table'=>'child'), $parent);
-        $meta->getDefaultFieldType();
-        $meta->getDefaultFieldType();
-    }
-    
-    public function dataForGetDefaultFieldTypeFromParentOnlyCallsParentOnce()
-    {
-        return array(
-            array('yep'),
-            array(array('id'=>'yep')),
-            array(null),
-            array(false),
-        );
-    }
-    
-    /**
-     * @covers Amiss\Meta::getFields
-     */
-    public function testGetFieldInheritance()
-    {
-        $grandparent = new \Amiss\Meta('a', array(
-            'table'=>'a',
-            'fields'=>array(
-                'field1'=>array(),
-                'field2'=>array(),
-            ),
-        )); 
-        $parent = new \Amiss\Meta(
-            'b',
-            array(
-                'table'=>'b',
-                'fields'=>array(
-                    'field3'=>array(),
-                    'field4'=>array(1),
-                ),
-            ),
-            $grandparent
-        );
-        $child = new \Amiss\Meta('c', array(
-            'table'=>'c',
-            'fields'=>array(
-                'field4'=>array(2),
-                'field5'=>array(),
-            ),
-        ), $parent);
-        
-        $expected = [
-            'field1'=>['id'=>'field1', 'name'=>'field1'] + $this->fieldDefaults,
-            'field2'=>['id'=>'field2', 'name'=>'field2'] + $this->fieldDefaults,
-            'field3'=>['id'=>'field3', 'name'=>'field3'] + $this->fieldDefaults,
-            'field4'=>[2, 'id'=>'field4', 'name'=>'field4'] + $this->fieldDefaults,
-            'field5'=>['id'=>'field5', 'name'=>'field5'] + $this->fieldDefaults,
-        ];
-        $this->assertEquals($expected, $child->getFields());
-    }
-    
+
     /**
      * @covers Amiss\Meta::setFields
      */
@@ -155,6 +59,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
             'primary'=>'a',
+            'fields'=>[
+                'a'=>true, 'b'=>true,
+            ],
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
@@ -170,6 +77,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
             'primary'=>array('a'),
+            'fields'=>[
+                'a'=>true, 'b'=>true,
+            ],
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
@@ -185,6 +95,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
             'primary'=>array('a', 'b'),
+            'fields'=>[
+                'a'=>true, 'b'=>true,
+            ],
         ));
         
         $obj = (object)array('a'=>1, 'b'=>2);
@@ -200,6 +113,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
             'primary'=>array('a', 'b'),
+            'fields'=>[
+                'a'=>true, 'b'=>true, 'c'=>true,
+            ],
         ));
         
         $obj = (object)array('a'=>null, 'b'=>null, 'c'=>3);
@@ -214,6 +130,9 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         $meta = new \Amiss\Meta('stdClass', array(
             'table'=>'std_class',
             'primary'=>array('a', 'b'),
+            'fields'=>[
+                'a'=>true, 'b'=>true, 'c'=>true,
+            ],
         ));
         
         $obj = (object)array('a'=>null, 'b'=>2, 'c'=>3);
@@ -251,7 +170,7 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         
         $obj = (object)array('a'=>'foo');
         
-        $this->setExpectedException('PHPUnit_Framework_Error_Notice');
+        $this->setExpectedException(\InvalidArgumentException::class, "Unknown property 'b' on stdClass");
         $result = $meta->getValue($obj, 'b');
     }
     
@@ -328,8 +247,8 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
         ));
         
         $object = (object) array('a'=>null);
+        $this->setExpectedException(\InvalidArgumentException::class, "Unknown property 'doesntExist' on stdClass");
         $meta->setValue($object, 'doesntExist', 'foo');
-        $this->assertEquals($object->doesntExist, 'foo');
     }
 
     /**

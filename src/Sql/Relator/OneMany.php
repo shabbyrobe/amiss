@@ -24,8 +24,8 @@ class OneMany extends Base
         $on = $this->createOn($meta, $from, $relatedMeta, $to);
 
         // find query values in source object(s)
-        $relatedFields = $relatedMeta->getFields();
-        list ($index, $resultIndex) = $this->indexSource($source, $on, $meta->getFields(), $relatedFields);
+        $relatedFields = $relatedMeta->fields;
+        list ($index, $resultIndex) = $this->indexSource($source, $on, $meta->fields, $relatedFields);
 
         $list = $this->runQuery($index, $relation, $relatedMeta, $criteria);
         return [$list, $relatedMeta, $relatedFields, $on, $index, $resultIndex];

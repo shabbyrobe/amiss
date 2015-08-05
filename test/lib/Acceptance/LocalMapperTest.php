@@ -19,31 +19,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
         ");
         $lm = new \Amiss\Mapper\Local();
         $meta = $lm->getMeta($c1);
-        $this->assertEquals(['foo', 'bar'], array_keys($meta->getFields()));
-    }
-
-    function testLocalMapperInherits()
-    {
-        list ($ns, )  = ClassBuilder::i()->register("
-            class Ding {
-                static function meta() {
-                    return [
-                        'fields'=>['foo'=>true],
-                    ];
-                }
-            }
-            class Dong extends Ding {
-                static function meta() {
-                    return [
-                        'inherit'=>true,
-                        'fields'=>['bar'=>true],
-                    ];
-                }
-            }
-        ");
-        $lm = new \Amiss\Mapper\Local();
-        $meta = $lm->getMeta("$ns\\Dong");
-        $this->assertEquals(['foo', 'bar'], array_keys($meta->getFields()));
+        $this->assertEquals(['foo', 'bar'], array_keys($meta->fields));
     }
 
     function testMetaInstance()
@@ -59,7 +35,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
         ");
         $lm = new \Amiss\Mapper\Local();
         $meta = $lm->getMeta($c1);
-        $this->assertEquals(['foo'], array_keys($meta->getFields()));
+        $this->assertEquals(['foo'], array_keys($meta->fields));
         $this->assertEquals($c1, $meta->class);
     }
 
@@ -78,7 +54,7 @@ class LocalMapperTest extends \Amiss\Test\Helper\TestCase
         $ns = substr($c1, 0, strrpos($c1, '\\'));
         $lm = new \Amiss\Mapper\Local();
         $meta = $lm->getMeta($c1);
-        $this->assertEquals(['foo'], array_keys($meta->getFields()));
+        $this->assertEquals(['foo'], array_keys($meta->fields));
         $this->assertEquals($c1, $meta->class);
     }
 

@@ -5,7 +5,7 @@ use Amiss\Exception;
 
 class TableBuilder extends \Amiss\Sql\TableBuilder
 {
-    public $defaultFieldType = 'STRING NULL';
+    public $fieldType = 'STRING NULL';
 
     protected $engine = 'sqlite';
 
@@ -19,11 +19,7 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
             }
             $fields = [];
             foreach ($details['fields'] as $p) {
-                $metaField = $this->meta->getField($p);
-                if (!$metaField) {
-                    throw new \UnexpectedValueException("Unknown field '$p' in index '$k' for class {$this->meta->class}");
-                }
-                $fields[] = $this->meta->getField($p)['name'];
+                $fields[] = $this->meta->fields[$p]['name'];
             }
             $colStr = '`'.implode('`, `', $fields).'`';
 
@@ -65,7 +61,7 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         if (!$foundPrimaries && $this->meta->primary) {
             $priFields = [];
             foreach ($this->meta->primary as $p) {
-                $priFields[] = $this->meta->getField($p)['name'];
+                $priFields[] = $this->meta->fields[$p]['name'];
             }
             $query .= ",\n  PRIMARY KEY (`".implode('`, `', $priFields)."`)";
         }

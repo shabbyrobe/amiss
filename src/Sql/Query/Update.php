@@ -35,7 +35,7 @@ class Update extends Criteria
         $clause = null;
         $properties = [];
         
-        $fields = $meta ? $meta->getFields() : null;
+        $fields = $meta ? $meta->fields : null;
         $named = $this->paramsAreNamed();
         
         if (is_string($this->set)) {

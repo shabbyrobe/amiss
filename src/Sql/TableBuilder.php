@@ -20,7 +20,7 @@ abstract class TableBuilder
     
     protected $engine;
 
-    protected $defaultFieldType;
+    protected $fieldType;
     
     public function __construct(Mapper $mapper, $class)
     {
@@ -109,16 +109,15 @@ abstract class TableBuilder
 
     protected function buildFields()
     {
-        $fields = $this->meta->getFields();
-        if (!$fields) {
+        if (!$this->meta->fields) {
             throw new Exception("No fields defined for {$this->meta->class}");
         }
 
         $primary = $this->meta->primary;
         
-        $defaultType = $this->meta->getDefaultFieldType();
+        $defaultType = $this->meta->fieldType;
         if (!$defaultType) {
-            $defaultType = $this->defaultFieldType;
+            $defaultType = $this->fieldType;
         }
 
         $f = array();
@@ -132,7 +131,7 @@ abstract class TableBuilder
 
         $pFieldOut = [];
         $fieldOut = [];
-        foreach ($fields as $id=>$info) {
+        foreach ($this->meta->fields as $id=>$info) {
             $f = $this->buildField($id, $info, $defaultType);
             if (isset($pFieldIds[$id])) {
                 $pFieldOut[$id] = $f;

@@ -28,18 +28,6 @@ class Arrays extends Base
             $class = isset($info['class']) ? $info['class'] : $class;
             unset($info['class']);
         }
-        
-        $parent = null;
-        parent_class: {
-            if (isset($info['inherit']) && $info['inherit']) {
-                $parent = null;
-                $parentClass = get_parent_class($class);
-                if ($parentClass) {
-                    $parent = $this->getMeta($parentClass);
-                }
-                unset($info['inherit']);
-            }
-        }
 
         if (!isset($info['table'])) {
             $info['table'] = $this->getDefaultTable($class);
@@ -49,6 +37,6 @@ class Arrays extends Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
         
-        return new \Amiss\Meta($class, $info, $parent);
+        return new \Amiss\Meta($class, $info);
     }
 }

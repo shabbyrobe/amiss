@@ -66,11 +66,8 @@ class Criteria extends Sql\Query
         $namedParams = $this->paramsAreNamed(); 
         $properties = [];
         
-        $fields = null;
-        if ($meta) {
-            $fields = $meta->getFields();
-        }
-        
+        $fields = $meta ? $meta->fields : null;
+
         if (is_array($where)) {
             // build a where clause from an array
 
@@ -171,7 +168,7 @@ class Criteria extends Sql\Query
     public static function replaceFields(\Amiss\Meta $meta, $clause, $tableAlias=null)
     {
         $tokens = array();
-        foreach ($meta->getFields() as $k=>$v) {
+        foreach ($meta->fields as $k=>$v) {
             $rep = !isset($v['source']) ? $v['name'] : $v['source'];
             if ($rep[0] != '`') {
                 $rep = '`'.$rep.'`';
