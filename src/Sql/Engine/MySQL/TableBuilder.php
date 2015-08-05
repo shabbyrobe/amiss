@@ -54,4 +54,3 @@ class TableBuilder extends \Amiss\Sql\TableBuilder
         return [$query];
     }
 }
-
