@@ -542,19 +542,23 @@ class Manager
      * Supports the following signatures:
      *   insert($object)
      *   insert($object, string $table)
+     *   insert($object, Meta $meta)
      * 
      * @return int|null
      */
-    public function insert($object, $table=null)
+    public function insert($object, $arg=null)
     {
         $meta = null;
         $query = new Query\Insert;
 
-        if ($table) {
-            if (!is_string($table)) {
-                throw new \InvalidArgumentException("Invalid type ".gettype($table));
-            }
-            $query->table = $table;
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
+            $query->table = $arg;
+        } elseif (is_array($arg)) {
+            throw new \BadMethodCallException("Please use insertTable()");
+        } elseif ($arg) {
+            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
         }
 
         if (!$meta) {
@@ -619,14 +623,14 @@ class Manager
      * Update a table by criteria.
      * 
      * Supports the following signatures:
-     *   updateTable($class, array $values, $criteria...);
-     *   updateTable($class, Query\Update $query, $criteria...);
+     *   updateTable($classNameOrMeta, array $values, $criteria...);
+     *   updateTable($classNameOrMeta, Query\Update $query, $criteria...);
      * 
      * @return void
      */
-    public function updateTable($class, ...$args)
+    public function updateTable($meta, ...$args)
     {
-        $meta = $this->mapper->getMeta($class);
+        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
@@ -652,25 +656,30 @@ class Manager
      * 
      * Supports the following signatures:
      *   update($object)
-     *   update($object, $table)
+     *   update($object, $tableOrMeta)
      * 
      * @return void
      */
-    public function update($object, $table=null)
+    public function update($object, $arg=null)
     {
+        $meta = null;
+
         $query = new Query\Update();
         if (!is_object($object)) {
             throw new \BadMethodCallException("Please use updateTable()");
         } 
-
-        if ($table) {
-            if (!is_string($table)) {
-                throw new \InvalidArgumentException();
-            }
-            $query->table = $table;
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
+            $query->table = $arg;
         } 
-
-        $meta = $this->mapper->getMeta($object);
+        elseif ($arg) {
+            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
+        }
+         
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($object);
+        }
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
@@ -710,16 +719,16 @@ class Manager
      * Delete from a table by criteria
      * 
      * Supports the following signatures:
-     *   deleteTable($class, $criteria...);
+     *   deleteTable($classNameOrMeta, $criteria...);
      * 
      * @return void
      */
-    public function deleteTable($class, ...$args)
+    public function deleteTable($meta, ...$args)
     {
         if (!isset($args[0])) {
             throw new \InvalidArgumentException("Cannot delete from table without a condition (pass the string '1=1' if you really meant to do this)");
         }
-        $meta = $this->mapper->getMeta($class);
+        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
         if (!$meta->canDelete) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
@@ -733,24 +742,30 @@ class Manager
      * Supports the following signatures:
      *   delete($object)
      *   delete($object, string $table)
+     *   delete($object, Amiss\Meta $meta)
      * 
      * @return void
      */
     public function delete($object, $arg=null)
     {
+        $meta = null;
         $query = new Query\Criteria();
 
         if (!is_object($object)) {
             throw new \BadMethodCallException("Please use deleteTable()");
         } 
-
-        if (is_string($arg)) {
+        if ($arg instanceof Meta) {
+            $meta = $arg;
+        } elseif (is_string($arg)) {
             $query->table = $arg;
-        } elseif ($arg) {
+        } 
+        elseif ($arg) {
             throw new \InvalidArgumentException("Invalid type ".gettype($arg));
         }
 
-        $meta = $this->mapper->getMeta($object);
+        if (!$meta) {
+            $meta = $this->mapper->getMeta($object);
+        }
         if (!$meta->canDelete) {
             throw new Exception("Class {$meta->class} prohibits delete");
         }
@@ -793,9 +808,9 @@ class Manager
      * a good way to remove it.
      * @return boolean
      */
-    public function shouldInsert($object)
+    public function shouldInsert($object, Meta $meta=null)
     {
-        $meta = $this->mapper->getMeta(get_class($object));
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
         if (!$meta->primary) {
             throw new Exception("No primary key for {$meta->class}");
         }
@@ -811,14 +826,16 @@ class Manager
      * 
      * @return void
      */
-    public function save($object, $table=null)
+    public function save($object, Meta $meta=null)
     {
-        $shouldInsert = $this->shouldInsert($object);
+        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
 
+        $shouldInsert = $this->shouldInsert($object, $meta);
+        
         if ($shouldInsert) {
-            $this->insert($object, $table);
+            $this->insert($object, $meta);
         } else {
-            $this->update($object, $table);
+            $this->update($object, $meta);
         }
     }
 
