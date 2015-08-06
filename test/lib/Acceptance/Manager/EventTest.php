@@ -25,7 +25,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
         $o = $d->manager->getList($cls);
         $this->assertEquals($result, $o[0]->foo);
     }
@@ -48,7 +48,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $cls = $d->classes['Pants'];
         $o = new $cls;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
         $this->assertEquals(244, $o->foo);
         $o = $d->manager->getList($cls);
         $this->assertEquals(123, $o[0]->foo);
@@ -79,12 +79,12 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $o = new $cls;
         $o->id = 1;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
         $this->assertEquals(123, $o->foo);
 
         $o = $d->manager->getById($o, 1);
         $this->assertEquals(123, $o->foo);
-        $d->manager->update($o, $d->manager->getMeta($cls));
+        $d->manager->update($o);
         $this->assertEquals(244, $o->foo);
 
         $o = $d->manager->getById($o, 1);
@@ -116,13 +116,13 @@ class EventTest extends \Amiss\Test\Helper\TestCase
         $o = new $cls;
         $o->id = 1;
         $o->foo = 123;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
         $this->assertEquals(123, $o->foo);
 
         // update
         $o = $d->manager->getById($o, 1);
         $this->assertEquals(123, $o->foo);
-        $d->manager->update($o, $d->manager->getMeta($cls));
+        $d->manager->update($o);
 
         // it will change in the instance
         $this->assertEquals(244, $o->foo);
@@ -154,7 +154,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
 
         $o = new $cls;
         $o->id = 1;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
 
         // delete
         $o = $d->manager->getById($o, 1);
@@ -196,7 +196,7 @@ class EventTest extends \Amiss\Test\Helper\TestCase
 
         $o = new $cls;
         $o->id = 1;
-        $d->manager->insert($o, $d->manager->getMeta($cls));
+        $d->manager->insert($o);
 
         // delete
         $o = $d->manager->getById($o, 1);
