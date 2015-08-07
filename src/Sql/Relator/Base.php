@@ -96,10 +96,10 @@ abstract class Base implements \Amiss\Sql\Relator
     protected function createOn($meta, $fromIndex, $relatedMeta, $toIndex)
     {
         if (!isset($meta->indexes[$fromIndex])) {
-            throw new Exception("Index $fromIndex does not exist on {$meta->class}");
+            throw new Exception("Index $fromIndex does not exist on {$meta->id}");
         }
         if (!isset($relatedMeta->indexes[$toIndex])) {
-            throw new Exception("Index $toIndex does not exist on {$relatedMeta->class}");
+            throw new Exception("Index $toIndex does not exist on {$relatedMeta->id}");
         }
 
         $on = [];
@@ -133,7 +133,7 @@ abstract class Base implements \Amiss\Sql\Relator
     public function resolveInverse($relation, $relatedMeta)
     {
         if (!isset($relatedMeta->relations[$relation['inverse']])) {
-            throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->class}");
+            throw new \Amiss\Exception("Inverse relation {$relation['inverse']} not found on class {$relatedMeta->id}");
         }
 
         $inverseRel = $relatedMeta->relations[$relation['inverse']];

@@ -25,7 +25,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits insert/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits insert/");
         $this->manager->insert($a);
     }
 
@@ -40,7 +40,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits update/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits update/");
         $this->manager->update($a);
     }
 
@@ -55,7 +55,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits update/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits update/");
         $this->manager->save($a);
     }
 
@@ -70,7 +70,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits delete/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits delete/");
         $this->manager->delete($a);
     }
 
@@ -85,7 +85,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits insert/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits insert/");
         $this->manager->insert($a);
     }
 
@@ -100,7 +100,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits update/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits update/");
         $this->manager->update($a);
     }
 
@@ -114,7 +114,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
             }
         ');
         $a = new $c;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits insert/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits insert/");
         $this->manager->save($a);
     }
 
@@ -129,7 +129,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits update/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits update/");
         $this->manager->save($a);
     }
 
@@ -144,7 +144,7 @@ class ClassPermissionsTest extends \Amiss\Test\Helper\TestCase
         ');
         $a = new $c;
         $a->artistId = 1;
-        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Class .* prohibits delete/");
+        $this->setExpectedExceptionRegexp(\Amiss\Exception::class, "/Meta .* prohibits delete/");
         $this->manager->delete($a);
     }
 }

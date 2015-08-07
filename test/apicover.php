@@ -1,11 +1,27 @@
 <?php
-$basePath = __DIR__.'/../';
+$basePath = realpath(__DIR__.'/../');
 chdir($basePath);
 require $basePath.'/vendor/autoload.php';
 goto defs;
 script:
 
+$usage = <<<'DOCOPT'
+Shows API argument permutation coverage
+
+Usage: apicover.php [options]
+
+Options:
+  --keep-trace      Do not delete the trace file at the end
+  -o, --out=<file>  Output results to a file
+
+DOCOPT;
+
+$options = (new \Docopt\Handler)->handle($usage);
 $cli = new \League\CLImate\CLImate;
+
+if ($options['--out']) {
+    $cli->output->add('report', new \League\CLIMate\Util\Writer\File(fopen($options['--out'], 'w')));
+}
 
 const PARAMS_FULL = 4;
 const PARAMS_TYPE = 2;
@@ -23,8 +39,24 @@ $cmd =  "php -d xdebug.auto_trace=1 " .
         "test/run.php";
 
 $traceFile = $basePath.'/build/'.$id.'.xt';
-$traceFile = $basePath.'/build/amiss-1438925638_159254.xt';
-$traceIndex = $traceFile.'.idx';
+
+$cli->green()->bold()->out("Running PHPUnit tests to genereate trace file"); 
+$cli->darkGray()->bold()->out("Trace file: $traceFile"); 
+{
+
+    $p = proc_open($cmd, [STDIN, STDOUT, STDERR], $pipes, $basePath);
+    if (!$p) {
+        die("Could not run test\n");
+    }
+    $ret = proc_close($p);
+    if ($ret !== 0) {
+        die("Test run failed\n");
+    } elseif (!file_exists($traceFile)) {
+        die("Trace file was not created. Xdebug enabled?\n");
+    }
+
+    $cli->br();
+}
 
 $searchFunctions = [
     'Amiss\Sql\Manager->assignRelated',
@@ -51,95 +83,116 @@ $searchFunctions = [
     'Amiss\Sql\Manager->updateTable',
 ];
 
-$searchFunctionIndex = [];
-foreach ($searchFunctions as $fn) {
-    $searchFunctionIndex[$fn] = true;
-}
+find_functions: {
+    $searchFunctionIndex = [];
+    foreach ($searchFunctions as $fn) {
+        $searchFunctionIndex[$fn] = true;
+    }
 
-$functions = [];
-foreach (xdebug_trace_pop_iter(xdebug_trace_fmt1_iter($traceFile)) as list ($call, $trace)) {
-    if (isset($searchFunctionIndex[$call->entry->function])) {
-        $functions[$call->entry->function][] = [$call, $trace];
+    $functions = [];
+    foreach (xdebug_trace_pop_iter(xdebug_trace_fmt1_iter($traceFile)) as list ($call, $trace)) {
+        if (isset($searchFunctionIndex[$call->entry->function])) {
+            $functions[$call->entry->function][] = [$call, $trace];
+        }
     }
 }
 
 $widthLimit = 60;
 $showTrace = false;
 
-ksort($functions);
-foreach ($functions as $name=>$calls) {
-    if ($showTrace) {
-        $callCount = count($calls);
+display: {
+    ksort($functions);
+    foreach ($functions as $name=>$calls) {
+        if ($showTrace) {
+            $callCount = count($calls);
 
-        foreach ($calls as $callIdx => list($call, $trace)) {
-            // $cli->green()->bold()->out(sprintf("%d/%d: %s", $callIdx + 1, $callCount, $call->entry->function));
+            foreach ($calls as $callIdx => list($call, $trace)) {
+                // $cli->green()->bold()->out(sprintf("%d/%d: %s", $callIdx + 1, $callCount, $call->entry->function));
 
-            write_argv($cli, $name, $call->entry->argv, $paramsMode, $widthLimit);
-            $cli->br();
+                write_argv_full($cli, $name, $call->entry->argv, $paramsMode, $widthLimit);
+                $cli->br();
 
-            $cli->bold()->yellow()->out("Trace:");
-            foreach (array_reverse($trace) as $frame) {
-                $cli->out("{$frame->function}() - {$frame->file}:{$frame->line}");
+                $cli->bold()->yellow()->out("Trace:");
+                foreach (array_reverse($trace) as $frame) {
+                    $cli->out("{$frame->function}() - {$frame->file}:{$frame->line}");
+                }
+                $cli->br();
             }
-            $cli->br();
+        }
+        else {
+            $callCounts = [];
+            foreach ($calls as $callIdx => $call) {
+                if ($paramsStripLengths && $paramsMode == PARAMS_TYPE) {
+                    foreach ($call[0]->entry->argv as &$arg) {
+                        $arg = preg_replace('/^(array|string)\(\d+\)$/', '$1', $arg);
+                    }
+                    unset($arg);
+                }
+
+                $argHash = serialize($call[0]->entry->argv);
+                if (!isset($callCounts[$argHash])) {
+                    $callCounts[$argHash] = ['count'=>1, 'call'=>$call];
+                } else {
+                    ++$callCounts[$argHash]['count'];
+                }
+            }
+
+            if ($paramsMode == PARAMS_TYPE) {
+                $cli->lightGreen()->bold()->out($name);
+                $hdr = ['<blue>calls</blue>', '<blue>arg1</blue>'];
+                $rows = [&$hdr];
+                $maxCols = 1;
+                foreach ($callCounts as $callCount) {
+                    list ($call, $trace) = $callCount['call'];
+
+                    $row = $call->entry->argv;
+                    array_unshift($row, $callCount['count']);
+                    $maxCols = max($call->entry->argc + 1, $maxCols);
+                    $rows[] = $row;
+                }
+
+                for ($i = 2; $i < $maxCols; $i++) {
+                    $hdr[$i] = "<blue>$i</blue>";
+                }
+                $cli->columns($rows, $maxCols);
+                $cli->br();
+            }
+            else {
+                foreach ($callCounts as $callCount) {
+                    list ($call, $trace) = $callCount['call'];
+
+                    write_argv_full($cli, $name, $call->entry->argv, $paramsMode, $widthLimit);
+                }
+            }
         }
     }
-    else {
-        $callCounts = [];
-        foreach ($calls as $callIdx => $call) {
-            if ($paramsStripLengths && $paramsMode == PARAMS_TYPE) {
-                foreach ($call[0]->entry->argv as &$arg) {
-                    $arg = preg_replace('/^(array|string)\(\d+\)$/', '$1', $arg);
-                }
-                unset($arg);
-            }
+}
 
-            $argHash = serialize($call[0]->entry->argv);
-            if (!isset($callCounts[$argHash])) {
-                $callCounts[$argHash] = ['count'=>1, 'call'=>$call];
-            } else {
-                ++$callCounts[$argHash]['count'];
-            }
-        }
-
-        if ($paramsMode == PARAMS_TYPE) {
-            $cli->lightGreen()->bold()->out($name);
-            $rows = [['<blue>calls</blue>', '<blue>args...</blue>']];
-            $maxRows = 1;
-            foreach ($callCounts as $callCount) {
-                list ($call, $trace) = $callCount['call'];
-
-                $row = $call->entry->argv;
-                array_unshift($row, "x{$callCount['count']}");
-                $maxRows = max($call->entry->argc + 1, $maxRows);
-                $rows[] = $row;
-            }
-            
-            $cli->columns($rows, $maxRows);
-            $cli->br();
-        }
+cleanup: {
+    if (!$options['--keep-trace']) {
+        @unlink($traceFile);
     }
 }
 
 return;
 defs:
 
-function write_argv($cli, $name, $argv, $mode, $widthLimit=null)
+function write_argv_full($cli, $name, $argv, $mode, $widthLimit=null)
 {
-    if ($mode == PARAMS_FULL) {
-        $cli->lightGreen()->bold()->out($name);
-        
-        $idx = 1;
-        foreach ($argv as $arg) {
-            if ($widthLimit) {
-                if (strlen($arg) > $widthLimit) {
-                    $arg = substr($arg, 0, $widthLimit).'...';
-                }
+    $cli->lightGreen()->bold()->out($name);
+    
+    $idx = 1;
+    foreach ($argv as $arg) {
+        if ($widthLimit) {
+            if (strlen($arg) > $widthLimit) {
+                $arg = substr($arg, 0, $widthLimit).'...';
             }
-            $cli->out("<bold>".($idx)."</bold>. ".$arg);
-            $idx++;
         }
+        $cli->out("<bold>".($idx)."</bold>. ".$arg);
+        $idx++;
     }
+
+    $cli->br();
 }
 
 function xdebug_trace_pop_iter($recordIter)
@@ -379,17 +432,19 @@ class TraceEntry extends TraceRecord
         $c->argc = $parts[static::FMT1_ARGC];
 
         if ($c->argc) {
-            for ($i = 0, $a = static::FMT1_ARGC + 1; $i < $c->argc; $i++, $a++) {
-                if (isset($parts[$a])) {
-                    $arg = $parts[$a];
-                    if ($arg === '...') {
-                        $c->ellipsisArg = $i;
-                        $c->argc -= 1;
-                    } else {
-                        $c->argv[] = $parts[$a];
-                    }
+            $hasEllipsis = false;
+            $i = 0;
+            foreach (array_slice($parts, static::FMT1_ARGC + 1) as $arg) {
+                if ($arg === '...') {
+                    $hasEllipsis = true;
+                    $c->ellipsisArg = $i;
+                    $c->argc -= 1;
+                }
+                else {
+                    $c->argv[$i++] = $arg;
                 }
             }
+            $c->argc = $i;
         }
         return $c;
     }

@@ -271,7 +271,16 @@ class Manager
         }
         return $this->get($meta, $query);
     }
-    
+
+    /**
+     * count ( $meta )
+     * count ( $meta , string $where [ , array $params ] )
+     * count ( $meta , array $query )
+     * count ( $meta , \Amiss\Sql\Query\Select $query )
+     *
+     * @param  $meta string|Amiss\Meta
+     * @return int
+     */
     public function count($meta, ...$args)
     {
         $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
@@ -319,7 +328,7 @@ class Manager
             $source = array($source);
         }
 
-        if ($meta) {
+        if ($meta !== null) {
             $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         } else {
             $meta = $this->mapper->getMeta(get_class($source[0]));
@@ -512,12 +521,11 @@ class Manager
     /**
      * Insert values into a table
      * 
-     * Supports the following signatures:
-     *   insertTable($meta, array $propertyValues);
-     *   insertTable($meta, Query\Insert $query);
+     *   insertTable ( $meta , array $propertyValues );
+     *   insertTable ( $meta , Query\Insert $query );
      * 
      * - $meta can be an instance of Amiss\Meta or a class name.
-     * - Property keys must exist in the corresponding Meta.
+     * - $propertyValues keys must exist in the corresponding Meta.
      * 
      * @return int|null
      */
@@ -546,33 +554,28 @@ class Manager
     /**
      * Insert an object into the database, or values into a table
      * 
-     * Supports the following signatures:
      *   insert($object)
-     *   insert($object, string $table)
      *   insert($object, Meta $meta)
      * 
      * @return int|null
      */
-    public function insert($object, $arg=null)
+    public function insert($object, $meta=null)
     {
         $meta = null;
         $query = new Query\Insert;
 
-        if ($arg instanceof Meta) {
-            $meta = $arg;
-        } elseif (is_string($arg)) {
-            $query->table = $arg;
-        } elseif (is_array($arg)) {
+        if (is_array($meta)) {
             throw new \BadMethodCallException("Please use insertTable()");
-        } elseif ($arg) {
-            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
         }
 
-        if (!$meta) {
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
             $meta = $this->mapper->getMeta(get_class($object));
         }
+
         if (!$meta->canInsert) {
-            throw new Exception("Class {$meta->class} prohibits insert");
+            throw new Exception("Meta {$meta->id} prohibits insert");
         }
 
         event_before: {
@@ -602,7 +605,7 @@ class Manager
             $lastInsertId = $this->getConnector()->lastInsertId();
             if ($lastInsertId) {
                 if (!$meta->autoinc) {
-                    throw new \UnexpectedValueException("lastInsertId returned, but class {$meta->class} had no autoinc field to receive it");
+                    throw new \UnexpectedValueException("lastInsertId returned, but meta {$meta->id} had no autoinc field to receive it");
                 }
 
                 $field = $meta->fields[$meta->autoinc];
@@ -629,9 +632,8 @@ class Manager
     /**
      * Update a table by criteria.
      * 
-     * Supports the following signatures:
-     *   updateTable($classNameOrMeta, array $values, $criteria...);
-     *   updateTable($classNameOrMeta, Query\Update $query, $criteria...);
+     *   updateTable ( $meta , array $values , $criteria... )
+     *   updateTable ( $meta , Query\Update $query , $criteria... )
      * 
      * @return void
      */
@@ -639,7 +641,7 @@ class Manager
     {
         $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!$meta->canUpdate) {
-            throw new Exception("Class {$meta->class} prohibits update");
+            throw new Exception("Meta {$meta->id} prohibits update");
         }
 
         $query = Query\Update::fromParamArgs($args);
@@ -661,13 +663,12 @@ class Manager
     /**
      * Update an object in the database, or update a table by criteria.
      * 
-     * Supports the following signatures:
-     *   update($object)
-     *   update($object, $tableOrMeta)
+     *   update ( $object )
+     *   update ( $object , $meta )
      * 
      * @return void
      */
-    public function update($object, $arg=null)
+    public function update($object, $meta=null)
     {
         $meta = null;
 
@@ -675,20 +676,15 @@ class Manager
         if (!is_object($object)) {
             throw new \BadMethodCallException("Please use updateTable()");
         } 
-        if ($arg instanceof Meta) {
-            $meta = $arg;
-        } elseif (is_string($arg)) {
-            $query->table = $arg;
-        } 
-        elseif ($arg) {
-            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
-        }
-         
-        if (!$meta) {
+
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
             $meta = $this->mapper->getMeta(get_class($object));
         }
+
         if (!$meta->canUpdate) {
-            throw new Exception("Class {$meta->class} prohibits update");
+            throw new Exception("Meta {$meta->id} prohibits update");
         }
 
         event_before: {
@@ -725,8 +721,7 @@ class Manager
     /**
      * Delete from a table by criteria
      * 
-     * Supports the following signatures:
-     *   deleteTable($classNameOrMeta, $criteria...);
+     *   deleteTable ( $meta , $criteria... );
      * 
      * @return void
      */
@@ -737,7 +732,7 @@ class Manager
         }
         $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!$meta->canDelete) {
-            throw new Exception("Class {$meta->class} prohibits update");
+            throw new Exception("Meta {$meta->id} prohibits update");
         }
         $query = Query\Criteria::fromParamArgs($args);
         return $this->executeDelete($meta, $query); 
@@ -745,15 +740,13 @@ class Manager
     
     /**
      * Delete an object from the database
-     * 
-     * Supports the following signatures:
-     *   delete($object)
-     *   delete($object, string $table)
-     *   delete($object, Amiss\Meta $meta)
+     *
+     *   delete ( $object )
+     *   delete ( $object, $meta )
      * 
      * @return void
      */
-    public function delete($object, $arg=null)
+    public function delete($object, $meta=null)
     {
         $meta = null;
         $query = new Query\Criteria();
@@ -761,20 +754,15 @@ class Manager
         if (!is_object($object)) {
             throw new \BadMethodCallException("Please use deleteTable()");
         } 
-        if ($arg instanceof Meta) {
-            $meta = $arg;
-        } elseif (is_string($arg)) {
-            $query->table = $arg;
-        } 
-        elseif ($arg) {
-            throw new \InvalidArgumentException("Invalid type ".gettype($arg));
-        }
 
-        if (!$meta) {
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
             $meta = $this->mapper->getMeta(get_class($object));
         }
+
         if (!$meta->canDelete) {
-            throw new Exception("Class {$meta->class} prohibits delete");
+            throw new Exception("Meta {$meta->id} prohibits delete");
         }
 
         event_before: {
@@ -819,10 +807,10 @@ class Manager
     {
         $meta = $meta ?: $this->mapper->getMeta(get_class($object));
         if (!$meta->primary) {
-            throw new Exception("No primary key for {$meta->class}");
+            throw new Exception("No primary key for {$meta->id}");
         }
         if (!$meta->autoinc) {
-            throw new Exception("No autoinc for {$meta->class}");
+            throw new Exception("No autoinc for {$meta->id}");
         }
         $prival = $meta->getValue($object, $meta->autoinc);
         return $prival == false;
@@ -858,11 +846,11 @@ class Manager
         }
         $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!isset($meta->indexes[$indexId])) {
-            throw new Exception("Index $indexId does not exist on class {$meta->class}");
+            throw new Exception("Index $indexId does not exist on meta {$meta->id}");
         }
         $index = $meta->indexes[$indexId];
         if (!$index['key']) {
-            throw new Exception("Index $indexId is not a key index for class {$meta->class}");
+            throw new Exception("Index $indexId is not a key index for meta {$meta->id}");
         }
         if (!is_array($id)) {
             $id = array($id);
@@ -872,7 +860,7 @@ class Manager
         foreach ($index['fields'] as $idx=>$p) {
             $idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
             if (!$idVal) {
-                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->class} by id");
+                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->id} by id");
             }
             $where[$p] = $idVal;
         }
