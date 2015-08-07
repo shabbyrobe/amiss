@@ -885,7 +885,7 @@ class Manager
         foreach ($index['fields'] as $idx=>$p) {
             $idVal = isset($id[$p]) ? $id[$p] : (isset($id[$idx]) ? $id[$idx] : null);
             if (!$idVal) {
-                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->id} by id");
+                throw new \InvalidArgumentException("Couldn't get ID value when getting {$meta->id} by index '{$indexId}'");
             }
             $where[$p] = $idVal;
         }
@@ -973,7 +973,7 @@ class Manager
             if (!($first = current($list))) {
                 throw new \UnexpectedValueException();
             }
-            $meta = $this->mapper->getMeta($first);
+            $meta = $this->mapper->getMeta(get_class($first));
         }
 
         $groups = [];
