@@ -47,8 +47,9 @@ interface Mapper
      * 
      * @return array
      */
+    function mapObjectToRow($object, $meta=null, $context=null);
 
-    function mapObjectsToRows($object, $meta=null, $context=null);
+    function mapObjectsToRows($objects, $meta=null, $context=null);
 
     /**
      * Create and populate an object

@@ -853,4 +853,23 @@ class NoteMapperTest extends \Amiss\Test\Helper\TestCase
         ]];
         $this->assertEquals($expected, $meta->relations);
     }
+
+    public function testCanMap()
+    {
+        $mapper = new \Amiss\Mapper\Note();
+        $name = ClassBuilder::i()->registerOne('
+            /** :amiss = true; */
+            class Test {}
+        ');
+        $this->assertTrue($mapper->canMap($name));
+    }
+
+    public function testCanMapUnmapped()
+    {
+        $mapper = new \Amiss\Mapper\Note();
+        $name = ClassBuilder::i()->registerOne('
+            class Test {}
+        ');
+        $this->assertFalse($mapper->canMap($name));
+    }
 }
