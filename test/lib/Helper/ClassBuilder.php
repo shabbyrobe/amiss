@@ -22,7 +22,7 @@ class ClassBuilder
         foreach ($classes as $k=>$v) {
             $hash .= "$k|$v|";
         }
-        $classHash = hash('sha256', $hash);
+        $classHash = hash('md5', $hash);
         if (isset(self::$classes[$classHash])) {
             list ($ns, $classes, $classMap) = self::$classes[$classHash];
         }

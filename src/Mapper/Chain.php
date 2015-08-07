@@ -18,9 +18,9 @@ class Chain implements \Amiss\Mapper
         $this->mappers = $mappers;
     }
 
-    public function getMeta($class, $strict=true)
+    public function getMeta($id, $strict=true)
     {
-        $key = 'chain-class-'.$class;
+        $key = 'chain-id-'.$id;
         if (isset($this->internalMetaCache[$key])) {
             $meta = $this->internalMetaCache[$key] ?: null;
         }
@@ -29,7 +29,7 @@ class Chain implements \Amiss\Mapper
         }
 
         if (!$meta) {
-            $meta = $this->findMapper($class)->getMeta($class, $strict);
+            $meta = $this->findMapper($id)->getMeta($id, $strict);
             if ($this->cache) {
                 $this->cache->set($key, $meta);
             }
@@ -37,18 +37,18 @@ class Chain implements \Amiss\Mapper
         }
 
         if ($strict && !$meta) {
-            throw new \RuntimeException("No metadata for class $class");
+            throw new \RuntimeException("No metadata for id $id");
         }
 
         return $meta;
     }
 
-    function mapsClass($class)
+    function canMap($id)
     {
-        return $this->getMeta($class) == true;
+        return $this->getMeta($id) == true;
     }
 
-    private function findMapper($input, $strict=true)
+    private function findMapper($id, $strict=true)
     {
         // input to class will be tricky:
         // - array mapper can give arbitrary keys to mapping names with different classes
@@ -57,16 +57,16 @@ class Chain implements \Amiss\Mapper
         //   (i.e. $manager->deleteObject($obj, $otherMeta) )
         throw new \Exception();
 
-        if (isset($this->index[$class])) {
-            return $this->index[$class];
+        if (isset($this->index[$id])) {
+            return $this->index[$id];
         }
         foreach ($this->mappers as $mapper) {
-            if ($mapper->mapsClass($class)) {
-                return $this->index[$class] = $mapper;
+            if ($mapper->canMap($id)) {
+                return $this->index[$id] = $mapper;
             }
         }
         if ($strict) {
-            throw new \RuntimeException("No mapper for class $class");
+            throw new \RuntimeException("No mapper for id $id");
         }
     }
 

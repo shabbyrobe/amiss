@@ -11,23 +11,19 @@ class Arrays extends Base
         $this->arrayMap = $arrayMap;
     }
 
-    public function mapsClass($class)
+    public function canMap($id)
     {
-        return isset($this->arrayMap[$class]);
+        return isset($this->arrayMap[$id]);
     }
 
-    protected function createMeta($class)
+    protected function createMeta($id)
     {
-        if (!isset($this->arrayMap[$class])) {
-            throw new \InvalidArgumentException("Unknown class $class");
+        if (!isset($this->arrayMap[$id])) {
+            throw new \InvalidArgumentException("Unknown id $id");
         }
 
-        $info = $this->arrayMap[$class];
-
-        class_name: {
-            $class = isset($info['class']) ? $info['class'] : $class;
-            unset($info['class']);
-        }
+        $info = $this->arrayMap[$id];
+        $class = isset($info['class']) ? $info['class'] : $id;
 
         if (!isset($info['table'])) {
             $info['table'] = $this->getDefaultTable($class);
@@ -37,6 +33,6 @@ class Arrays extends Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
         
-        return new \Amiss\Meta($class, $info);
+        return new \Amiss\Meta($id, $info);
     }
 }

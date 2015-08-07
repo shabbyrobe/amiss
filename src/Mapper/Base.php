@@ -25,34 +25,31 @@ abstract class Base implements \Amiss\Mapper
     public function __construct()
     {}
     
-    public function getMeta($class, $strict=true)
+    public function getMeta($id, $strict=true)
     {
-        if (is_object($class)) {
-            $class = get_class($class);
-        }
-        if (!is_string($class)) {
-            throw new \InvalidArgumentException();
+        if (!is_string($id)) {
+            throw new \InvalidArgumentException("Unexpected type for id: ".gettype($id));
         }
         
         $meta = null;
-        if (!isset($this->meta[$class])) {
-            $meta = $this->meta[$class] = $this->createMeta($class);
+        if (!isset($this->meta[$id])) {
+            $meta = $this->meta[$id] = $this->createMeta($id);
             if (!$meta && $strict) {
-                throw new \RuntimeException("No metadata for class $class");
+                throw new \RuntimeException("No metadata for id $id");
             }
             return $meta;
         }
         else {
-            return $this->meta[$class];
+            return $this->meta[$id];
         }
     }
 
-    abstract protected function createMeta($class);
+    abstract protected function createMeta($id);
 
     public function mapPropertiesToRow($input, $meta=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $input);
+            $meta = $this->getMeta($meta ?: get_class($input));
             if (!$meta) { throw new \InvalidArgumentException(); }
         }
 
@@ -87,7 +84,7 @@ abstract class Base implements \Amiss\Mapper
     public function mapRowToProperties($input, $meta=null, $fieldMap=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $input);
+            $meta = $this->getMeta($meta ?: get_class($input));
             if (!$meta) { throw new \InvalidArgumentException(); }
         }
 
@@ -179,7 +176,7 @@ abstract class Base implements \Amiss\Mapper
     public function mapObjectToRow($object, $meta=null, $context=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $object);
+            $meta = $this->getMeta($meta ?: get_class($object));
             if (!$meta) {
                 throw new \InvalidArgumentException();
             }

@@ -22,7 +22,9 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
         ;
         $mapper->expects($this->any())->method('getMeta')->will($this->returnValue(new Meta('a', [])));
         $mapper->expects($this->exactly(2))->method('mapObjectToRow');
-        $mapper->mapObjectsToRows(array('a', 'b'), null, 'foo');
+
+        $input = [(object)['a'=>'a'], (object)['a'=>'b']];
+        $mapper->mapObjectsToRows($input, null, 'foo');
     }
 
     /**

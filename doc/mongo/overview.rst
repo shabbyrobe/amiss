@@ -1,7 +1,9 @@
 Overview
 ========
 
-MongoDB is document oriented, and the PHP extension belches complex, multi-dimensional arrays intermixed with Mongo's wrapper types for values that it can't accurately represent using raw PHP types:
+MongoDB is document oriented, and the PHP extension belches complex,
+multi-dimensional arrays intermixed with Mongo's wrapper types for values that
+it can't accurately represent using raw PHP types:
 
 .. code-block:: php
 
@@ -9,7 +11,7 @@ MongoDB is document oriented, and the PHP extension belches complex, multi-dimen
     $mongo = new \Mongo();
     $db = $mongo->dbname;
     $result = $db->event->findOne(array('_id'=>new \MongoId('...')));
-
+   
     // result will equal this:
     $result = array (
         '_id' => new \MongoId('4f8c21a1b1e69a9b04000000'),
@@ -26,14 +28,15 @@ MongoDB is document oriented, and the PHP extension belches complex, multi-dimen
     );
 
 
-This extension leverages the mappers used by Amiss for relational SQL databases to transform these documents into domain objects:
+This extension leverages the mappers used by Amiss for relational SQL databases
+to transform these documents into domain objects:
 
 .. code-block:: php
 
     <?php
     $mapper = new \Amiss\Mapper\Note();
     $mapper->addTypeSet(new \Amiss\Mongo\TypeSet());
-
+   
     $mongo = new \Mongo();
     $db = $mongo->dbname;
     $result = $mapper->mapObjectToRow(

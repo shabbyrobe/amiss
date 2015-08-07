@@ -49,23 +49,22 @@ class Manager
     }
 
     /**
-     * @param string Class name
      * @return \Amiss\Meta 
      */
-    public function getMeta($class, $strict=true)
+    public function getMeta($id, $strict=true)
     {
         // Do not put any logic in here at all. this is just syntactic sugar.
         // If you override this, nothing will actually call it - this class
         // uses $this->mapper->getMeta() internally
-        return $this->mapper->getMeta($class, $strict);
+        return $this->mapper->getMeta($id, $strict);
     }
 
-    public function get($class, ...$args)
+    public function get($meta, ...$args)
     {
         $mapper = $this->mapper;
 
         $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         $object = null;
 
         // Hack to stop circular references in auto relations
@@ -131,11 +130,11 @@ class Manager
         return $object;
     }
 
-    public function getList($class, ...$args)
+    public function getList($meta, ...$args)
     {
         $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
         $mapper = $this->mapper;
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
 
         // Hack to stop circular references in auto relations
         if (isset($query->stack[$meta->class])) {
@@ -206,7 +205,7 @@ class Manager
      * Dunno about this. Consider it unstable, don't count on it still
      * being here in v6
      */
-    public function selectList($class, ...$args)
+    public function selectList($meta, ...$args)
     {
         if (!$args) {
             throw new \InvalidArgumentException();
@@ -239,7 +238,7 @@ class Manager
         }
 
         $mapper = $this->mapper;
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
 
         list ($sql, $params, $props) = $query->buildQuery($meta);
         if ($props) {
@@ -261,22 +260,22 @@ class Manager
         return $mappedRows;
     }
 
-    public function getById($class, $id, array $criteria=null)
+    public function getById($meta, $id, array $criteria=null)
     {
         $key = isset($criteria['key']) ? $criteria['key'] : null;
         unset($criteria['key']);
 
-        $query = $this->createKeyCriteria($class, $id, $key);
+        $query = $this->createKeyCriteria($meta, $id, $key);
         if ($criteria) {
             $query = array_merge($criteria, $query);
         }
-        return $this->get($class, $query);
+        return $this->get($meta, $query);
     }
     
-    public function count($class, ...$args)
+    public function count($meta, ...$args)
     {
         $query = $args && $args[0] instanceof Query\Select ? $args[0] : Query\Select::fromParamArgs($args);
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         
         $table = $query->table ?: $meta->table;
         
@@ -293,9 +292,9 @@ class Manager
         return (int)$stmt->fetchColumn();
     }
 
-    public function exists($class, $id, $key='primary')
+    public function exists($meta, $id, $key='primary')
     {
-        $meta = !$class instanceof Meta ? $this->mapper->getMeta($class) : $class;
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         $query = new \Amiss\Sql\Query\Select;
         $query->setParams([$this->createKeyCriteria($meta, $id, $key)]);
 
@@ -310,7 +309,7 @@ class Manager
      * @param string|array The name of the relation(s) to assign
      * @return void
      */
-    public function assignRelated($source, $relationNames=null, Meta $meta=null)
+    public function assignRelated($source, $relationNames=null, $meta=null)
     {
         if (!$source) { return; }
 
@@ -319,7 +318,12 @@ class Manager
         if (!$sourceIsArray) {
             $source = array($source);
         }
-        $meta = $meta ?: $this->mapper->getMeta($source[0]);
+
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
+            $meta = $this->mapper->getMeta(get_class($source[0]));
+        }
 
         if (!$relationNames) {
             if ($meta->autoRelations) {
@@ -453,7 +457,7 @@ class Manager
      *
      * @return object[]
      */
-    public function getRelated($source, $relationName, $query=null, Meta $meta=null)
+    public function getRelated($source, $relationName, $query=null, $meta=null)
     {
         if (!$source) { return; }
 
@@ -471,6 +475,9 @@ class Manager
             } else {
                 $meta = $this->mapper->getMeta(get_class($test));
             }
+        }
+        else {
+            $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
         }
 
         if (!isset($meta->relations[$relationName])) {
@@ -562,7 +569,7 @@ class Manager
         }
 
         if (!$meta) {
-            $meta = $this->mapper->getMeta($object);
+            $meta = $this->mapper->getMeta(get_class($object));
         }
         if (!$meta->canInsert) {
             throw new Exception("Class {$meta->class} prohibits insert");
@@ -630,7 +637,7 @@ class Manager
      */
     public function updateTable($meta, ...$args)
     {
-        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
@@ -678,7 +685,7 @@ class Manager
         }
          
         if (!$meta) {
-            $meta = $this->mapper->getMeta($object);
+            $meta = $this->mapper->getMeta(get_class($object));
         }
         if (!$meta->canUpdate) {
             throw new Exception("Class {$meta->class} prohibits update");
@@ -728,7 +735,7 @@ class Manager
         if (!isset($args[0])) {
             throw new \InvalidArgumentException("Cannot delete from table without a condition (pass the string '1=1' if you really meant to do this)");
         }
-        $meta = $meta instanceof Meta ? $meta : $this->mapper->getMeta($meta);
+        $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
         if (!$meta->canDelete) {
             throw new Exception("Class {$meta->class} prohibits update");
         }
@@ -764,7 +771,7 @@ class Manager
         }
 
         if (!$meta) {
-            $meta = $this->mapper->getMeta($object);
+            $meta = $this->mapper->getMeta(get_class($object));
         }
         if (!$meta->canDelete) {
             throw new Exception("Class {$meta->class} prohibits delete");
@@ -904,15 +911,16 @@ class Manager
         $allowDupes  = $allowDupes  !== null ? $allowDupes  : false;
         $ignoreNulls = $ignoreNulls !== null ? $ignoreNulls : true;
 
-        if ($meta) {
-            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
-        }
         if (!$list) {
             return [];
         }
-        $first = current($list);
-        if (!$meta) {
-            $meta = $this->mapper->getMeta($first);
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
+            if (!($first = current($list))) {
+                throw new \UnexpectedValueException();
+            }
+            $meta = $this->mapper->getMeta(get_class($first));
         }
 
         $index = array();
@@ -948,8 +956,10 @@ class Manager
         if (!$list) {
             return [];
         }
-        $first = current($list);
         if (!$meta) {
+            if (!($first = current($list))) {
+                throw new \UnexpectedValueException();
+            }
             $meta = $this->mapper->getMeta($first);
         }
 

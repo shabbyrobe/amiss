@@ -64,20 +64,21 @@ offer you.
 
 The following functions must be implemented:
 
-``getMeta ( $class )``
+``getMeta ( $id )``
     
-    Must return an instance of ``Amiss\Meta`` that defines the mapping for the class name
-    passed.  See :doc:`metadata` for details on how to structure this object.
+    Must return an instance of ``Amiss\Meta`` that defines the mapping for the id
+    passed. See :doc:`metadata` for details on how to structure this object.
 
-    ``$class``
-        A string containing the name used when ``Amiss\Sql\Manager`` is called to act on
-        an "object".
+    ``$id``
+        A string containing the name used when ``Amiss\Sql\Manager`` is called
+        to act on an "object". May or may not be a class name, depending on the
+        Mapper used, but for all simple configurations it will be.
 
 
 ``mapObjectToRow ( $meta , $object )``
     
-    Creates a row that will be used to insert or update the database. Must return a
-    1-dimensional associative array (or instance of `ArrayAccess
+    Creates a row that will be used to insert or update the database. Must
+    return a 1-dimensional associative array (or instance of `ArrayAccess
     <http://php.net/manual/en/class.arrayaccess.php>`_).
 
     ``$meta``

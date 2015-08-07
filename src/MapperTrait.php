@@ -11,7 +11,7 @@ trait MapperTrait
     public function mapRowToObject($input, $args=null, $meta=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $input);
+            $meta = $this->getMeta($meta ?: get_class($input));
         }
 
         $mapped = $this->mapRowToProperties($input, $meta);
@@ -26,7 +26,7 @@ trait MapperTrait
         $output = [];
         foreach ($objects as $idx=>$object) {
             if (!$meta instanceof Meta) {
-                $meta = $this->getMeta($meta ?: $object);
+                $meta = $this->getMeta($meta ?: get_class($object));
             }
             $output[$idx] = $this->mapObjectToProperties($object, $meta);
         }
@@ -36,7 +36,7 @@ trait MapperTrait
     public function mapObjectToProperties($object, $meta=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $object);
+            $meta = $this->getMeta($meta ?: get_class($object));
         }
 
         $output = [];
@@ -65,7 +65,7 @@ trait MapperTrait
             return [];
         }
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: current($input));
+            $meta = $this->getMeta($meta ?: get_class(current($input)));
             if (!$meta) { throw new \InvalidArgumentException(); }
         }
         $out = array();
@@ -91,7 +91,7 @@ trait MapperTrait
         if (!$input) { return []; }
 
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: current($input));
+            $meta = $this->getMeta($meta ?: get_class(current($input)));
         }
 
         $out = [];
@@ -188,7 +188,7 @@ trait MapperTrait
     public function populateObject($object, \stdClass $mapped, $meta=null)
     {
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: $object);
+            $meta = $this->getMeta($meta ?: get_class($object));
             if (!$meta) {
                 throw new \InvalidArgumentException();
             }

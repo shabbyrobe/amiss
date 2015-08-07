@@ -35,7 +35,6 @@ class ManagerTest extends \Amiss\Test\Helper\TestCase
     }
 
     /**
-     * @group manager
      * @covers Amiss\Sql\Manager::getRelated
      */
     public function testGetRelatedFailsWhenRelatorUnknown()

@@ -26,7 +26,7 @@ class Note extends \Amiss\Mapper\Base
         $this->parser = $parser;
         $this->cache = $cache;
     }
-    
+
     protected function createMeta($class)
     {
         $meta = null;
@@ -44,21 +44,21 @@ class Note extends \Amiss\Mapper\Base
         return $meta;
     }
 
-    function mapsClass($class)
+    function canMap($id)
     {
-        if (isset($this->mapsCache[$class])) {
-            return $this->mapsCache[$class];
+        if (isset($this->mapsCache[$id])) {
+            return $this->mapsCache[$id];
         }
 
-        $key = "note-maps-$class";
+        $key = "note-maps-$id";
         $maps = null;
         if ($this->cache) {
             $maps = $this->cache->get($key);
         }
 
         if ($maps === null) {
-            $maps = $this->loadMeta($class) === true;
-            $this->mapsCache[$class] = $maps;
+            $maps = $this->loadMeta($id) === true;
+            $this->mapsCache[$id] = $maps;
             if ($this->cache) {
                 $this->cache->set($key, $maps);
             }
@@ -218,7 +218,7 @@ class Note extends \Amiss\Mapper\Base
             $info['fields'] = $this->resolveUnnamedFields($info['fields']);
         }
 
-        return new \Amiss\Meta($class, $info);
+        return new \Amiss\Meta(ltrim($class, '\\'), $info);
     }
 
     protected function fillGetterSetter($name, &$itemNotes, $readOnlyAllowed=false)

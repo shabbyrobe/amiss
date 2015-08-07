@@ -24,13 +24,13 @@ interface Mapper
     const AUTOINC_TYPE = 'autoinc';
 
     /**
-     * @param  $class   mixed  String class name or object
-     * @param  $strict  bool   Throws an exception if the class isn't mapped.
+     * @param  $id      string  ID of entity to map (probably class name, but not necessarily)
+     * @param  $strict  bool    Throws an exception if the class isn't mapped.
      * @return \Amiss\Meta
      */
-    function getMeta($class, $strict=true);
+    function getMeta($id, $strict=true);
 
-    function mapsClass($class);
+    function canMap($id);
 
     function mapRowToProperties($input, $meta=null, $fieldMap=null);
 
@@ -39,8 +39,8 @@ interface Mapper
     /**
      * Get row values from an object
      * 
-     * @param $meta Amiss\Meta or string used to call getMeta()
      * @param $input   object  The object to get row values from
+     * @param $meta Amiss\Meta or string used to call getMeta()
      * @param $context mixed   Identifies the context in which the export is occurring.
      *                         Useful for distinguishing between inserts and updates when
      *                         dealing with sql databases.

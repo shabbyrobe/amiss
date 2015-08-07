@@ -5,6 +5,7 @@ use Amiss\Exception;
 
 class Meta
 {
+    public $id;
     public $class;
     public $table;
     public $schema;
@@ -74,16 +75,17 @@ class Meta
         $this->getProperties();
 
         return array(
-            'class', 'table', 'schema', 'primary', 'relations', 'fields',
+            'id', 'class', 'table', 'schema', 'primary', 'relations', 'fields',
             'fieldType', 'columnMap', 'autoRelations',
             'indexes', 'constructor', 'constructorArgs', 'ext', 'properties',
             'canInsert', 'canUpdate', 'canDelete', 'defaultOrder', 'on', 'autoinc',
         ); 
     }
 
-    public function __construct($class, array $info)
+    public function __construct($id, array $info)
     {
-        $this->class  = ltrim($class, "\\");
+        $this->id     = $id;
+        $this->class  = isset($info['class'])   ? $info['class']   : $id;
         $this->table  = isset($info['table'])   ? $info['table']   : null;
         $this->schema = isset($info['schema'])  ? $info['schema']  : null;
 

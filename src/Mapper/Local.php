@@ -13,14 +13,13 @@ class Local extends Base
         $this->localName = $localName;
     }
 
-    public function mapsClass($class)
+    public function canMap($id)
     {
-        return method_exists($class, $this->localName);
+        return method_exists($id, $this->localName);
     }
     
-    protected function createMeta($id)
+    protected function createMeta($class)
     {
-        $class = $id;
         $fn = $this->localName;
         if (!method_exists($class, $fn)) {
             throw new \UnexpectedValueException("Static function $fn not found on $class");
