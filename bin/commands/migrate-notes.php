@@ -35,7 +35,7 @@ $meta = new \Amiss\Meta('stdClass', [
         'ext'=>'--ext',
     ]
 ]);
-$options = $optMapper->mapRowToObject($options, null, $meta);
+$options = $optMapper->mapRowToObject($meta, $options);
 $options->crapExtractor = $options->ext != 'php';
 
 $hasColorDiff = shell_cmd('which colordiff', false);

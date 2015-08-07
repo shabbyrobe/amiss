@@ -50,12 +50,9 @@ class Chain implements \Amiss\Mapper
 
     private function findMapper($id, $strict=true)
     {
-        // input to class will be tricky:
-        // - array mapper can give arbitrary keys to mapping names with different classes
-        // - who do we trust when the $input is a Meta? what about when we are
-        //   using a completely custom meta to operate on a similar object 
-        //   (i.e. $manager->deleteObject($obj, $otherMeta) )
-        throw new \Exception();
+        if ($id instanceof Meta) {
+            $id = $id->id;
+        }
 
         if (isset($this->index[$id])) {
             return $this->index[$id];
@@ -70,14 +67,22 @@ class Chain implements \Amiss\Mapper
         }
     }
 
-    function mapRowToProperties($input, $meta=null, $fieldMap=null)
+    function mapRowToProperties($meta, $input, $fieldMap=null)
     {
-        return $this->findMapper($input)->mapRowToProperties($input, $meta, $fieldMap);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
+
+        return $this->findMapper($meta)->mapRowToProperties($meta, $input, $fieldMap);
     }
 
-    function mapPropertiesToRow($input, $meta=null)
+    function mapPropertiesToRow($meta, $input)
     {
-        return $this->findMapper($input)->mapPropertiesToRow($input, $meta);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
+
+        return $this->findMapper($meta)->mapPropertiesToRow($meta, $input);
     }
 
     function determineTypeHandler($type)
@@ -86,24 +91,41 @@ class Chain implements \Amiss\Mapper
         throw new \BadMethodCallException();
     }
 
-    function mapObjectToRow($input, $meta=null, $context=null)
+    function mapObjectToRow($object, $meta=null, $context=null)
     {
-        return $this->findMapper($input)->mapObjectToRow($input, $meta, $context);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: get_class($object));
+        }
+
+        return $this->findMapper($meta)->mapObjectToRow($object, $meta, $context);
     }
 
-    function mapRowToObject($input, $args=null, $meta=null)
+    function mapRowToObject($meta, $row, $args=null)
     {
-        return $this->findMapper($input)->mapRowToObject($input, $args, $meta);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
+
+        return $this->findMapper($meta)->mapRowToObject($meta, $row, $args);
     }
 
     function mapObjectsToProperties($objects, $meta=null)
     {
-        return $this->findMapper($objects)->mapObjectsToProperties($objects, $meta);
+        if (!$objects) {
+            return [];
+        }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: get_class(current($objects)));
+        }
+        return $this->findMapper($meta)->mapObjectsToProperties($objects, $meta);
     }
 
     function mapObjectToProperties($object, $meta=null)
     {
-        return $this->findMapper($object)->mapObjectToProperties($object, $meta);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: get_class($object));
+        }
+        return $this->findMapper($meta)->mapObjectToProperties($object, $meta);
     }
 
     function formatParams(Meta $meta, $propertyParamMap, $params)
@@ -111,23 +133,37 @@ class Chain implements \Amiss\Mapper
         return $this->findMapper($meta)->mapObjectToProperties($meta, $propertyParamMap, $params);
     }
 
-    function mapRowsToObjects($input, $args=null, $meta=null)
+    function mapRowsToObjects($meta, $rows, $args=null)
     {
-        return $this->findMapper($input)->mapRowsToObjects($input, $args, $meta);
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
+        return $this->findMapper($meta)->mapRowsToObjects($meta, $input, $args);
     }
 
-    function mapObjectsToRows($input, $meta=null, $context=null)
+    function mapObjectsToRows($objects, $meta=null, $context=null)
     {
-        return $this->findMapper($input)->mapObjectsToRows($input, $meta, $context);
+        if (!$objects) {
+            return [];
+        }
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta ?: get_class(current($objects)));
+        }
+        return $this->findMapper($meta)->mapObjectsToRows($objects, $meta, $context);
     }
 
     function createObject($meta, $mapped, $args=null)
     {
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
         return $this->findMapper($meta)->createObject($meta, $mapped, $args);
     }
 
     function populateObject($object, \stdClass $mapped, $meta=null)
     {
-        return $this->findMapper($object)->populateObject($object, $mapped, $meta);
+        if (!$meta instanceof Meta) {
+            $meta = $this->getMeta($meta);
+        }
+        return $this->findMapper($meta)->populateObject($object, $mapped, $meta);
     }
 }

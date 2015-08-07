@@ -8,13 +8,11 @@ namespace Amiss;
  */
 trait MapperTrait
 {
-    public function mapRowToObject($input, $args=null, $meta=null)
+    public function mapRowToObject($meta, $row, $args=null)
     {
-        if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: get_class($input));
-        }
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
 
-        $mapped = $this->mapRowToProperties($input, $meta);
+        $mapped = $this->mapRowToProperties($meta, $row);
         $object = $this->createObject($meta, $mapped, $args);
         $this->populateObject($object, $mapped, $meta);
 
@@ -59,19 +57,18 @@ trait MapperTrait
     /**
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function mapRowsToObjects($input, $args=null, $meta=null)
+    public function mapRowsToObjects($meta, $rows, $args=null)
     {
-        if (!$input) {
+        if (!$rows) {
             return [];
         }
-        if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: get_class(current($input)));
-            if (!$meta) { throw new \InvalidArgumentException(); }
-        }
+
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
+
         $out = array();
-        if ($input) {
-            foreach ($input as $item) {
-                $obj = $this->mapRowToObject($item, $args, $meta);
+        if ($rows) {
+            foreach ($rows as $row) {
+                $obj = $this->mapRowToObject($meta, $row, $args);
                 $out[] = $obj;
             }
         }
@@ -86,17 +83,17 @@ trait MapperTrait
      *
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    public function mapObjectsToRows($input, $meta=null, $context=null)
+    public function mapObjectsToRows($objects, $meta=null, $context=null)
     {
-        if (!$input) { return []; }
+        if (!$objects) { return []; }
 
         if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: get_class(current($input)));
+            $meta = $this->getMeta($meta ?: get_class(current($objects)));
         }
 
         $out = [];
-        foreach ($input as $key=>$item) {
-            $out[$key] = $this->mapObjectToRow($item, $meta, $context);
+        foreach ($objects as $key => $object) {
+            $out[$key] = $this->mapObjectToRow($object, $meta, $context);
         }
         return $out;
     }

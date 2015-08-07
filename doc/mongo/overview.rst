@@ -40,8 +40,8 @@ to transform these documents into domain objects:
     $mongo = new \Mongo();
     $db = $mongo->dbname;
     $result = $mapper->mapObjectToRow(
-        $mapper->getMeta('Event'),
-        $db->event->findOne(array('_id'=>new \MongoId('...')))
+        $db->event->findOne(array('_id'=>new \MongoId('...'))),
+        $mapper->getMeta('Event')
     );
     var_dump($result);
 

@@ -32,9 +32,9 @@ class TestMapper implements \Amiss\Mapper
     
     function populateObject($object, \stdClass $mapped, $meta=null) {}
 
-    public function mapRowToProperties($input, $meta=null, $fieldMap=null) {}
+    public function mapRowToProperties($meta, $input, $fieldMap=null) {}
 
-    public function mapPropertiesToRow($input, $meta=null) {}
+    public function mapPropertiesToRow($meta, $input) {}
 
     function mapObjectToRow($object, $meta=null, $context=null) {}
     

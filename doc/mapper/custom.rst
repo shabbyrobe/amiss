@@ -75,17 +75,18 @@ The following functions must be implemented:
         Mapper used, but for all simple configurations it will be.
 
 
-``mapObjectToRow ( $meta , $object )``
+``mapObjectToRow ( $object , $meta = null )``
     
     Creates a row that will be used to insert or update the database. Must
     return a 1-dimensional associative array (or instance of `ArrayAccess
     <http://php.net/manual/en/class.arrayaccess.php>`_).
 
-    ``$meta``
-        ``Amiss\Meta`` defining the mapping
-
     ``$object``
         The object containing the values which will be used for the row
+
+    ``$meta``
+        ``Amiss\Meta`` defining the mapping. If this isn't passed, it will be
+        inferred from the class of the object
 
 
 ``mapRowToObject ( $meta , $object , array $args = null )``

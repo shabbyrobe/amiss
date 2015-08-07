@@ -32,9 +32,9 @@ interface Mapper
 
     function canMap($id);
 
-    function mapRowToProperties($input, $meta=null, $fieldMap=null);
+    function mapRowToProperties($meta, $row, $fieldMap=null);
 
-    function mapPropertiesToRow($input, $meta=null);
+    function mapPropertiesToRow($meta, $properties);
 
     /**
      * Get row values from an object
@@ -47,20 +47,16 @@ interface Mapper
      * 
      * @return array
      */
-    function mapObjectToRow($input, $meta=null, $context=null);
 
-    /**
-     * Get a type handler for a field type
-     * @param  string  $type  The type of the field
-     * @return \Amiss\Type\Handler
-     */
-    function determineTypeHandler($type);
+    function mapObjectsToRows($object, $meta=null, $context=null);
 
     /**
      * Create and populate an object
      * @param $meta Amiss\Meta or string used to call getMeta()
      */
-    function mapRowToObject($input, $args=null, $meta=null);
+    function mapRowToObject($meta, $row, $args=null);
+
+    function mapRowsToObjects($meta, $rows, $args=null);
 
     function mapObjectsToProperties($objects, $meta=null);
 
@@ -68,11 +64,14 @@ interface Mapper
 
     function formatParams(Meta $meta, $propertyParamMap, $params);
 
-    function mapRowsToObjects($input, $args=null, $meta=null);
-
-    function mapObjectsToRows($input, $meta=null, $context=null);
-
     function createObject($meta, $mapped, $args=null);
 
     function populateObject($object, \stdClass $mapped, $meta=null);
+
+    /**
+     * Get a type handler for a field type
+     * @param  string  $type  The type of the field
+     * @return \Amiss\Type\Handler
+     */
+    function determineTypeHandler($type);
 }

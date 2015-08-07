@@ -38,7 +38,7 @@ $meta = new \Amiss\Meta('stdClass', [
         'getset'=>'--getset',
     ]
 ]);
-$options = $mapper->mapRowToObject($options, null, $meta);
+$options = $mapper->mapRowToObject($meta, $options);
 
 if ($options->base && $options->ars) {
     die("Cannot pass --base and --ars\n");

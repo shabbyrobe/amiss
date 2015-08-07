@@ -46,12 +46,9 @@ abstract class Base implements \Amiss\Mapper
 
     abstract protected function createMeta($id);
 
-    public function mapPropertiesToRow($input, $meta=null)
+    public function mapPropertiesToRow($meta, $input)
     {
-        if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: get_class($input));
-            if (!$meta) { throw new \InvalidArgumentException(); }
-        }
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
 
         $properties = $meta->getProperties();
         $fields = [];
@@ -81,12 +78,9 @@ abstract class Base implements \Amiss\Mapper
         return $fields;
     }
 
-    public function mapRowToProperties($input, $meta=null, $fieldMap=null)
+    public function mapRowToProperties($meta, $input, $fieldMap=null)
     {
-        if (!$meta instanceof Meta) {
-            $meta = $this->getMeta($meta ?: get_class($input));
-            if (!$meta) { throw new \InvalidArgumentException(); }
-        }
+        if (!$meta instanceof Meta) { $meta = $this->getMeta($meta); }
 
         if (!$fieldMap) { $fieldMap = $meta->columnMap; }
 

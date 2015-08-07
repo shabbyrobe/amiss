@@ -46,10 +46,10 @@ v5.0.0
     +    function populateObject($object, \stdClass $mapped, $meta=null)
     -    function populateObject($meta, $object, $row)
 
-    +    function mapRowToObject($input, $args=null, $meta=null)
+    +    function mapRowToObject($meta, $input, $args=null)
     -    function toObject($meta, $input, $args=null)
 
-    +    function mapRowsToObjects($input, $args=null, $meta=null)
+    +    function mapRowsToObjects($meta, $input, $args=null)
     -    function toObjects($meta, $input, $args=null)
 
 - Relations can now be automatically populated (with some limits)

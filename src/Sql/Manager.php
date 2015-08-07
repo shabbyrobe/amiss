@@ -89,7 +89,7 @@ class Manager
             if ($mappedRow) {
                 throw new Exception("Query returned more than one row");
             }
-            $mappedRow = $mapper->mapRowToProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($meta, $row);
         }
 
         if (!$mappedRow) {
@@ -150,7 +150,7 @@ class Manager
 
         $mappedRows = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->mapRowToProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($meta, $row);
             $mappedRows[] = $mappedRow;
         }
 
@@ -249,7 +249,7 @@ class Manager
 
         $mappedRows = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $mappedRow = $mapper->mapRowToProperties($row, $meta);
+            $mappedRow = $mapper->mapRowToProperties($meta, $row);
             if ($singleMode) {
                 $mappedRows[] = current($mappedRow);
             } else {
@@ -537,7 +537,7 @@ class Manager
         }
 
         $query = $query instanceof Query\Insert ? $query : new Query\Insert(['values'=>$query]);
-        $query->values = $this->mapper->mapPropertiesToRow($query->values, $meta);
+        $query->values = $this->mapper->mapPropertiesToRow($meta, $query->values);
         if (!$query->table) {
             $query->table = $meta->table;
         }

@@ -133,7 +133,7 @@ class Association extends Base
         $list = array();
         $ids = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $object = $this->manager->mapper->mapRowToObject($row, array(), $relatedMeta);
+            $object = $this->manager->mapper->mapRowToObject($relatedMeta, $row);
             
             $list[] = $object;
             $id = array();

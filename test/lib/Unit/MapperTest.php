@@ -107,7 +107,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
         $mapper->expects($this->exactly(2))->method('mapRowToObject');
         $meta = new \Amiss\Meta('a', ['table'=>'b']);
         $mapper->expects($this->any())->method('getMeta')->will($this->returnValue($meta));
-        $mapper->mapRowsToObjects(array('a', 'b'), null, 'foo');
+        $mapper->mapRowsToObjects('foo', array('a', 'b'));
     }
 
     /**
@@ -236,7 +236,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ]
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar']);
         $this->assertInstanceOf('stdClass', $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -259,7 +259,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 ['property', 'a'],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar']);
         $this->assertEquals(['bar', 'foo'], $obj->args);
         $this->assertFalse(isset($obj->a));
         $this->assertFalse(isset($obj->b));
@@ -278,7 +278,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 'a'=>['name'=>'a', 'type'=>'string'], 'b'=>['name'=>'b', 'type'=>'string'],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar'], ['bar', 'foo'], $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar'], ['bar', 'foo']);
         $this->assertEquals(['bar', 'foo'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -302,7 +302,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 ['arg', 0],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar'], ['baz', 'qux'], $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar'], ['baz', 'qux']);
         $this->assertEquals(['qux', 'bar', 'baz'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertFalse(isset($obj->b));
@@ -325,7 +325,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 ['arg', 0],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar'], [null, 'qux'], $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar'], [null, 'qux']);
         $this->assertEquals(['qux', null], $obj->args);
     }
 
@@ -346,7 +346,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 ['property', 'a'],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>null, 'b'=>'bar'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>null, 'b'=>'bar']);
         $this->assertEquals(['bar', null], $obj->args);
         $this->assertFalse(isset($obj->a));
         $this->assertFalse(isset($obj->b));
@@ -373,7 +373,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
                 ['property', 'rel2'],
             ],
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo', 'b'=>'bar', 'rel1'=>'yep', 'rel2'=>'woo']);
         $this->assertEquals(['yep', 'woo'], $obj->args);
         $this->assertEquals('foo', $obj->a);
         $this->assertEquals('bar', $obj->b);
@@ -393,7 +393,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
             'table'=>'test_table',
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']]
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo']);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);
@@ -413,7 +413,7 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
             'fields'=>['a'=>['name'=>'a', 'type'=>'string']],
             'constructor'=>'staticConstruct',
         ]);
-        $obj = $mapper->mapRowToObject(['a'=>'foo'], null, $meta);
+        $obj = $mapper->mapRowToObject($meta, ['a'=>'foo']);
         $this->assertInstanceOf($class, $obj);
         $this->assertEquals('foo', $obj->a);
         $this->assertTrue($obj->constructCalled);

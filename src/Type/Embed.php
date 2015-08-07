@@ -48,13 +48,13 @@ class Embed implements Handler
             $return = array();
             if ($value) {
                 foreach ($value as $key=>$item) {
-                    $obj = $this->mapper->mapRowToObject($item, null, $embedMeta);
+                    $obj = $this->mapper->mapRowToObject($embedMeta, $item);
                     $return[$key] = $obj;
                 }
             }
         }
         else {
-            $return = $this->mapper->mapRowToObject($value, null, $embedMeta);
+            $return = $this->mapper->mapRowToObject($embedMeta, $value);
         }
         return $return;
     }

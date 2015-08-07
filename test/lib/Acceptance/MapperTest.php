@@ -26,10 +26,10 @@ class MapperTest extends \Amiss\Test\Helper\TestCase
     public function testMapRowToObjectMeta()
     {
         $mapper = $this->deps->mapper;
-        $obj = $mapper->mapRowToObject(['artistId'=>1], null, 'Amiss\Demo\Artist');
+        $obj = $mapper->mapRowToObject(\Amiss\Demo\Artist::class, ['artistId'=>1]);
         $this->assertInstanceOf('Amiss\Demo\Artist', $obj);
 
-        $obj = $mapper->mapRowToObject(['artistId'=>1], null, $mapper->getMeta('Amiss\Demo\Artist'));
+        $obj = $mapper->mapRowToObject($mapper->getMeta('Amiss\Demo\Artist'), ['artistId'=>1]);
         $this->assertInstanceOf('Amiss\Demo\Artist', $obj);
     }
 
