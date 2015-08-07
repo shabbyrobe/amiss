@@ -13,13 +13,14 @@ class Chain implements \Amiss\Mapper
 
     public function __construct(array $mappers, $cache=null)
     {
-        parent::__construct();
         $this->cache = $cache;
         $this->mappers = $mappers;
     }
 
     public function getMeta($id, $strict=true)
     {
+        $meta = null;
+
         $key = 'chain-id-'.$id;
         if (isset($this->internalMetaCache[$key])) {
             $meta = $this->internalMetaCache[$key] ?: null;

@@ -57,7 +57,7 @@ class Note extends \Amiss\Mapper\Base
         }
 
         if ($maps === null) {
-            $maps = $this->loadMeta($id) === true;
+            $maps = $this->loadMeta($id) == true;
             $this->mapsCache[$id] = $maps;
             if ($this->cache) {
                 $this->cache->set($key, $maps);
