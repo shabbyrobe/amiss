@@ -10,6 +10,13 @@ use PDOK\Connector;
 
 class Manager
 {
+    static $eventNames = [
+        'beforeUpdate' , 'afterUpdate' ,
+        'beforeInsert' , 'afterInsert' ,
+        'beforeDelete' , 'afterDelete' ,
+        'beforeSave'   , 'afterSave'   ,
+    ];
+
     /**
      * @var PDOK\Connector
      */
@@ -603,11 +610,7 @@ class Manager
         // we need to be careful with "lastInsertId": SQLite generates one even without a PRIMARY
         if ($object && $meta->primary) {
             $lastInsertId = $this->getConnector()->lastInsertId();
-            if ($lastInsertId) {
-                if (!$meta->autoinc) {
-                    throw new \UnexpectedValueException("lastInsertId returned, but meta {$meta->id} had no autoinc field to receive it");
-                }
-
+            if ($lastInsertId && $meta->autoinc) {
                 $field = $meta->fields[$meta->autoinc];
                 $handler = $this->mapper->determineTypeHandler(Mapper::AUTOINC_TYPE);
                 if (!$handler) {
@@ -683,6 +686,9 @@ class Manager
             $meta = $this->mapper->getMeta(get_class($object));
         }
 
+        if (!$meta->primary) {
+            throw new Exception("Cannot update: meta {$meta->id} has no primary key");
+        }
         if (!$meta->canUpdate) {
             throw new Exception("Meta {$meta->id} prohibits update");
         }
@@ -699,7 +705,7 @@ class Manager
         query: {
             $query->set = $this->mapper->mapObjectToRow($object, $meta, 'update');
             $query->where = $meta->getIndexValue($object);
-            
+
             list ($sql, $params, $props) = $query->buildQuery($meta);
             // don't need to do formatParams - it's already covered by the mapPropertiesToRow call in
             // table update mode
@@ -798,39 +804,58 @@ class Manager
     }
 
     /**
-     * This is a hack to allow active record to intercept saving and fire events.
-     * You should not call it yourself as it will be removed as soon as I work out
-     * a good way to remove it.
-     * @return boolean
-     */
-    public function shouldInsert($object, Meta $meta=null)
-    {
-        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
-        if (!$meta->primary) {
-            throw new Exception("No primary key for {$meta->id}");
-        }
-        if (!$meta->autoinc) {
-            throw new Exception("No autoinc for {$meta->id}");
-        }
-        $prival = $meta->getValue($object, $meta->autoinc);
-        return $prival == false;
-    }
-    
-    /**
      * If an object has an autoincrement primary key, insert or update as necessary.
      * 
      * @return void
      */
-    public function save($object, Meta $meta=null)
+    public function save($object, $meta=null)
     {
-        $meta = $meta ?: $this->mapper->getMeta(get_class($object));
+        if ($meta) {
+            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
+        } else {
+            $meta = $this->mapper->getMeta(get_class($object));
+        }
 
-        $shouldInsert = $this->shouldInsert($object, $meta);
-        
+        if (!$meta->primary) {
+            throw new Exception("No primary key for {$meta->id}");
+        }
+
+        $shouldInsert = null;
+        $prival = null;
+        if ($meta->autoinc) {
+            $prival = $meta->getValue($object, $meta->autoinc);
+            $shouldInsert = !$prival;
+        } else {
+            $prival = $meta->getIndexValue($object);
+        }
+
+        event_before: {
+            if (isset($meta->on['beforeSave'])) {
+                foreach ($meta->on['beforeSave'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['beforeSave'])) {
+                foreach ($this->on['beforeSave'] as $cb) { $cb($object, $meta); }
+            }
+        }
+
+        if ($shouldInsert === null) {
+            $newpri = $meta->getIndexValue($object);
+            $shouldInsert = $newpri != $prival;
+        }
+
         if ($shouldInsert) {
             $this->insert($object, $meta);
         } else {
             $this->update($object, $meta);
+        }
+
+        event_after: {
+            if (isset($meta->on['afterSave'])) {
+                foreach ($meta->on['afterSave'] as $cb) { $cb = [$object, $cb]; $cb(); }
+            }
+            if (isset($this->on['afterSave'])) {
+                foreach ($this->on['afterSave'] as $cb) { $cb($object, $meta); }
+            }
         }
     }
 

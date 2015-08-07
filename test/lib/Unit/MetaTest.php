@@ -111,15 +111,15 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
     public function testGetIndexValueMultiReturnsNullWhenNoValues()
     {
         $meta = new \Amiss\Meta('stdClass', array(
-            'table'=>'std_class',
-            'primary'=>array('a', 'b'),
-            'fields'=>[
-                'a'=>true, 'b'=>true, 'c'=>true,
+            'table'   => 'std_class',
+            'primary' => ['a', 'b'],
+            'fields'  => [
+                'a' => true, 'b' => true, 'c' => true,
             ],
         ));
         
-        $obj = (object)array('a'=>null, 'b'=>null, 'c'=>3);
-        $this->assertEquals(null, $meta->getIndexValue($obj));
+        $obj = (object) ['a'=>null, 'b'=>null, 'c'=>3];
+        $this->assertEquals(['a'=>null, 'b'=>null], $meta->getIndexValue($obj));
     }
 
     /**
@@ -128,15 +128,15 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
     public function testGetIndexValueMultiWhenOneValueIsNull()
     {
         $meta = new \Amiss\Meta('stdClass', array(
-            'table'=>'std_class',
-            'primary'=>array('a', 'b'),
-            'fields'=>[
-                'a'=>true, 'b'=>true, 'c'=>true,
+            'table'   => 'std_class',
+            'primary' => ['a', 'b'],
+            'fields'  => [
+                'a' => true, 'b' => true, 'c' => true,
             ],
         ));
         
-        $obj = (object)array('a'=>null, 'b'=>2, 'c'=>3);
-        $this->assertEquals(array('a'=>null, 'b'=>2), $meta->getIndexValue($obj));
+        $obj = (object) ['a'=>null, 'b'=>2, 'c'=>3];
+        $this->assertEquals(['a'=>null, 'b'=>2], $meta->getIndexValue($obj));
     }
 
     /**
@@ -144,14 +144,14 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetPropertyValue()
     {
-        $meta = new \Amiss\Meta('stdClass', array(
-            'table'=>'std_class',
-            'fields'=>array(
-                'a'=>array(),
-            ),
-        ));
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'  => 'std_class',
+            'fields' => [
+                'a'  => [],
+            ],
+        ]);
         
-        $obj = (object)array('a'=>'foo');
+        $obj = (object) ['a' => 'foo'];
         $result = $meta->getValue($obj, 'a');
         $this->assertEquals('foo', $result);
     }
@@ -161,16 +161,18 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetUnknownPropertyValue()
     {
-        $meta = new \Amiss\Meta('stdClass', array(
-            'table'=>'std_class',
-            'fields'=>array(
-                'a'=>array(),
-            ),
-        ));
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'  => 'std_class',
+            'fields' => [
+                'a'  => [],
+            ],
+        ]);
         
-        $obj = (object)array('a'=>'foo');
+        $obj = (object) ['a'=>'foo'];
         
-        $this->setExpectedException(\InvalidArgumentException::class, "Unknown property 'b' on stdClass");
+        $this->setExpectedException(
+            \InvalidArgumentException::class, "Unknown property 'b' on stdClass"
+        );
         $result = $meta->getValue($obj, 'b');
     }
     
@@ -179,15 +181,15 @@ class MetaTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetGetterValue()
     {
-        $meta = new \Amiss\Meta('stdClass', array(
-            'table'=>'std_class',
-            'fields'=>array(
-                'a'=>array('getter'=>'getTest'),
-            ),
-        ));
+        $meta = new \Amiss\Meta('stdClass', [
+            'table'  => 'std_class',
+            'fields' => [
+                'a'  => ['getter' => 'getTest'],
+            ],
+        ]);
         
         $mock = $this->getMockBuilder('stdClass')
-            ->setMethods(array('getTest'))
+            ->setMethods(['getTest'])
             ->getMock()
         ;
         $mock->expects($this->once())->method('getTest');

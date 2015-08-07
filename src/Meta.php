@@ -12,6 +12,11 @@ class Meta
     public $primary;
     public $constructor;
     public $constructorArgs = [];
+
+    /**
+     * Field id for autoinc - only one field can be autoinc. Must exist
+     * in $meta->fields
+     */
     public $autoinc;
     
     // queries that use this Meta which do not explicitly pass 'null' as their
@@ -65,8 +70,11 @@ class Meta
     public $columnMap;
 
     protected $properties;
-    
-    /** @var array|null */
+
+    /**
+     * Default type for fields which don't specify one
+     * @var array|null
+     */
     public $fieldType;
 
     function __sleep()
@@ -361,9 +369,7 @@ class Meta
             $indexValue[$p] = $value;
         }
         
-        if ($foundValue) {
-            return $indexValue;
-        }
+        return $indexValue;
     }
     
     function getValue($object, $property)

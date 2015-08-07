@@ -73,13 +73,48 @@ class ManagerSaveTest extends \Amiss\Test\Helper\TestCase
         $this->assertEquals($expected, $this->manager->updateTable(Demo\ArtistType::class, ['type'=>'Band'], '1=1'));
     }
 
-    public function testSaveFailsWhenAutoincNotDeclared()
+    public function testSaveNoAutoincUpdates()
     {
         $object = new Demo\EventArtist();
-        $this->setExpectedException(
-            'Amiss\Exception', 
-            'No autoinc for Amiss\Demo\EventArtist'
-        );
+        $object->artistId = 1;
+        $object->eventId = 1;
+        $object->priority = 1;
+        $object->sequence = 1;
+
+        $this->manager->connector->exec("DELETE FROM event_artist");
+        $this->manager->insert($object);
+
+        $object->sequence = 2;
         $this->manager->save($object);
+
+        $rows = $this->manager->connector->query("SELECT * FROM event_artist")->fetchAll(\PDO::FETCH_ASSOC);
+        $this->assertCount(1, $rows);
+        $this->assertEquals(2, $rows[0]['sequence']);
+    }
+
+    public function testSaveNoAutoincBeforeSavePopulatedPrimaryInserts()
+    {
+        $this->manager->connector->exec("DELETE FROM event_artist");
+
+        $object = new Demo\EventArtist();
+        $object->priority = 1;
+        $object->sequence = 1;
+        $meta = $this->manager->mapper->getMeta(Demo\EventArtist::class);
+        $this->manager->on['beforeSave'] = [function($object) {
+            $object->artistId = 1;
+            $object->eventId  = 1;
+        }];
+
+        $this->manager->save($object, $meta);
+
+        $sql  = "SELECT priority, sequence, artistId, eventId FROM event_artist";
+        $rows = $this->manager->connector->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+        $expected = [[
+            'priority' => '1',
+            'sequence' => '1',
+            'artistId' => '1',
+            'eventId'  => '1',
+        ]];
+        $this->assertEquals($expected, $rows);
     }
 }

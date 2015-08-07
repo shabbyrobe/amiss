@@ -18,42 +18,24 @@ abstract class ActiveRecord
         self::$meta = array();
     }
     
-    protected function beforeInsert() {}
-    
-    protected function beforeSave() {}
-    
-    protected function beforeUpdate() {}
-    
-    protected function beforeDelete() {}
-    
     public function save()
     {
-        $manager = static::getDependency('manager');
-        if ($manager->shouldInsert($this)) {
-            $this->insert();
-        } else {
-            $this->update();
-        }
+        return static::getDependency('manager')->save($this, static::getMeta());
     }
     
     public function insert()
     {
-        $this->beforeInsert();
-        $this->beforeSave();
-        return static::getDependency('manager')->insert($this);
+        return static::getDependency('manager')->insert($this, static::getMeta());
     }
     
     public function update()
     {
-        $this->beforeUpdate();
-        $this->beforeSave();
-        return static::getDependency('manager')->update($this);
+        return static::getDependency('manager')->update($this, static::getMeta());
     }
 
     public function delete()
     {
-        $this->beforeDelete();
-        return static::getDependency('manager')->delete($this);
+        return static::getDependency('manager')->delete($this, static::getMeta());
     }
     
     /**
@@ -99,11 +81,17 @@ abstract class ActiveRecord
     {
         $class = $class ?: get_called_class();
         if (!isset(self::$meta[$class])) {
-            self::$meta[$class] = static::getDependency('manager')->mapper->getMeta($class);
+            self::$meta[$class] = $meta = static::getDependency('manager')->mapper->getMeta($class);
+
+            foreach (\Amiss\Sql\Manager::$eventNames as $name) {
+                if (method_exists($class, $name)) {
+                    $meta->on[$name][] = $name;
+                }
+            }
         }
         return self::$meta[$class];
     }
-    
+
     public static function insertTable(...$args)
     {
         $manager = static::getDependency('manager');

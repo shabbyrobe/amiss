@@ -6,6 +6,52 @@ use Amiss\Test;
 
 class EventTest extends \Amiss\Test\Helper\TestCase
 {
+    function testBeforeSave()
+    {
+        $d = Test\Factory::managerNoteModelCustom('
+            /** :amiss = {"on": {"beforeSave": ["a", "b"]}}; */
+            class Pants {
+                /** :amiss = {"field": {"primary": true}}; */
+                public $foo;
+
+                function a() { $this->foo = $this->foo * 2; }
+                function b() { $this->foo = $this->foo + 3; }
+            }
+        ');
+        $d->manager->on['beforeSave'][] = function($object) {
+            $object->foo -= 5;
+        };
+        $result = ((123 * 2) + 3) - 5; // 244
+        $cls = $d->classes['Pants'];
+        $o = new $cls;
+        $o->foo = 123;
+        $d->manager->save($o, $d->manager->getMeta($cls));
+        $o = $d->manager->getList($cls);
+        $this->assertEquals($result, $o[0]->foo);
+    }
+
+    function testMetaAfterSave()
+    {
+        $d = Test\Factory::managerNoteModelCustom('
+            /** :amiss = {"on": {"afterSave": ["a", "b"]}}; */
+            class Pants {
+                /** :amiss = {"field": {"primary": true}}; */
+                public $foo;
+
+                function a() { $this->foo = $this->foo * 2; }
+                function b() { $this->foo = $this->foo + 3; }
+            }
+        ');
+        $d->manager->on['afterSave'][] = function($object) {
+            $object->foo -= 5;
+        };
+        $cls = $d->classes['Pants'];
+        $o = new $cls;
+        $o->foo = 123;
+        $d->manager->save($o, $d->manager->getMeta($cls));
+        $this->assertEquals(244, $o->foo);
+    }
+
     function testBeforeInsert()
     {
         $d = Test\Factory::managerNoteModelCustom('
