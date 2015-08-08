@@ -331,14 +331,14 @@ class Meta
     public function getProperties()
     {
         if ($this->properties === null) {
-            foreach ($this->fields as $name=>$field) {
-                $field['source'] = 'field';
-                $this->properties[$name] = $field;
+            foreach ($this->fields as $name=>&$field) {
+                $field['source'] = 'fields';
+                $this->properties[$name] = &$field;
             }
-            foreach ($this->relations as $name=>$relation) {
+            foreach ($this->relations as $name=>&$relation) {
                 if ($relation['mode'] != 'class') {
-                    $relation['source'] = 'relation';
-                    $this->properties[$name] = $relation;
+                    $relation['source'] = 'relations';
+                    $this->properties[$name] = &$relation;
                 }
             }
         }
