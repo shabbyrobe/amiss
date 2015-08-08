@@ -43,7 +43,6 @@ $traceFile = $basePath.'/build/'.$id.'.xt';
 $cli->green()->bold()->out("Running PHPUnit tests to genereate trace file"); 
 $cli->darkGray()->bold()->out("Trace file: $traceFile"); 
 {
-
     $p = proc_open($cmd, [STDIN, STDOUT, STDERR], $pipes, $basePath);
     if (!$p) {
         die("Could not run test\n");
@@ -146,7 +145,7 @@ display: {
                     list ($call, $trace) = $callCount['call'];
 
                     $row = $call->entry->argv;
-                    array_unshift($row, $callCount['count']);
+                    array_unshift($row, "x{$callCount['count']}");
                     $maxCols = max($call->entry->argc + 1, $maxCols);
                     $rows[] = $row;
                 }
@@ -200,27 +199,46 @@ function xdebug_trace_pop_iter($recordIter)
     $stack = [];
     $entryStack = [];
     $lastLevel = 0;
-    foreach ($recordIter as $record) {
+    $lastTraceId = null;
+
+    foreach ($recordIter as list($trace, $record)) {
+        if ($lastTraceId === null || $lastTraceId != $trace->id) {
+            $lastTraceId = $trace->id;
+            $stack = [];
+            $entryStack = [];
+            $lastLevel = 0;
+        }
+
         if ($lastLevel && $lastLevel == $record->level && $record instanceof TraceEntry) {
             $ret = array_pop($stack);
-            array_pop($entryStack);
-            yield [$ret, $entryStack];
+            if (array_pop($entryStack)) {
+                yield [$ret, $entryStack];
+            }
         }
         elseif ($record->level < $lastLevel && $record instanceof TraceExit) {
             $ret = array_pop($stack);
-            array_pop($entryStack);
-            yield [$ret, $entryStack];
+            if (array_pop($entryStack)) {
+                yield [$ret, $entryStack];
+            }
         }
+
+        // if there is nothing in our stack on Exit or Return, this is
+        // (hopefully) a trace that was invoked from a function call - the exit
+        // for 'xdebug_trace_start' appears first
 
         if ($record instanceof TraceEntry) {
             $stack[$record->level] = (object)['entry' => $record, 'exit' => null, 'return' => null];
             $entryStack[] = $record;
         }
         elseif ($record instanceof TraceExit) {
-            $stack[$record->level]->exit = $record;
+            if (isset($stack[$record->level])) {
+                $stack[$record->level]->exit = $record;
+            }
         }
         elseif ($record instanceof TraceReturn) {
-            $stack[$record->level]->return = $record;
+            if (isset($stack[$record->level])) {
+                $stack[$record->level]->return = $record;
+            }
         }
 
         $lastLevel = $record->level;
@@ -229,7 +247,7 @@ function xdebug_trace_pop_iter($recordIter)
     if (count($stack) > 1) {
         throw new \Exception();
     }
-    elseif ($stack) {
+    elseif ($stack && current($stack)->exit) {
         yield [current($stack), []];
     }
 }
@@ -247,10 +265,11 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
 
     foreach ((array)$query['entryTypes'] as $t) { $entryTypeIndex[$t] = true; }
 
-    $XT_IN_HDR = 1;
-    $XT_IN_VER = 2;
-    $XT_IN_V4  = 3;
-    $XT_IN_V4_FOOTER = 4;
+    $XT_IN_NEW = 1;
+    $XT_IN_HDR = 2;
+    $XT_IN_VER = 3;
+    $XT_IN_V4  = 4;
+    $XT_IN_V4_FOOTER = 5;
 
     if (!is_resource($traceFile)) {
         $h = fopen($traceFile, 'r');
@@ -261,9 +280,10 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
         $h = $traceFile;
     }
 
-    $state = $XT_IN_HDR;
+    $state = $XT_IN_NEW;
 
-    $meta = [];
+    $traceIndex = 0;
+    $trace = null;
     $lineNum = 0;
     $record = 0;
 
@@ -272,9 +292,14 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
         $line = rtrim(fgets($h));
 
     parse_line:
+        state_new: if ($state === $XT_IN_NEW) {
+            $trace = (object)['id' => $traceIndex++, 'meta' => []];
+            $state = $XT_IN_HDR;
+        }
+
         state_hdr: if ($state === $XT_IN_HDR) {
             if (strpos($line, 'TRACE START') === 0) {
-                $state = $XT_IN_V4;
+                $state = $XT_IN_VER;
                 goto next_record;
             }
             else {
@@ -282,14 +307,14 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
                 if (!isset($parts[1])) {
                     throw new \UnexpectedValueException("Invalid header at line $lineNum");
                 }
-                $meta[$parts[0]] = $parts[1];
+                $trace->meta[$parts[0]] = $parts[1];
             }
         }
 
         state_ver: if ($state === $XT_IN_VER) {
-            if (!isset($meta['File format']) || $meta['File format'] != 4) {
+            if (!isset($trace->meta['File format']) || $trace->meta['File format'] != 4) {
                 throw new \UnexpectedValueException(
-                    "Only supports file format 4, found ".(isset($meta['File format']) ? $meta['File format'] : '(null)')
+                    "Only supports file format 4, found ".(isset($trace->meta['File format']) ? $trace->meta['File format'] : '(null)')
                 );
             }
             $state = $XT_IN_V4;
@@ -310,20 +335,20 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
                         $yield = TraceEntry::allowFormat1($parts, $query);
                     }
                     if ($yield) {
-                        yield TraceEntry::fromFormat1($parts);
+                        yield [$trace, TraceEntry::fromFormat1($parts)];
                     }
                 }
             break;
 
             case TraceExit::TYPE_CODE:
                 if (isset($entryTypeIndex[TraceExit::class])) {
-                    yield TraceExit::fromFormat1($parts);
+                    yield [$trace, TraceExit::fromFormat1($parts)];
                 }
             break;
 
             case TraceReturn::TYPE_CODE:
                 if (isset($entryTypeIndex[TraceReturn::class])) {
-                    yield TraceReturn::fromFormat1($parts);
+                    yield [$trace, TraceReturn::fromFormat1($parts)];
                 }
             break;
             
@@ -344,8 +369,13 @@ function xdebug_trace_fmt1_iter($traceFile, $query=[])
         }
 
         state_trace_v4_footer: if ($state === $XT_IN_V4_FOOTER) {
-            if ($line && strpos($line, 'TRACE END') !== 0) {
-                throw new \UnexpectedValueException();
+            if ($line) {
+                if (strpos($line, 'TRACE END') === 0) {
+                    goto next_record;
+                } else {
+                    $state = $XT_IN_NEW;
+                    goto parse_line;
+                }
             }
         }
 
@@ -371,8 +401,9 @@ class TraceEntry extends TraceRecord
 {
     const TYPE_CODE = "0";
 
-    const FMT1_ARGC = 10;
     const FMT1_FUNCTION = 5;
+    const FMT1_LINE = 9;
+    const FMT1_ARGC = 10;
 
     public $timeIndex;
     public $memUsage;
@@ -408,7 +439,7 @@ class TraceEntry extends TraceRecord
         if ($parts[static::FMT1_TYPE] !== static::TYPE_CODE) {
             throw new \InvalidArgumentException("Invalid type ".$parts[static::FMT1_TYPE]);
         }
-        if (!isset($parts[static::FMT1_ARGC])) {
+        if (!isset($parts[static::FMT1_LINE])) {
             throw new \InvalidArgumentException();
         }
         $c = new static;
@@ -428,23 +459,25 @@ class TraceEntry extends TraceRecord
 
         $c->requireFile = $parts[7];
         $c->file = $parts[8];
-        $c->line = $parts[9];
-        $c->argc = $parts[static::FMT1_ARGC];
+        $c->line = $parts[static::FMT1_LINE];
+        if (isset($parts[static::FMT1_ARGC])) {
+            $c->argc = $parts[static::FMT1_ARGC];
 
-        if ($c->argc) {
-            $hasEllipsis = false;
-            $i = 0;
-            foreach (array_slice($parts, static::FMT1_ARGC + 1) as $arg) {
-                if ($arg === '...') {
-                    $hasEllipsis = true;
-                    $c->ellipsisArg = $i;
-                    $c->argc -= 1;
+            if ($c->argc) {
+                $hasEllipsis = false;
+                $i = 0;
+                foreach (array_slice($parts, static::FMT1_ARGC + 1) as $arg) {
+                    if ($arg === '...') {
+                        $hasEllipsis = true;
+                        $c->ellipsisArg = $i;
+                        $c->argc -= 1;
+                    }
+                    else {
+                        $c->argv[$i++] = $arg;
+                    }
                 }
-                else {
-                    $c->argv[$i++] = $arg;
-                }
+                $c->argc = $i;
             }
-            $c->argc = $i;
         }
         return $c;
     }
