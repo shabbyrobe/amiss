@@ -332,15 +332,18 @@ class Meta
     {
         if ($this->properties === null) {
             foreach ($this->fields as $name=>&$field) {
-                $field['source'] = 'fields';
-                $this->properties[$name] = &$field;
+                $field['origin'] = 'fields';
+                $this->properties[$name] = $field;
             }
+            unset($field);
+
             foreach ($this->relations as $name=>&$relation) {
                 if ($relation['mode'] != 'class') {
-                    $relation['source'] = 'relations';
-                    $this->properties[$name] = &$relation;
+                    $relation['origin'] = 'relations';
+                    $this->properties[$name] = $relation;
                 }
             }
+            unset($relation);
         }
         return $this->properties;
     }

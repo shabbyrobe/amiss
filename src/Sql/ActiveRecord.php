@@ -38,9 +38,6 @@ abstract class ActiveRecord
         return static::getDependency('manager')->delete($this, static::getMeta());
     }
     
-    /**
-     * @return Amiss\Sql\Manager
-     */
     public static function getDependency($id, $class=null)
     {
         if (!$class) {

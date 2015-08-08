@@ -1,7 +1,36 @@
 <?php
 namespace Amiss;
 
-abstract class Model
+/**
+ * Use in conjunction with Amiss\Mapper\Local to provide a convenient
+ * way of creating simple model objects:
+ *
+ * class MyModel
+ * {
+ *     use \Amiss\Model;
+ *     protected static function meta()
+ *     {
+ *         return [
+ *             'table' => 'pants',
+ *             'fields' => [
+ *                 'field1' => true, 'field2' => true,
+ *             ],
+ *         ];
+ *     }
+ *
+ *     private $field1;
+ *     function getField1()   { return $this->field1.'y'; }
+ *     function setField1($v) { $this->field1 = $v.'x'; }
+ * }
+ *
+ * Getters/setters are automatically detected and are transparently 
+ * called on property access:
+ * 
+ * $
+ * 
+ * 
+ */
+trait Model
 {
     private static $meta = [];
 
@@ -49,12 +78,12 @@ abstract class Model
             
             if ($propId && isset($props[$propId])) {
                 $prop = $props[$propId];
-                $source = $prop['source'];
+                $origin = $prop['origin'];
 
                 if ($is === 'getter') {
-                    $meta->{$source}[$prop['id']]['getter'] = $method->name;
+                    $meta->{$origin}[$prop['id']]['getter'] = $method->name;
                 } elseif ($is === 'setter') {
-                    $meta->{$source}[$prop['id']]['setter'] = $method->name;
+                    $meta->{$origin}[$prop['id']]['setter'] = $method->name;
                 }
             }
         }
@@ -106,11 +135,6 @@ abstract class Model
 
     function __isset($name)
     {
-        $meta = static::getMeta();
-        $properties = $meta->getProperties();
-        if (!isset($properties[$name])) {
-            throw new \BadMethodCallException("Unknown property $name");
-        }
         return isset($this->$name);
     }
     
