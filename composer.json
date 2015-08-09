@@ -26,6 +26,13 @@
         "phpunit/phpunit": "4.*",
         "d11wtq/boris": "1.0.*",
         "symfony/var-dumper": "*",
-        "league/climate": "*"
-    }
+        "league/climate": "*",
+        "shabbyrobe/caper": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/shabbyrobe/caper.git"
+        }
+    ]
 }
