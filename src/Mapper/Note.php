@@ -37,6 +37,7 @@ class Note extends \Amiss\Mapper\Base
         }
         if (!$meta) {
             $meta = $this->loadMeta($class);
+            $this->mapsCache[$class] = true;
             if ($this->cache) {
                 $this->cache->set($key, $meta);
             }

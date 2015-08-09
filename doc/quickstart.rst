@@ -8,7 +8,8 @@ This quickstart will assume you wish to use an annotation-based mapper. See
 Install
 -------
 
-::
+Add *Amiss* and all of its dependencies to your project using `Composer
+<http://getcomposer.org>`_::
 
     composer require shabbyrobe/amiss
 
@@ -25,9 +26,7 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     // Include and register autoloader (generate using composer install)
     require 'vendor/autoload.php';
    
-    // Amiss depends on the PDOK library (http://github.com/shabbyrobe/pdok). PDOK is
-    // a thin wrapper around PDO which adds a few nice things. You should use it
-    // instead of PDO in your own code.
+    // Amiss depends on the PDOK library (http://github.com/shabbyrobe/pdok).
     $connector = new PDOK\Connector('mysql:host=127.0.0.1', 'user', 'password');
     
     // This will create a SQL manager using the default configuration (note mapper, 
@@ -44,13 +43,13 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     
     // Replace the default note mapper with a different mapper:
     $manager = Amiss\Sql\Factory::createManager($connector, [
-        'mapper' => new \Amiss\Mapper\Arrays(),
+        'mapper' => new \Amiss\Mapper\Local(),
         'appTimeZone' => 'UTC'
     ]);
     
     // Or go lean and mean, don't use any defaults at all and set up your
     // own mapper (Boolean_ is not a typo):
-    $mapper = new \Amiss\Mapper\Arrays();
+    $mapper = new \Amiss\Mapper\Local();
     $mapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
     $mapper->addTypeHandler(new \Amiss\Sql\Type\Boolean_, 'bool');
    
@@ -62,9 +61,10 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 Annotation Syntax
 -----------------
 
-*Amiss* uses the `Nope library <http://github.com/shabbyrobe/nope>`_ for annotation
-support. Annotations in *Nope* have a very simple syntax. They follow this format and
-MUST be embedded in doc block comments (``/** */``, not ``/* */``)::
+*Amiss* uses the `Nope <http://github.com/shabbyrobe/nope>`_ library for
+annotation support. Annotations in *Nope* have a very simple syntax. They follow
+this format and MUST be embedded in doc block comments (``/** */``, not ``/*
+*/``)::
 
     /**
      * :namespace = {"json": "object"};
@@ -99,6 +99,7 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
 
     <?php
    
+    /** :amiss = true; */
     class Event
     {
         /**
@@ -110,9 +111,8 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         public $eventId;
    
         /**
-         * This is just a plain old field, with no special properties. Amiss
-         * will not handle the field's type - it will be treated as a string in
-         * both directions.
+         * This is just a plain old field. Amiss * will not handle the field's
+         * type - it will be treated as a string in * both directions.
          * 
          * :amiss = {"field": true};
          */
@@ -152,7 +152,8 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
     class Venue
     {
         /**
-         * An index with the name "primary" is automatically defined for a primary key.
+         * An index with the name "primary" is automatically defined for a
+         * primary key.
          *
          * :amiss = {"field": {"type": "autoinc", "primary": true}};
          */
@@ -264,16 +265,16 @@ See :doc:`selecting` for more details.
         'where'=>'...',
         'forUpdate'=>true,
     ));
-    // make your changes
     $manager->connector->commit();
 
 
 Relations
 ---------
 
-Amiss supports one-to-one, one-to-many and many-to-many relations, and provides an
-extension point for adding additional relationship retrieval methods. See :doc:`relations`
-for more details.
+Amiss supports one-to-one, one-to-many and many-to-many relations, and provides
+an extension point for adding additional relationship retrieval methods. See
+:doc:`relations` for more details.
+
 
 One-to-one
 ~~~~~~~~~~
@@ -281,6 +282,7 @@ One-to-one
 .. code-block:: php
 
     <?php
+    /** :amiss = true; */
     class Event
     {
         /**
