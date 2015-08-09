@@ -1,3 +1,6 @@
+bootstrap:
+  - vendor/autoload.php
+
 scripts:
   - type: php
     script: test/run.php
