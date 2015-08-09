@@ -12,6 +12,10 @@ define('AMISS_BASE_PATH', $basePath);
 $testPath = __DIR__;
 
 require $testPath.'/config.php';
+if (file_exists("/home/bl/code/php/caper/vendor/autoload.php")) {
+    require "/home/bl/code/php/caper/vendor/autoload.php";
+}
+require '/home/bl/code/php/caper/src/Trace.php';
 
 $options = array(
     'coverage-html'=>null,
@@ -54,6 +58,10 @@ $args = array(
     'addUncoveredFilesFromWhitelist'=>true,
     'processUncoveredFilesFromWhitelist'=>true,
 );
+
+if (getenv('CAPER_RUN')) {
+    $args['listeners'] = [new \Caper\PHPUnit\Listener];
+}
 
 if ($options['coverage-html']) {
     $args['coverageHtml'] = $options['coverage-html'];

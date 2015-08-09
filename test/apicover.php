@@ -77,7 +77,6 @@ $searchFunctions = [
     'Amiss\Sql\Manager->populateObjectsWithRelated',
     'Amiss\Sql\Manager->save',
     'Amiss\Sql\Manager->selectList',
-    'Amiss\Sql\Manager->shouldInsert',
     'Amiss\Sql\Manager->update',
     'Amiss\Sql\Manager->updateTable',
 ];
