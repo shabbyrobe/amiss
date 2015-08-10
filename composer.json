@@ -1,7 +1,7 @@
 {
     "name": "shabbyrobe/amiss",
     "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
-    "version": "5.0.0",
+    "version": "5.0.0.beta.2",
     "type": "library",
     "license": "MIT",
     "keywords": ["orm", "sql", "database", "mapper", "datamapper", "activerecord"],
@@ -26,6 +26,13 @@
         "phpunit/phpunit": "4.*",
         "d11wtq/boris": "1.0.*",
         "symfony/var-dumper": "*",
-        "league/climate": "*"
-    }
+        "league/climate": "*",
+        "shabbyrobe/caper": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/shabbyrobe/caper.git"
+        }
+    ]
 }

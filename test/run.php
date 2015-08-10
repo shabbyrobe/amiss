@@ -12,10 +12,6 @@ define('AMISS_BASE_PATH', $basePath);
 $testPath = __DIR__;
 
 require $testPath.'/config.php';
-if (file_exists("/home/bl/code/php/caper/vendor/autoload.php")) {
-    require "/home/bl/code/php/caper/vendor/autoload.php";
-}
-require '/home/bl/code/php/caper/src/Trace.php';
 
 $options = array(
     'coverage-html'=>null,
