@@ -31,6 +31,7 @@ $meta = new \Amiss\Meta('stdClass', [
         'input'=>'<input>',
         'inPlace'=>'--in-place',
         'noColour'=>'--no-colour',
+        'noDiff'=>'--no-diff',
         'warnOnly'=>'--warn-only',
         'ext'=>'--ext',
     ]
@@ -88,23 +89,27 @@ foreach ($iter() as $file) {
     $code = file_get_contents($file);
     try {
         $out = comment_rewrite($code);
-        echo "Preparing $file\n";
+        stderr("Preparing $file\n");
+        $diff = diff($code, $out);
 
         if ($options->inPlace) {
             $allOut[$file] = $out;
         }
-        else {
+        elseif ($diff) {
             ob_start();
             if ($options->noColour) {
                 echo $file."\n";
             } else {
                 echo "\e[92;1m{$file}\e[0m\n";
             }
-            echo $diff = diff($code, $out);
-            if ($options->noColour) {
-                echo "$hr\n";
-            } else {
-                echo "\e[90m$hr\e[0m\n";
+
+            if (!$options->noDiff) {
+                echo $diff;
+                if ($options->noColour) {
+                    echo "$hr\n";
+                } else {
+                    echo "\e[90m$hr\e[0m\n";
+                }
             }
             $allOut[$file] = ob_get_clean();
         }
@@ -341,7 +346,12 @@ function data_rebuild($data)
         // it's a class!
 
         if (isset($data['table'])) {
-            $rebuilt['table'] = $data['table'];
+            $exp = preg_split('/\s*\.\s*/', $data['table'], 2, PREG_SPLIT_NO_EMPTY);
+            if (isset($exp[1])) {
+                list ($rebuilt['schema'], $rebuilt['table']) = $exp;
+            } else {
+                $rebuilt['table'] = $data['table'];
+            }
         }
         if (isset($data['canUpdate'])) {
             $rebuilt['canUpdate'] = $data['canUpdate'] == true;
@@ -567,6 +577,11 @@ class LegacyParser
         }
         return [$data, $toDelete];
     }
+}
+
+function stderr($msg)
+{
+    file_put_contents('php://stderr', $msg, FILE_APPEND);
 }
 
 goto script;

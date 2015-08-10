@@ -8,6 +8,7 @@ class Date implements \Amiss\Type\Handler
     public $dbTimeZone;
     public $forceTime;
     public $classes;
+    public $requireAppTimeZone;
 
     private $mainClass;
 
@@ -17,12 +18,18 @@ class Date implements \Amiss\Type\Handler
             // Can be 'date', 'datetime', or an array of date formats supported by
             // DateTime->format(). When the date is parsed from the db, `|` is appended
             // in order to zero unparsed fields
-            'formats'=>'datetime',
+             'formats' => 'datetime',
 
-            'dbTimeZone'=>null,
-            'appTimeZone'=>null,
-            'forceTime'=>null,
-            'classes'=>[\DateTime::class, \DateTimeImmutable::class],
+            'dbTimeZone'  => null,
+            'appTimeZone' => null,
+            'forceTime'   => null,
+            'classes'     => [\DateTime::class, \DateTimeImmutable::class],
+
+            // if the DateTime passed to prepareValueForDb is not in the app time zone,
+            // an exception is raised.
+            // defaults to false because Amiss v4, in spite of attempting to always enforce 
+            // this constraint, ran afoul of a PHP bug (see comments in `timeZoneEqual()`)
+            'requireAppTimeZone' => false,
         ];
 
         $options = array_merge($defaults, $options);
@@ -51,9 +58,14 @@ class Date implements \Amiss\Type\Handler
             $dbTimeZone = new \DateTimeZone($dbTimeZone);
         }
         
+        $this->requireAppTimeZone = $options['requireAppTimeZone'] == true;
+
         $this->dbTimeZone  = $dbTimeZone;
         $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
-        $this->forceTime   = $options['forceTime'];
+        // this may not be a good idea.
+        // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
+
+        $this->forceTime = $options['forceTime'];
 
         if ($this->forceTime && is_string($this->forceTime)) {
             $this->forceTime = explode(':', $this->forceTime);
@@ -82,7 +94,6 @@ class Date implements \Amiss\Type\Handler
                 throw new \InvalidArgumentException("Date class $class must contain static createFromFormat() method");
             }
         }
-        // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
     }
     
     public static function unixTime(array $config=[])
@@ -123,7 +134,7 @@ class Date implements \Amiss\Type\Handler
      */
     protected function prepareDateTime($value)
     {
-        if (!static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
+        if ($this->requireAppTimeZone && !static::timeZoneEqual($value->getTimeZone(), $this->appTimeZone)) {
             // Actually performing this conversion may not be an issue. Wait
             // until it is raised before making a decision.
             throw new \UnexpectedValueException(

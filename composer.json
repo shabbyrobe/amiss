@@ -1,7 +1,7 @@
 {
     "name": "shabbyrobe/amiss",
     "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
-    "version": "5.0.0.beta.1",
+    "version": "5.0.0.beta.2",
     "type": "library",
     "license": "MIT",
     "keywords": ["orm", "sql", "database", "mapper", "datamapper", "activerecord"],
