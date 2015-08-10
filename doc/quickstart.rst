@@ -285,15 +285,16 @@ One-to-one
     /** :amiss = true; */
     class Event
     {
-        /**
-         * :amiss = {"field": {"primary": true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $eventId;
+   
+        /** :amiss = {"field": {"index": true}}; */
+        public $venueId;
         
         // snip
    
         /**
-         * :amiss = {"has": {"type": "one", "of": "Venue", "on": "venueId"}};
+         * :amiss = {"has": {"type": "one", "of": "Venue", "from": "venueId"}};
          */
         public $venue;
     }
@@ -327,7 +328,7 @@ One-to-many
         // snip
    
         /**
-         * :amiss = {"has": {"type": "many", "of": "Event", "on": "venueId"}};
+         * :amiss = {"has": {"type": "many", "of": "Event", "to": "venueId"}};
          */
         public $events;
     }
@@ -377,14 +378,16 @@ object, and also require the relation to be specified on both sides:
    
     class EventArtist
     {
-        /**
-         * :amiss = {"has": {"type": "one", "of": "Event", "on": "eventId"}};
-         */
+        /** :amiss = {"field": {"index": true}}; */
+        public $eventId;
+   
+        /** :amiss = {"field": {"index": true}}; */
+        public $artistId;
+
+        /** :amiss = {"has": {"type": "one", "of": "Event", "from": "eventId"}}; */
         public $event;
    
-        /**
-         * :amiss = {"has": {"type": "one", "of": "Artist", "on": "artistId"}};
-         */
+        /** :amiss = {"has": {"type": "one", "of": "Artist", "from": "artistId"}}; */
         public $artist;
     }
    
@@ -393,9 +396,7 @@ object, and also require the relation to be specified on both sides:
         /** :amiss = {"field": {"primary": true}}; */
         public $artistId;
         
-        /**
-         * :amiss = {"has": {"type": "assoc", "of": "Event", "via": "EventArtist"}};
-         */
+        /** :amiss = {"has": {"type": "assoc", "of": "Event", "via": "EventArtist"}}; */
         public $events;
     }
    
@@ -424,7 +425,7 @@ Modifying by object:
     $event->dateStart = new \DateTime('2020-01-02');
     $manager->update($event);
    
-    // Using the 'save' method if the object contains an autoincrement primary:
+    // Using the 'save' method (insert if new, otherwise update):
     $event = new Event;
     $manager->save($event); // inserts
     $event->dateStart = new \DateTime('2020-01-02');
@@ -436,16 +437,20 @@ Modifying by table:
 .. code-block:: php
 
     <?php
-    // Insert a new row
+    // Insert a new row using property names (type handling is performed)
     $manager->insertTable('Event', array(
         'name'=>'Abc Def',
         'slug'=>'abc-def',
         'dateStart'=>new \DateTime('2020-01-01'),
     );
    
-    // Update by table. Set the name field based on the start date.
+    // Update by table.
+    // 
     // This can work on an arbitrary number of rows, depending on the condition.
     // Clauses can be specified the same way as 'selecting'.
+    // 
+    // If the parameter name in the 'update' or 'set' clause matches a property
+    // name in the model, type handling is performed
     $manager->updateTable(
         'Event', 
         ['name'=>'Abc: Def'],
@@ -455,7 +460,7 @@ Modifying by table:
     
     // Alternative clause syntax
     $manager->updateTable('Event', [
-        'set'   => ['name'      => 'Abc: Def'], 
+        'set'   => ['name' => 'Abc: Def'], 
         'where' => ['dateStart' => new \DateTime('2019-01-01')],
     ]);
 

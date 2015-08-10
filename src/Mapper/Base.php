@@ -196,9 +196,7 @@ abstract class Base implements \Amiss\Mapper
                     $value = $this->typeHandlerMap[$typeId]->prepareValueForDb($value, $field);
                 }
             }
-            
-            // don't allow array_merging. it breaks mongo compatibility and is pretty 
-            // confused anyway.
+
             if (!$this->skipNulls || $value !== null) {
                 $output[$field['name']] = $value;
             }

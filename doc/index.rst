@@ -20,7 +20,6 @@ Amiss PHP Data Mapper
     schema
     helpers
     active
-    mongo/index
     cookbook/index
         
     development

@@ -12,48 +12,36 @@ relation like so:
     <?php
     class Artist
     {
-        /**
-         * :amiss = {"field":{"primary":true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $artistId;
         
-        /**
-         * :amiss = {"field":true};
-         */
+        /** :amiss = {"field": {"index": true}}; */
         public $artistTypeId;
         
-        /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "ArtistType",
-         *         "on": "artistTypeId"
-         *     }
-         * };
+        /** 
+         * :amiss = {"has": {
+         *     "type": "one",
+         *     "of"  : "ArtistType",
+         *     "from": "artistTypeId"
+         * }};
          */
         public $artistType;
     }
    
     class ArtistType
     {
-        /**
-         * :amiss = {"field":{"primary":true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $artistTypeId;
    
-        /**
-         * :amiss = {"field":true};
-         */
+        /** :amiss = {"field": true}; */
         public $type;
    
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "many",
-         *         "of": "Artist",
-         *         "inverse": "artistType"
-         *     }
-         * };
+         * :amiss = {"has": {
+         *     "type": "many",
+         *     "of": "Artist",
+         *     "inverse": "artistType"
+         * }};
          */
         public $artists = array();
     }
@@ -73,8 +61,8 @@ Amiss provides three relationship types out of the box: ``one``, ``many`` and
 
 .. note:: 
 
-    The following describes the way the relations are structured *after* your
-    mapper has done its business converting your mappings into
+    This documentation describes the way the relations are structured *after*
+    your mapper has done its business converting your mappings into
     :doc:`mapper/metadata`. Documentation for the specific mapper you have
     chosen will explain how to declare these structures in the format they
     expect.  See :doc:`mapper/mapping` for more details.
