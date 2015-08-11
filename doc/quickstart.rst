@@ -20,9 +20,9 @@ Loading and Configuring
 See :doc:`configuring` and :doc:`mapper/mapping` for more details.
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
-   
     // Include and register autoloader (generate using composer install)
     require 'vendor/autoload.php';
    
@@ -64,7 +64,9 @@ Annotation Syntax
 *Amiss* uses the `Nope <http://github.com/shabbyrobe/nope>`_ library for
 annotation support. Annotations in *Nope* have a very simple syntax. They follow
 this format and MUST be embedded in doc block comments (``/** */``, not ``/*
-*/``)::
+*/``):
+
+.. code-block:: nope
 
     /**
      * :namespace = {"json": "object"};
@@ -73,7 +75,9 @@ this format and MUST be embedded in doc block comments (``/** */``, not ``/*
 All Amiss annotations use the ``:amiss`` namespace.
 
 Annotations can span an arbitrary number of lines. Parsing ends when a semicolon is
-encountered as the last non-whitespace character on a line::
+encountered as the last non-whitespace character on a line:
+
+.. code-block:: nope
 
     /**
      * :namespace = {
@@ -96,9 +100,9 @@ your own automatic translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator`
 See :doc:`mapper/mapping` for more details and alternative mapping options.
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
-   
     /** :amiss = true; */
     class Event
     {
@@ -183,7 +187,8 @@ Creating Tables
 See :doc:`schema` for more details.
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
     // single
     Amiss\Sql\TableBuilder::create($connector, $manager, 'Venue');
@@ -202,7 +207,8 @@ Selecting
 See :doc:`selecting` for more details.
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
     // Get a single event by primary key
     $event = $manager->getById('Event', 1);
@@ -210,7 +216,7 @@ See :doc:`selecting` for more details.
     // Get a single event by name using a raw SQL clause and positional parameters. 
     // Property names wrapped in curly braces get translated to field names by 
     // the mapper:
-    $event = $manager->get('Event', '{name}=?', ['foobar']);
+    $event = $manager->get(Event::class, '{name}=?', ['foobar']);
    
     // Get a single event by start date using a raw SQL clause and named parameters. 
     // In addition to field name unwrapping, if the named parameter names match a 
@@ -220,7 +226,7 @@ See :doc:`selecting` for more details.
         '{dateStart} = :dateStart', 
         ['dateStart'=>new \DateTime('2020-06-02')]
     );
-   
+    
     // Get all events
     $events = $manager->getList('Event');
    
@@ -280,7 +286,7 @@ One-to-one
 ~~~~~~~~~~
 
 .. code-block:: php
-
+   
     <?php
     /** :amiss = true; */
     class Event
@@ -298,6 +304,9 @@ One-to-one
          */
         public $venue;
     }
+
+.. code-block:: php
+    :testgroup: quickstart  
    
     // get a one-to-one relation for an event
     $venue = $manager->getRelated($event, 'venue');
@@ -318,7 +327,7 @@ One-to-many
 ~~~~~~~~~~~
 
 .. code-block:: php
-
+    
     <?php
     class Venue
     {
@@ -332,7 +341,10 @@ One-to-many
          */
         public $events;
     }
-   
+
+.. code-block:: php
+    :testgroup: quickstart
+    
     // get a one-to-many relation for a venue. this will return an array
     $events = $manager->getRelated($venue, 'events');
    
@@ -363,16 +375,14 @@ Many-to-many relations require the association table to be mapped to an intermed
 object, and also require the relation to be specified on both sides:
 
 .. code-block:: php
-
+    
     <?php
     class Event
     {
         /** :amiss = {"field": {"primary": true, "type": "autoinc"}}; */
         public $eventId;
    
-        /**
-         * :amiss = {"has": {"type": "assoc", "of": "Artist", "via": "EventArtist"}};
-         */
+        /** :amiss = {"has": {"type": "assoc", "of": "Artist", "via": "EventArtist"}}; */
         public $artists;
     }
    
@@ -383,7 +393,7 @@ object, and also require the relation to be specified on both sides:
    
         /** :amiss = {"field": {"index": true}}; */
         public $artistId;
-
+   
         /** :amiss = {"has": {"type": "one", "of": "Event", "from": "eventId"}}; */
         public $event;
    
@@ -399,7 +409,11 @@ object, and also require the relation to be specified on both sides:
         /** :amiss = {"has": {"type": "assoc", "of": "Event", "via": "EventArtist"}}; */
         public $events;
     }
-   
+
+.. code-block:: php
+    :testgroup: quickstart
+ 
+    <?php
     $event = $manager->getById('Event', 1);
     $artists = $manager->getRelated($event, 'artists');
 
@@ -412,7 +426,8 @@ You can modify by object or by table. See :doc:`modifying` for more details.
 Modifying by object:
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
     // Inserting an object:
     $event = new Event;
@@ -435,7 +450,8 @@ Modifying by object:
 Modifying by table:
 
 .. code-block:: php
-
+    :testgroup: quickstart
+    
     <?php
     // Insert a new row using property names (type handling is performed)
     $manager->insertTable('Event', array(
