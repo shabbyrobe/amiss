@@ -51,15 +51,15 @@ relation gymnastics.
     .. code-block:: php
     
         <?php
-        $objects = array(
-            (object)array('foo'=>array(
-                (object)array('bar'=>'a'),
-                (object)array('bar'=>'b'),
-            ),
-        );
+        $objects = [
+            (object) ['foo' => [
+                (object) ['bar'=>'a'],
+                (object) ['bar'=>'b'],
+            ]],
+        ];
 
         $children = $manager->getChildren($objects, 'foo/bar');
-        $expected = array('a', 'b');
+        $expected = ['a', 'b'];
 
         // this will output true
         var_dump($children == $expected);
@@ -70,7 +70,7 @@ relation gymnastics.
     .. code-block:: php
     
         <?php
-        $children = $manager->getChildren($objects, array('foo', 'bar'));
+        $children = $manager->getChildren($objects, ['foo', 'bar']);
 
 
     See :ref:`relations-assigning-nested` for a complete example of using ``getChildren`` with
@@ -84,13 +84,13 @@ relation gymnastics.
     .. code-block:: php
 
         <?php
-        $objects = array(
-            (object)array('foo'=>'a'),
-            (object)array('foo'=>'b'),
-            (object)array('foo'=>'c'),
-        );
+        $objects = [
+            (object) ['foo' => 'a'],
+            (object) ['foo' => 'b'],
+            (object) ['foo' => 'c'],
+        ];
         
-        $manager = new Amiss\Sql\Manager(...);
+        $manager = new Amiss\Sql\Manager(new \Amiss\Mapper\Note);
         $indexed = $manager->indexBy($objects, 'foo');
         
         // this will output array('a', 'b', 'c')
@@ -107,12 +107,12 @@ relation gymnastics.
     .. code-block:: php
 
         <?php
-        $objects = array(
-            (object)array('foo'=>'a'),
-            (object)array('foo'=>'a'),
-            (object)array('foo'=>'b'),
-        );
-        $manager = new Amiss\Sql\Manager(...);
+        $objects = [
+            (object) ['foo' => 'a'],
+            (object) ['foo' => 'a'],
+            (object) ['foo' => 'b'],
+        ];
+        $manager = new Amiss\Sql\Manager(new \Amiss\Mapper\Note);
         $indexed = $manager->indexBy($objects, 'foo', null, !'failOnDupe');
 
         count($indexed) == 2;
@@ -129,7 +129,7 @@ relation gymnastics.
     .. code-block:: php
 
         <?php
-        $manager = new Amiss\Sql\Manager(...);
+        $manager = new \Amiss\Sql\Manager(new \Amiss\Mapper\Note);
         $sql = 'SELECT artistId, name FROM artist ORDER BY artistName';
         $artists = $manager->keyValue($manager->execute($sql)->fetchAll(\PDO::FETCH_ASSOC));
 
@@ -143,7 +143,7 @@ relation gymnastics.
     .. code-block:: php
 
         <?php
-        $manager = new Amiss\Sql\Manager(...);
-        $result = $manager->getList('Artist', array('order'=>'name'));
+        $manager = new \Amiss\Sql\Manager(new \Amiss\Mapper\Note);
+        $result = $manager->getList(Artist::class, ['order' => 'name']);
         $artists = $manager->keyValue($result, 'artistId', 'name'); 
 

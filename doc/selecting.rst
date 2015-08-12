@@ -1,10 +1,11 @@
 Selecting
 =========
 
-``Amiss\Sql\Manager`` has three methods for retrieving objects: ``getById``, ``get`` and
-``getList``.  Both methods share the same set of signatures, and they can both be used in
-a number of different ways. The first argument is always the model name. All the
-subsequent arguments are used to define criteria for the query.
+``Amiss\Sql\Manager`` has three methods for retrieving objects: ``getById``,
+``get`` and ``getList``.  Both methods share the same set of signatures, and
+they can both be used in a number of different ways. The first argument is
+always the model name. All the subsequent arguments are used to define criteria
+for the query.
 
 The selection methods are:
 
@@ -15,7 +16,7 @@ The selection methods are:
     .. code-block:: php
     
         <?php
-        $event = $manager->getById('Event', 5);
+        $event = $manager->getById(Event::class, 5);
         
     If the primary key is a multi-column primary key, you can pass an array containing the
     values in the same order as the metadata defines the primary key's properties:
@@ -23,7 +24,7 @@ The selection methods are:
     .. code-block:: php
     
         <?php
-        $eventArtist = $manager->getById('EventArtist', array(2, 3));
+        $eventArtist = $manager->getById(EventArtist::class, [2, 3]);
     
     If you find the above example to be a bit unreadable, you can use the property names
     as keys:
@@ -31,7 +32,7 @@ The selection methods are:
     .. code-block:: php
     
         <?php
-        $eventArtist = $manager->getById('EventArtist', array('eventId'=>2, 'artistId'=>3));
+        $eventArtist = $manager->getById(EventArtist::class, ['eventId' => 2, 'artistId' => 3]);
 
 
 ``object Amiss\\Sql\\Manager::get( $model , $criteria... )``
@@ -42,7 +43,7 @@ The selection methods are:
     .. code-block:: php
 
         <?php
-        $event = $manager->get('Venue', '{venueSlug}=?', array($slug));
+        $event = $manager->get('Venue', '{venueSlug}=?', [$slug]);
 
     See :ref:`clauses` and :ref:`criteria-arguments` for more details.
 
@@ -73,7 +74,7 @@ names:
     <?php
     // The Artist class has a property called 'artistTypeId' that maps to a 
     // column with the same name:
-    $artists = $manager->getList('Artist', 'artistTypeId=?', array(1));
+    $artists = $manager->getList('Artist', 'artistTypeId=?', [1]);
 
 
 When your table's column names are exactly the same as your property names, this is the
@@ -137,8 +138,8 @@ corresponding value in an array::
 .. code-block:: php
 
     <?php
-    $badNews = $manager->get('Event', 'name=? AND slug=?', array('Bad News', 'bad-news-2'));
-    $bands = $manager->getList('Artist', 'artistTypeId=1');
+    $badNews = $manager->get(Event::class, 'name=? AND slug=?', ['Bad News', 'bad-news-2']);
+    $bands = $manager->getList(Artist::class, 'artistTypeId=1');
 
 
 To select using named placeholders, pass the where clause as the first criteria argument
@@ -149,7 +150,7 @@ and an array of parameters the next argument::
 .. code-block:: php
 
     <?php
-    $duke = $manager->get('Artist', 'slug=:slug', array(':slug'=>'duke-nukem'));
+    $duke = $manager->get(Artist::class, 'slug=:slug', [':slug' => 'duke-nukem']);
 
 
 Long form
@@ -166,11 +167,11 @@ The long form of query criteria is either an array representation of the relevan
 
     <?php
     $artist = $manager->get(
-        'Artist', 
-        array(
-            'where'=>'slug=:slug', 
-            'params'=>array(':slug'=>'duke-nukem')
-        )
+        Artist::class, 
+        [
+            'where'  => 'slug=:slug', 
+            'params' => [':slug' => 'duke-nukem']
+        ]
     );
 
 .. code-block:: php
@@ -180,7 +181,7 @@ The long form of query criteria is either an array representation of the relevan
     $criteria->where = 'slug=:slug';
     $criteria->params[':slug'] = 'duke-nukem';
     
-    $artist = $manager->get('Artist', $criteria);
+    $artist = $manager->get(Artist::class, $criteria);
 
 
 Lists
@@ -192,7 +193,7 @@ passed (be careful!):
 .. code-block:: php
 
     <?php
-    $artists = $manager->getList('Artist');
+    $artists = $manager->getList(Artist::class);
 
 
 In addition to the "where" clause and parameters, ``getList()`` will also make use of
@@ -209,10 +210,10 @@ combo:
 
     <?php
     // limit to 30 rows
-    $artists = $manager->getList('Artist', array('limit'=>30);
+    $artists = $manager->getList(Artist::class, ['limit' => 30]);
    
     // limit to 30 rows, skip 60
-    $artists = $manager->getList('Artist', array('limit'=>30, 'offset'=>60));
+    $artists = $manager->getList(Artist::class, ['limit' => 30, 'offset' => 60]);
 
 
 The second style is suited to the way your UI typically thinks of pagination: using page
@@ -222,10 +223,10 @@ number/page size. This is passed as a :term:`2-tuple` using the ``page`` key:
 
     <?php
     // retrieve page 1, page size 30. equivalent to LIMIT 30
-    $artists = $manager->getList('Artist', array('page'=>array(1, 30)));
+    $artists = $manager->getList(Artist::class, ['page' => [1, 30]]);
    
     // retrieve page 3, page size 30. equivalent to LIMIT 30, OFFSET 60
-    $artists = $manager->getList('Artist', array('page'=>array(3, 30)));
+    $artists = $manager->getList(Artist::class, ['page' => [3, 30]]);
 
 
 Ordering
@@ -239,7 +240,7 @@ mapped using this method:
 .. code-block:: php
 
     <?php
-    $eventArtists = $manager->getList('EventArtist', array('order'=>'priority'));
+    $eventArtists = $manager->getList(EventArtist::class, ['order' => 'priority']);
 
 
 Just like :ref:`clauses`, you can order using an array. The key should be the field name,
@@ -252,12 +253,12 @@ This will produce the same order as the previous example:
 .. code-block:: php
 
     <?php
-    $eventArtists = $manager->getList('EventArtist', array(
-        'order'=>array(
-            'priority'=>'desc',
+    $eventArtists = $manager->getList(EventArtist::class, [
+        'order' => [
+            'priority' => 'desc',
             'sequence',
-        ),
-    ));
+        ],
+    ]);
 
 
 And also like :ref:`clauses`, you can write your order expression in raw sql. You can use
@@ -266,9 +267,9 @@ column names directly, or you can use property name placeholders:
 .. code-block:: php
 
     <?php
-    $eventArtists = $manager->getList('EventArtist', array(
-        'order'=>'{propertyName} desc, column_name',
-    ));
+    $eventArtists = $manager->getList(EventArtist::class, [
+        'order' => '{propertyName} desc, column_name',
+    ]);
 
 
 Counting
@@ -281,15 +282,15 @@ count rows:
 
     <?php
     // positional parameters
-    $dukeCount = $manager->count('Artist', '{slug}=?', array('duke-nukem'));
+    $dukeCount = $manager->count(Artist::class, '{slug}=?', ['duke-nukem']);
    
     // named parameters, shorthand:
-    $dukeCount = $manager->count('Artist', '{slug}=:slug', array(':slug'=>'duke-nukem'));
+    $dukeCount = $manager->count(Artist::class, '{slug}=:slug', [':slug' => 'duke-nukem']);
    
     // long form
     $criteria = new \Amiss\Sql\Query\Criteria();
-    $criteria->where = '{slug}=:slug';
-    $criteria->params = array(':slug'=>'duke-nukem');
+    $criteria->where  = '{slug}=:slug';
+    $criteria->params = [':slug' => 'duke-nukem'];
     $dukeCount = $manager->count('Artist', $criteria);
 
 
@@ -302,7 +303,7 @@ Vanilla PDO statements with parameters don't work with arrays and IN clauses:
 
     <?php
     // This won't work.
-    $pdo = new PDO(...);
+    $pdo = new PDO('sqlite::memory:');
     $stmt = $pdo->prepare("SELECT * FROM bar WHERE foo IN (:foo)");
     $stmt->bindValue(':foo', array(1, 2, 3));
     $stmt->execute(); 

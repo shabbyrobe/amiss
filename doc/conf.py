@@ -21,8 +21,9 @@ sys.path.insert(0, root_dir)
 from sphinx.directives.code import CodeBlock
 from docutils.parsers.rst import directives
 
-CodeBlock.option_spec['test']      = directives.unchanged
+CodeBlock.option_spec['nolint']    = directives.flag
 CodeBlock.option_spec['testgroup'] = directives.unchanged
+CodeBlock.option_spec['test']      = directives.unchanged
 CodeBlock.option_spec['testseq']   = int
 
 # If extensions (or modules to document with autodoc) are in another directory,

@@ -516,7 +516,7 @@ names whatever you please:
          * };
          */
         public function pleaseGrabThatQuxForMe() 
-        
+        {
             return $this->qux;
         }
    

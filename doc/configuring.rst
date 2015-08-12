@@ -20,13 +20,13 @@ Creating an ``Amiss\Sql\Manager`` with the default mapping options is simple:
 .. code-block:: php
 
     <?php
-    $db = array(
-        'dsn'=>'mysql:host=localhost;dbname=amiss_demo',
-        'user'=>'user', 
-        'password'=>'password',
-    );
-    $config = ['appTimeZone'=>'UTC'];
-    $manager = new \Amiss\Sql\Factory::createManager($db, $config);
+    $db = [
+        'dsn'      => 'mysql:host=localhost;dbname=amiss_demo',
+        'user'     => 'user', 
+        'password' => 'password',
+    ];
+    $config = ['appTimeZone' => 'UTC'];
+    $manager = \Amiss\Sql\Factory::createManager($db, $config);
 
 
 This will also create an instance of ``Amiss\Mapper\Note`` with a default set of
@@ -37,8 +37,8 @@ can pass it in the config array. The mapper must implement the ``Amiss\Mapper`` 
 
     <?php
     $config = [
-        'appTimeZone'=>'UTC',
-        'mapper'=>new \Amiss\Mapper\Arrays(),
+        'date'   => ['dbTimeZone' => 'UTC'],
+        'mapper' => new \Amiss\Mapper\Arrays(),
     ];
     $manager = \Amiss\Sql\Factory::createManager($db, $config);
 
@@ -140,7 +140,7 @@ details:
         'dsn'      => 'mysql:host=localhost;dbname=amiss_demo',
         'user'     => 'user', 
         'password' => 'password',
-    });
+    ]);
 
 ``create()`` is quite tolerant in what it accepts. You can pass it names that correspond
 to the PDO_ constructor arguments ``dsn``, ``user``, ``password`` and ``options``, as well
@@ -167,9 +167,9 @@ Using ``PDO`` options:
 
     <?php
     $connector = PDOK\Connector::create([
-        'dsn'=>...,
-        'options'=>[
-            \PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES utf8',
+        'dsn'     => 'sqlite::memory:',
+        'options' => [
+            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
         ],
     ]);
 
@@ -179,7 +179,7 @@ Using ``connectionStatements``:
 
     <?php
     $connector = PDOK\Connector::create([
-        'dsn'=>...,
+        'dsn' => 'sqlite::memory:',
         'connectionStatements'=>[
             'SET NAMES utf8',
         ],

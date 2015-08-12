@@ -18,7 +18,7 @@ class Date implements \Amiss\Type\Handler
             // Can be 'date', 'datetime', or an array of date formats supported by
             // DateTime->format(). When the date is parsed from the db, `|` is appended
             // in order to zero unparsed fields
-             'formats' => 'datetime',
+            'formats' => 'datetime',
 
             'dbTimeZone'  => null,
             'appTimeZone' => null,
@@ -61,9 +61,14 @@ class Date implements \Amiss\Type\Handler
         $this->requireAppTimeZone = $options['requireAppTimeZone'] == true;
 
         $this->dbTimeZone  = $dbTimeZone;
-        $this->appTimeZone = $appTimeZone ?: $dbTimeZone;
-        // this may not be a good idea.
-        // $this->appTimeZone = $appTimeZone ?: new \DateTimeZone(date_default_timezone_get());
+        $this->appTimeZone = $appTimeZone;
+
+        if (!$this->dbTimeZone) {
+            throw new \InvalidArgumentException("dbTimeZone required");            
+        }
+        if (!$this->appTimeZone) {
+            throw new \InvalidArgumentException("appTimeZone required");            
+        }
 
         $this->forceTime = $options['forceTime'];
 

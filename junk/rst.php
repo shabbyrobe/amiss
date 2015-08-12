@@ -3,7 +3,7 @@ require __DIR__.'/../vendor/autoload.php';
 
 $docPath = __DIR__.'/../doc';
 
-list ($groups, $tests) = doctest_find($docPath);
+list ($groups, $tests, $blocks) = doctest_find($docPath);
 
 $config = [
     'php' => [
@@ -24,19 +24,33 @@ $testInfo = [
     ],
 ];
 
-foreach ($tests['php'] as $test) {
-    doctest_run_php($test);
+if (isset($tests['php'])) {
+    foreach ($tests['php'] as $test) {
+        doctest_run_php($test);
+    }
 }
 
-foreach ($groups['php'] as $groupId => $group) {
-    doctest_run_php_group($group);
+if (isset($groups['php'])) {
+    foreach ($groups['php'] as $groupId => $group) {
+        doctest_run_php_group($group);
+    }
+}
+
+if (isset($blocks['php'])) {
+    foreach ($blocks['php'] as $block) {
+        if ($errors = php_lint_errors($block['code'])) {
+            $errstr = implode("\n - ", $errors);
+            throw new \RuntimeException("Linting block on {$block['file']}:{$block['line']} failed with errors:\n - ".$errstr);
+        }
+    }
 }
 
 function doctest_run_php_group($group)
 {
     $scope = [];    
     foreach ($group as $test) {
-        $scope = array_merge($scope, doctest_run_php($test));
+        $scope = array_merge($scope, doctest_run_php($test, $scope));
+        // dump($scope);
     }
 }
 
@@ -52,6 +66,8 @@ function doctest_run_php($test, $scope=[])
         $scope = array_merge($scope, $info['setUp']() ?: []);
     }
 
+    php_lint_errors($test['code'], !!'throw', $test['line']);
+
     $scope = doctest_php_eval($scope, $test['code']);
     return $scope;
 }
@@ -66,7 +82,8 @@ function doctest_php_eval($scope)
 function doctest_find($docPath)
 {
     $groups = [];
-    $tests = [];
+    $tests  = [];
+    $blocks = [];
 
     $id = 0;
 
@@ -78,9 +95,13 @@ function doctest_find($docPath)
         }
 
         $h = fopen($file, 'r');
-        $blocks = rst_code_block_find($h);
+        $rstBlocks = rst_code_block_find($h);
         
-        foreach ($blocks as $block) {
+        foreach ($rstBlocks as $block) {
+            $block['file'] = $file;
+
+            $claimed = false;
+
             if (isset($block['meta'])) {
                 if ($test = array_intersect_key($block['meta'], ['test'=>true, 'testgroup'=>true, 'testseq'=>true])) {
                     $seq = isset($test['testseq']) ? $test['testseq'] : $id;
@@ -91,7 +112,17 @@ function doctest_find($docPath)
                     } else {
                         $tests[$block['lang']][] = $block;
                     }
+                    $claimed = true;
                 }
+
+
+                if (isset($block['meta']['nolint']) && $block['meta']['nolint']) {
+                    $claimed = true;
+                }
+            }
+
+            if (!$claimed) {
+                $blocks[$block['lang']][] = $block;
             }
         }
     }
@@ -103,8 +134,8 @@ function doctest_find($docPath)
         }
         unset($group);
     }
-    
-    return [$groups, $tests];
+
+    return [$groups, $tests, $blocks];
 }
 
 
@@ -179,6 +210,8 @@ function rst_code_block_find($h)
                     'lang'   => $match['lang'],
                     'code'   => '',
                     'level'  => $currentLevel,
+                    'line'   => $idx + 1,
+                    'meta'   => [],
                 ];
                 $state = $ST_META;
                 goto next_line;
@@ -191,7 +224,8 @@ function rst_code_block_find($h)
                 goto next_line;
             }
             elseif (preg_match('/^ \h+ :(?P<key> \w+): \h* (?P<value> .*) $/x', $line, $match)) {
-                $current['meta'][$match['key']] = isset($match['value']) ? trim($match['value']) : true;
+                $value = isset($match['value']) && trim($match['value']) ? trim($match['value']) : true;
+                $current['meta'][$match['key']] = $value;
                 goto next_line;
             }
             elseif (!trim($line)) {
@@ -259,6 +293,29 @@ function indent_detect($lines)
         return [false, 1];
     }
     return null;
+}
+
+function php_lint_errors($code, $throw=false, $line=null)
+{
+    $p = proc_open(PHP_BINARY.' -l', [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes);
+    fwrite($pipes[0], $code);
+    fclose($pipes[0]);
+    $out = stream_get_contents($pipes[1]);
+    $err = stream_get_contents($pipes[2]);
+    $ret = proc_close($p);
+
+    if ($ret !== 0) {
+        $errors = preg_split('/(\r?\n)+/', trim($err), -1, PREG_SPLIT_NO_EMPTY);
+    } else {
+        $errors = [];
+    }
+
+    if ($errors && $throw) {
+        $errstr = implode("\n - ", $errors);
+        throw new \RuntimeException("Linting block failed with errors:\n - ".$errstr);
+    }
+
+    return $errors;
 }
 
 function indent_count($line, $indent)

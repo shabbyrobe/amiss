@@ -27,35 +27,42 @@ See :doc:`configuring` and :doc:`mapper/mapping` for more details.
     require 'vendor/autoload.php';
    
     // Amiss depends on the PDOK library (http://github.com/shabbyrobe/pdok).
-    $connector = new PDOK\Connector('mysql:host=127.0.0.1', 'user', 'password');
+    $connector = new PDOK\Connector('sqlite::memory:');
     
     // This will create a SQL manager using the default configuration (note mapper, 
     // default types and relators, no cache)
     $config = [
-        // app timezone is required if you want date/datetime/timestamp types
-        'appTimeZone' => 'UTC',
+        // db timezone is required if you want date/datetime/timestamp types.
+        // dbTimeZone should represent the timezone of dates coming out of
+        // the database, appTimeZone represents the timezone they should be
+        // in your app.
+        'date' => [
+            'dbTimeZone'  => 'UTC',
+            'appTimeZone' => 'Australia/Melbourne',
+        ],
     ];
     $manager = Amiss\Sql\Factory::createManager($connector, $config);
+    $mapper = $manager->mapper;
     
     // Same as above, but with a cache
     $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
     $manager = Amiss\Sql\Factory::createManager($connector, $config + ['cache'=>$cache]);
     
     // Replace the default note mapper with a different mapper:
-    $manager = Amiss\Sql\Factory::createManager($connector, [
+    $localManager = Amiss\Sql\Factory::createManager($connector, [
         'mapper' => new \Amiss\Mapper\Local(),
         'appTimeZone' => 'UTC'
     ]);
     
     // Or go lean and mean, don't use any defaults at all and set up your
     // own mapper (Boolean_ is not a typo):
-    $mapper = new \Amiss\Mapper\Local();
-    $mapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
-    $mapper->addTypeHandler(new \Amiss\Sql\Type\Boolean_, 'bool');
+    $localMapper = new \Amiss\Mapper\Local();
+    $localMapper->addTypeHandler(new \Amiss\Sql\Type\Autoinc, 'autoinc');
+    $localMapper->addTypeHandler(new \Amiss\Sql\Type\Boolean_, 'bool');
    
-    $manager = new \Amiss\Sql\Manager($connector, $mapper);
-    $manager->relators['one']  = new \Amiss\Sql\Relator\OneMany($manager);
-    $manager->relators['many'] = new \Amiss\Sql\Relator\OneMany($manager);
+    $localManager = new \Amiss\Sql\Manager($connector, $localMapper);
+    $localManager->relators['one']  = new \Amiss\Sql\Relator\OneMany($localManager);
+    $localManager->relators['many'] = new \Amiss\Sql\Relator\OneMany($localManager);
 
 
 Annotation Syntax
@@ -121,6 +128,9 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
          * :amiss = {"field": true};
          */
         public $name;
+   
+        /** :amiss = {"field": true}; */
+        public $slug;
    
         /**
          * :amiss = {"field": {"type": "datetime"}};
@@ -190,15 +200,12 @@ See :doc:`schema` for more details.
     :testgroup: quickstart
     
     <?php
-    // single
-    Amiss\Sql\TableBuilder::create($connector, $manager, 'Venue');
-   
-    // multiple
-    Amiss\Sql\TableBuilder::create($connector, $manager, ['Venue', 'Event']);
+    $classes = [Venue::class, Event::class];
+    Amiss\Sql\TableBuilder::create($connector, $mapper, $classes);
    
     // get the SQL for your own nefarious purposes:
-    $query   = Amiss\Sql\TableBuilder::createSQL($connector, $manager, 'Venue');
-    $queries = Amiss\Sql\TableBuilder::createSQL($connector, $manager, ['Venue', 'Event']);
+    $query   = Amiss\Sql\TableBuilder::createSQL($connector, $mapper, Venue::class);
+    $queries = Amiss\Sql\TableBuilder::createSQL($connector, $mapper, [Venue::class, Event::class]);
 
 
 Selecting
@@ -211,7 +218,7 @@ See :doc:`selecting` for more details.
     
     <?php
     // Get a single event by primary key
-    $event = $manager->getById('Event', 1);
+    $event = $manager->getById(Event::class, 1);
    
     // Get a single event by name using a raw SQL clause and positional parameters. 
     // Property names wrapped in curly braces get translated to field names by 
@@ -222,29 +229,29 @@ See :doc:`selecting` for more details.
     // In addition to field name unwrapping, if the named parameter names match a 
     // property name in your model, type handling is also performed:
     $event = $manager->get(
-        'Event', 
+        Event::class, 
         '{dateStart} = :dateStart', 
         ['dateStart'=>new \DateTime('2020-06-02')]
     );
     
     // Get all events
-    $events = $manager->getList('Event');
+    $events = $manager->getList(Event::class);
    
     // Get all events named foo that start on the 2nd of June, 2020 using an array
     // clause. Array clauses are combined using "AND", must be keyed by property name,
     // and type handling is performed on values:
-    $events = $manager->getList('Event', [
+    $events = $manager->getList(Event::class, [
         'where' => ['name'=>'foo', 'dateStart'=>new \DateTime('2020-06-02')]
     ]);
    
     // Get all events with 'foo' in the name using positional parameters
-    $events = $manager->getList('Event', [
+    $events = $manager->getList(Event::class, [
         'where'  => '{name} LIKE ?', 
         'params' => ['%foo%']
     ]);
     
     // Paged list, limit/offset
-    $events = $manager->getList('Event', [
+    $events = $manager->getList(Event::class, [
         'where'  => '{name}=?',
         'params' => ['foo'],
         'limit'  => 10, 
@@ -252,26 +259,28 @@ See :doc:`selecting` for more details.
     ]);
    
     // Paged list, alternate style (number, size)
-    $events = $manager->getList('Event', [
+    $events = $manager->getList(Event::class, [
         'where'  => '{name}=?',
         'params' => ['foo'],
         'page'   => [1, 30]
-    ));
+    ]);
    
     // Amiss will unroll and properly parameterise IN() clauses when using
     // named parameter clauses:
-    $events = $manager->getList('Event', '{eventId} IN (:foo)', ['foo'=>[1, 2, 3]]);
+    $events = $manager->getList(Event::class, '{eventId} IN (:foo)', ['foo'=>[1, 2, 3]]);
    
     // IN() clauses are also generated when using array clauses:
-    $events = $manager->getList('Event', ['where' => ['foo' => [1, 2, 3]]]);
+    $events = $manager->getList(Event::class, ['where' => ['venueId' => [1, 2, 3]]]);
    
     // FOR UPDATE InnoDB row locking
-    $manager->connector->beginTransaction();
-    $rows = $manager->getList('Event', array(
-        'where'=>'...',
-        'forUpdate'=>true,
-    ));
-    $manager->connector->commit();
+    if ($manager->connector->engine == 'mysql') {
+        $manager->connector->beginTransaction();
+        $rows = $manager->get(Event::class, [
+            'where'=>'{eventId}=1',
+            'forUpdate'=>true,
+        ]);
+        $manager->connector->commit();
+    }
 
 
 Relations
@@ -308,6 +317,7 @@ One-to-one
 .. code-block:: php
     :testgroup: quickstart  
    
+    <?php
     // get a one-to-one relation for an event
     $venue = $manager->getRelated($event, 'venue');
    
@@ -315,11 +325,11 @@ One-to-one
     $manager->assignRelated($event, 'venue');
    
     // get each one-to-one relation for all events in a list
-    $events = $manager->getList('Event');
+    $events = $manager->getList(Event::class);
     $venueMap = $manager->getRelated($events, 'venue');
     
     // assign each one-to-one relation to all events in a list
-    $events = $manager->getList('Event');
+    $events = $manager->getList(Event::class);
     $manager->assignRelated($events, 'venue');
 
 
@@ -345,6 +355,7 @@ One-to-many
 .. code-block:: php
     :testgroup: quickstart
     
+    <?php
     // get a one-to-many relation for a venue. this will return an array
     $events = $manager->getRelated($venue, 'events');
    
@@ -354,14 +365,14 @@ One-to-many
     // get each one-to-many relation for all events in a list.
     // this will return an array of arrays. the order corresponds
     // to the order of the events passed.
-    $venues = $manager->getList('Venue');
+    $venues = $manager->getList(Venue::class);
     $events = $manager->getRelated($venues, 'events');
     foreach ($venues as $idx=>$v) {
         echo "Found ".count($events[$idx])." events for venue ".$v->venueId."\n";
     }
    
     // assign each one-to-many relation to all venues in a list
-    $venues = $manager->getList('Venue');
+    $venues = $manager->getList(Venue::class);
     $manager->assignRelated($venues, 'events');
     foreach ($venues as $idx=>$v) {
         echo "Found ".count($v->events)." events for venue ".$v->venueId."\n";
@@ -414,7 +425,7 @@ object, and also require the relation to be specified on both sides:
     :testgroup: quickstart
  
     <?php
-    $event = $manager->getById('Event', 1);
+    $event = $manager->getById(Event::class, 1);
     $artists = $manager->getRelated($event, 'artists');
 
 
@@ -431,12 +442,12 @@ Modifying by object:
     <?php
     // Inserting an object:
     $event = new Event;
-    $event->setName('Abc Def');
+    $event->name = 'Abc Def';
     $event->dateStart = new \DateTime('2020-01-01');
     $manager->insert($event);
     
     // Updating an existing object:
-    $event = $manager->getById('Event', 1);
+    $event = $manager->getById(Event::class, 1);
     $event->dateStart = new \DateTime('2020-01-02');
     $manager->update($event);
    
@@ -454,11 +465,11 @@ Modifying by table:
     
     <?php
     // Insert a new row using property names (type handling is performed)
-    $manager->insertTable('Event', array(
-        'name'=>'Abc Def',
-        'slug'=>'abc-def',
-        'dateStart'=>new \DateTime('2020-01-01'),
-    );
+    $manager->insertTable(Event::class, [
+        'name' => 'Abc Def',
+        'slug' => 'abc-def',
+        'dateStart' => new \DateTime('2020-01-01'),
+    ]);
    
     // Update by table.
     // 
@@ -468,14 +479,14 @@ Modifying by table:
     // If the parameter name in the 'update' or 'set' clause matches a property
     // name in the model, type handling is performed
     $manager->updateTable(
-        'Event', 
+        Event::class, 
         ['name'=>'Abc: Def'],
         '{dateStart} > :dateStart',
         ['dateStart' => new \DateTime('2019-01-01')]
     );
     
     // Alternative clause syntax
-    $manager->updateTable('Event', [
+    $manager->updateTable(Event::class, [
         'set'   => ['name' => 'Abc: Def'], 
         'where' => ['dateStart' => new \DateTime('2019-01-01')],
     ]);

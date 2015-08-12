@@ -28,9 +28,10 @@ class Factory
 
         $cf = new ConnectionFactory(\Amiss\Test\Helper\Env::instance()->getConnectionInfo());
         if (!isset($deps->mapper) || !$deps->mapper) {
-            $deps->mapper = \Amiss\Sql\Factory::createMapper(array(
-                'dbTimeZone'=>'UTC',
-            ));
+            $config = [
+                'date' => ['dbTimeZone' => 'UTC', 'appTimeZone' => 'UTC'],
+            ];
+            $deps->mapper = \Amiss\Sql\Factory::createMapper($config);
         }
         if (!isset($deps->connector) || !$deps->connector) {
             $deps->connector = $cf->getConnector();
@@ -55,9 +56,7 @@ class Factory
     public static function managerArraysModelCustom($map)
     {
         $mapper = new \Amiss\Mapper\Arrays($map);
-        $config = [
-            'dbTimeZone'=>'UTC',
-        ];
+        $config = ['date' => ['dbTimeZone' => 'UTC', 'appTimeZone' => 'UTC']];
 
         $deps = (object)['mapper' => $mapper];
 

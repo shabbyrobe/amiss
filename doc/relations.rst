@@ -423,16 +423,12 @@ this relator like so:
     class Bar
     {
         /**
-         * :amiss = {"field":{"primary":true}};
+         * :amiss = {"field": {"primary": true}};
          */
-        public $id
+        public $id;
    
         /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "somethingElse"
-         *     }
-         * };
+         * :amiss = {"has": {"type": "somethingElse"}};
          */
         public $foo;
     }
@@ -450,9 +446,9 @@ If your relator requires additional keys/values to be available in the metadata
     class Bar
     {
         /**
-         * :amiss = {"field":{"primary":true}};
+         * :amiss = {"field": {"primary": true}};
          */
-        public $id
+        public $id;
    
         /**
          * :amiss = {

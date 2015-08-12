@@ -48,29 +48,35 @@ class Factory
     {
         $handlers = array();
         
-        if (isset($config['dbTimeZone'])) {
-            $config['appTimeZone'] = isset($config['appTimeZone']) ? $config['appTimeZone'] : null;
-
-            $handlers['date'] = function() use ($config) {
-                $config['formats'] = 'date';
-                $config['forceTime'] = '00:00:00';
-                return new \Amiss\Sql\Type\Date($config);
+        if (isset($config['dbTimeZone'])  || 
+            isset($config['appTimeZone']) || 
+            isset($config['formats'])
+        ) {
+            throw new \InvalidArgumentException("Please use \$config['date'][...] instead of \$config[...] for date configuration");
+        }
+        
+        if (isset($config['date'])) {
+            $dateConfig = $config['date'];
+            $handlers['date'] = function() use ($dateConfig) {
+                $dateConfig['formats'] = 'date';
+                $dateConfig['forceTime'] = '00:00:00';
+                return new \Amiss\Sql\Type\Date($dateConfig);
             };
 
-            $handlers['datetime'] = $handlers['timestamp'] = function() use ($config) {
-                $config['formats'] = 'datetime';
-                unset($config['forceTime']);
-                return new \Amiss\Sql\Type\Date($config);
+            $handlers['datetime'] = $handlers['timestamp'] = function() use ($dateConfig) {
+                $dateConfig['formats'] = 'datetime';
+                unset($dateConfig['forceTime']);
+                return new \Amiss\Sql\Type\Date($dateConfig);
             };
             
-            $handlers['unixtime'] = function() use ($config) {
-                return \Amiss\Sql\Type\Date::unixTime($config);
+            $handlers['unixtime'] = function() use ($dateConfig) {
+                return \Amiss\Sql\Type\Date::unixTime($dateConfig);
             };
         }
         else {
             $handlers['date'] = $handlers['datetime'] = $handlers['timestamp'] = $handlers['unixtime'] = function() {
                 throw new \UnexpectedValueException(
-                    "Please pass dbTimeZone (and optionally appTimeZone) with your \$config ".
+                    "Please pass dbTimeZone and appTimeZone with your \$config ".
                     "when using Amiss\Sql\Factory::createManager(), Amiss\Sql\Factory::createMapper() ".
                     "or Amiss\Sql\Factory::createTypeHandlers()"
                 );

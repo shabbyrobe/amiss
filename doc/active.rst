@@ -112,30 +112,30 @@ Consider the following equivalents:
     // getting by primary key
     $mapped = $manager->getById('MappedObject', 1);
     $active = ActiveObject::getById(1);
-
+   
     // assigning relations
     $manager->assignRelated($mapped, 'mappedFriend');
     $active->assignRelated('mappedFriend');
 
 
-``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods available:
-
+``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods available:;
 
 .. code-block:: php
-
+    :nolint:
+   
     <?php
     // get a single active record by primary key
     YourRecord::getById ( $primaryKey );
-
+   
     // get a single active record
     YourRecord::get ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::get ( string $namedWhere, array $params );
     YourRecord::get ( array $criteria );
     YourRecord::get ( Amiss\Sql\Criteria $criteria );
-
+   
     // get a list of active records
     YourRecord::getList ( as with get );
-
+   
     // count active records
     YourRecord::count ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::count ( string $namedWhere, array $params );

@@ -79,12 +79,12 @@ Object mappings have the following structure:
 
     <?php
     $mapping = array(
-        'primary'     => ...,
+        'primary'     => 'primary',
         'table'       => 'table',
         'fieldType'   => null,
         'constructor' => null,
-        'fields'      => [...],
-        'relations'   => [...],
+        'fields'      => ['field1' => true],
+        'relations'   => ['rel' => []],
     );
 
 
