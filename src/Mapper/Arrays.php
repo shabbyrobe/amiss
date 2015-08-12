@@ -3,26 +3,26 @@ namespace Amiss\Mapper;
 
 class Arrays extends Base
 {
-    public $arrayMap;
+    public $mappings;
     
-    public function __construct($arrayMap=array())
+    public function __construct($mappings=array())
     {
         parent::__construct();
-        $this->arrayMap = $arrayMap;
+        $this->mappings = $mappings;
     }
 
     public function canMap($id)
     {
-        return isset($this->arrayMap[$id]);
+        return isset($this->mappings[$id]);
     }
 
     protected function createMeta($id)
     {
-        if (!isset($this->arrayMap[$id])) {
+        if (!isset($this->mappings[$id])) {
             throw new \InvalidArgumentException("Unknown id $id");
         }
 
-        $info = $this->arrayMap[$id];
+        $info = $this->mappings[$id];
         $class = isset($info['class']) ? $info['class'] : $id;
 
         if (!isset($info['table'])) {

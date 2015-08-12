@@ -48,7 +48,7 @@ class ArrayMapperTest extends \Amiss\Test\Helper\TestCase
     {
         $mappings = array('a');
         $mapper = new Arrays($mappings);
-        $this->assertEquals($mappings, $mapper->arrayMap);
+        $this->assertEquals($mappings, $mapper->mappings);
     }
     
     /**

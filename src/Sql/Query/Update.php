@@ -3,7 +3,7 @@ namespace Amiss\Sql\Query;
 
 class Update extends Criteria
 {
-    public $set = array();
+    public $set = [];
 
     public static function fromParamArgs(array $args, $class=null)
     {
@@ -91,6 +91,6 @@ class Update extends Criteria
         $t = ($meta->schema ? "`{$meta->schema}`." : null)."`{$table}`";
         $sql = "UPDATE $t SET $setClause WHERE $whereClause";
         
-        return array($sql, $params, $setProps, $whereProps);
+        return [$sql, $params, $setProps, $whereProps];
     }
 }

@@ -568,7 +568,6 @@ class Manager
      */
     public function insert($object, $meta=null)
     {
-        $meta = null;
         $query = new Query\Insert;
 
         if (is_array($meta)) {
@@ -649,7 +648,7 @@ class Manager
 
         $query = Query\Update::fromParamArgs($args);
         if (!$query->set) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException("Query missing 'set' values");
         }
 
         list ($sql, $params, $setProps, $whereProps) = $query->buildQuery($meta);
@@ -673,8 +672,6 @@ class Manager
      */
     public function update($object, $meta=null)
     {
-        $meta = null;
-
         $query = new Query\Update();
         if (!is_object($object)) {
             throw new \BadMethodCallException("Please use updateTable()");
@@ -754,7 +751,6 @@ class Manager
      */
     public function delete($object, $meta=null)
     {
-        $meta = null;
         $query = new Query\Criteria();
 
         if (!is_object($object)) {

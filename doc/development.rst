@@ -17,8 +17,8 @@ Instead, run::
     php test/run.php
 
 
-There are some tests that are known to report incorrect results. These can be excluded by
-running the tests like so::
+There may be some tests that are known to report incorrect results. These can be
+excluded by running the tests like so::
 
     php test/run.php --exclude-group faulty
 
@@ -64,9 +64,12 @@ ini file with a ``[mysql]`` section, set out like so::
     user = amisstester
     password = password
 
-You should then be able to run the MySQL tests::
+You should then be able to run the MySQL tests. Pass ``mysql`` (normal MySQL)
+and/or ``mysqlp`` (MySQL with persistent connections) to the ``--with``
+argument, or just pass ``--all``::
 
-    php test/run.php --with-mysql
+    php test/run.php --with=mysql,mysqlp
+    php test/run.php --with=all
 
 
 Building the docs

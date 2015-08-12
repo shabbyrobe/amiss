@@ -14,7 +14,7 @@ class OneManyTest extends \Amiss\Test\Helper\TestCase
         $this->mapper = $this->createDefaultMapper();
         $this->manager = new \Amiss\Sql\Manager($this->db, $this->mapper);
         $this->manager->relators = \Amiss\Sql\Factory::createRelators();
-        foreach ($this->mapper->arrayMap as $class=>$meta) {
+        foreach ($this->mapper->mappings as $class=>$meta) {
             TableBuilder::create($this->manager->connector, $this->mapper, $class);
         }
         $this->manager->connector->exec("INSERT INTO test_child(id, parentId) VALUES(1, 1)");
