@@ -3,7 +3,7 @@ require __DIR__.'/../vendor/autoload.php';
 
 $docPath = __DIR__.'/../doc';
 
-list ($groups, $tests, $blocks) = doctest_find($docPath);
+list ($groups, $tests, $unclaimedBlocks, $allBlocks) = doctest_find($docPath);
 
 $config = [
     'php' => [
@@ -45,12 +45,29 @@ if (isset($blocks['php'])) {
     }
 }
 
+lint_nope_blocks: {
+    $nope = new \Nope\Parser;
+
+    foreach ($allBlocks as $block) {
+        if ($block['lang'] == 'php') {
+            $tokens = token_get_all($block['code']);
+            foreach ($tokens as $token) {
+                if (is_array($token) && $token[0] == T_DOC_COMMENT) {
+                    $parsed = $nope->parseDocComment($token[1]);
+                }
+            }
+        }
+        elseif ($block['lang'] == 'nope') {
+            $parsed = $nope->parseDocComment($block['code']);
+        }
+    }
+}
+
 function doctest_run_php_group($group)
 {
     $scope = [];    
     foreach ($group as $test) {
         $scope = array_merge($scope, doctest_run_php($test, $scope));
-        // dump($scope);
     }
 }
 
@@ -75,7 +92,7 @@ function doctest_run_php($test, $scope=[])
 function doctest_php_eval($scope)
 {
     extract($scope);
-    eval('?>'.func_get_args()[1]);
+    eval('?'.'>'.func_get_args()[1]);
     return get_defined_vars();
 }
 
@@ -84,6 +101,7 @@ function doctest_find($docPath)
     $groups = [];
     $tests  = [];
     $blocks = [];
+    $allBlocks= [];
 
     $id = 0;
 
@@ -124,6 +142,8 @@ function doctest_find($docPath)
             if (!$claimed) {
                 $blocks[$block['lang']][] = $block;
             }
+
+            $allBlocks[] = $block;
         }
     }
 
@@ -135,7 +155,7 @@ function doctest_find($docPath)
         unset($group);
     }
 
-    return [$groups, $tests, $blocks];
+    return [$groups, $tests, $blocks, $allBlocks];
 }
 
 
@@ -171,6 +191,7 @@ function iter_lines($h)
     }];
 }
 
+// The awfulness of the prototype. It works.
 function rst_code_block_find($h)
 {
     $ST_NONE = 0;
