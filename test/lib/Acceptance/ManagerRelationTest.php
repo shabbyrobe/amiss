@@ -193,7 +193,7 @@ class ManagerRelationTest extends \Amiss\Test\Helper\TestCase
         $this->manager->assignRelated($event, 'artists');
         
         // Relation 2: populate each Artist object's artistType property
-        $this->manager->assignRelated(Functions::getChildren($event, 'artists'), 'artistType');
+        $this->manager->assignRelated($this->manager->getChildren($event, 'artists'), 'artistType');
         
         $this->assertInstanceOf(Demo\Event::class, $event);
         $this->assertGreaterThan(0, count($event->artists));

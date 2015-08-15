@@ -34,6 +34,8 @@ class Manager
 
     public $on = [];
 
+    private $filter;
+
     /**
      * @param PDOK\Connector|array  Database connector
      * @param Amiss\Mapper
@@ -906,86 +908,32 @@ class Manager
         $stmt = $this->getConnector()->prepare($sql)->execute($whereParams);
     }
 
-    /**
-     * Iterate over an array of objects and returns an array of objects
-     * indexed by a property
-     *
-     * Doesn't really belong in Manager from a purist POV, but it's very convenient for
-     * users for it to be here.
-     * 
-     * @return array
-     */
-    public function indexBy($list, $property, $meta=null, $allowDupes=null, $ignoreNulls=null)
+
+    /*{{{ Amiss\Filter methods*/
+    public function getChildren(...$args)
     {
-        $allowDupes  = $allowDupes  !== null ? $allowDupes  : false;
-        $ignoreNulls = $ignoreNulls !== null ? $ignoreNulls : true;
-
-        if (!$list) {
-            return [];
+        if (!$this->filter) {
+            $this->filter = new \Amiss\Filter($this->mapper);
         }
-        if ($meta) {
-            $meta = !$meta instanceof Meta ? $this->mapper->getMeta($meta) : $meta;
-        } else {
-            if (!($first = current($list))) {
-                throw new \UnexpectedValueException();
-            }
-            $meta = $this->mapper->getMeta(get_class($first));
-        }
-
-        $index = array();
-
-        $props = $meta ? $meta->getProperties() : [];
-        foreach ($list as $object) {
-            $propDef = !isset($props[$property]) ? null : $props[$property];
-            $value = !$propDef || !isset($propDef['getter']) 
-                ? $object->{$property} 
-                : call_user_func(array($object, $propDef['getter']));
-
-            if ($value === null && $ignoreNulls) {
-                continue;
-            }
-            if (!$allowDupes && isset($index[$value])) {
-                throw new \UnexpectedValueException("Duplicate value for property $property");
-            }
-            $index[$value] = $object;
-        }
-        return $index;
+        return $this->filter->getChildren(...$args);
     }
 
-    /**
-     * Iterate over an array of objects and group them by the value of a property
-     *
-     * Doesn't really belong in Manager from a purist POV, but it's very convenient for
-     * users for it to be here.
-     * 
-     * @return array[group] = class[]
-     */
-    public function groupBy($list, $property, $meta=null)
+    public function indexBy(...$args)
     {
-        if (!$list) {
-            return [];
+        if (!$this->filter) {
+            $this->filter = new \Amiss\Filter($this->mapper);
         }
-        if (!$meta) {
-            if (!($first = current($list))) {
-                throw new \UnexpectedValueException();
-            }
-            $meta = $this->mapper->getMeta(get_class($first));
-        }
-
-        $groups = [];
-
-        $props = $meta->getProperties();
-        foreach ($list as $object) {
-            $propDef = !isset($props[$property]) ? null : $props[$property];
-            $value = !$propDef || !isset($propDef['getter']) 
-                ? $object->{$property} 
-                : call_user_func(array($object, $propDef['getter']));
-
-            $groups[$value][] = $object;
-        }
-        return $groups;
+        return $this->filter->indexBy(...$args);
     }
 
+    public function groupBy(...$args)
+    {
+        if (!$this->filter) {
+            $this->filter = new \Amiss\Filter($this->mapper);
+        }
+        return $this->filter->groupBy(...$args);
+    }
+    /*}}}*/
 
     /**
      * @ignore

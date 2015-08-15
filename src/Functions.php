@@ -30,43 +30,6 @@ class Functions
         }
         return $index;
     }
-    
-    /**
-     * Retrieve all object child values through a property path.
-     * 
-     * @param object[] $objects
-     * @param string|array $path
-     * @return array
-     */
-    public static function getChildren($objects, $path)
-    {
-        $array = array();
-        if (!is_array($path)) {
-            $path = explode('/', $path);
-        }
-        if (!is_array($objects)) {
-            $objects = array($objects);
-        }
-        
-        $count = count($path);
-        
-        foreach ($objects as $o) {
-            $value = $o->{$path[0]};
-            
-            if (is_array($value) || $value instanceof \Traversable) {
-                $array = array_merge($array, $value);
-            }
-            elseif ($value !== null) {
-                $array[] = $value;
-            }
-        }
-        
-        if ($count > 1) {
-            $array = self::getChildren($array, array_slice($path, 1));
-        }
-        
-        return $array;
-    }
 
     public static function guid()
     {
