@@ -1,6 +1,9 @@
 <?php
 namespace Amiss\Test\Unit;
 
+use Amiss\Test\Factory;
+use Amiss\Test\Helper\ClassBuilder;
+
 /**
  * @group unit
  */
@@ -13,15 +16,15 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetFirstLevelScalarChildrenWithStringPath()
     {
-        $objects = array(
-            (object)array('foo'=>(object)array('bar'=>'baz')),
-            (object)array('foo'=>(object)array('bar'=>'qux')),
-        );
+        $objects = [
+            (object) ['foo'=>(object) ['bar'=>'baz']],
+            (object) ['foo'=>(object) ['bar'=>'qux']],
+        ];
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
         $children = $filter->getChildren($objects, 'foo');
-        $this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
+        $this->assertEquals([$objects[0]->foo, $objects[1]->foo], $children);
     }
-    
+
     /**
      * @group manager
      * 
@@ -30,12 +33,12 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
     public function testGetFirstLevelScalarChildrenWithArrayPath()
     {
         $objects = array(
-            (object)array('foo'=>(object)array('bar'=>'baz')),
-            (object)array('foo'=>(object)array('bar'=>'qux')),
+            (object) ['foo'=>(object) ['bar'=>'baz']],
+            (object) ['foo'=>(object) ['bar'=>'qux']],
         );
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
-        $children = $filter->getChildren($objects, array('foo'));
-        $this->assertEquals(array($objects[0]->foo, $objects[1]->foo), $children);
+        $children = $filter->getChildren($objects, ['foo']);
+        $this->assertEquals([$objects[0]->foo, $objects[1]->foo], $children);
     }
     
     /**
@@ -51,7 +54,7 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
         ];
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
         $children = $filter->getChildren($objects, 'foo/bar');
-        $this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
+        $this->assertEquals([$objects[0]->foo->bar, $objects[1]->foo->bar], $children);
     }
     
     /**
@@ -61,13 +64,13 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetSecondLevelScalarChildrenWithArrayPath()
     {
-        $objects = array(
-            (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'qux'))),
-            (object)array('foo'=>(object)array('bar'=>(object)array('baz'=>'doink'))),
-        );
+        $objects = [
+            (object) ['foo'=>(object) ['bar'=>(object) ['baz'=>'qux']]],
+            (object) ['foo'=>(object) ['bar'=>(object) ['baz'=>'doink']]],
+        ];
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
-        $children = $filter->getChildren($objects, array('foo', 'bar'));
-        $this->assertEquals(array($objects[0]->foo->bar, $objects[1]->foo->bar), $children);
+        $children = $filter->getChildren($objects, ['foo', 'bar']);
+        $this->assertEquals([$objects[0]->foo->bar, $objects[1]->foo->bar], $children);
     }
     
     /**
@@ -77,13 +80,13 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetFirstLevelArrayChildren()
     {
-        $objects = array(
-            (object)array('foo'=>array((object)array('bar'=>'baz'),   (object)array('bar'=>'qux'))),
-            (object)array('foo'=>array((object)array('bar'=>'doink'), (object)array('bar'=>'boing'))),
-        );
+        $objects = [
+            (object) ['foo'=>[(object) ['bar'=>'baz'],   (object) ['bar'=>'qux']]],
+            (object) ['foo'=>[(object) ['bar'=>'doink'], (object) ['bar'=>'boing']]],
+        ];
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
         $children = $filter->getChildren($objects, 'foo');
-        $this->assertEquals(array($objects[0]->foo[0], $objects[0]->foo[1], $objects[1]->foo[0], $objects[1]->foo[1]), $children);
+        $this->assertEquals([$objects[0]->foo[0], $objects[0]->foo[1], $objects[1]->foo[0], $objects[1]->foo[1]], $children);
     }
     
     /**
@@ -93,37 +96,42 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
      */
     public function testGetMultiLevelArrayChildren()
     {
-        $result = array(
-            new TestObject(array('baz'=>'qux')),
-            new TestObject(array('baz'=>'doink')),
-            new TestObject(array('baz'=>'boing')),
-            new TestObject(array('baz'=>'ting')),
-            new TestObject(array('baz'=>'dong')),
-            new TestObject(array('baz'=>'bang')),
-            new TestObject(array('baz'=>'clang')),
-            new TestObject(array('baz'=>'blam')),
-        );
+        $result = [
+            new TestObject(['baz'=>'qux']),
+            new TestObject(['baz'=>'doink']),
+            new TestObject(['baz'=>'boing']),
+            new TestObject(['baz'=>'ting']),
+            new TestObject(['baz'=>'dong']),
+            new TestObject(['baz'=>'bang']),
+            new TestObject(['baz'=>'clang']),
+            new TestObject(['baz'=>'blam']),
+        ];
         
-        $objects = array(
-            new TestObject(array('foo'=>array(
-                new TestObject(array('bar'=>array($result[0], $result[1]))),
-                new TestObject(array('bar'=>array($result[2], $result[3]))),
-            ))),
-            new TestObject(array('foo'=>array(
-                new TestObject(array('bar'=>array($result[4], $result[5]))),
-                new TestObject(array('bar'=>array($result[6], $result[7]))),
-            ))),
-        );
+        $objects = [
+            new TestObject(['foo'=>[
+                new TestObject(['bar'=>[$result[0], $result[1]]]),
+                new TestObject(['bar'=>[$result[2], $result[3]]]),
+            ]]),
+            new TestObject(['foo'=>[
+                new TestObject(['bar'=>[$result[4], $result[5]]]),
+                new TestObject(['bar'=>[$result[6], $result[7]]]),
+            ]]),
+        ];
         
         $filter = new \Amiss\Filter(new \Amiss\Mapper\Note);
         $children = $filter->getChildren($objects, 'foo/bar');
         $this->assertEquals($result, $children);
     }
+
+    function testGetMappedChildren()
+    {
+        Factory::c        
+    }
 }
 
 class TestObject
 {
-    public function __construct($properties=array())
+    public function __construct($properties=[])
     {
         foreach ($properties as $k=>$v) $this->$k = $v;
     }
