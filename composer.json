@@ -1,7 +1,7 @@
 {
     "name": "shabbyrobe/amiss",
     "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
-    "version": "5.0.0.beta.2",
+    "version": "5.0.0.beta.3",
     "type": "library",
     "license": "MIT",
     "keywords": ["orm", "sql", "database", "mapper", "datamapper", "activerecord"],
@@ -17,10 +17,10 @@
     },
     "require": {
         "php": ">=5.6.0",
-        "shabbyrobe/pdok": "^1",
+        "shabbyrobe/pdok": ">=1.2,<2",
         "shabbyrobe/nope": ">=1.0.3,<2",
         "docopt/docopt": "1.0.*",
-        "litipk/php-bignumbers": "dev-master"
+        "litipk/php-bignumbers": ">=0.7.3,<1"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
