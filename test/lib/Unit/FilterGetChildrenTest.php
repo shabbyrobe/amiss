@@ -122,11 +122,6 @@ class FilterGetChildrenTest extends \Amiss\Test\Helper\TestCase
         $children = $filter->getChildren($objects, 'foo/bar');
         $this->assertEquals($result, $children);
     }
-
-    function testGetMappedChildren()
-    {
-        Factory::c        
-    }
 }
 
 class TestObject

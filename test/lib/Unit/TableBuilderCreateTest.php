@@ -139,7 +139,7 @@ class TableBuilderCreateTest extends \Amiss\Test\Helper\TestCase
     {
         $this->deps->connector = new \PDO('sqlite::memory:');
         if (version_compare(PHP_VERSION, "7.0.0-dev") >= 0) {
-            $this->setExpectedException('TypeException');
+            $this->setExpectedException('TypeError');
         } else {
             $this->setExpectedException('PHPUnit_Framework_Error');
         }

@@ -2,7 +2,8 @@ bootstrap:
   - vendor/autoload.php
 
 scripts:
-  - type: php
+  test:
+    type: php
     script: test/run.php
     trace: false
     # args: [ --filter, ManagerTest ]
