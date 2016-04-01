@@ -93,6 +93,42 @@ class ActiveRecordTest extends \Amiss\Test\Helper\TestCase
         $this->assertGreaterThan(0, $this->deps->manager->count(Active\ArtistRecord::class));
     }
 
+    public function testDeleteTable()
+    {
+        $obj = Active\ArtistRecord::getById(1);
+        $this->assertTrue($obj==true, "Couldn't retrieve object");
+        Active\ArtistRecord::deleteTable('1=1');
+
+        $this->assertEquals(0, $this->deps->manager->count(Active\ArtistRecord::class));
+    }
+
+    public function testUpdateTable()
+    {
+        $cnt = Active\ArtistRecord::count("{name}='flerb'");
+        $this->assertEquals(0, $cnt);
+
+        Active\ArtistRecord::updateTable([
+            'set'   => ['name' => 'flerb'],
+            'where' => '1=1',
+        ]);
+
+        $this->assertEquals(
+            Active\ArtistRecord::count("{name}='flerb'"),
+            Active\ArtistRecord::count()
+        );
+    }
+
+    public function testInsertTable()
+    {
+        $this->assertEquals(0, Active\ArtistRecord::count("{name}='flerb'"));
+        Active\ArtistRecord::insertTable([
+            'name' => 'flerb',
+            'slug' => 'flerb',
+            'artistTypeId' => 1,
+        ]);
+        $this->assertEquals(1, Active\ArtistRecord::count("{name}='flerb'"));
+    }
+
     public function testUpdateByPrimary()
     {
         $n = md5(uniqid('', true));

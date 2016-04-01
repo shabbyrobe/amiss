@@ -128,10 +128,12 @@ abstract class ActiveRecord
         $called = get_called_class();
         
         $exists = null;
-        if ($name == 'get'      || $name == 'getByPk'    || 
-            $name == 'getById'  || $name == 'getList'    || 
-            $name == 'count'    || $name == 'deleteById' ||
-            $name == 'getByKey' || $name == 'exists'
+        if ($name == 'get'         || $name == 'getById'     || 
+            $name == 'getList'     || $name == 'getByKey'    || 
+            $name == 'exists'      || $name == 'count'       || 
+            $name == 'deleteById'  ||
+            $name == 'deleteTable' || $name == 'updateTable' ||
+            $name == 'insertTable' 
         ) {
             $exists = true; 
             array_unshift($args, $called);
