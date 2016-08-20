@@ -1,14 +1,14 @@
 {
-    "name": "shabbyrobe/amiss",
+    "name": "pierrelemee/amiss",
     "description": "Data Mapper and Active Record implementation for MySQL and SQLite",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "type": "library",
     "license": "MIT",
     "keywords": ["orm", "sql", "database", "mapper", "datamapper", "activerecord"],
     "authors": [
         {
-            "name": "Blake Williams", 
-            "email": "code@k3jw.com"
+            "name": "Pierre Lemée", 
+            "email": "pierre@pierrelemee.fr"
         }
     ],
     "homepage": "http://k3jw.com/code/amiss/",
