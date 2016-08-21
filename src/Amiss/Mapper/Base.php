@@ -71,11 +71,12 @@ abstract class Base implements \Amiss\Mapper
                 $value = call_user_func(array($object, $field['getter']));
 
             if (is_object($value)) {
-                if (null !== $m = $this->getMeta(get_class($value))) {
-                    $primary = $m->getPrimaryValue($value);
-                    if (isset($meta->relations[$field["name"]]["on"]) && isset($primary[$meta->relations[$field["name"]]["on"]])) {
-                        $value = $primary[$meta->relations[$field["name"]]["on"]];
-                    }
+                $m = $this->getMeta(get_class($value));
+                $primary = $m->getPrimaryValue($value);
+                if (sizeof($primary) > 0 && isset($meta->relations[$field["name"]]["on"]) && isset($primary[$meta->relations[$field["name"]]["on"]])) {
+                    $value = $primary[$meta->relations[$field["name"]]["on"]];
+                } else {
+                    $value = $value->__toString();
                 }
             }
             
