@@ -2,6 +2,7 @@
 namespace Amiss\Mapper;
 
 use Amiss\Meta;
+use Amiss\Exception;
 
 /**
  * @package Mapper
@@ -68,6 +69,19 @@ abstract class Base implements \Amiss\Mapper
                 $value = $object->$prop;
             else
                 $value = call_user_func(array($object, $field['getter']));
+
+            if (is_object($value)) {
+                try {
+                    $primary = $this->getMeta(get_class($value))->getPrimaryValue($value);
+                    if (sizeof($primary) > 0 && isset($meta->relations[$field["name"]]["on"]) && isset($primary[$meta->relations[$field["name"]]["on"]])) {
+                        $value = $primary[$meta->relations[$field["name"]]["on"]];
+                    } else {
+                        // TODO: throw something ?
+                    }
+                } catch (Exception $e) {
+                    // This is a regular object, let's delegate string conversion to PDO
+                }
+            }
             
             $type = $field['type'] ?: $defaultType;
             $typeId = $type['id'];
