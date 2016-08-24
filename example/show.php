@@ -3,8 +3,15 @@
 require_once(__DIR__.'/config.php');
 
 if (php_sapi_name() == 'cli') {
-    $ex = $argv[1];
     $fmt = 'json';
+    $options = getopt('f:c:l:');
+    $ex = $options['f'];
+    if (isset($options['l'])) {
+        $_GET['loop'] = $options['l'];
+    }
+    if (array_key_exists('c', $options)) {
+        $_GET['cache'] = $options['c'];
+    }
 }
 else {
     $ex = isset($_SERVER['PATH_INFO']) ? trim($_SERVER['PATH_INFO'], '/') : null;
@@ -62,7 +69,7 @@ $source = source(file_get_contents($file), true);
 </style>
 </head>
 <body>
-<a href="<?php echo dirname($_SERVER['SCRIPT_NAME']) ?>/index.php">Back to index</a>
+<a href="<?php echo rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/index.php">Back to index</a>
 <h2>Source</h2>
 <div>
 <?php echo $source; ?>

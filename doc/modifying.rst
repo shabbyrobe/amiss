@@ -7,13 +7,14 @@ Objects
 ``\Amiss\Sql\Manager->insert(...)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``insert`` method inserts mapped objects into the database and supports the following
-signatures::
+The ``insert`` method inserts mapped objects into the database and supports the
+following signatures::
 
     $manager->insert( $object )
     $manager->insert( $object , string $table )
 
-Inserting by object is simple: just pass it directly to ``Amiss\Sql\Manager::insert``.
+Inserting by object is simple: just pass it directly to
+``Amiss\Sql\Manager::insert``.
 
 .. code-block:: php
     
@@ -26,11 +27,12 @@ Inserting by object is simple: just pass it directly to ``Amiss\Sql\Manager::ins
     echo $e->eventId;
 
 
-Multiple insertions of the same object are not prevented by Amiss. An appropriately
-configured primary or unique key will allow your database to prevent undesired duplicates.
+Multiple insertions of the same object are not prevented by Amiss. An
+appropriately configured primary or unique key will allow your database to
+prevent undesired duplicates.
 
-You can manually specify which table to insert into, overriding the table stored in the
-``Amiss\Meta`` for the class:
+You can manually specify which table to insert into, overriding the table stored
+in the ``Amiss\Meta`` for the class:
 
 .. code-block:: php
     
@@ -42,8 +44,8 @@ You can manually specify which table to insert into, overriding the table stored
 ``Amiss\Sql\Manager->update(...)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``update`` method updates mapped objects into the database and supports the following
-signatures::
+The ``update`` method updates mapped objects into the database and supports the
+following signatures::
 
     $manager->update( $object )
     $manager->update( $object , string $table )
@@ -58,15 +60,15 @@ Updating an object requires a primary key be defined in the :doc:`metadata`.
     $manager->update($a);
     // UPDATE artist SET name='foo bar' WHERE artistId=1
 
-You can manually specify which table to update, overriding the table stored in the
-``Amiss\Meta`` for the class.
+You can manually specify which table to update, overriding the table stored in
+the ``Amiss\Meta`` for the class.
 
 
 ``Amiss\Sql\Manager->delete(...)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``delete`` method removes a mapped object from the database and supports the following
-signatures::
+The ``delete`` method removes a mapped object from the database and supports the
+following signatures::
 
     $manager->delete( $object )
     $manager->delete( $object , string $table )
@@ -81,18 +83,19 @@ Deleting an object requires a primary key be defined in the :doc:`metadata`.
     $manager->delete($a);
     unset($a);
 
-The instance of the object is not modified by the delete operation - it is up to you to
-get rid of the instance if you're done with it. You are free to re-insert it if you like.
+The instance of the object is not modified by the delete operation - it is up to
+you to get rid of the instance if you're done with it. You are free to re-insert
+it if you like.
 
-You can manually specify which table to update, overriding the table stored in the
-``Amiss\Meta`` for the class.
+You can manually specify which table to update, overriding the table stored in
+the ``Amiss\Meta`` for the class.
 
 
 Value Insertion
 ~~~~~~~~~~~~~~~
 
-When the default behaviour of Object Insertion just won't do, you can insert a list of values
-directly.
+When the default behaviour of Object Insertion just won't do, you can insert a
+list of values directly.
 
 This is useful when
 
@@ -102,12 +105,14 @@ This is useful when
 .. code-block:: php
 
     <?php
-    $eventId = $amiss->insert('Event', array(
-        'name'=>'Guns and Roses at The Tote',
-        'slug'=>'guns-and-roses-tote'
-    ));
+    $eventId = $amiss->insert('Event', [
+        'name' => 'Guns and Roses at The Tote',
+        'slug' => 'guns-and-roses-tote'
+    ]);
 
-.. note:: This is kind of a throwback to an earlier version. It may be removed at some point.
+.. note::
+   
+    This a throwback to an earlier version. It may be removed at some point.
 
 
 Updating
@@ -119,8 +124,8 @@ Updating can work on a specific object or a whole table.
 Objects
 ~~~~~~~
 
-To update an object's representation in the database, call the ``update`` method of
-``Amiss\Sql\Manager`` with the object as the argument.
+To update an object's representation in the database, call the ``update`` method
+of ``Amiss\Sql\Manager`` with the object as the argument.
 
 .. note:: This only works if the object has a primary key.
 
@@ -136,9 +141,9 @@ To update an object's representation in the database, call the ``update`` method
 Tables
 ~~~~~~
 
-To update a table, call the ``updateTable`` method of ``Amiss\Sql\Manager`` but pass the
-object's name as the first parameter instead of an instance. The following signatures are
-available::
+To update a table, call the ``updateTable`` method of ``Amiss\Sql\Manager`` but
+pass the object's name as the first parameter instead of an instance. The
+following signatures are available::
 
     updateTable( string $class, array $set , string $positionalWhere, [ $param1, ... ] )
     updateTable( string $class, array $set , string $namedWhere, array $params )
@@ -146,14 +151,14 @@ available::
     updateTable( string $class, Amiss\Sql\Criteria\Update $criteria )
 
 
-The ``class`` parameter should just be the name of a class, otherwise the "Object"
-updating method described above will kick in.
+The ``class`` parameter should just be the name of a class, otherwise the
+"Object" updating method described above will kick in.
 
-In the first two signatures, the ``set`` parameter is an array of ``key => value`` pairs
-containing fields to set. The key should be the object's property name, not the column in
-the database (though these may be identical). The ``positionalWhere`` or ``namedWhere``
-are, like select, just parameterised query clauses. See :ref:`clauses` for more
-information.
+In the first two signatures, the ``set`` parameter is an array of ``key =>
+value`` pairs containing fields to set. The key should be the object's property
+name, not the column in the database (though these may be identical). The
+``positionalWhere`` or ``namedWhere`` are, like select, just parameterised query
+clauses. See :ref:`clauses` for more information.
 
 .. code-block:: php
 
@@ -162,8 +167,8 @@ information.
     // equivalent SQL: UPDATE event_artist SET priority=1 WHERE artistId=2
 
 
-In the second two signatures, an ``Amiss\Sql\Criteria\Update`` (or an array-based representation)
-can be passed:
+In the second two signatures, an ``Amiss\Sql\Criteria\Update`` (or an
+array-based representation) can be passed:
 
 .. code-block:: php
 
@@ -192,8 +197,8 @@ can be passed:
 Saving
 ------
 
-"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only works for
-objects with an autoincrement column.
+"Saving" is a shortcut for "insert if it's new, update if it isn't", but it only
+works for objects with an autoincrement column.
 
 .. code-block:: php
 
@@ -227,8 +232,8 @@ Deleting by table::
 
 .. note:: 
 
-    Deleting by table cannot be used with an empty "where" clause. If you really want to delete
-    everything in a table, you should either truncate directly:
+    Deleting by table cannot be used with an empty "where" clause. If you really
+    want to delete everything in a table, you should either truncate directly:
 
     .. code-block:: php
 

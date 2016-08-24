@@ -9,12 +9,12 @@ autoload_namespace('Amiss\Test', __DIR__.'/lib');
 
 function autoload_namespace($prefix, $path, $options=array())
 {
-    $defaults = array(
-        'prepend'=>false,      // stick the autoloader up the top of the stack rather than on the bottom
-        'suffix'=>'.php',      // attached to the last namespace segment to determine the class file name
-        'stripPrefix'=>true,   // remove the prefix from the start of the class name before generating path
-        'separator'=>'\\',     // namespace separator (switch to _ for 5.2 style)
-    );
+    $defaults = [
+        'prepend'     => false,  // stick the autoloader up the top of the stack rather than on the bottom
+        'suffix'      => '.php', // attached to the last namespace segment to determine the class file name
+        'stripPrefix' => true,   // remove the prefix from the start of the class name before generating path
+        'separator'   => '\\',   // namespace separator (switch to _ for 5.2 style)
+    ];
     $options = array_merge($defaults, $options);
     $prefix = trim($prefix, $options['separator']);
     

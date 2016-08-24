@@ -129,23 +129,23 @@ related one.
 
 ``on`` can be a single string if the name is the same on both objects::
 
-    'on'=>'artistTypeId',
+    'on' => 'artistTypeId',
 
 An array of strings if the related object's primary key is composite and the
 names are the same on both objects::
     
-    'on'=>array('artistTypeIdPartOne', 'artistTypeIdPartTwo')
+    'on' => ['artistTypeIdPartOne', 'artistTypeIdPartTwo']
 
 Or an array of key=>value pairs when the owning object's primary key has a
 different name to the related object's property::
 
-    'on'=>array('id'=>'artistTypeId')
+    'on' => ['id'=>'artistTypeId']
 
 Instead of ``on``, if there is a corresponding one-to-one relationship on the
 related object, you can specify ``inverse``, where the value is the name of the
 corresponding relationship on the related object::
 
-    'inverse'=>'artist',
+    'inverse' => 'artist',
 
 
 .. _relator-assoc:
@@ -201,7 +201,7 @@ relation to ``Venue`` looks like this:
 
     <?php
     $event->relations = array(
-        'venues'=>array('assoc', 'of'=>'Venue', 'via'=>'EventVenue'),
+        'venues' => ['assoc', 'of' => 'Venue', 'via' => 'EventVenue'],
     );
 
 .. note:: ``EventVenue`` in this example *must itself be mapped*.
@@ -212,11 +212,16 @@ Retrieving Related Objects
 
 Amiss provides two methods for retrieving and populating relations:
 
-.. py:function:: Amiss\\Sql\\Manager::getRelated( $source , $relationName , $criteria ... )
+``Amiss\\Sql\\Manager::getRelated( $source , $relationName , $criteria ... )``
 
-    :param source: The single object or array of objects for which to retrieve the related values
-    :param relationName: The name of the relation through which to retrieve objects
-    :param criteria: *Optional*. Allows filtering of the related objects.
+    Parameters:
+
+    ``source``
+        The single object or array of objects for which to retrieve the related values
+    ``relationName``
+        The name of the relation through which to retrieve objects
+    ``criteria``
+        *Optional*. Allows filtering of the related objects.
 
     Retrieves and returns objects related to the ``$source`` through the
     ``$relationName``:
@@ -250,13 +255,18 @@ Amiss provides two methods for retrieving and populating relations:
 
         <?php
         $artistType = $manager->getById('ArtistType', 1);
-        $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', array('%foo%'));
+        $artists = $manager->getRelated($artistType, 'artists', 'name LIKE ?', ['%foo%']);
 
 
-.. py:function:: Amiss\\Sql\\Manager::assignRelated( $into , $relationName )
+``Amiss\\Sql\\Manager::assignRelated( $into , $relationName )``
 
-    :param into: The single object or array of objects into which this will set the related values
-    :param relationName: The name of the relation through which to retrieve objects
+    Parameters:
+
+    ``into``
+        The single object or array of objects into which this will set the
+        related values
+    ``relationName``
+        The name of the relation through which to retrieve objects
 
     The ``assignRelated`` method will call ``getRelated`` and assign the
     resulting relations to the source object(s):
@@ -391,19 +401,27 @@ extends ``Amiss\Sql\Relator\Base`` and adding it to the
 ``Amiss\Sql\Manager->relators`` dictionary. Your Relator must implement the
 following method:
 
-.. py:method:: Amiss\\Sql\\Relator::getRelated( $source , $relationName , $criteria... = null )
+``Amiss\\Sql\\Relator::getRelated( $source , $relationName , $criteria... = null )``
     
-    Retrieve the objects for the ``$source`` that are related through ``$relationName``. Optionally
-    filter using ``$criteria``, which must be an instance of ``Amiss\Sql\Criteria\Query``.
+    Retrieve the objects for the ``$source`` that are related through
+    ``$relationName``. Optionally filter using ``$criteria``, which must be an
+    instance of ``Amiss\Sql\Criteria\Query``.
 
     ``Amiss\Sql\Relator\Base`` makes an instance of ``Amiss\Sql\Manager``
     available through ````$this->manager``. You can use this to perform queries.
 
-    :param source: The source object(s). This could be either a single object or an array of objects 
-        depending on your context. You are free to raise an exception if your ``Relator`` only 
-        supports single objects or arrays.
-    :param relationName: The name of the relation which was passed to ``getRelated``
-    :param criteria: Optional filter criteria. Must be instance of ``Amiss\Sql\Criteria\Query``.
+    Parameters:
+
+    ``source``
+        The source object(s). This could be either a single object or
+        an array of objects depending on your context. You are free to raise an
+        exception if your ``Relator`` only supports single objects or arrays.
+
+    ``relationName``
+        The name of the relation which was passed to ``getRelated``
+    
+    ``criteria``
+        Optional filter criteria. Must be instance of ``Amiss\Sql\Criteria\Query``.
 
 
 You can register your relator with Amiss like so:
@@ -411,61 +429,36 @@ You can register your relator with Amiss like so:
 .. code-block:: php
 
     <?php
-    $manager->relators['somethingElse'] = new My\Custom\OneToFooRelator($manager);
+    $manager->relators['custom'] = new My\Custom\Relator($manager);
 
 
-If you are using ``Amiss\Mapper\Note``, you would define a relation that uses
-this relator like so:
+If your relator requires additional keys/values to be available in the metadata
+(all the default ones do), you can pass them as part of the relator definition:
 
 .. code-block:: php
 
     <?php
     class Bar
     {
-        /**
-         * :amiss = {"field": {"primary": true}};
-         */
+        /** :amiss = {"field": {"primary": true}}; */
         public $id;
    
         /**
-         * :amiss = {"has": {"type": "somethingElse"}};
+         * :amiss = {"has": {"type": "custom", "a": "yep", "b": "yep"}};
          */
         public $foo;
     }
-
 
 Calls to ``getRelated()`` and ``assignRelated()`` referring to ``Bar->foo`` will
 now use your custom relator to retrieve the related objects.
 
-If your relator requires additional keys/values to be available in the metadata
-(all the default ones do), you can use array notation instead:
-
 .. code-block:: php
 
     <?php
-    class Bar
-    {
-        /**
-         * :amiss = {"field": {"primary": true}};
-         */
-        public $id;
+    $bar = new Bar();
+    $bar->id = 1;
    
-        /**
-         * :amiss = {
-         *     "has": {
-         *         "type": "somethingElse",
-         *         "key": "value",
-         *         "anotherKey": "anotherValue",
-         *         "anArray": [
-         *             "value1",
-         *             "value2"
-         *         ],
-         *         "anArrayWithOneElement": [
-         *             "yep"
-         *         ]
-         *     }
-         * };
-         */
-        public $foo;
-    }
+    // will invoke My\Custom\Relator to assign 'foo'
+    $manager->assignRelated($bar, 'foo');
+
 

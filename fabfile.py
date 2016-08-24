@@ -15,10 +15,6 @@ def doc(clean=False):
             local('make clean')
         local('make html')
 
-@task
-def cloc():
-    local('cloc src')
-    local('cloc test')
 
 @task
 def pdf():
@@ -26,6 +22,7 @@ def pdf():
         local('make latexpdf >> /dev/null')
         print "PDF available at:"
         print "%s/doc/_build/latex/AmissPHPDataMapper.pdf" % env.base_path
+
 
 @task
 def test(filter=None):
@@ -35,6 +32,7 @@ def test(filter=None):
             cmd += ' --filter ' + filter
         local(cmd)
 
+
 @task
 def testq(filter=None):
     with lcd(env.test_path):
@@ -43,15 +41,18 @@ def testq(filter=None):
             cmd += ' --filter ' + filter
         local(cmd)
 
+
 @task
 def testgrp(group):
     with lcd(env.test_path):
         local('php test/run.php --group %s' % group)
 
+
 @task
 def testall():
     with lcd(env.test_path):
         local('php test/run.php')
+
 
 @task
 def testcvg(coverage_path='/tmp/cvg'):
@@ -60,11 +61,13 @@ def testcvg(coverage_path='/tmp/cvg'):
         print "Coverage available at:"
         print "%s/index.html" % coverage_path
 
-@task
-def archive(outpath):
-    with lcd(env.base_path):
-        version = read_version()
-        local("git archive --prefix=amiss/ HEAD | bzip2 >%s/amiss-%s.tar.bz2" % (outpath, version))
+
+# @task
+# def archive(outpath):
+#     with lcd(env.base_path):
+#         version = read_version()
+#         local("git archive --prefix=amiss/ HEAD | bzip2 >%s/amiss-%s.tar.bz2" % (outpath, version))
+
 
 @task
 def version(version):

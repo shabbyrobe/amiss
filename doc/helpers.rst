@@ -1,8 +1,8 @@
 Helpers
 =======
 
-``Amiss\Sql\Manager`` has several helper methods that can take some of the pain out of complex 
-relation gymnastics.
+``Amiss\Sql\Manager`` has several helper methods that can take some of the pain
+out of complex relation gymnastics.
 
 .. _helpers-get-children:
 
@@ -27,8 +27,9 @@ relation gymnastics.
         var_dump($children == $expected);
 
     
-    ``$path`` can be a single string containing a property name, like the above example,
-    or it can be a path expression allowing you to traverse multiple levels:
+    ``$path`` can be a single string containing a property name, like the above
+    example, or it can be a path expression allowing you to traverse multiple
+    levels:
 
     .. code-block:: php
         
@@ -46,7 +47,8 @@ relation gymnastics.
         var_dump($children == $expected);
 
     
-    ``getChildren`` will also work if the result of any path level yields an array:
+    ``getChildren`` will also work if the result of any path level yields an
+    array:
 
     .. code-block:: php
     
@@ -79,7 +81,8 @@ relation gymnastics.
 
 .. py:function:: Amiss\\Sql\\Manager::indexBy()
 
-    Iterate over an array of objects and returns an array of objects indexed by a property:
+    Iterate over an array of objects and returns an array of objects indexed by
+    a property:
 
     .. code-block:: php
 
@@ -100,9 +103,9 @@ relation gymnastics.
         var_dump($objects[0] == $indexed['a']); // will output true
 
 
-    If you have more than one object with the same property value, ``indexBy`` will
-    raise an exception by default. Pass ``false`` as the fourth parameter if you would
-    prefer to overwrite existing keys:
+    If you have more than one object with the same property value, ``indexBy``
+    will raise an exception by default. Pass ``false`` as the fourth parameter
+    if you would prefer to overwrite existing keys:
 
     .. code-block:: php
 
@@ -120,11 +123,12 @@ relation gymnastics.
 
 .. py:function:: Amiss\Sql\Manager::keyValue()
 
-    ``keyValue`` scans an array of objects or arrays and selects a property for the key
-    and a property for the value.
+    ``keyValue`` scans an array of objects or arrays and selects a property for
+    the key and a property for the value.
 
-    ``keyValue`` works in two ways. Firstly, you can feed it the result of a query with
-    two columns and it'll make the first column the key and the second column the value:
+    ``keyValue`` works in two ways. Firstly, you can feed it the result of a
+    query with two columns and it'll make the first column the key and the
+    second column the value:
 
     .. code-block:: php
 
@@ -136,9 +140,9 @@ relation gymnastics.
 
     Et voila! Array of key/value pairs from your query.
 
-    The other way is to feed it a list of objects and tell it which properties to use.
-    This will produce the same array as the previous example (albeit way less
-    efficiently):
+    The other way is to feed it a list of objects and tell it which properties
+    to use.  This will produce the same array as the previous example (albeit
+    way less efficiently):
 
     .. code-block:: php
 

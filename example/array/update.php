@@ -1,5 +1,4 @@
 <?php
-
 use Amiss\Demo\Artist;
 
 $artist = $manager->getById(Artist::class, 1);

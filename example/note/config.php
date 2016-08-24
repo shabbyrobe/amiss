@@ -1,6 +1,5 @@
 <?php
-
-require_once(__DIR__.'/../../doc/demo/model.php');
+require_once __DIR__.'/../../doc/demo/model.php';
 
 $connector = new \PDOK\Connector('sqlite::memory:');
 $manager = Amiss\Sql\Factory::createManager($connector, array(

@@ -100,9 +100,10 @@ Defining objects
 Table names are guessed from the object name. Object names are converted from
 ``CamelCase`` to ``under_scores`` by default.
 
-Table field names are taken from the property name. No name mapping is performed by
-default, but you can pass an explicit field name via the ``field`` annotation, or pass
-your own automatic translator to ``Amiss\Mapper\Base->unnamedPropertyTranslator``.
+Table field names are taken from the property name. No name mapping is performed
+by default, but you can pass an explicit field name via the ``field``
+annotation, or pass your own automatic translator to
+``Amiss\Mapper\Base->unnamedPropertyTranslator``.
 
 See :doc:`mapper/mapping` for more details and alternative mapping options.
 
@@ -122,8 +123,8 @@ See :doc:`mapper/mapping` for more details and alternative mapping options.
         public $eventId;
    
         /**
-         * This is just a plain old field. Amiss * will not handle the field's
-         * type - it will be treated as a string in * both directions.
+         * This is just a plain old field. Amiss will not handle the field's
+         * type - it will be treated as a string in both directions.
          * 
          * :amiss = {"field": true};
          */
@@ -272,12 +273,12 @@ See :doc:`selecting` for more details.
     // IN() clauses are also generated when using array clauses:
     $events = $manager->getList(Event::class, ['where' => ['venueId' => [1, 2, 3]]]);
    
-    // FOR UPDATE InnoDB row locking
+    // FOR UPDATE InnoDB row locking (MySQL only)
     if ($manager->connector->engine == 'mysql') {
         $manager->connector->beginTransaction();
         $rows = $manager->get(Event::class, [
-            'where'=>'{eventId}=1',
-            'forUpdate'=>true,
+            'where' => '{eventId}=1',
+            'forUpdate' => true,
         ]);
         $manager->connector->commit();
     }

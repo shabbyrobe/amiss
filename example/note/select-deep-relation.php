@@ -1,5 +1,4 @@
 <?php
-
 $events = $manager->getList(\Amiss\Demo\Event::class);
     
 // Relation 1: populate each Event object's list of EventArtists

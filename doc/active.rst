@@ -1,24 +1,25 @@
 Active Records
 ==============
 
-From `P of EAA`_: An object that wraps a row in a database table or view, encapsulates the
-database access, and adds domain logic on that data.
+From `P of EAA`_: An object that wraps a row in a database table or view,
+encapsulates the database access, and adds domain logic on that data.
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not wild about Active Records, but they can be very effective for rapid development
-and people seem to like them, so why not throw them in?
+I'm not wild about Active Records, but they can be very effective for rapid
+development and people seem to like them, so why not throw them in?
 
 
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class. Configure
-everything else just like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class.
+Configure everything else just like you would when using Amiss as a Data Mapper.
 
-This guide will assume you are using the :doc:`mapper/annotation`. For more information on
-alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any
-mapping configuration that works with the data mapper.
+This guide will assume you are using the :doc:`mapper/annotation`. For more
+information on alternative mapping options, see :doc:`mapper/mapping`. Active
+records will work with any mapping configuration that works with the data
+mapper.
 
 .. code-block:: php
 
@@ -51,8 +52,8 @@ Connecting
 ----------
 
 As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an
-``Amiss\Mapper`` and pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
-``Amiss\Sql\ActiveRecord::setManager()``.
+``Amiss\Mapper`` and pass it to an ``Amiss\Sql\Manager``. Then, assign the
+manager to ``Amiss\Sql\ActiveRecord::setManager()``.
 
 .. code-block:: php
 
@@ -66,8 +67,8 @@ As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an
     var_dump($conn === $manager); // outputs true
 
 
-Multiple connections are possible, but require subclasses. The separate connections are
-then assigned to their respective base class:
+Multiple connections are possible, but require subclasses. The separate
+connections are then assigned to their respective base class:
 
 .. code-block:: php
 
@@ -88,12 +89,12 @@ then assigned to their respective base class:
 Querying and Modifying
 ----------------------
 
-All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied by
-``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or object
-instance, ``Amiss\Sql\ActiveRecord`` takes care of passing itself.
+All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied
+by ``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or
+object instance, ``Amiss\Sql\ActiveRecord`` takes care of passing itself.
 
-When an instance is not required, the methods are called statically against your specific
-active record.
+When an instance is not required, the methods are called statically against your
+specific active record.
 
 Consider the following equivalents:
 
@@ -148,17 +149,17 @@ Consider the following equivalents:
 .. code-block:: php
 
     <?php
-    $yourRecordInstance->insert ();
-    $yourRecordInstance->update ();
-    $yourRecordInstance->delete ();
-    $yourRecordInstance->save ();
+    $yourRecordInstance->insert();
+    $yourRecordInstance->update();
+    $yourRecordInstance->delete();
+    $yourRecordInstance->save();
 
 
 Relations
 ---------
 
-Relations can be retrieved directly from the active record. This does not change the
-parent object:
+Relations can be retrieved directly from the active record. This does not change
+the parent object:
 
 .. code-block:: php
 

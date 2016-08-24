@@ -1,5 +1,4 @@
 <?php
-
 use Amiss\Demo\Active\EventRecord;
 
 if (!class_exists('Handler')) {

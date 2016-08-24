@@ -1,6 +1,12 @@
 <?php
+// the CLI server can't make requests to itself because it can
+// only handle one request at a time.
+// if (php_sapi_name() == 'cli-server') {
+//     die("This script doesn't work with the cli server");
+// }
+
 $parts = parse_url($_SERVER['SCRIPT_NAME']);
-$webBase = dirname($parts['path']);
+$webBase = rtrim(dirname($parts['path']), '/');
 
 $iter = isset($_GET['cnt']) ? $_GET['cnt'] : 1;
 $cache = isset($_GET['cache']) ? $_GET['cache'] : '';
@@ -19,8 +25,14 @@ for ($i = 0; $i < $iter; $i++) {
             
             $name = $folder.'/'.pathinfo($item, PATHINFO_FILENAME);
             $loop = isset($_GET['loop']) ? $_GET['loop'] : 1;
+            $out  = exec(strtr("php {path}/show.php -f {name} -c {cache} -l {loop}", [
+                '{path}'  => escapeshellarg(__DIR__),
+                '{name}'  => escapeshellarg($name),
+                '{cache}' => escapeshellarg($cache),
+                '{loop}'  => escapeshellarg($loop),
+            ]));
             $url = "{$webBase}/show.php/{$name}?cache={$cache}&loop={$loop}";
-            $out = file_get_contents("http://localhost{$url}&fmt=json");
+
             $json = json_decode($out, true);
             
             if (!isset($result[$json['id']])) {
@@ -41,11 +53,12 @@ for ($i = 0; $i < $iter; $i++) {
             $current->queries = $json['queries'];
             $current->timeTakenMs += $json['timeTakenMs'];
             
-            if ($current->timeTakenMsMin === null || $json['timeTakenMs'] < $current->timeTakenMsMin)
+            if ($current->timeTakenMsMin === null || $json['timeTakenMs'] < $current->timeTakenMsMin) {
                 $current->timeTakenMsMin = $json['timeTakenMs'];
-            if ($json['timeTakenMs'] > $current->timeTakenMsMax)
+            }
+            if ($json['timeTakenMs'] > $current->timeTakenMsMax) {
                 $current->timeTakenMsMax = $json['timeTakenMs'];
-            
+            }
             $current->memUsed += $json['memUsed'];
             $current->memPeak += $json['memPeak'];
         }
