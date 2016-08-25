@@ -8,11 +8,18 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, subprocess
 
 root_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(root_dir, "_themes"))
 sys.path.insert(0, root_dir)
+
+try:
+    out = subprocess.check_output(['git', 'symbolic-ref', '--short', '-q', 'HEAD'])
+    is_latest = out.strip() == "master"
+except subprocess.CalledProcessError, e:
+    is_latest = False
+
 
 # -- General configuration -----------------------------------------------------
 
@@ -93,6 +100,9 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+html_context = {
+    "is_latest": is_latest
+}
 
 # -- Options for HTML output ---------------------------------------------------
 
