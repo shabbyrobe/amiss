@@ -1,0 +1,131 @@
+#!/bin/bash
+set -o nounset -o errexit -o pipefail
+
+base_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+test_exclude_args=( --exclude-group "faulty,faulty-mysql,faulty-sqlite" )
+
+pushd() {
+    command pushd "$@" > /dev/null
+}
+
+popd() {
+    command popd > /dev/null
+}
+
+run_cmd() {
+    local cmd="$1"
+    set -x
+    $cmd
+    { set +x; } 2>/dev/null
+}
+
+build_cmd() {
+    local cmd=""
+    for var in "$@"; do
+        cmd+="$( printf "%q" "$var" ) "
+    done
+    echo "$cmd"
+}
+
+task_test() {
+    local filter="${1:-}"
+    local cmd=( php test/run.php --with-mysql )
+    cmd+=("${test_exclude_args[@]}")
+    if [[ ! -z "$filter" ]]; then
+        cmd+=( --filter "$filter" )
+    fi
+    cmdstr="$( build_cmd "${cmd[@]}" )"
+    run_cmd "$cmdstr"
+}
+
+task_testquick() {
+    local filter="${1:-}"
+    local cmd=( php test/run.php )
+    cmd+=("${test_exclude_args[@]}")
+    if [[ ! -z "$filter" ]]; then
+        cmd+=( --filter "$filter" )
+    fi
+    cmdstr="$( build_cmd "${cmd[@]}" )"
+    run_cmd "$cmdstr"
+}
+
+task_testgrp() {
+    local group="$1"
+    pushd "$base_path"
+        php test/run.php --group "$group"
+    popd
+}
+
+task_testcvg() {
+    local coverage_path="${1:-/tmp/cvg}"
+    pushd "$base_path"
+        php test/run.php --exclude-group faulty --coverage-html="$coverage_path"
+        print "Coverage available at:"
+        print "%s/index.html" % coverage_path
+    popd
+}
+
+task_doc() {
+    local clean=false
+    while getopts ":c" opt; do
+        case "$opt" in
+            c)  clean=true;;
+            \?) echo "Invalid option"; exit 127;;
+        esac
+    done
+
+    pushd "$base_path/doc"
+        [[ "$clean" == true ]] && make clean
+        make html
+    popd
+}
+
+task_pdf() {
+    pushd "$base_path/doc"
+        make latexpdf >> /dev/null
+        echo "PDF available at:"
+        echo "$base_path/doc/_build/latex/AmissPHPDataMapper.pdf"
+    popd
+}
+
+task_examples() {
+    php -S 127.0.0.1:8555 -t example/   
+}
+
+task_cloc() {
+    cloc src
+    cloc test
+}
+
+task_setversion() {
+    local version="$1"
+
+    pushd "$base_path"
+        echo "$version" > VERSION
+        hash="$( md5sum composer.json )"
+        sed -i 's/"version": ".*"/"version": "'"$version"'"/g' composer.json
+        check="$( md5sum composer.json )"
+        if [[ "$hash" == "$check" ]]; then
+            echo >&2 "Could not replace version"
+            exit 1
+        fi
+
+        cat VERSION
+        grep '"version"' composer.json
+        echo "---"
+        echo "Make sure you commit"
+    popd
+}
+
+task_list() {
+    local prefix=task_
+    compgen -A function "$prefix" | sed 's/^'"$prefix"'//g' | tr '_' '-'
+}
+
+if [[ -z "$1" ]]; then
+    task_list
+else
+    "task_$1" "${@:2}"
+fi
+

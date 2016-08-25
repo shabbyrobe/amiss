@@ -61,8 +61,9 @@ function filter_classes_by_namespaces($classes, $namespaces)
 
 function filter_classes_by_notes($classes, $notes)
 {
-    if (!is_array($notes))
+    if (!is_array($notes)) {
         $notes = array($notes);
+    }
     
     $parser = new \Nope\Parser();
     $found = array();
