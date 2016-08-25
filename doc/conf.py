@@ -8,7 +8,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, subprocess
 
 root_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(root_dir, "_themes"))
@@ -21,6 +21,13 @@ CodeBlock.option_spec['nolint']    = directives.flag
 CodeBlock.option_spec['testgroup'] = directives.unchanged
 CodeBlock.option_spec['test']      = directives.unchanged
 CodeBlock.option_spec['testseq']   = int
+
+try:
+    out = subprocess.check_output(['git', 'symbolic-ref', '--short', '-q', 'HEAD'])
+    is_latest = out.strip() == "master"
+except subprocess.CalledProcessError, e:
+    is_latest = False
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -106,6 +113,9 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+html_context = {
+    "is_latest": is_latest
+}
 
 # -- Options for HTML output ---------------------------------------------------
 
