@@ -1,9 +1,5 @@
 <?php
-// the CLI server can't make requests to itself because it can
-// only handle one request at a time.
-// if (php_sapi_name() == 'cli-server') {
-//     die("This script doesn't work with the cli server");
-// }
+require_once __DIR__.'/config.php';
 
 $parts = parse_url($_SERVER['SCRIPT_NAME']);
 $webBase = rtrim(dirname($parts['path']), '/');

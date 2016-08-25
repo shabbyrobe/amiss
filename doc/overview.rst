@@ -1,8 +1,8 @@
-Quick Start
-===========
+Overview
+========
 
-This quickstart will assume you wish to use an annotation-based mapper. See
-:doc:`mapper/mapping` for more details and alternatives.
+This high-level overview will assume you wish to use an annotation-based mapper.
+See :doc:`mapper/mapping` for more details and alternatives.
 
 
 Install
@@ -307,8 +307,6 @@ One-to-one
         /** :amiss = {"field": {"index": true}}; */
         public $venueId;
         
-        // snip
-   
         /**
          * :amiss = {"has": {"type": "one", "of": "Venue", "from": "venueId"}};
          */
@@ -345,8 +343,6 @@ One-to-many
         /** :amiss = {"field": {"primary": true}}; */
         public $venueId;
         
-        // snip
-   
         /**
          * :amiss = {"has": {"type": "many", "of": "Event", "to": "venueId"}};
          */

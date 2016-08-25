@@ -1,4 +1,12 @@
 <?php
+$sapi = php_sapi_name();
+if ($sapi != 'cli-server' && $sapi != 'cli') {
+    die("This should not be used on a production web server!");
+}
+if (!file_exists(__DIR__.'/../.examples')) {
+    die("This should only be run using './task examples'");
+}
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 date_default_timezone_set("UTC");

@@ -1,4 +1,8 @@
 <?php
+if (php_sapi_name() != 'cli') {
+    throw new \Exception();
+}
+
 $usage = <<<'DOCOPT'
 Usage: amiss create-tables-sql [options] [--note=<note>]... 
                                [--ns=<ns>]... <input>

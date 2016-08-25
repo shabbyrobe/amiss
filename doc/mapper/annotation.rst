@@ -394,12 +394,13 @@ requires.  A quick example:
     }
 
 
-.. py:attribute:: @setter setterName
+``setter``
 
-    If the ``@has`` attribute is set against a getter method as opposed to a property, this defines
-    the method that is used to set the value when loading an object from the database. It is
-    required if the ``@has`` attribute is defined against a property and the getter/setter method
-    names deviate from the standard ``getFoo``/``setFoo`` pattern.
+    If the ``has`` annotation is set against a getter method as opposed to a
+    property, this defines the method that is used to set the value when loading
+    an object from the database. It is required if the ``@has`` attribute is
+    defined against a property and the getter/setter method names deviate from
+    the standard ``getFoo``/``setFoo`` pattern.
 
     See :ref:`annotations-getters-setters` for more details.
 
@@ -409,9 +410,9 @@ requires.  A quick example:
 Getters and setters
 -------------------
 
-Getters and setters can be used for both fields and relations. When using the annotation
-mapper, this should be done against the getter in exactly the same way as you would do it
-against a property:
+Getters and setters can be used for both fields and relations. When using the
+annotation mapper, this should be done against the getter in exactly the same
+way as you would do it against a property:
 
 .. code-block:: php
 
@@ -421,42 +422,28 @@ against a property:
         private $baz;
         private $qux;
    
-        /**
-         * :amiss = {"field":true};
-         */
-        public function getBaz()
-        {
-            return $this->baz;
-        }
+        /** :amiss = {"field":true}; */
+        public function getBaz() { return $this->baz; }
    
         /**
          * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Qux",
-         *         "on": "baz"
-         *     }
+         *     "has": {"type": "one", "of": "Qux", "on": "baz"}
          * };
          */
-        public function getQux()
-        {
-            return $this->qux;
-        }
+        public function getQux() { return $this->qux; }
     }
 
-There is a problem with the above example: we have provided a way to get the values, but
-not to set them. This will make it impossible to retrieve the object from the database. If
-you provide matching ``setBaz`` and ``setQux`` methods, Amiss will guess that these are
-paired with ``getBaz`` and ``getQux`` respectively and don't require any special
-annotations:
+There is a problem with the above example: we have provided a way to get the
+values, but not to set them. This will make it impossible to retrieve the object
+from the database. If you provide matching ``setBaz`` and ``setQux`` methods,
+Amiss will guess that these are paired with ``getBaz`` and ``getQux``
+respectively and don't require any special annotations:
 
 .. code-block:: php
 
     <?php
     class Foo
     {
-        // snip
-   
         public function setBaz($value)
         {
             $value->thingy = $this;
@@ -471,11 +458,11 @@ annotations:
     }
 
 
-If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you can specify
-the setter directly against both relations and fields using the ``@setter`` annotation.
-The following example should give you some idea of my opinion on going outside the
-standard, but Amiss tries not to be too opinionated so you can go ahead and make your
-names whatever you please:
+If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you
+can specify the setter directly against both relations and fields using the
+``@setter`` annotation.  The following example should give you some idea of my
+opinion on going outside the standard, but Amiss tries not to be too opinionated
+so you can go ahead and make your names whatever you please:
 
 .. code-block:: php
 
@@ -487,15 +474,10 @@ names whatever you please:
    
         /**
          * :amiss = {
-         *     "field": {
-         *         "setter": "assignAValueToBaz"
-         *     }
+         *     "field": {"setter": "assignAValueToBaz"}
          * };
          */
-        public function getBaz()
-        {
-            return $this->baz;
-        }
+        public function getBaz() { return $this->baz; }
    
         public function assignAValueToBaz($value)
         {
@@ -505,14 +487,8 @@ names whatever you please:
    
         /**
          * :amiss = {
-         *     "has": {
-         *         "type": "one",
-         *         "of": "Qux",
-         *         "on": "baz"
-         *     },
-         *     "field": {
-         *         "setter": "makeQuxEqualTo"
-         *     }
+         *     "has": {"type": "one", "of": "Qux", "on": "baz"},
+         *     "field": {"setter": "makeQuxEqualTo"}
          * };
          */
         public function pleaseGrabThatQuxForMe() 
@@ -531,15 +507,16 @@ names whatever you please:
 Caching
 -------
 
-``Amiss\Mapper\Note`` provides a facility to cache reflected metadata. This is not strictly
-necessary: the mapping process only does a little bit of reflection and is really very fast, but you
-can get up to 30% more speed out of Amiss in circumstances where you're doing even just a few
-metadata lookups per request (say, running one or two queries against one or two objects) by using a
-cache.
+``Amiss\Mapper\Note`` provides a facility to cache reflected metadata. This is
+not strictly necessary: the mapping process only does a little bit of reflection
+and is really very fast, but you can get up to 30% more speed out of Amiss in
+circumstances where you're doing even just a few metadata lookups per request
+(say, running one or two queries against one or two objects) by using a cache.
 
-The simplest way to enable caching is to create an instance of ``Amiss\Cache`` with a callable
-getter and setter as the first two arguments, then pass it as the first constructor argument of
-``Amiss\Maper\Note``. Many of the standard PHP caching libraries can be used in this way:
+The simplest way to enable caching is to create an instance of ``Amiss\Cache``
+with a callable getter and setter as the first two arguments, then pass it as
+the first constructor argument of ``Amiss\Maper\Note``. Many of the standard PHP
+caching libraries can be used in this way:
 
 .. code-block:: php
 
@@ -556,11 +533,12 @@ getter and setter as the first two arguments, then pass it as the first construc
     $manager = \Amiss\Sql\Factory::createManager($db, $mapper);
 
 
-By default, no TTL or expiration information will be passed by the mapper. In the case of
-``apc_store``, for example, this will mean that once cached, the metadata will never invalidate.
-If you would like an expiration to be passed, you can either pass it as the fourth argument
-to the cache's constructor (the third argument is explained later), or set it against the
-``expiration`` property:
+By default, no TTL or expiration information will be passed by the mapper. In
+the case of ``apc_store``, for example, this will mean that once cached, the
+metadata will never invalidate.  If you would like an expiration to be passed,
+you can either pass it as the fourth argument to the cache's constructor (the
+third argument is explained later), or set it against the ``expiration``
+property:
 
 .. code-block:: php
 
@@ -573,8 +551,8 @@ to the cache's constructor (the third argument is explained later), or set it ag
     $cache->expiration = 86400;
 
 
-You can set a prefix for the cache in case you want to ensure Amiss does not clobber items that
-other areas of your application may be caching:
+You can set a prefix for the cache in case you want to ensure Amiss does not
+clobber items that other areas of your application may be caching:
 
 .. code-block:: php
 
@@ -598,8 +576,8 @@ You can also use closures:
     );
 
 
-If you would rather use your own caching class, you can pass it directly to ``Amiss\Mapper\Note``
-if it has following method signatures:
+If you would rather use your own caching class, you can pass it directly to
+``Amiss\Mapper\Note`` if it has following method signatures:
 
 .. code-block:: php
 
@@ -613,11 +591,13 @@ if it has following method signatures:
     $mapper = new Amiss\Mapper\Note($cache);
 
 
-The ``$expiration`` parameter to ``set()`` is optional. It will be passed, but you can ignore it
-and PHP doesn't require that it be present in your method signature.
+The ``$expiration`` parameter to ``set()`` is optional. It will be passed, but
+you can ignore it and PHP doesn't require that it be present in your method
+signature.
 
-If your class does not support this interface, you can use ``Amiss\Cache`` to wrap your own class
-by passing the names of the getter and setter methods and your own class:
+If your class does not support this interface, you can use ``Amiss\Cache`` to
+wrap your own class by passing the names of the getter and setter methods and
+your own class:
 
 .. code-block:: php
 
@@ -634,12 +614,12 @@ by passing the names of the getter and setter methods and your own class:
 
 .. warning:: 
 
-    Don't use a cache in your development environment otherwise you'll have to clear the cache
-    every time you change your models!
+    Don't use a cache in your development environment otherwise you'll have to
+    clear the cache every time you change your models!
 
     Set an environment variable (see `SetEnv
-    <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>`_  for apache or ``export`` for
-    bash), then do something like this:
+    <https://httpd.apache.org/docs/2.2/mod/mod_env.html#setenv>`_  for apache or
+    ``export`` for bash), then do something like this:
 
     .. code-block:: php
         

@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__.'/../../doc/demo/model.php');
+require_once(__DIR__.'/../doc/demo/model.php');
 
 $namespace = 'Amiss\Demo';
 $mapper = new Amiss\Mapper\Arrays(array(
@@ -34,5 +34,5 @@ $connector = new \PDOK\Connector('sqlite::memory:');
 $manager = Amiss\Sql\Factory::createManager($connector, array(
     'mapper'=>$mapper,
 ));
-$connector->exec(file_get_contents(__DIR__.'/../../doc/demo/schema.sqlite.sql'));
-$connector->exec(file_get_contents(__DIR__.'/../../doc/demo/testdata.sql'));
+$connector->exec(file_get_contents(__DIR__.'/../doc/demo/schema.sqlite.sql'));
+$connector->exec(file_get_contents(__DIR__.'/../doc/demo/testdata.sql'));

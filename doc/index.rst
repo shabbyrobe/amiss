@@ -10,7 +10,7 @@ Amiss PHP Data Mapper
     :maxdepth: 2
     
     intro
-    quickstart
+    overview
     
     configuring
     mapper/mapping

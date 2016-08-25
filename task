@@ -1,5 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -o nounset -o errexit -o pipefail
+
+if [[ "${BASH_VERSION%%[^0-9]*}" -lt "4" ]]; then
+    echo "Requires bash version 4, you have $BASH_VERSION"
+    exit 1
+fi
 
 base_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -90,7 +95,13 @@ task_pdf() {
 }
 
 task_examples() {
-    php -S 127.0.0.1:8555 -t example/   
+    pushd "$base_path"
+        # the examples won't run without this file
+        trap "rm -f .examples" EXIT
+        touch .examples
+
+        php -S 127.0.0.1:8555 -t example/   
+    popd
 }
 
 task_cloc() {
@@ -103,9 +114,9 @@ task_setversion() {
 
     pushd "$base_path"
         echo "$version" > VERSION
-        hash="$( md5sum composer.json )"
+        hash="$( shasum composer.json )"
         sed -i 's/"version": ".*"/"version": "'"$version"'"/g' composer.json
-        check="$( md5sum composer.json )"
+        check="$( shasum composer.json )"
         if [[ "$hash" == "$check" ]]; then
             echo >&2 "Could not replace version"
             exit 1
@@ -123,7 +134,7 @@ task_list() {
     compgen -A function "$prefix" | sed 's/^'"$prefix"'//g' | tr '_' '-'
 }
 
-if [[ -z "$1" ]]; then
+if [[ -z "${1:-}" ]]; then
     task_list
 else
     "task_$1" "${@:2}"

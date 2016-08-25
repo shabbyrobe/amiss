@@ -1,4 +1,8 @@
 <?php
+if (php_sapi_name() != 'cli') {
+    throw new \Exception();
+}
+
 $usage = "Amiss test runner
 Usage: test/run.php [--no-sqlite] [--with=<with>] [--filter=<expr>]
            [--coverage-html=<outpath>] [--exclude-group=<group>]

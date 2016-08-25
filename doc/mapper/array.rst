@@ -3,16 +3,15 @@ Array Mapper
 
 .. note:: 
 
-    The majority of this guide assumes you are using the :doc:`annotation` rather than the
-    array mapper mentioned here. 
+    The majority of this guide assumes you are using the :doc:`annotation`
+    rather than the array mapper.
     
-    If you have decided to use the annotation mapper, you may wish to skip this section
-    and continue with the :doc:`common`.
+    If you have decided to use the annotation mapper, you may wish to skip this
+    section and continue with the :doc:`common`.
 
-
-The array mapper allows you to define your mappings as a PHP array. Fields and relations
-are defined using the structure outlined in :doc:`metadata`, though some additional
-conveniences are added.
+The array mapper allows you to define your mappings as a PHP array. Fields and
+relations are defined using the structure outlined in :doc:`metadata`, though
+some additional conveniences are added.
 
 Mapping your objects is quite simple:
 
@@ -42,7 +41,7 @@ Mapping your objects is quite simple:
             'fields'    => ['id' => true, 'name' => true, 'barId' => true],
             'indexes'   => ['barId' => ['fields' => 'barId']],
             'relations' => [
-                'bar' => ['one', 'of' => 'Bar', 'from' => 'barId'],
+                'bar'   => ['one', 'of' => 'Bar', 'from' => 'barId'],
             ],
         ),
    
@@ -50,14 +49,14 @@ Mapping your objects is quite simple:
             'primary'   => 'id',
             'fields'    => ['id' => true, 'name' => true],
             'relations' => [
-                'foo' => ['many', 'of' => 'Foo', 'to' => 'barId']
+                'foo'   => ['many', 'of' => 'Foo', 'to' => 'barId']
             ],
         ),
     );
 
 
-Once your objects and mappings are defined, load load them into ``Amiss\Mapper\Arrays``
-and create a manager:
+Once your objects and mappings are defined, load load them into
+``Amiss\Mapper\Arrays`` and create a manager:
 
 .. code-block:: php
 
@@ -69,9 +68,9 @@ and create a manager:
 Mapping
 -------
 
-The mapping definitions are quite straightforward. The key to the ``$mapping`` array in
-the below examples is the fully-qualified object name. Each object name is mapped to
-another array containing the mapping definition.
+The mapping definitions are quite straightforward. The key to the ``$mapping``
+array in the below examples is the fully-qualified object name. Each object name
+is mapped to another array containing the mapping definition.
 
 Object mappings have the following structure:
 
@@ -90,11 +89,12 @@ Object mappings have the following structure:
 
 ``primary``
 
-    The primary key can either be a single string containing the primary key's property
-    name or, in the case of a composite primary key, an array listing each property name.
+    The primary key can either be a single string containing the primary key's
+    property name or, in the case of a composite primary key, an array listing
+    each property name.
 
-    The primary key does not have to appear in the field list unless you want to give it a
-    specific type. If not, it will use the value of
+    The primary key does not have to appear in the field list unless you want to
+    give it a specific type. If not, it will use the value of
     ``Amiss\Mapper\Arrays->defaultPrimaryType``, which defaults to ``autoinc``.
 
 
@@ -116,31 +116,37 @@ Object mappings have the following structure:
 
 ``constructor``
  
-    The name of a static constructor to use when creating the object instead of the
-    default ``__construct``. The method must be static and must return an instance of the
-    class.
+    The name of a static constructor to use when creating the object instead of
+    the default ``__construct``. The method must be static and must return an
+    instance of the class.
 
-    If no constructor arguments are found in the meta, the entire unmapped input record is
-    passed as the first argument.
+    If no constructor arguments are found in the meta, the entire unmapped input
+    record is passed as the first argument.
 
 
 ``fields``
 
-    An array of the object's properties that map to fields in the database table.
+    An array of the object's properties that map to fields in the database
+    table.
 
-    The key contains the property name. The value can simply be set to ``true``, which
-    indicates that no special metadata exists for the field:
+    The key contains the property name. The value can simply be set to ``true``,
+    which indicates that no special metadata exists for the field:
 
     .. code-block:: php
 
         <?php
         $mapping = array(
-            'fields' => ['name' => true, 'slug' => true, 'foo' => true, 'anotherFoo' => true],
+            'fields' => [
+                'name'       => true,
+                'slug'       => true,
+                'foo'        => true,
+                'anotherFoo' => true
+            ],
         );
 
-    In the above case, the column name will be guessed from the property name (see
-    :ref:`name-translation`), and the type will either use the ``fieldType`` or, if
-    one is not defined, no type at all.
+    In the above case, the column name will be guessed from the property name
+    (see :ref:`name-translation`), and the type will either use the
+    ``fieldType`` or, if one is not defined, no type at all.
 
     You can set the column and type yourself if you need to:
 
@@ -182,10 +188,10 @@ Object mappings have the following structure:
 
     A dictionary of the mapped object's relations, indexed by property name.
 
-    Each relation value should be an array whose ``0`` element contains the name of the
-    relator to use. The rest of the array should be the set of key/value pairs expected by
-    the relator. See :ref:`relators` for more details on the structure of the relation
-    configuration.
+    Each relation value should be an array whose ``0`` element contains the name
+    of the relator to use. The rest of the array should be the set of key/value
+    pairs expected by the relator. See :ref:`relators` for more details on the
+    structure of the relation configuration.
 
     .. code-block:: php
         
@@ -198,6 +204,6 @@ Object mappings have the following structure:
             ],
         ];
 
-    Some examples of configuring the ``one`` and ``many`` relators are provided in the
-    example at the top of the page.
+    Some examples of configuring the ``one`` and ``many`` relators are provided
+    in the example at the top of the page.
 

@@ -1,7 +1,9 @@
+<?php 
+require_once __DIR__.'/config.php';
+?>
 <html>
 <body>
 <?php
-require_once(__DIR__.'/config.php');
 $ex = isset($_SERVER['PATH_INFO']) ? trim($_SERVER['PATH_INFO'], '/') : null;
 $files = [
     'ar.php',

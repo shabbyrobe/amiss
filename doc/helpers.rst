@@ -6,7 +6,7 @@ out of complex relation gymnastics.
 
 .. _helpers-get-children:
 
-.. py:function:: Amiss\\Sql\\Manager::getChildren( iterable $objects , $path )
+``Amiss\\Sql\\Manager::getChildren( iterable $objects , $path )``
 
     Retrieve all child values through property ``$path`` from ``$objects``.
 
@@ -22,10 +22,10 @@ out of complex relation gymnastics.
         
         $children = $manager->getChildren($objects, 'foo');
         $expected = array('a', 'b', 'c');
-
+    
         // this will output true
         var_dump($children == $expected);
-
+    
     
     ``$path`` can be a single string containing a property name, like the above
     example, or it can be a path expression allowing you to traverse multiple
@@ -42,11 +42,11 @@ out of complex relation gymnastics.
         
         $children = $manager->getChildren($objects, 'foo/bar');
         $expected = array('a', 'b', 'c');
-
+    
         // this will output true
         var_dump($children == $expected);
 
-    
+
     ``getChildren`` will also work if the result of any path level yields an
     array:
 
@@ -59,13 +59,13 @@ out of complex relation gymnastics.
                 (object) ['bar'=>'b'],
             ]],
         ];
-
+    
         $children = $manager->getChildren($objects, 'foo/bar');
         $expected = ['a', 'b'];
-
+    
         // this will output true
         var_dump($children == $expected);
-
+    
     
     ``$path`` will also accept an array:
 
@@ -75,11 +75,11 @@ out of complex relation gymnastics.
         $children = $manager->getChildren($objects, ['foo', 'bar']);
 
 
-    See :ref:`relations-assigning-nested` for a complete example of using ``getChildren`` with
-    :doc:`relations`.
+    See :ref:`relations-assigning-nested` for a complete example of using
+    ``getChildren`` with :doc:`relations`.
 
 
-.. py:function:: Amiss\\Sql\\Manager::indexBy()
+``Amiss\\Sql\\Manager::indexBy()``
 
     Iterate over an array of objects and returns an array of objects indexed by
     a property:
@@ -117,11 +117,11 @@ out of complex relation gymnastics.
         ];
         $manager = new Amiss\Sql\Manager(new \Amiss\Mapper\Note);
         $indexed = $manager->indexBy($objects, 'foo', null, !'failOnDupe');
-
+    
         count($indexed) == 2;
 
 
-.. py:function:: Amiss\Sql\Manager::keyValue()
+``Amiss\Sql\Manager::keyValue()``
 
     ``keyValue`` scans an array of objects or arrays and selects a property for
     the key and a property for the value.
@@ -135,8 +135,8 @@ out of complex relation gymnastics.
         <?php
         $manager = new \Amiss\Sql\Manager(new \Amiss\Mapper\Note);
         $sql = 'SELECT artistId, name FROM artist ORDER BY artistName';
-        $artists = $manager->keyValue($manager->execute($sql)->fetchAll(\PDO::FETCH_ASSOC));
-
+        $artists = $manager->keyValue($manager->execute($sql)
+            ->fetchAll(\PDO::FETCH_ASSOC));
 
     Et voila! Array of key/value pairs from your query.
 

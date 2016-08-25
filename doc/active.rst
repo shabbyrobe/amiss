@@ -119,7 +119,8 @@ Consider the following equivalents:
     $active->assignRelated('mappedFriend');
 
 
-``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods available:;
+``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods
+available:;
 
 .. code-block:: php
     :nolint:
@@ -180,9 +181,9 @@ Relations can be populated directly (nothing is returned):
 
 
 For convenience, ``assignRelated`` also works statically and directly proxies
-``Amiss\Sql\Manager->assignRelated()``. No validation is performed on the first argument -
-you can pass in anything accepted by the record's associated manager. This method is
-simply a bit of syntactic sugar:
+``Amiss\Sql\Manager->assignRelated()``. No validation is performed on the first
+argument - you can pass in anything accepted by the record's associated manager.
+This method is simply a bit of syntactic sugar:
 
 .. code-block:: php
     
@@ -194,8 +195,8 @@ simply a bit of syntactic sugar:
 Lazy Loading
 ------------
 
-``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can implement it
-yourself using a wrapper function:
+``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can
+implement it yourself using a wrapper function:
 
 .. code-block:: php
 
@@ -241,21 +242,20 @@ You can then simply call the new function to get the related object:
 Hooks
 -----
 
-You can define additional behaviour against your Active Record which will occur when certain events
-happen inside Amiss.
+You can define additional behaviour against your Active Record which will occur
+when certain events happen inside Amiss.
 
-The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to the ones defined by
-``Amiss\Sql\Manager``. I sincerely hope these are largely self explanatory:
+The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to
+the ones defined by ``Amiss\Sql\Manager``. I sincerely hope these are largely
+self explanatory:
 
 * ``beforeInsert()``
 * ``beforeUpdate()``
 * ``beforeSave()``
 * ``beforeDelete()``
     
-.. note:: 
-
-    ``beforeSave()`` is called when an item is inserted *or* updated. It is called in
-    addition to ``beforeInsert()`` and ``beforeUpdate()``.
+.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It
+   is called in addition to ``beforeInsert()`` and ``beforeUpdate()``.
 
 ALWAYS call the parent method of the hook when overriding:
 

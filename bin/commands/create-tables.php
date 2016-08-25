@@ -1,4 +1,8 @@
 <?php
+if (php_sapi_name() != 'cli') {
+    throw new \Exception();
+}
+
 $usage = <<<'DOCOPT'
 Creates tables in the specified database
 

@@ -32,10 +32,13 @@ accompany the documentation in the `doc/demo`_ subdirectory of the source
 distribution. It contains a very simple set of related objects representing a
 set of events for a music festival.
 
-There is also a set of examples in the - you guessed it - `example`_ folder in
-the source distribution that will allow you to click through some scripts that
-are built on this schema. You should never expose those scripts over a public
-web server - they are for development machines only.
+There is also a set of examples in the `doc/example`_ folder that will allow you
+to click through some scripts that are built on this schema. You should never
+expose those scripts over a public web server - they are for development
+machines only. The code is disgusting.
+
+To browse the examples, run ``./task examples`` in the root of the Amiss project
+then point your browser at http://127.0.0.1:8555/.
 
 .. _`doc/demo`:    https://github.com/shabbyrobe/amiss/blob/master/doc/demo
 .. _`doc/example`: https://github.com/shabbyrobe/amiss/blob/master/example

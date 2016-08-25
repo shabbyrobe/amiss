@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once __DIR__.'/config.php';
 $dirs = [
     'active',
     'note',
@@ -12,12 +12,12 @@ $dirs = [
 <?php foreach ($dirs as $d): ?>
   <li><?php echo e(titleise_slug($d)) ?>
     <ul>
-    <?php foreach (glob(__DIR__.'/'.$d.'/*.php') as $file): ?>
-    <?php $base = basename($file, '.php') ?>
+    <?php foreach (glob(__DIR__.'/'.$d.'/*.phps') as $file): ?>
+    <?php $base = basename($file, '.phps') ?>
 
     <?php if ($base != 'config'): ?>
       <li>
-        <a href="show.php/<?php echo htmlentities($d.'/'.$base) ?>">
+        <a href="show.php/<?php echo e($d.'/'.$base) ?>">
           <?php echo e(titleise_slug($base)) ?>
         </a>
       </li>
