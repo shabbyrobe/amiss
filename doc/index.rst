@@ -10,7 +10,7 @@ Amiss PHP Data Mapper
     :maxdepth: 2
     
     intro
-    quickstart
+    overview
     
     configuring
     mapper/mapping
@@ -20,24 +20,27 @@ Amiss PHP Data Mapper
     schema
     helpers
     active
-    mongo/index
     cookbook/index
         
     development
     glossary
+    docmodels
 
 
 Requirements
 ------------
 
-- PHP 5.3.2 or greater
+- PHP 5.6.0 or greater
 - MySQL or SQLite
 - PDO/MySQL and/or PDO/SQLite
 
-.. note:: 
+Unlike earlier versions, Amiss 5 requires PHP 5.6 or greater. If you need
+support for earlier versions back to 5.3.2, use Amiss 4. Amiss 4 will be
+supported for the forseeable future, but no new features will be added.
 
-    Amiss has only been tested with a minimum version of PHP 5.3.2. It may work with 5.3.0 and
-    5.3.1, but this is not guaranteed.
+Documentation for Amiss 4 can be found here:
+
+    http://shabbyrobe.org/code/amiss/doc/4/
 
 
 License
@@ -46,3 +49,4 @@ License
 Amiss is licensed under the MIT License:
 
 .. literalinclude:: ../LICENSE
+

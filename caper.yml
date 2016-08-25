@@ -1,0 +1,18 @@
+bootstrap:
+  - vendor/autoload.php
+
+scripts:
+  test:
+    type: php
+    script: test/run.php
+    trace: false
+    # args: [ --filter, ManagerTest ]
+
+scan:
+  - { type: exclude, kind: namespace }
+  - { type: include, kind: class , path: Amiss\Sql\Manager }
+  - { type: exclude, kind: method, path: Amiss\Sql\Manager, name: executeDelete }
+  - { type: exclude, kind: method, path: Amiss\Sql\Manager, name: getConnector }
+  - { type: exclude, kind: method, path: Amiss\Sql\Manager, name: getMeta }
+  - { type: exclude, kind: method, path: Amiss\Sql\Manager, name: populateObjectsWithRelated }
+

@@ -1,5 +1,11 @@
 #!/usr/bin/env php
 <?php
+if (php_sapi_name() != 'cli') {
+    throw new \Exception();
+}
+
+require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/lib/functions.php';
 
 if (!isset($argv[1])) {
     echo "Amiss v".trim(file_get_contents(__DIR__.'/../VERSION'))." CLI\n";

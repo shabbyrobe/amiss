@@ -37,8 +37,9 @@ function find_classes($input, $recursive=true)
     $found = array();
     foreach ($classes as $c) {
         $rc = new \ReflectionClass($c);
-        if ($rc->isInstantiable())
+        if ($rc->isInstantiable()) {
             $found[] = $c;
+        }
     }
     return $found;
 }
@@ -60,10 +61,11 @@ function filter_classes_by_namespaces($classes, $namespaces)
 
 function filter_classes_by_notes($classes, $notes)
 {
-    if (!is_array($notes))
+    if (!is_array($notes)) {
         $notes = array($notes);
+    }
     
-    $parser = new \Amiss\Note\Parser();
+    $parser = new \Nope\Parser();
     $found = array();
     foreach ($classes as $c) {
         $classNotes = $parser->parseClass(new \ReflectionClass($c));

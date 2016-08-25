@@ -1,6 +1,7 @@
 doc/_build/
 *.DS_Store
 .buildpath
+.examples
 .settings
 .project
 .pydevproject
@@ -10,6 +11,8 @@ texput.log
 tags
 *.swp
 vendor/
+junk/
+build/
 
 .amisstestrc
 amisstestrc

@@ -1,8 +1,93 @@
-Changelog
-=========
+Changes
+=======
 
-v4.1.0 to v4.2.0
-----------------
+v5.0.0
+------
+
+Object and table modes for ``update``, ``insert`` and ``delete`` have been
+broken into separate methods, ``updateTable``, ``insertTable`` and
+``deleteTable`` respectively.
+
+Permissions: ``readOnly`` objects, also ``canUpdate``, ``canDelete``
+and ``canInsert``. These are easily bypassed with some fiddling, but they're
+a useful guide and safety feature.
+
+Static lookup relator: relations can be defined which retrieve an object from
+a static function on another object.
+
+Issue #14 - Order By support for getRelated
+
+``Amiss\Meta`` methods removed:
+
+- ``Meta->getDefaultFieldType()`` becomes ``Meta->fieldType``
+- ``Meta->getFields()`` becomes ``Meta->fields``
+- ``Meta->getField()`` becomes ``Meta->field[$id]``
+
+Relations can now be automatically populated (with some limits)
+
+Objects can now use properties and auto relations as constructor arguments.
+
+``Amiss\Sql\Manager`` methods which accept positional query parameters
+(``foo=?"``) no longer use a variadic for parameter values::
+
+    + $manager->getList(MyModel::class, "pants=? OR pants=?", [1, 2]);
+    - $manager->getList(MyModel::class, "pants=? OR pants=?", 1, 2);
+
+
+Mapper
+~~~~~~
+
+The Mapper API has changed significantly.
+
+``Amiss\Mapper\Local`` mapper added: define metadata mappings like
+``Amiss\Mapper\Arrays``, but using a static method on the model itself. Defaults
+to ``meta``, but this can be changed.
+
+``Amiss\Mapper\Chain`` mapper added: specify a list of mappers to be searched
+sequentially for metadata.
+
+``Amiss\Mapper\Base->objectNamespace`` has been removed. The addition of 
+``::class`` to the language in PHP 5.5 and Amiss 5's PHP 5.6 requirement 
+render it unnecessary. One consequence is that relation definitions using the
+Note mapper are now more verbose.
+
+Annotation syntax changed (again) to use the http://github.com/shabbyrobe/nope
+library. Migrations can be automated using the ``migrate-notes`` command in
+the :ref:`cli`.
+
+``Amiss\Mapper\Note`` now requires a class level ``:amiss`` annotation to exist
+in order to map the object, even if that annotation contains no additional
+data::
+
+    /** :amiss = true; */
+    class Foo {}
+
+``Amiss\Mapper`` is now an interface instead of an abstract class. Common
+definitions are extracted into ``Amiss\MapperTrait``.
+
+``Amiss\Mapper`` method signature overhaul::
+
+  +    function createObject($meta, $mapped, $args=null)
+  -    function createObject($meta, $row, $args=null)
+
+  +    function mapObjectToRow($object, $meta=null, $context=null)
+  -    function fromObject($meta, $input, $context=null)
+
+  +    function mapObjectsToRows($objects, $meta=null, $context=null)
+  -    function fromObjects($meta, $input, $context=null)
+
+  +    function populateObject($object, \stdClass $mapped, $meta=null)
+  -    function populateObject($meta, $object, $row)
+
+  +    function mapRowToObject($meta, $row, $args=null)
+  -    function toObject($meta, $input, $args=null)
+
+  +    function mapRowsToObjects($meta, $rows, $args=null)
+  -    function toObjects($meta, $input, $args=null)
+
+
+v4.2.0
+------
 
 - Active Records support ``deleteById`` as a static method.
 
@@ -15,8 +100,8 @@ v4.1.0 to v4.2.0
 - Moved to packagist
 
 
-v4.0.x to v4.1.0
-----------------
+v4.1.0
+------
 
 New features
 ~~~~~~~~~~~~
@@ -42,8 +127,8 @@ Static constructor support added to mapper, receives unmapped input as argument 
     }
 
 
-v3.0.x to v4.0
---------------
+v4.0
+----
 
 New features:
 
@@ -66,7 +151,7 @@ If you make use of these defaults, you will need to change::
 	
 To this::
 
-	$manager = Amiss::createSqlManager($conn);
+	$manager = Amiss\Sql\Factory::createManager($conn);
 
 
 Note mapper relation syntax change

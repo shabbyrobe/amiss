@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -13,6 +13,19 @@ import sys, os
 root_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(root_dir, "_themes"))
 sys.path.insert(0, root_dir)
+
+from sphinx.directives.code import CodeBlock
+from docutils.parsers.rst import directives
+
+CodeBlock.option_spec['nolint']    = directives.flag
+CodeBlock.option_spec['testgroup'] = directives.unchanged
+CodeBlock.option_spec['test']      = directives.unchanged
+CodeBlock.option_spec['testseq']   = int
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+#sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration -----------------------------------------------------
 

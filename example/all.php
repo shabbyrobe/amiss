@@ -1,6 +1,8 @@
 <?php
+require_once __DIR__.'/config.php';
+
 $parts = parse_url($_SERVER['SCRIPT_NAME']);
-$webBase = dirname($parts['path']);
+$webBase = rtrim(dirname($parts['path']), '/');
 
 $iter = isset($_GET['cnt']) ? $_GET['cnt'] : 1;
 $cache = isset($_GET['cache']) ? $_GET['cache'] : '';
@@ -10,15 +12,23 @@ $result = array();
 for ($i = 0; $i < $iter; $i++) {
     foreach (array('active', 'array', 'note') as $folder) {
         foreach (new \DirectoryIterator(__DIR__.'/'.$folder) as $item) {
-            if ($item->isDir() || $item->isDot())
+            if ($item->isDir() || $item->isDot()) {
                 continue;
-            if ($item->getFilename() == 'config.php')
+            }
+            if (($fname = $item->getFilename()) == 'config.php' || $fname[0] == '.') {
                 continue;
-            
+            }
             
             $name = $folder.'/'.pathinfo($item, PATHINFO_FILENAME);
-            $url = "{$webBase}/show.php/{$name}?cache={$cache}";
-            $out = file_get_contents("http://localhost{$url}&fmt=json");
+            $loop = isset($_GET['loop']) ? $_GET['loop'] : 1;
+            $out  = exec(strtr("php {path}/show.php -f {name} -c {cache} -l {loop}", [
+                '{path}'  => escapeshellarg(__DIR__),
+                '{name}'  => escapeshellarg($name),
+                '{cache}' => escapeshellarg($cache),
+                '{loop}'  => escapeshellarg($loop),
+            ]));
+            $url = "{$webBase}/show.php/{$name}?cache={$cache}&loop={$loop}";
+
             $json = json_decode($out, true);
             
             if (!isset($result[$json['id']])) {
@@ -39,11 +49,12 @@ for ($i = 0; $i < $iter; $i++) {
             $current->queries = $json['queries'];
             $current->timeTakenMs += $json['timeTakenMs'];
             
-            if ($current->timeTakenMsMin === null || $json['timeTakenMs'] < $current->timeTakenMsMin)
+            if ($current->timeTakenMsMin === null || $json['timeTakenMs'] < $current->timeTakenMsMin) {
                 $current->timeTakenMsMin = $json['timeTakenMs'];
-            if ($json['timeTakenMs'] > $current->timeTakenMsMax)
+            }
+            if ($json['timeTakenMs'] > $current->timeTakenMsMax) {
                 $current->timeTakenMsMax = $json['timeTakenMs'];
-            
+            }
             $current->memUsed += $json['memUsed'];
             $current->memPeak += $json['memPeak'];
         }

@@ -1,0 +1,97 @@
+<?php
+require __DIR__."/vendor/autoload.php";
+define('AMISS_BASE_PATH', __DIR__);
+
+echo <<<'EOS'
+Amiss Boris
+===========
+
+Available functions:
+
+`demo_model() / dm()`
+    Creates an Amiss\Sql\Manager instance configured to work with the default
+    types and the models defined in doc/demo/model.php (Artist, Event, etc)
+
+`demo_active() / da()`
+    Creates an Amiss\Sql\Manager configured to work with the default types and
+    the Active Records defined in doc/demo/ar.php (ArtistRecord, EventRecord, etc)
+
+
+EOS;
+
+class AmissInspector extends \Boris\ColoredInspector
+{
+    public function inspect($value)
+    {
+        if ($value instanceof \Amiss\Sql\Manager) {
+            $class = get_class($value);
+            return $this->_dumpStructure("object($class)", []);
+        }
+        else {
+            return parent::inspect($value);
+        }
+    }
+
+    public function __call($name, $args)
+    {
+        $rm = new \ReflectionMethod('Boris\ColoredInspector', $name);
+        $rm->setAccessible(true);
+        return $rm->invokeArgs($this, $args);
+    }
+}
+
+$boris->setInspector(new AmissInspector());
+
+function dm() { return demo_model();  }
+function da() { return demo_active(); }
+
+function demo_model()
+{
+    $connector = new \PDOK\Connector('sqlite::memory:');
+    $manager = Amiss\Sql\Factory::createManager($connector, [
+        'dbTimeZone'=>date_default_timezone_get(),
+    ]);
+
+    $manager->mapper->objectNamespace = 'Amiss\Demo';
+
+    require_once AMISS_BASE_PATH.'/doc/demo/model.php';
+
+    foreach (get_declared_classes() as $class) {
+        if (strpos($class, 'Amiss\Demo\\')===0 && strpos($class, 'Amiss\Demo\Active\\')!==0) {
+            $rc = new \ReflectionClass($class);
+            if (!$rc->isAbstract()) {
+                \Amiss\Sql\TableBuilder::create($manager->connector, $manager->mapper, $class);
+            }
+        }
+    }
+    $connector->exec(file_get_contents(AMISS_BASE_PATH.'/doc/demo/testdata.sql'));
+    return $manager;
+}
+
+function demo_active()
+{
+    $connector = new \PDOK\Connector('sqlite::memory:');
+    $manager = Amiss\Sql\Factory::createManager($connector, [
+        'dbTimeZone'=>date_default_timezone_get(),
+    ]);
+
+    $manager->mapper->objectNamespace = 'Amiss\Demo';
+
+    require_once AMISS_BASE_PATH.'/doc/demo/ar.php';
+
+    foreach (get_declared_classes() as $class) {
+        if (strpos($class, 'Amiss\Demo\Active')===0) {
+            $rc = new \ReflectionClass($class);
+            if (!$rc->isAbstract()) {
+                \Amiss\Sql\TableBuilder::create($manager->connector, $manager->mapper, $class);
+            }
+        }
+    }
+    $connector->exec(file_get_contents(AMISS_BASE_PATH.'/doc/demo/testdata.sql'));
+    \Amiss\Sql\ActiveRecord::setManager($manager);
+    return $manager;
+}
+
+// $connector->exec(file_get_contents($amissPath.'/../doc/demo/schema.sqlite.sql'));
+
+/* vim: set ft=php : */

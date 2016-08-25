@@ -1,42 +1,48 @@
 Active Records
 ==============
 
-From `P of EAA`_: An object that wraps a row in a database table or view, encapsulates the database
-access, and adds domain logic on that data.
+From `P of EAA`_: An object that wraps a row in a database table or view,
+encapsulates the database access, and adds domain logic on that data.
 
 .. _`P of EAA`: http://martinfowler.com/eaaCatalog/activeRecord.html
 
-I'm not wild about Active Records, but they can be very effective for rapid development and people
-seem to like them, so why not throw them in?
+I'm not wild about Active Records, but they can be very effective for rapid
+development and people seem to like them, so why not throw them in?
 
 
 Defining
 --------
 
-To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class. Configure everything
-else just like you would when using Amiss as a Data Mapper.
+To define active records, simply extend the ``Amiss\Sql\ActiveRecord`` class.
+Configure everything else just like you would when using Amiss as a Data Mapper.
 
-This guide will assume you are using the :doc:`mapper/annotation`. For more information on
-alternative mapping options, see :doc:`mapper/mapping`. Active records will work with any mapping
-configuration that works with the data mapper.
+This guide will assume you are using the :doc:`mapper/annotation`. For more
+information on alternative mapping options, see :doc:`mapper/mapping`. Active
+records will work with any mapping configuration that works with the data
+mapper.
 
 .. code-block:: php
 
     <?php
     class Artist extends Amiss\Sql\ActiveRecord
     {
-        /** @primary */
+        /** :amiss = {"field": {"primary": true}}; */
         public $artistId;
-
-        /** @field */
+   
+        /** :amiss = {"field": true}; */
         public $name;
-
-        /** @field */
+   
+        /** :amiss = {"field":true}; */
         public $artistTypeId;
-
-        /** 
-         * @has.one.of ArtistType
-         * @has.one.on artistTypeId
+   
+        /**
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "ArtistType",
+         *         "on": "artistTypeId"
+         *     }
+         * };
          */
         public $artistType;
     }
@@ -45,15 +51,15 @@ configuration that works with the data mapper.
 Connecting
 ----------
 
-As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an ``Amiss\Mapper`` and
-pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
-``Amiss\Sql\ActiveRecord::setManager()``.
+As per the :doc:`configuring` section, create an ``Amiss\Sql\Connector`` and an
+``Amiss\Mapper`` and pass it to an ``Amiss\Sql\Manager``. Then, assign the
+manager to ``Amiss\Sql\ActiveRecord::setManager()``.
 
 .. code-block:: php
 
     <?php
     $conn = new Amiss\Sql\Connector('sqlite::memory:');
-    $manager = Amiss::createManager($conn);
+    $manager = Amiss\Factory::createManager($conn);
     Amiss\Sql\ActiveRecord::setManager($manager);
     
     // test it out
@@ -61,8 +67,8 @@ pass it to an ``Amiss\Sql\Manager``. Then, assign the manager to
     var_dump($conn === $manager); // outputs true
 
 
-Multiple connections are possible, but require subclasses. The separate connections are then
-assigned to their respective base class:
+Multiple connections are possible, but require subclasses. The separate
+connections are then assigned to their respective base class:
 
 .. code-block:: php
 
@@ -83,12 +89,12 @@ assigned to their respective base class:
 Querying and Modifying
 ----------------------
 
-All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied by
-``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or object instance,
-``Amiss\Sql\ActiveRecord`` takes care of passing itself.
+All of the main storage/retrieval methods in ``Amiss\Sql\Manager`` are proxied
+by ``Amiss\Sql\ActiveRecord``, but for signatures that require the class name or
+object instance, ``Amiss\Sql\ActiveRecord`` takes care of passing itself.
 
-When an instance is not required, the methods are called statically against your specific active
-record.
+When an instance is not required, the methods are called statically against your
+specific active record.
 
 Consider the following equivalents:
 
@@ -107,30 +113,31 @@ Consider the following equivalents:
     // getting by primary key
     $mapped = $manager->getById('MappedObject', 1);
     $active = ActiveObject::getById(1);
-
+   
     // assigning relations
     $manager->assignRelated($mapped, 'mappedFriend');
     $active->assignRelated('mappedFriend');
 
 
-``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods available:
-
+``Amiss\Sql\ActiveRecord`` subclasses make the following **static** methods
+available:;
 
 .. code-block:: php
-
+    :nolint:
+   
     <?php
     // get a single active record by primary key
     YourRecord::getById ( $primaryKey );
-
+   
     // get a single active record
     YourRecord::get ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::get ( string $namedWhere, array $params );
     YourRecord::get ( array $criteria );
     YourRecord::get ( Amiss\Sql\Criteria $criteria );
-
+   
     // get a list of active records
     YourRecord::getList ( as with get );
-
+   
     // count active records
     YourRecord::count ( string $positionalWhere, mixed $param1[, mixed $param2...]);
     YourRecord::count ( string $namedWhere, array $params );
@@ -143,17 +150,17 @@ Consider the following equivalents:
 .. code-block:: php
 
     <?php
-    $yourRecordInstance->insert ();
-    $yourRecordInstance->update ();
-    $yourRecordInstance->delete ();
-    $yourRecordInstance->save ();
+    $yourRecordInstance->insert();
+    $yourRecordInstance->update();
+    $yourRecordInstance->delete();
+    $yourRecordInstance->save();
 
 
 Relations
 ---------
 
-Relations can be retrieved directly from the active record. This does not change the
-parent object:
+Relations can be retrieved directly from the active record. This does not change
+the parent object:
 
 .. code-block:: php
 
@@ -174,9 +181,9 @@ Relations can be populated directly (nothing is returned):
 
 
 For convenience, ``assignRelated`` also works statically and directly proxies
-``Amiss\Sql\Manager->assignRelated()``. No validation is performed on the first argument -
-you can pass in anything accepted by the record's associated manager. This method is
-simply a bit of syntactic sugar:
+``Amiss\Sql\Manager->assignRelated()``. No validation is performed on the first
+argument - you can pass in anything accepted by the record's associated manager.
+This method is simply a bit of syntactic sugar:
 
 .. code-block:: php
     
@@ -188,8 +195,8 @@ simply a bit of syntactic sugar:
 Lazy Loading
 ------------
 
-``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can implement it yourself 
-using a wrapper function:
+``Amiss\Sql\ActiveRecord`` has no support for automatic lazy loading. You can
+implement it yourself using a wrapper function:
 
 .. code-block:: php
 
@@ -205,8 +212,13 @@ using a wrapper function:
         private $artistType;
         
         /**
-         * @has.one.of ArtistType
-         * @has.one.on artistTypeId
+         * :amiss = {
+         *     "has": {
+         *         "type": "one",
+         *         "of": "ArtistType",
+         *         "on": "artistTypeId"
+         *     }
+         * };
          */
         public function getArtistType()
         {
@@ -230,21 +242,20 @@ You can then simply call the new function to get the related object:
 Hooks
 -----
 
-You can define additional behaviour against your Active Record which will occur when certain events
-happen inside Amiss.
+You can define additional behaviour against your Active Record which will occur
+when certain events happen inside Amiss.
 
-The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to the ones defined by
-``Amiss\Sql\Manager``. I sincerely hope these are largely self explanatory:
+The ``Amiss\Sql\ActiveRecord`` class defines the following hooks in addition to
+the ones defined by ``Amiss\Sql\Manager``. I sincerely hope these are largely
+self explanatory:
 
 * ``beforeInsert()``
 * ``beforeUpdate()``
 * ``beforeSave()``
 * ``beforeDelete()``
     
-.. note:: 
-
-    ``beforeSave()`` is called when an item is inserted *or* updated. It is called in addition to 
-    ``beforeInsert()`` and ``beforeUpdate()``.
+.. note:: ``beforeSave()`` is called when an item is inserted *or* updated. It
+   is called in addition to ``beforeInsert()`` and ``beforeUpdate()``.
 
 ALWAYS call the parent method of the hook when overriding:
 
@@ -254,7 +265,7 @@ ALWAYS call the parent method of the hook when overriding:
     class MyRecord extends \Amiss\Sql\ActiveRecord
     {
         // snipped fields, etc
-
+   
         function beforeUpdate()
         {
             parent::beforeUpdate();
