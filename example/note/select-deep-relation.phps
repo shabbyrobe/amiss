@@ -1,5 +1,4 @@
 <?php
-
 $events = $manager->getList('Event');
     
 // Relation 1: populate each Event object's list of EventArtists

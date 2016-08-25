@@ -1,5 +1,4 @@
 <?php
-
 require_once($amissPath.'/../doc/demo/model.php');
 
 $namespace = 'Amiss\Demo';

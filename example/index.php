@@ -1,6 +1,5 @@
 <?php
-
-require_once('config.php');
+require_once __DIR__.'/config.php';
 $dirs = array(
     'active',
     'note',
@@ -11,23 +10,21 @@ $dirs = array(
 <body>
 <ul>
 <?php foreach ($dirs as $d): ?>
-<li><?php echo e(titleise_slug($d)) ?>
-<ul>
-<?php foreach (glob(__DIR__.'/'.$d.'/*.php') as $file): ?>
-<?php $base = basename($file, '.php') ?>
+  <li><?php echo e(titleise_slug($d)) ?>
+    <ul>
+    <?php foreach (glob(__DIR__.'/'.$d.'/*.phps') as $file): ?>
+    <?php $base = basename($file, '.phps') ?>
 
-<?php if ($base != 'config'): ?>
-<?php /* $metadata = extract_file_metadata($file); */ ?>
-<li><a href="show.php/<?php echo htmlentities($d.'/'.$base) ?>"><?php echo e(isset($metadata['title']) ? $metadata['title'] : titleise_slug($base)) ?></a>
-<?php /* if ($metadata['description']): ?>
-<p><?php echo $metadata['description'] ?></p>
-<?php endif; */ ?>
-</li>
-<?php endif; ?>
-
-<?php endforeach; ?>
-</ul>
-</li>
+    <?php if ($base != 'config'): ?>
+      <li>
+        <a href="show.php/<?php echo e($d.'/'.$base) ?>">
+          <?php echo e(titleise_slug($base)) ?>
+        </a>
+      </li>
+    <?php endif; ?>
+    <?php endforeach; ?>
+    </ul>
+  </li>
 <?php endforeach; ?>
 </ul>
 </body>

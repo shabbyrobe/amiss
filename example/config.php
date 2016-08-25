@@ -1,4 +1,11 @@
 <?php
+$sapi = php_sapi_name();
+if ($sapi != 'cli-server' && $sapi != 'cli') {
+    die("This should not be used on a production web server!");
+}
+if (!file_exists(__DIR__.'/../.examples')) {
+    die("This should only be run using './task examples'");
+}
 
 $amissPath = __DIR__.'/../src';
 
@@ -36,7 +43,6 @@ function dump_example($obj, $depth=10, $highlight=true)
     $line = $trace[0]['line'];
     
     echo '<div class="dump">';
-    echo '<div class="file">Dump at <a href="#line-'.$line.'">Line '.$line.'</a>:</div>';
     echo '<div class="code">';
     echo dump_highlight($obj, $depth);
     echo "</div>";
@@ -90,24 +96,28 @@ function get_note_cache()
     
     if ($active) {
         if ($type == 'hack') {
+            $prefix = 'nc-';
             $path = sys_get_temp_dir();
             $cache = new \Amiss\Cache(
-                function ($key) use ($path) {
+                function ($key) use ($path, $prefix) {
                     $key = md5($key);
-                    $file = $path.'/nc-'.$key;
+                    $file = $path.'/'.$prefix.$key;
                     if (file_exists($file)) {
                         return unserialize(file_get_contents($file));
                     }
                 },
-                function ($key, $value) use ($path) {
+                function ($key, $value) use ($path, $prefix) {
                     $key = md5($key);
-                    $file = $path.'/nc-'.$key;
+                    $file = $path.'/'.$prefix.$key;
                     file_put_contents($file, serialize($value));
                 }
             );
         }
         elseif ($type == 'xcache') {
             $cache = new \Amiss\Cache('xcache_get', 'xcache_set');
+        }
+        elseif ($type == 'apc') {
+            $cache = new \Amiss\Cache('apc_fetch', 'apc_store');
         }
     }
     return $cache;
