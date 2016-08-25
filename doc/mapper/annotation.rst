@@ -171,12 +171,13 @@ The following class level annotations are available:
 
 ``constructor``:
 
-    The name of a static constructor to use when creating the object instead of the
-    default ``__construct``. The method must be static and must return an instance of the
-    class.
+    The name of a static constructor to use when creating the object instead of
+    the default ``__construct``. The method must be static and must return an
+    instance of the class.
 
-    If no constructor arguments are found in the metadata (see ``constructorArgs``), the
-    entire unmapped input record is passed as the first argument.
+    If no constructor arguments are found in the metadata (see
+    ``constructorArgs``), the entire unmapped input record is passed as the
+    first argument.
 
     .. code-block:: php
 
@@ -198,12 +199,12 @@ The following class level annotations are available:
 Property mapping
 ----------------
 
-Mapping a property to a column is done inside a property or getter method's docblock using
-a JSON object with the key ``field``.
+Mapping a property to a column is done inside a property or getter method's
+docblock using a JSON object with the key ``field``.
 
-If the value for ``field`` is ``true``, no special additional metadata is required and the
-column name is determined by the base mapper. See :ref:`name-translation` for more details
-on this process::
+If the value for ``field`` is ``true``, no special additional metadata is
+required and the column name is determined by the base mapper. See
+:ref:`name-translation` for more details on this process::
 
     /** :amiss = {"field": true}; */
     public $theField;
@@ -213,16 +214,17 @@ If the value for ``field`` is a string, it is used as the column name::
     /** :amiss = {"field": "my_column"}; */
     public $theField;
 
-More complex mapping is possible by assigning an object to ``field`` with any of the
-following keys::
+More complex mapping is possible by assigning an object to ``field`` with any of
+the following keys:
 
 ``name``
 
-    This marks whether a property or a getter method represents a value that should be
-    stored in a column.
+    This marks whether a property or a getter method represents a value that
+    should be stored in a column.
 
-    This value is optional. If it isn't specified, the column name is determined by the
-    base mapper. See :ref:`name-translation` for more details on this process.
+    This value is optional. If it isn't specified, the column name is determined
+    by the base mapper. See :ref:`name-translation` for more details on this
+    process.
 
 ``type``
 
@@ -242,7 +244,8 @@ following keys::
 
 ``index``
 
-    If this is true, an single-field index with the same name as the property is created::
+    If this is true, an single-field index with the same name as the property is
+    created::
         
         class Pants {
             /** :amiss = {"field": {"index": true}}; */
@@ -253,9 +256,9 @@ following keys::
 
 ``setter``
 
-    If the ``field`` attribute is set against a getter method as opposed to a property,
-    and the getter/setter pair does not follow one of the common formats listed below, you
-    can explicitly define the setter using this key::
+    If the ``field`` attribute is set against a getter method as opposed to a
+    property, and the getter/setter pair does not follow one of the common
+    formats listed below, you can explicitly define the setter using this key::
 
         /** :amiss = {"field": {"setter": "assignTheFoo"}}; */
         public function gimmeTheFoo()    { ... }
@@ -267,28 +270,28 @@ following keys::
 Relation mapping
 ----------------
 
-Mapping a property to a column is done inside a property or getter method's docblock using
-a JSON object with the key ``has``.
+Mapping a property to a column is done inside a property or getter method's
+docblock using a JSON object with the key ``has``.
 
 If the value for ``has`` is a string, it is used as the relator name::
 
     /** :amiss = {"has": "theRelator"}; */
     public $theRelation;
 
-More complex mapping is possible by assigning an object to ``has`` with the key ``type``.
-This is equivalent to the previous example::
+More complex mapping is possible by assigning an object to ``has`` with the key
+``type``.  This is equivalent to the previous example::
 
     /** :amiss = {"has": {"type": "theRelator"}}; */
     public $theRelation;
 
-``type`` must be a short string registered with ``Amiss\Sql\Manager->relators``. The
-``one``, ``many`` and ``assoc`` relators are available by default, which all require
-additional configuration using an object.
+``type`` must be a short string registered with ``Amiss\Sql\Manager->relators``.
+The ``one``, ``many`` and ``assoc`` relators are available by default, which all
+require additional configuration using an object.
 
-**One-to-one** (``one``) relationships require, at a minimum, the target object of the
-relation and the indexes on which the relation is established. You should read the
-:ref:`relator-one` documentation for a full description of the data this relator requires.
-A simple one-to-one is annotated like so:
+**One-to-one** (``one``) relationships require, at a minimum, the target object
+of the relation and the indexes on which the relation is established. You should
+read the :ref:`relator-one` documentation for a full description of the data
+this relator requires.  A simple one-to-one is annotated like so:
 
 .. code-block:: php
         
@@ -332,16 +335,17 @@ A one-to-one relationship on a composite key with different field names::
     @has.one.on.typeIdPart2 idPart2
         
     
-A one-to-one relationship with a matching one-to-many on the related object, where the ``on``
-values are to be determined from the related object::
+A one-to-one relationship with a matching one-to-many on the related object,
+where the ``on`` values are to be determined from the related object::
         
     @has.one.of ArtistType
     @has.one.inverse artist
 
     
-**One-to-many** (``many``) relationships support all the same options as one-to-one
-relationships. You should read the :ref:`relator-many` documentation for a full description of 
-the data this relator requires. The simplest one-to-many is annotated like so:
+**One-to-many** (``many``) relationships support all the same options as
+one-to-one relationships. You should read the :ref:`relator-many` documentation
+for a full description of the data this relator requires. The simplest
+one-to-many is annotated like so:
 
 .. code-block:: php
 
@@ -362,9 +366,9 @@ the data this relator requires. The simplest one-to-many is annotated like so:
     }
 
 
-**Association** (``assoc``) relationships are annotated quite differently. You should read
-the :ref:`relator-assoc` documentation for a full description of the data this relator
-requires.  A quick example:
+**Association** (``assoc``) relationships are annotated quite differently. You
+should read the :ref:`relator-assoc` documentation for a full description of the
+data this relator requires.  A quick example:
 
 .. code-block:: php
 
@@ -398,7 +402,7 @@ requires.  A quick example:
 
     If the ``has`` annotation is set against a getter method as opposed to a
     property, this defines the method that is used to set the value when loading
-    an object from the database. It is required if the ``@has`` attribute is
+    an object from the database. It is required if the ``has`` attribute is
     defined against a property and the getter/setter method names deviate from
     the standard ``getFoo``/``setFoo`` pattern.
 
@@ -460,9 +464,10 @@ respectively and don't require any special annotations:
 
 If your getter/setter pair doesn't follow the ``getFoo/setFoo`` standard, you
 can specify the setter directly against both relations and fields using the
-``@setter`` annotation.  The following example should give you some idea of my
-opinion on going outside the standard, but Amiss tries not to be too opinionated
-so you can go ahead and make your names whatever you please:
+``setter`` property of the ``field`` annotation.  The following example should
+give you some idea of my opinion on going outside the standard, but Amiss tries
+not to be too opinionated so you can go ahead and make your names whatever you
+please:
 
 .. code-block:: php
 

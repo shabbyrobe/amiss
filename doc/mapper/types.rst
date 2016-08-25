@@ -39,7 +39,7 @@ this behaviour.
 Quickstart (annotation mapper)
 ------------------------------
 
-Define an object with a field that has a ``@type`` annotation:
+Define an object with a field that has a ``type`` annotation:
 
 .. code-block:: php
 

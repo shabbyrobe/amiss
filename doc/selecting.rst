@@ -451,8 +451,8 @@ them using criteria.
 .. note:: Amiss does not yet support using row values as constructor arguments.
 
 
-``FOR UPDATE``
---------------
+FOR UPDATE
+----------
 
 If you are using InnoDB and wish to select rows using ``FOR UPDATE``, you can
 set the ``forUpdate`` key of the criteria to ``true``. Make sure you're inside a
