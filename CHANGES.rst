@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v4.2.1
+------
+
+- Crappy examples can now not be run on a public webserver if ``vendor/``
+  happens to be exposed.
+
+
 v4.1.0 to v4.2.0
 ----------------
 
