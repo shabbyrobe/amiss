@@ -11,6 +11,8 @@ class Chain implements \Amiss\Mapper
     private $mappers;
     private $index = [];
 
+    public $useInternalCache = true;
+
     public function __construct(array $mappers, $cache=null)
     {
         $this->cache = $cache;
@@ -25,7 +27,7 @@ class Chain implements \Amiss\Mapper
         }
 
         $key = 'chain-id-'.$id;
-        if (isset($this->internalMetaCache[$key])) {
+        if ($this->useInternalCache && isset($this->internalMetaCache[$key])) {
             $meta = $this->internalMetaCache[$key] ?: null;
         }
         elseif ($this->cache) {
@@ -37,7 +39,9 @@ class Chain implements \Amiss\Mapper
             if ($this->cache) {
                 $this->cache->set($key, $meta);
             }
-            $this->internalMetaCache[$key] = $meta ?: false;
+            if ($this->useInternalCache) {
+                $this->internalMetaCache[$key] = $meta ?: false;
+            }
         }
 
         if ($strict && !$meta) {
@@ -91,7 +95,8 @@ class Chain implements \Amiss\Mapper
 
     function determineTypeHandler($type)
     {
-        // dunno. probably need class/meta as first param
+        // dunno how to deal with this. probably need class/meta as first param,
+        // but that would pollute the API for everything else.
         throw new \BadMethodCallException();
     }
 

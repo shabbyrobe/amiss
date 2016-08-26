@@ -1,5 +1,5 @@
-Array Mapper
-============
+Local Mapper and Array Mapper 
+=============================
 
 .. note:: 
 
@@ -9,11 +9,74 @@ Array Mapper
     If you have decided to use the annotation mapper, you may wish to skip this
     section and continue with the :doc:`common`.
 
-The array mapper allows you to define your mappings as a PHP array. Fields and
-relations are defined using the structure outlined in :doc:`metadata`, though
-some additional conveniences are added.
+The Local mapper and Array mapper allow you to define your mappings as a PHP
+array. Fields and relations are defined using the structure outlined in
+:doc:`metadata`, though some additional conveniences are added.
 
-Mapping your objects is quite simple:
+Mappings for both array and local are essentially identical.
+
+Object mappings are declared in an array where the key is the fully qualified
+class name and the value is the mapping metadata.
+
+
+Local Mapper
+------------
+
+.. code-block:: php
+
+    <?php
+    class Foo
+    {
+        public $id;
+        public $name;
+        public $barId;
+   
+        public $bar;
+        
+        public static function meta() {
+            return {
+                'primary'   => 'id',
+                'fields'    => ['id' => true, 'name' => true, 'barId' => true],
+                'indexes'   => ['barId' => ['fields' => 'barId']],
+                'relations' => [
+                    'bar'   => ['one', 'of' => 'Bar', 'from' => 'barId'],
+                ],
+            };
+        }
+    }
+   
+    class Bar
+    {
+        public $id;
+        public $name;
+   
+        public $foo;
+       
+        public static function meta() {
+            return [
+                'primary'   => 'id',
+                'fields'    => ['id' => true, 'name' => true],
+                'relations' => [
+                    'foo'   => ['many', 'of' => 'Foo', 'to' => 'barId']
+                ],
+            ];
+        }
+    }
+
+
+Once your objects and mappings are defined, load them into
+``Amiss\Mapper\Arrays`` and create a manager:
+
+.. code-block:: php
+
+    <?php
+    $mapper = new Amiss\Mapper\Arrays($mapping);
+    $manager = Amiss\Sql\Factory::createManager($db, $mapper);
+
+
+
+Array Mapper
+------------
 
 .. code-block:: php
 
@@ -32,11 +95,11 @@ Mapping your objects is quite simple:
         public $id;
         public $name;
    
-        public $child;
+        public $foo;
     }
    
     $mapping = array(
-        'Foo'=>array(
+        'Foo' => array(
             'primary'   => 'id',
             'fields'    => ['id' => true, 'name' => true, 'barId' => true],
             'indexes'   => ['barId' => ['fields' => 'barId']],
@@ -45,7 +108,7 @@ Mapping your objects is quite simple:
             ],
         ),
    
-        'Bar'=>array(
+        'Bar' => array(
             'primary'   => 'id',
             'fields'    => ['id' => true, 'name' => true],
             'relations' => [
@@ -53,16 +116,6 @@ Mapping your objects is quite simple:
             ],
         ),
     );
-
-
-Once your objects and mappings are defined, load load them into
-``Amiss\Mapper\Arrays`` and create a manager:
-
-.. code-block:: php
-
-    <?php
-    $mapper = new Amiss\Mapper\Arrays($mapping);
-    $manager = Amiss\Sql\Factory::createManager($db, $mapper);
 
 
 Mapping

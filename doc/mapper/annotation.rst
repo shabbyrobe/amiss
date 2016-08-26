@@ -182,9 +182,7 @@ The following class level annotations are available:
     .. code-block:: php
 
         <?php
-        /**
-         * :amiss = {"constructor": "pants"};
-         */
+        /** :amiss = {"constructor": "pants"}; */
         class Foo
         {
             static function pants(array $input)
@@ -508,6 +506,8 @@ please:
         }
     }
 
+
+.. _note-caching:
 
 Caching
 -------
