@@ -50,7 +50,8 @@ following signatures::
     $manager->update( $object )
     $manager->update( $object , string $table )
 
-Updating an object requires a primary key be defined in the :doc:`metadata`.
+Updating an object requires a primary key be defined in the
+:doc:`mapper/metadata`.
 
 .. code-block:: php
 
@@ -73,7 +74,8 @@ following signatures::
     $manager->delete( $object )
     $manager->delete( $object , string $table )
 
-Deleting an object requires a primary key be defined in the :doc:`metadata`.
+Deleting an object requires a primary key be defined in the
+:doc:`mapper/metadata`.
 
 .. code-block:: php
 
