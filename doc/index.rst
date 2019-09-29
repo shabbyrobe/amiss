@@ -40,13 +40,12 @@ supported for the forseeable future, but no new features will be added.
 
 Documentation for Amiss 4 can be found here:
 
-    http://shabbyrobe.org/code/amiss/doc/4/
+    http://k3jw.com/code/amiss/doc/4/
 
 
 License
 -------
 
-Amiss is licensed under the MIT License:
-
-.. literalinclude:: ../LICENSE
+Amiss is licensed under the `MIT License
+<https://github.com/shabbyrobe/amiss/blob/master/LICENSE>`_.
 

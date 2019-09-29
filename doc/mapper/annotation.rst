@@ -102,10 +102,10 @@ Using the Annotation mapper, object/table mappings are defined in this way:
          * One-to-one relation: 
          *
          * :amiss = {"has": {
-         *     "type": "one", "of": "Baz", "on": "bazId"
+         *     "type": "one", "of": "bar", "from": "barId"
          * }};
          */
-        public $baz;
+        public $bar;
    
         /** 
          * One-to-many relation:
@@ -113,12 +113,12 @@ Using the Annotation mapper, object/table mappings are defined in this way:
          * :amiss = {
          *     "has": {
          *         "type": "many",
-         *         "of": "Bar",
+         *         "of": "Baz",
          *         "inverse": "foo"
          *     }
          * };
          */
-        public $bars;
+        public $bazzes;
    
         // field is defined below using getter/setter
         private $fooDate;
@@ -299,47 +299,21 @@ this relator requires.  A simple one-to-one is annotated like so:
         /** :amiss = {"field": {"primary": true}}; */
         public $artistId;
    
-        /** :amiss = {"field":true}; */
+        /** :amiss = {"field": {"index": true}}; */
         public $artistTypeId;
             
         /**
          * :amiss = {"has": {
-         *     "type": "one",
-         *     "of": "ArtistType",
-         *     "on": "artistTypeId"
+         *     "type" : "one",
+         *     "of"   : "ArtistType",
+         *     "from" : "artistTypeId"
          * }};
          */
         public $artist;
     }
     
 
-A one-to-one relationship where the left and right side have different field names::
 
-    @has.one.of ArtistType
-    @has.one.on.typeId artistTypeId
-
-
-A one-to-one relationship on a composite key::
-
-    @has.one.of ArtistType
-    @has.one.on typeIdPart1
-    @has.one.on typeIdPart2
-
-
-A one-to-one relationship on a composite key with different field names::
-
-    @has.one.of ArtistType
-    @has.one.on.typeIdPart1 idPart1
-    @has.one.on.typeIdPart2 idPart2
-        
-    
-A one-to-one relationship with a matching one-to-many on the related object,
-where the ``on`` values are to be determined from the related object::
-        
-    @has.one.of ArtistType
-    @has.one.inverse artist
-
-    
 **One-to-many** (``many``) relationships support all the same options as
 one-to-one relationships. You should read the :ref:`relator-many` documentation
 for a full description of the data this relator requires. The simplest
@@ -357,7 +331,7 @@ one-to-many is annotated like so:
          * :amiss = {"has": {
          *     "type": "many",
          *     "of": "Artist",
-         *     "on": "artistTypeId"
+         *     "from": "artistTypeId"
          * }};
          */
         public $artists;
@@ -380,7 +354,7 @@ data this relator requires.  A quick example:
          * :amiss = {"has": {
          *     "type": "many",
          *     "of": "EventArtist",
-         *     "on": "eventId"
+         *     "from": "eventId"
          * }};
          */
         public $eventArtists;
