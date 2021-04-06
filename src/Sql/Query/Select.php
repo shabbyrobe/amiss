@@ -17,7 +17,7 @@ class Select extends Criteria
     {
         if ($this->limit) {
             return [$this->limit, $this->offset];
-        } else {
+        } else if ($this->page) {
             return [$this->page[1], ($this->page[0] - 1) * $this->page[1]]; 
         }
     }
