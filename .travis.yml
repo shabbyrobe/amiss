@@ -9,9 +9,10 @@ before_script:
 php:
   - "nightly"
   - "hhvm"
+  - 8.1
+  - 8.0
+  - 7.4
   - 5.6
-  - 5.5
-  - 5.4
 
 branches:
   only:
